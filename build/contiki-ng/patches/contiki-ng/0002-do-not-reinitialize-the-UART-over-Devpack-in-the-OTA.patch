@@ -1,0 +1,27 @@
+From 52d328d1524bc0732cc54aeed7dba190f3c29311 Mon Sep 17 00:00:00 2001
+From: Antonio Langiu <antonio.langiu@studenti.polito.it>
+Date: Wed, 29 Nov 2017 15:24:49 +0100
+Subject: [PATCH] do not reinitialize the UART over Devpack in the OTA image
+
+---
+ arch/platform/srf06-cc26xx/sensortag/board.c | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/arch/platform/srf06-cc26xx/sensortag/board.c b/arch/platform/srf06-cc26xx/sensortag/board.c
+index e2069f39f..b138217b9 100644
+--- a/arch/platform/srf06-cc26xx/sensortag/board.c
++++ b/arch/platform/srf06-cc26xx/sensortag/board.c
+@@ -121,8 +121,10 @@ configure_unused_pins(void)
+   ti_lib_ioc_io_port_pull_set(BOARD_IOID_AUDIO_CLK, IOC_IOPULL_DOWN);
+ 
+   /* UART over Devpack - TX only (ToDo: Map all UART pins to Debugger) */
++#ifndef OTA
+   ti_lib_ioc_pin_type_gpio_input(BOARD_IOID_DP5_UARTTX);
+   ti_lib_ioc_io_port_pull_set(BOARD_IOID_DP5_UARTTX, IOC_IOPULL_DOWN);
++#endif /* OTA */
+ }
+ /*---------------------------------------------------------------------------*/
+ void
+-- 
+2.13.1
+

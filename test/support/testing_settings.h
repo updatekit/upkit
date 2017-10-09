@@ -1,0 +1,13 @@
+#ifndef SUPPORT_SETTINGS_H
+#define SUPPORT_SETTINGS_H
+
+#define PROV_SERVER "localhost"
+
+#define COAP_DEFAULT_PORT 5683
+#define REMOTE_PORT     COAP_DEFAULT_PORT
+
+#define BLOCK_SIZE 4
+
+#define URI_SPLIT_SIZE 20
+
+#endif

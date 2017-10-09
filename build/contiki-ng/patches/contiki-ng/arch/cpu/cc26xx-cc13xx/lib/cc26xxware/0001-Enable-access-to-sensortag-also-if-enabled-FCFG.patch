@@ -1,0 +1,38 @@
+From 93eabda2fb9cf7a7663a9c2220316d900ec6b912 Mon Sep 17 00:00:00 2001
+From: Antonio Langiu <antonio.langiu@studenti.polito.it>
+Date: Wed, 8 Nov 2017 14:22:50 +0100
+Subject: [PATCH] Enable access to sensortag also if enabled FCFG
+
+---
+ startup_files/ccfg.c | 8 ++++----
+ 1 file changed, 4 insertions(+), 4 deletions(-)
+
+diff --git a/startup_files/ccfg.c b/startup_files/ccfg.c
+index bda17f3..1d24ef6 100644
+--- a/startup_files/ccfg.c
++++ b/startup_files/ccfg.c
+@@ -205,8 +205,8 @@
+ #endif
+ 
+ #ifndef SET_CCFG_CCFG_TAP_DAP_0_CPU_DAP_ENABLE
+-#define SET_CCFG_CCFG_TAP_DAP_0_CPU_DAP_ENABLE       0x00       // Access disabled
+-// #define SET_CCFG_CCFG_TAP_DAP_0_CPU_DAP_ENABLE          0xC5       // Access enabled if also enabled in FCFG
++// #define SET_CCFG_CCFG_TAP_DAP_0_CPU_DAP_ENABLE       0x00       // Access disabled
++#define SET_CCFG_CCFG_TAP_DAP_0_CPU_DAP_ENABLE          0xC5       // Access enabled if also enabled in FCFG
+ #endif
+ 
+ #ifndef SET_CCFG_CCFG_TAP_DAP_0_PRCM_TAP_ENABLE
+@@ -215,8 +215,8 @@
+ #endif
+ 
+ #ifndef SET_CCFG_CCFG_TAP_DAP_0_TEST_TAP_ENABLE
+-#define SET_CCFG_CCFG_TAP_DAP_0_TEST_TAP_ENABLE      0x00       // Access disabled
+-// #define SET_CCFG_CCFG_TAP_DAP_0_TEST_TAP_ENABLE         0xC5       // Access enabled if also enabled in FCFG
++// #define SET_CCFG_CCFG_TAP_DAP_0_TEST_TAP_ENABLE      0x00       // Access disabled
++#define SET_CCFG_CCFG_TAP_DAP_0_TEST_TAP_ENABLE         0xC5       // Access enabled if also enabled in FCFG
+ #endif
+ 
+ #ifndef SET_CCFG_CCFG_TAP_DAP_1_PBIST2_TAP_ENABLE
+-- 
+2.13.1
+

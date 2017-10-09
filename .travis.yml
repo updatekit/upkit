@@ -1,0 +1,17 @@
+language: c
+sudo: false
+dist: trusty
+
+addons:
+  apt:
+    packages:
+      - srecord
+      - gcovr
+
+install: 
+  - gem install ceedling
+  - ./autogen.sh
+  - (cd utils/server/ && make)
+  - ./utils/server/server.bin -v 10 -a assets & >/dev/null
+
+script: ceedling test:all

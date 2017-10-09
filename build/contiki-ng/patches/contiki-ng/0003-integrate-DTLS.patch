@@ -1,0 +1,859 @@
+From ee8567a22d84fac4dead6bf82283c608bb10a219 Mon Sep 17 00:00:00 2001
+From: Antonio Langiu <antonio.langiu@studenti.polito.it>
+Date: Tue, 19 Dec 2017 00:47:02 +0100
+Subject: [PATCH] Integrate DTLS into er-coap for Contiki-NG
+
+---
+ os/net/app-layer/coap/coap-communication.h  |  21 ++++
+ os/net/app-layer/coap/coap-conf.h           |  17 ++-
+ os/net/app-layer/coap/coap-dtls.c           | 182 ++++++++++++++++++++++++++++
+ os/net/app-layer/coap/coap-dtls.h           |   6 +
+ os/net/app-layer/coap/coap-engine.c         |  25 ++--
+ os/net/app-layer/coap/coap-engine.h         |  18 ++-
+ os/net/app-layer/coap/coap-observe-client.c |  10 +-
+ os/net/app-layer/coap/coap-observe-client.h |   2 +-
+ os/net/app-layer/coap/coap-observe.c        |   9 +-
+ os/net/app-layer/coap/coap-observe.h        |   1 +
+ os/net/app-layer/coap/coap-separate.c       |   3 +-
+ os/net/app-layer/coap/coap-separate.h       |   1 +
+ os/net/app-layer/coap/coap-transactions.c   |  13 +-
+ os/net/app-layer/coap/coap-transactions.h   |   3 +
+ os/net/app-layer/coap/coap-udp.c            |  43 +++++++
+ os/net/app-layer/coap/coap-udp.h            |   6 +
+ os/net/app-layer/coap/coap.c                |  38 +-----
+ os/net/app-layer/coap/coap.h                |  13 +-
+ 18 files changed, 344 insertions(+), 67 deletions(-)
+ create mode 100644 os/net/app-layer/coap/coap-communication.h
+ create mode 100644 os/net/app-layer/coap/coap-dtls.c
+ create mode 100644 os/net/app-layer/coap/coap-dtls.h
+ create mode 100644 os/net/app-layer/coap/coap-udp.c
+ create mode 100644 os/net/app-layer/coap/coap-udp.h
+
+diff --git a/os/net/app-layer/coap/coap-communication.h b/os/net/app-layer/coap/coap-communication.h
+new file mode 100644
+index 000000000..e169c0179
+--- /dev/null
++++ b/os/net/app-layer/coap/coap-communication.h
+@@ -0,0 +1,21 @@
++#ifndef _ER_COAP_COMMUNICATION_H_
++#define _ER_COAP_COMMUNICATION_H_
++
++#include "contiki.h"
++
++#if WITH_DTLS_COAP
++#include "coap-dtls.h"
++#else
++#include "coap-udp.h"
++#endif
++
++context_t *
++coap_init_communication_layer(uint16_t port);
++
++void
++coap_send_message(context_t * ctx, uip_ipaddr_t *addr, uint16_t port, uint8_t *data, uint16_t length);
++
++void
++coap_handle_receive(context_t * ctx);
++
++#endif
+diff --git a/os/net/app-layer/coap/coap-conf.h b/os/net/app-layer/coap/coap-conf.h
+index 2aabc4be4..955b859c1 100644
+--- a/os/net/app-layer/coap/coap-conf.h
++++ b/os/net/app-layer/coap/coap-conf.h
+@@ -41,17 +41,22 @@
+ 
+ /* Features that can be disabled to achieve smaller memory footprint */
+ #ifndef COAP_LINK_FORMAT_FILTERING
+-#define COAP_LINK_FORMAT_FILTERING     0
+-#endif /* COAP_LINK_FORMAT_FILTERING */
+-
+-#ifndef COAP_PROXY_OPTION_PROCESSING
++#define COAP_LINK_FORMAT_FILTERING           1
++#endif
+ #define COAP_PROXY_OPTION_PROCESSING   0
+-#endif /* COAP_PROXY_OPTION_PROCESSING */
++
++#ifndef WITH_WELL_KNOWN_CORE
++#define WITH_WELL_KNOWN_CORE                 1
++#endif
++
++#ifndef COAP_CORE_OBSERVE
++#define COAP_CORE_OBSERVE                    1
++#endif
+ 
+ /* Listening port for the CoAP REST Engine */
+ #ifndef COAP_SERVER_PORT
+ #define COAP_SERVER_PORT               COAP_DEFAULT_PORT
+-#endif /* COAP_SERVER_PORT */
++#endif
+ 
+ /* The number of concurrent messages that can be stored for retransmission in the transaction layer. */
+ #ifndef COAP_MAX_OPEN_TRANSACTIONS
+diff --git a/os/net/app-layer/coap/coap-dtls.c b/os/net/app-layer/coap/coap-dtls.c
+new file mode 100644
+index 000000000..0a353c654
+--- /dev/null
++++ b/os/net/app-layer/coap/coap-dtls.c
+@@ -0,0 +1,182 @@
++#ifdef WITH_DTLS_COAP
++#include "contiki.h"
++#include "contiki-net.h"
++#include "coap.h"
++#include "coap-engine.h"
++#include "coap-dtls.h"
++
++#include "dtls.h"
++
++#include <string.h>
++
++#define DEBUG DEBUG_NONE
++#include "dtls_debug.h"
++
++/*---------------------------------------------------------------------------*/
++
++#if defined DTLS_CONF_IDENTITY_HINT && defined DTLS_CONF_IDENTITY_HINT_LENGTH
++#define DTLS_IDENTITY_HINT DTLS_CONF_IDENTITY_HINT
++#define DTLS_IDENTITY_HINT_LENGTH DTLS_CONF_IDENTITY_HINT_LENGTH
++#else
++#define DTLS_IDENTITY_HINT "CoAP"
++#define DTLS_IDENTITY_HINT_LENGTH 4
++#endif
++
++#if defined DTLS_CONF_PSK_KEY && defined DTLS_CONF_PSK_KEY_LENGTH
++#define DTLS_PSK_KEY_VALUE DTLS_CONF_PSK_KEY
++#define DTLS_PSK_KEY_VALUE_LENGTH DTLS_CONF_PSK_KEY_LENGTH
++#else
++#define DTLS_PSK_KEY_VALUE "ThisIsOurSecret1"
++#define DTLS_PSK_KEY_VALUE_LENGTH 16
++#endif
++
++/*---------------------------------------------------------------------------*/
++
++static int
++send_to_peer(struct dtls_context_t *ctx,
++             session_t *session, uint8 *data, size_t len);
++
++static int
++read_from_peer(struct dtls_context_t *ctx,
++               session_t *session, uint8 *data, size_t len);
++
++/*-----------------------------------------------------------------------------------*/
++#ifdef DTLS_PSK
++/* This function is the "key store" for tinyDTLS. It is called to
++ * retrieve a key for the given identiy within this particular
++ * session. */
++static int
++get_psk_info(struct dtls_context_t *ctx, const session_t *session,
++         dtls_credentials_type_t type,
++         const unsigned char *id, size_t id_len,
++         unsigned char *result, size_t result_length) {
++
++  struct keymap_t {
++    unsigned char *id;
++    size_t id_length;
++    unsigned char *key;
++    size_t key_length;
++  } psk[1] = {
++    { (unsigned char *)DTLS_IDENTITY_HINT, DTLS_IDENTITY_HINT_LENGTH, (unsigned char *)DTLS_PSK_KEY_VALUE, DTLS_PSK_KEY_VALUE_LENGTH },
++  };
++  if (type ==  DTLS_PSK_IDENTITY) {
++    if (id_len) {
++      dtls_debug("got psk_identity_hint: '%.*s'\n", id_len, id);
++    }
++
++    if (result_length < psk[0].id_length) {
++      dtls_warn("cannot set psk_identity -- buffer too small\n");
++      return dtls_alert_fatal_create(DTLS_ALERT_INTERNAL_ERROR);
++    }
++
++    memcpy(result, psk[0].id, psk[0].id_length);
++    return psk[0].id_length;
++  } else if (type == DTLS_PSK_KEY) {
++    if (id) {
++      int i;
++      for (i = 0; i < sizeof(psk)/sizeof(struct keymap_t); i++) {
++        if (id_len == psk[i].id_length && memcmp(id, psk[i].id, id_len) == 0) {
++          if (result_length < psk[i].key_length) {
++            dtls_warn("buffer too small for PSK");
++            return dtls_alert_fatal_create(DTLS_ALERT_INTERNAL_ERROR);
++          }
++
++          memcpy(result, psk[i].key, psk[i].key_length);
++          return psk[i].key_length;
++        }
++      }
++    }
++  } else {
++    return 0;
++  }
++
++  return dtls_alert_fatal_create(DTLS_ALERT_DECRYPT_ERROR);
++}
++#endif
++/*-----------------------------------------------------------------------------------*/
++context_t *
++coap_init_communication_layer(uint16_t port)
++{
++  static dtls_handler_t cb = {
++    .write = send_to_peer,
++    .read  = read_from_peer,
++    .event = NULL,
++#ifdef DTLS_PSK
++    .get_psk_info = get_psk_info,
++#endif
++#ifdef DTLS_ECC
++    .get_ecdsa_key = NULL,
++    .verify_ecdsa_key = NULL,
++#endif
++  };
++  context_t * ctx;
++
++  struct uip_udp_conn *server_conn = udp_new(NULL, 0, NULL);
++  udp_bind(server_conn, port);
++
++  dtls_set_log_level(DTLS_LOG_DEBUG);
++
++  ctx = dtls_new_context(server_conn);
++  if(ctx) {
++    dtls_set_handler(ctx, &cb);
++  }
++  /* new connection with remote host */
++  printf("COAP-DTLS listening on port %u\n", uip_ntohs(server_conn->lport));
++  return ctx;
++}
++/*-----------------------------------------------------------------------------------*/
++static int
++send_to_peer(struct dtls_context_t *ctx,
++             session_t *session, uint8 *data, size_t len)
++{
++
++  struct uip_udp_conn *conn = (struct uip_udp_conn *)dtls_get_app_data(ctx);
++
++  uip_ipaddr_copy(&conn->ripaddr, &session->addr);
++  conn->rport = session->port;
++
++  uip_udp_packet_send(conn, data, len);
++
++  /* Restore server connection to allow data from any node */
++  memset(&conn->ripaddr, 0, sizeof(conn->ripaddr));
++  memset(&conn->rport, 0, sizeof(conn->rport));
++
++  return len;
++}
++/*-----------------------------------------------------------------------------------*/
++void
++coap_send_message(context_t * ctx, uip_ipaddr_t *addr, uint16_t port, uint8_t *data, uint16_t length)
++{
++  session_t session;
++
++  dtls_session_init(&session);
++  uip_ipaddr_copy(&session.addr, addr);
++  session.port = port;
++
++  dtls_write(ctx, &session, data, length);
++}
++/*-----------------------------------------------------------------------------------*/
++static int
++read_from_peer(struct dtls_context_t *ctx,
++               session_t *session, uint8 *data, size_t len)
++{
++  uip_len = len;
++  memmove(uip_appdata, data, len);
++  coap_receive(ctx);
++  return 0;
++}
++/*-----------------------------------------------------------------------------------*/
++void
++coap_handle_receive(context_t *ctx)
++{
++  session_t session;
++
++  if(uip_newdata()) {
++    dtls_session_init(&session);
++    uip_ipaddr_copy(&session.addr, &UIP_IP_BUF->srcipaddr);
++    session.port = UIP_UDP_BUF->srcport;
++
++    dtls_handle_message(ctx, &session, uip_appdata, uip_datalen());
++  }
++}
++#endif /* WITH_DTLS_COAP */
+diff --git a/os/net/app-layer/coap/coap-dtls.h b/os/net/app-layer/coap/coap-dtls.h
+new file mode 100644
+index 000000000..88ff6dee8
+--- /dev/null
++++ b/os/net/app-layer/coap/coap-dtls.h
+@@ -0,0 +1,6 @@
++#ifndef _ER_COAP_DTLS_H_
++#define _ER_COAP_DTLS_H_
++
++typedef struct dtls_context_t context_t;
++
++#endif
+diff --git a/os/net/app-layer/coap/coap-engine.c b/os/net/app-layer/coap/coap-engine.c
+index 8cde3b836..4c8bb9ca9 100644
+--- a/os/net/app-layer/coap/coap-engine.c
++++ b/os/net/app-layer/coap/coap-engine.c
+@@ -60,12 +60,13 @@ PROCESS(coap_engine, "CoAP Engine");
+ /*- Variables ---------------------------------------------------------------*/
+ /*---------------------------------------------------------------------------*/
+ static service_callback_t service_cbk = NULL;
++context_t * coap_default_context = NULL;
+ 
+ /*---------------------------------------------------------------------------*/
+ /*- Internal API ------------------------------------------------------------*/
+ /*---------------------------------------------------------------------------*/
+-static int
+-coap_receive(void)
++int
++coap_receive(context_t * ctx)
+ {
+   erbium_status_code = NO_ERROR;
+ 
+@@ -107,6 +108,7 @@ coap_receive(void)
+           uint16_t block_size = COAP_MAX_BLOCK_SIZE;
+           uint32_t block_offset = 0;
+           int32_t new_offset = 0;
++          coap_set_transaction_context(transaction, ctx);
+ 
+           /* prepare response */
+           if(message->type == COAP_TYPE_CON) {
+@@ -236,8 +238,10 @@ coap_receive(void)
+         } else if(message->type == COAP_TYPE_RST) {
+           PRINTF("Received RST\n");
+           /* cancel possible subscriptions */
++#if COAP_CORE_OBSERVE
+           coap_remove_observer_by_mid(&UIP_IP_BUF->srcipaddr,
+                                       UIP_UDP_BUF->srcport, message->mid);
++#endif
+         }
+ 
+         if((transaction = coap_get_transaction_by_mid(message->mid))) {
+@@ -256,12 +260,12 @@ coap_receive(void)
+         transaction = NULL;
+ 
+ #if COAP_OBSERVE_CLIENT
+-        /* if observe notification */
++	/* if observe notification */
+         if((message->type == COAP_TYPE_CON || message->type == COAP_TYPE_NON)
+-           && IS_OPTION(message, COAP_OPTION_OBSERVE)) {
++              && IS_OPTION(message, COAP_OPTION_OBSERVE)) {
+           PRINTF("Observe [%u]\n", message->observe);
+-          coap_handle_notification(&UIP_IP_BUF->srcipaddr, UIP_UDP_BUF->srcport,
+-                                   message);
++          coap_handle_notification(ctx, &UIP_IP_BUF->srcipaddr, UIP_UDP_BUF->srcport,
++              message);
+         }
+ #endif /* COAP_OBSERVE_CLIENT */
+       } /* request or response */
+@@ -293,7 +297,7 @@ coap_receive(void)
+                         message->mid);
+       coap_set_payload(message, coap_error_message,
+                        strlen(coap_error_message));
+-      coap_send_message(&UIP_IP_BUF->srcipaddr, UIP_UDP_BUF->srcport,
++      coap_send_message(ctx, &UIP_IP_BUF->srcipaddr, UIP_UDP_BUF->srcport,
+                         uip_appdata, coap_serialize_message(message,
+                                                             uip_appdata));
+     }
+@@ -337,7 +341,9 @@ PROCESS_THREAD(coap_engine, ev, data)
+   PROCESS_BEGIN();
+   PRINTF("Starting %s receiver...\n", coap_rest_implementation.name);
+ 
++#if WITH_WELL_KNOWN_CORE
+   rest_activate_resource(&res_well_known_core, ".well-known/core");
++#endif
+ 
+   coap_register_as_transaction_handler();
+   coap_init_connection(SERVER_LISTEN_PORT);
+@@ -346,7 +352,7 @@ PROCESS_THREAD(coap_engine, ev, data)
+     PROCESS_YIELD();
+ 
+     if(ev == tcpip_event) {
+-      coap_receive();
++      coap_handle_receive(coap_default_context);
+     } else if(ev == PROCESS_EVENT_TIMER) {
+       /* retransmissions are handled here */
+       coap_check_transactions();
+@@ -369,7 +375,7 @@ coap_blocking_request_callback(void *callback_data, void *response)
+ /*---------------------------------------------------------------------------*/
+ PT_THREAD(coap_blocking_request
+             (struct request_state_t *state, process_event_t ev,
+-            uip_ipaddr_t *remote_ipaddr, uint16_t remote_port,
++            context_t *ctx, uip_ipaddr_t *remote_ipaddr, uint16_t remote_port,
+             coap_packet_t *request,
+             blocking_response_handler request_callback))
+ {
+@@ -391,6 +397,7 @@ PT_THREAD(coap_blocking_request
+     request->mid = coap_get_mid();
+     if((state->transaction = coap_new_transaction(request->mid, remote_ipaddr,
+                                                   remote_port))) {
++      coap_set_transaction_context(state->transaction, ctx);
+       state->transaction->callback = coap_blocking_request_callback;
+       state->transaction->callback_data = state;
+ 
+diff --git a/os/net/app-layer/coap/coap-engine.h b/os/net/app-layer/coap/coap-engine.h
+index 8b3ae1d2c..04d89eb43 100644
+--- a/os/net/app-layer/coap/coap-engine.h
++++ b/os/net/app-layer/coap/coap-engine.h
+@@ -52,6 +52,9 @@ typedef coap_packet_t rest_request_t;
+ typedef coap_packet_t rest_response_t;
+ 
+ void coap_init_engine(void);
++int coap_receive(context_t * ctx);
++
++extern context_t * coap_default_context;
+ 
+ /*---------------------------------------------------------------------------*/
+ /*- Client Part -------------------------------------------------------------*/
+@@ -62,13 +65,14 @@ struct request_state_t {
+   coap_transaction_t *transaction;
+   coap_packet_t *response;
+   uint32_t block_num;
++  uint32_t status;
+ };
+ 
+ typedef void (*blocking_response_handler)(void *response);
+ 
+ PT_THREAD(coap_blocking_request
+             (struct request_state_t *state, process_event_t ev,
+-            uip_ipaddr_t *remote_ipaddr, uint16_t remote_port,
++            context_t *ctx, uip_ipaddr_t *remote_ipaddr, uint16_t remote_port,
+             coap_packet_t *request,
+             blocking_response_handler request_callback));
+ 
+@@ -77,7 +81,17 @@ PT_THREAD(coap_blocking_request
+     static struct request_state_t request_state; \
+     PT_SPAWN(process_pt, &request_state.pt, \
+              coap_blocking_request(&request_state, ev, \
+-                                   server_addr, server_port, \
++                                   coap_default_context, server_addr, server_port, \
++                                   request, chunk_handler) \
++             ); \
++  }
++
++#define COAP_BLOCKING_REQUEST_CONTEXT(ctx, server_addr, server_port, request, chunk_handler) \
++  { \
++    static struct request_state_t request_state; \
++    PT_SPAWN(process_pt, &request_state.pt, \
++             coap_blocking_request(&request_state, ev, \
++                                   ctx, server_addr, server_port, \
+                                    request, chunk_handler) \
+              ); \
+   }
+diff --git a/os/net/app-layer/coap/coap-observe-client.c b/os/net/app-layer/coap/coap-observe-client.c
+index 84edec98e..385f4e118 100644
+--- a/os/net/app-layer/coap/coap-observe-client.c
++++ b/os/net/app-layer/coap/coap-observe-client.c
+@@ -191,7 +191,7 @@ coap_obs_remove_observee_by_url(uip_ipaddr_t *addr, uint16_t port,
+ }
+ /*----------------------------------------------------------------------------*/
+ static void
+-simple_reply(coap_message_type_t type, uip_ip6addr_t *addr, uint16_t port,
++simple_reply(coap_message_type_t type, context_t *ctx, uip_ip6addr_t *addr, uint16_t port,
+              coap_packet_t *notification)
+ {
+   static coap_packet_t response[1];
+@@ -199,7 +199,7 @@ simple_reply(coap_message_type_t type, uip_ip6addr_t *addr, uint16_t port,
+ 
+   coap_init_message(response, type, NO_ERROR, notification->mid);
+   len = coap_serialize_message(response, uip_appdata);
+-  coap_send_message(addr, port, uip_appdata, len);
++  coap_send_message(ctx, addr, port, uip_appdata, len);
+ }
+ /*----------------------------------------------------------------------------*/
+ static coap_notification_flag_t
+@@ -228,7 +228,7 @@ classify_notification(void *response, int first)
+ }
+ /*----------------------------------------------------------------------------*/
+ void
+-coap_handle_notification(uip_ipaddr_t *addr, uint16_t port,
++coap_handle_notification(context_t *ctx, uip_ipaddr_t *addr, uint16_t port,
+                          coap_packet_t *notification)
+ {
+   coap_packet_t *pkt;
+@@ -252,11 +252,11 @@ coap_handle_notification(uip_ipaddr_t *addr, uint16_t port,
+   if(NULL == obs) {
+     PRINTF("Error while handling coap observe notification: "
+            "no matching token found\n");
+-    simple_reply(COAP_TYPE_RST, addr, port, notification);
++    simple_reply(COAP_TYPE_RST, ctx, addr, port, notification);
+     return;
+   }
+   if(notification->type == COAP_TYPE_CON) {
+-    simple_reply(COAP_TYPE_ACK, addr, port, notification);
++    simple_reply(COAP_TYPE_ACK, ctx, addr, port, notification);
+   }
+   if(obs->notification_callback != NULL) {
+     flag = classify_notification(notification, 0);
+diff --git a/os/net/app-layer/coap/coap-observe-client.h b/os/net/app-layer/coap/coap-observe-client.h
+index c0ea0c5a2..6aefff256 100644
+--- a/os/net/app-layer/coap/coap-observe-client.h
++++ b/os/net/app-layer/coap/coap-observe-client.h
+@@ -107,7 +107,7 @@ int coap_obs_remove_observee_by_token(uip_ipaddr_t *addr, uint16_t port,
+ int coap_obs_remove_observee_by_url(uip_ipaddr_t *addr, uint16_t port,
+                                     const char *url);
+ 
+-void coap_handle_notification(uip_ipaddr_t *addr, uint16_t port,
++void coap_handle_notification(context_t *ctx, uip_ipaddr_t *addr, uint16_t port,
+                               coap_packet_t *notification);
+ 
+ coap_observee_t *coap_obs_request_registration(uip_ipaddr_t *addr,
+diff --git a/os/net/app-layer/coap/coap-observe.c b/os/net/app-layer/coap/coap-observe.c
+index 2237e4e25..742596454 100644
+--- a/os/net/app-layer/coap/coap-observe.c
++++ b/os/net/app-layer/coap/coap-observe.c
+@@ -39,6 +39,7 @@
+ #include <stdio.h>
+ #include <string.h>
+ #include "coap-observe.h"
++#include "coap-engine.h"
+ 
+ #define DEBUG 0
+ #if DEBUG
+@@ -74,6 +75,7 @@ add_observer(uip_ipaddr_t *addr, uint16_t port, const uint8_t *token,
+     }
+     memcpy(o->url, uri, max);
+     o->url[max] = 0;
++    o->ctx = coap_default_context;
+     uip_ipaddr_copy(&o->addr, addr);
+     o->port = port;
+     o->token_len = token_len;
+@@ -183,7 +185,9 @@ coap_remove_observer_by_mid(uip_ipaddr_t *addr, uint16_t port, uint16_t mid)
+ void
+ coap_notify_observers(resource_t *resource)
+ {
++#if COAP_CORE_OBSERVE
+   coap_notify_observers_sub(resource, NULL);
++#endif
+ }
+ void
+ coap_notify_observers_sub(resource_t *resource, const char *subpath)
+@@ -228,6 +232,7 @@ coap_notify_observers_sub(resource_t *resource, const char *subpath)
+       /*TODO implement special transaction for CON, sharing the same buffer to allow for more observers */
+ 
+       if((transaction = coap_new_transaction(coap_get_mid(), &obs->addr, obs->port))) {
++        coap_set_transaction_context(transaction, obs->ctx);
+         if(obs->obs_counter % COAP_OBSERVE_REFRESH_INTERVAL == 0) {
+           PRINTF("           Force Confirmable for\n");
+           notification->type = COAP_TYPE_CON;
+@@ -266,9 +271,10 @@ coap_notify_observers_sub(resource_t *resource, const char *subpath)
+ void
+ coap_observe_handler(resource_t *resource, void *request, void *response)
+ {
++#if COAP_CORE_OBSERVE
+   coap_packet_t *const coap_req = (coap_packet_t *)request;
+   coap_packet_t *const coap_res = (coap_packet_t *)response;
+-  coap_observer_t *obs;
++  coap_observer_t * obs;
+ 
+   if(coap_req->code == COAP_GET && coap_res->code < 128) { /* GET request and response without error code */
+     if(IS_OPTION(coap_req, COAP_OPTION_OBSERVE)) {
+@@ -306,5 +312,6 @@ coap_observe_handler(resource_t *resource, void *request, void *response)
+       }
+     }
+   }
++#endif
+ }
+ /*---------------------------------------------------------------------------*/
+diff --git a/os/net/app-layer/coap/coap-observe.h b/os/net/app-layer/coap/coap-observe.h
+index 7ff2bb502..38e8ba300 100644
+--- a/os/net/app-layer/coap/coap-observe.h
++++ b/os/net/app-layer/coap/coap-observe.h
+@@ -57,6 +57,7 @@ typedef struct coap_observer {
+   struct coap_observer *next;   /* for LIST */
+ 
+   char url[COAP_OBSERVER_URL_LEN];
++  context_t *ctx;
+   uip_ipaddr_t addr;
+   uint16_t port;
+   uint8_t token_len;
+diff --git a/os/net/app-layer/coap/coap-separate.c b/os/net/app-layer/coap/coap-separate.c
+index 03f95c411..2486c78cb 100644
+--- a/os/net/app-layer/coap/coap-separate.c
++++ b/os/net/app-layer/coap/coap-separate.c
+@@ -100,7 +100,7 @@ coap_separate_accept(void *request, coap_separate_t *separate_store)
+       /* ACK with empty code (0) */
+       coap_init_message(ack, COAP_TYPE_ACK, 0, coap_req->mid);
+       /* serializing into IPBUF: Only overwrites header parts that are already parsed into the request struct */
+-      coap_send_message(&UIP_IP_BUF->srcipaddr, UIP_UDP_BUF->srcport,
++      coap_send_message(t->ctx, &UIP_IP_BUF->srcipaddr, UIP_UDP_BUF->srcport,
+                         (uip_appdata), coap_serialize_message(ack,
+                                                               uip_appdata));
+     }
+@@ -108,6 +108,7 @@ coap_separate_accept(void *request, coap_separate_t *separate_store)
+     /* store remote address */
+     uip_ipaddr_copy(&separate_store->addr, &t->addr);
+     separate_store->port = t->port;
++    separate_store->ctx = t->ctx;
+ 
+     /* store correct response type */
+     separate_store->type =
+diff --git a/os/net/app-layer/coap/coap-separate.h b/os/net/app-layer/coap/coap-separate.h
+index 1a89ed434..7eb3e8415 100644
+--- a/os/net/app-layer/coap/coap-separate.h
++++ b/os/net/app-layer/coap/coap-separate.h
+@@ -45,6 +45,7 @@ typedef struct coap_separate {
+ 
+   uip_ipaddr_t addr;
+   uint16_t port;
++  context_t * ctx;
+ 
+   coap_message_type_t type;
+   uint16_t mid;
+diff --git a/os/net/app-layer/coap/coap-transactions.c b/os/net/app-layer/coap/coap-transactions.c
+index 613557f4d..29dc9a72a 100644
+--- a/os/net/app-layer/coap/coap-transactions.c
++++ b/os/net/app-layer/coap/coap-transactions.c
+@@ -39,6 +39,7 @@
+ #include "contiki.h"
+ #include "contiki-net.h"
+ #include "coap-transactions.h"
++#include "coap-engine.h"
+ #include "coap-observe.h"
+ 
+ #define DEBUG 0
+@@ -76,6 +77,7 @@ coap_new_transaction(uint16_t mid, uip_ipaddr_t *addr, uint16_t port)
+     t->mid = mid;
+     t->retrans_counter = 0;
+ 
++    t->ctx = coap_default_context;
+     /* save client address */
+     uip_ipaddr_copy(&t->addr, addr);
+     t->port = port;
+@@ -87,11 +89,17 @@ coap_new_transaction(uint16_t mid, uip_ipaddr_t *addr, uint16_t port)
+ }
+ /*---------------------------------------------------------------------------*/
+ void
++coap_set_transaction_context(coap_transaction_t *t, context_t *ctx)
++{
++  t->ctx = ctx;
++}
++/*---------------------------------------------------------------------------*/
++void
+ coap_send_transaction(coap_transaction_t *t)
+ {
+   PRINTF("Sending transaction %u\n", t->mid);
+ 
+-  coap_send_message(&t->addr, t->port, t->packet, t->packet_len);
++  coap_send_message(t->ctx, &t->addr, t->port, t->packet, t->packet_len);
+ 
+   if(COAP_TYPE_CON ==
+      ((COAP_HEADER_TYPE_MASK & t->packet[0]) >> COAP_HEADER_TYPE_POSITION)) {
+@@ -125,8 +133,9 @@ coap_send_transaction(coap_transaction_t *t)
+       void *callback_data = t->callback_data;
+ 
+       /* handle observers */
++#if COAP_CORE_OBSERVE
+       coap_remove_observer_by_client(&t->addr, t->port);
+-
++#endif
+       coap_clear_transaction(t);
+ 
+       if(callback) {
+diff --git a/os/net/app-layer/coap/coap-transactions.h b/os/net/app-layer/coap/coap-transactions.h
+index 49e35c0f2..fb03edf9f 100644
+--- a/os/net/app-layer/coap/coap-transactions.h
++++ b/os/net/app-layer/coap/coap-transactions.h
+@@ -59,6 +59,8 @@ typedef struct coap_transaction {
+   uip_ipaddr_t addr;
+   uint16_t port;
+ 
++  context_t *ctx;
++
+   restful_response_handler callback;
+   void *callback_data;
+ 
+@@ -71,6 +73,7 @@ void coap_register_as_transaction_handler(void);
+ 
+ coap_transaction_t *coap_new_transaction(uint16_t mid, uip_ipaddr_t *addr,
+                                          uint16_t port);
++void coap_set_transaction_context(coap_transaction_t *t, context_t *ctx);
+ void coap_send_transaction(coap_transaction_t *t);
+ void coap_clear_transaction(coap_transaction_t *t);
+ coap_transaction_t *coap_get_transaction_by_mid(uint16_t mid);
+diff --git a/os/net/app-layer/coap/coap-udp.c b/os/net/app-layer/coap/coap-udp.c
+new file mode 100644
+index 000000000..cbd9d4d47
+--- /dev/null
++++ b/os/net/app-layer/coap/coap-udp.c
+@@ -0,0 +1,43 @@
++#ifndef WITH_DTLS_COAP
++#include "contiki.h"
++#include "contiki-net.h"
++#include "coap.h"
++#include "coap-engine.h"
++
++#include <string.h>
++
++#define DEBUG DEBUG_NONE
++#include "uip-debug.h"
++
++/*-----------------------------------------------------------------------------------*/
++context_t *
++coap_init_communication_layer(uint16_t port)
++{
++  /* new connection with remote host */
++  context_t * ctx = udp_new(NULL, 0, NULL);
++  udp_bind(ctx, port);
++  PRINTF("Listening on port %u\n", uip_ntohs(ctx->lport));
++  return ctx;
++}
++/*-----------------------------------------------------------------------------------*/
++void
++coap_send_message(context_t * ctx, uip_ipaddr_t *addr, uint16_t port, uint8_t *data, uint16_t length)
++{
++  /* Configure connection to reply to client */
++  uip_ipaddr_copy(&ctx->ripaddr, addr);
++  ctx->rport = port;
++
++  uip_udp_packet_send(ctx, data, length);
++  PRINTF("-sent UDP datagram (%u)-\n", length);
++
++  /* Restore server connection to allow data from any node */
++  memset(&ctx->ripaddr, 0, sizeof(ctx->ripaddr));
++  ctx->rport = 0;
++}
++/*-----------------------------------------------------------------------------------*/
++void
++coap_handle_receive(context_t * ctx)
++{
++  coap_receive(ctx);
++}
++#endif /* WITH_DTLS_COAP */
+diff --git a/os/net/app-layer/coap/coap-udp.h b/os/net/app-layer/coap/coap-udp.h
+new file mode 100644
+index 000000000..b993c7d42
+--- /dev/null
++++ b/os/net/app-layer/coap/coap-udp.h
+@@ -0,0 +1,6 @@
++#ifndef _ER_COAP_UPD_H_
++#define _ER_COAP_UPD_H_
++
++typedef struct uip_udp_conn context_t;
++
++#endif
+diff --git a/os/net/app-layer/coap/coap.c b/os/net/app-layer/coap/coap.c
+index da466e6d7..1e69427a8 100644
+--- a/os/net/app-layer/coap/coap.c
++++ b/os/net/app-layer/coap/coap.c
+@@ -43,6 +43,7 @@
+ #include "contiki-net.h"
+ 
+ #include "coap.h"
++#include "coap-engine.h"
+ #include "coap-transactions.h"
+ 
+ #define DEBUG 0
+@@ -60,7 +61,6 @@
+ /*---------------------------------------------------------------------------*/
+ /*- Variables ---------------------------------------------------------------*/
+ /*---------------------------------------------------------------------------*/
+-static struct uip_udp_conn *udp_conn = NULL;
+ static uint16_t current_mid = 0;
+ 
+ coap_status_t erbium_status_code = NO_ERROR;
+@@ -279,9 +279,7 @@ void
+ coap_init_connection(uint16_t port)
+ {
+   /* new connection with remote host */
+-  udp_conn = udp_new(NULL, 0, NULL);
+-  udp_bind(udp_conn, port);
+-  PRINTF("Listening on port %u\n", uip_ntohs(udp_conn->lport));
++  coap_default_context = coap_init_communication_layer(port);
+ 
+   /* initialize transaction ID */
+   current_mid = random_rand();
+@@ -422,23 +420,6 @@ coap_serialize_message(void *packet, uint8_t *buffer)
+   return (option - buffer) + coap_pkt->payload_len; /* packet length */
+ }
+ /*---------------------------------------------------------------------------*/
+-void
+-coap_send_message(uip_ipaddr_t *addr, uint16_t port, uint8_t *data,
+-                  uint16_t length)
+-{
+-  /* configure connection to reply to client */
+-  uip_ipaddr_copy(&udp_conn->ripaddr, addr);
+-  udp_conn->rport = port;
+-
+-  uip_udp_packet_send(udp_conn, data, length);
+-
+-  PRINTF("-sent UDP datagram (%u)-\n", length);
+-
+-  /* restore server socket to allow data from any node */
+-  memset(&udp_conn->ripaddr, 0, sizeof(udp_conn->ripaddr));
+-  udp_conn->rport = 0;
+-}
+-/*---------------------------------------------------------------------------*/
+ coap_status_t
+ coap_parse_message(void *packet, uint8_t *data, uint16_t data_len)
+ {
+@@ -529,21 +510,6 @@ coap_parse_message(void *packet, uint8_t *data, uint16_t data_len)
+       ++current_option;
+     }
+ 
+-    if(current_option + option_length > data + data_len) {
+-      /* Malformed CoAP - out of bounds */
+-      PRINTF("BAD REQUEST: options outside data packet: %u > %u\n",
+-             (unsigned)(current_option + option_length - data), data_len);
+-      return BAD_REQUEST_4_00;
+-    }
+-
+-     option_number += option_delta;
+-
+-    if(option_number > COAP_OPTION_SIZE1) {
+-      /* Malformed CoAP - out of bounds */
+-      PRINTF("BAD REQUEST: option number too large: %u\n", option_number);
+-      return BAD_REQUEST_4_00;
+-    }
+-
+     option_number += option_delta;
+ 
+     PRINTF("OPTION %u (delta %u, len %zu): ", option_number, option_delta,
+diff --git a/os/net/app-layer/coap/coap.h b/os/net/app-layer/coap/coap.h
+index 9d88886af..7f85a4369 100644
+--- a/os/net/app-layer/coap/coap.h
++++ b/os/net/app-layer/coap/coap.h
+@@ -43,10 +43,11 @@
+ #include "contiki-net.h"
+ #include "coap-constants.h"
+ #include "coap-conf.h"
++#include "coap-communication.h"
+ 
+ /* sanity check for configured values */
+ #define COAP_MAX_PACKET_SIZE  (COAP_MAX_HEADER_SIZE + REST_MAX_CHUNK_SIZE)
+-#if COAP_MAX_PACKET_SIZE > (UIP_BUFSIZE - UIP_IPH_LEN - UIP_UDPH_LEN)
++#if COAP_MAX_PACKET_SIZE > (UIP_BUFSIZE - UIP_LLH_LEN - UIP_IPH_LEN - UIP_UDPH_LEN)
+ #error "UIP_CONF_BUFFER_SIZE too small for REST_MAX_CHUNK_SIZE"
+ #endif
+ 
+@@ -61,13 +62,17 @@
+                                         (REST_MAX_CHUNK_SIZE < 128 ? 64 : \
+                                          (REST_MAX_CHUNK_SIZE < 256 ? 128 : \
+                                           (REST_MAX_CHUNK_SIZE < 512 ? 256 : \
+-                                           (REST_MAX_CHUNK_SIZE < 1024 ? 512 : \
+-                                            (REST_MAX_CHUNK_SIZE < 2048 ? 1024 : 2048)))))))
++                                          (REST_MAX_CHUNK_SIZE < 1024 ? 512 : \
++                                          (REST_MAX_CHUNK_SIZE < 2048 ? 1024 : 2048)))))))
+ #endif /* COAP_MAX_BLOCK_SIZE */
+ 
+ /* direct access into the buffer */
+ #define UIP_IP_BUF   ((struct uip_ip_hdr *)&uip_buf[UIP_LLH_LEN])
++#if NETSTACK_CONF_WITH_IPV6
+ #define UIP_UDP_BUF  ((struct uip_udp_hdr *)&uip_buf[uip_l2_l3_hdr_len])
++#else
++#define UIP_UDP_BUF  ((struct uip_udp_hdr *)&uip_buf[UIP_LLH_LEN + UIP_IPH_LEN])
++#endif
+ 
+ /* bitmap for set options */
+ enum { OPTION_MAP_SIZE = sizeof(uint8_t) * 8 };
+@@ -178,7 +183,7 @@ uint16_t coap_get_mid(void);
+ void coap_init_message(void *packet, coap_message_type_t type, uint8_t code,
+                        uint16_t mid);
+ size_t coap_serialize_message(void *packet, uint8_t *buffer);
+-void coap_send_message(uip_ipaddr_t *addr, uint16_t port, uint8_t *data,
++void coap_send_message(context_t * ctx, uip_ipaddr_t *addr, uint16_t port, uint8_t *data,
+                        uint16_t length);
+ coap_status_t coap_parse_message(void *request, uint8_t *data,
+                                  uint16_t data_len);
+-- 
+2.13.1
+

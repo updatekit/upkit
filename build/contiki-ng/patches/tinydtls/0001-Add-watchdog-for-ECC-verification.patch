@@ -1,0 +1,95 @@
+From b17248830424094878df5306c818f89ca669d290 Mon Sep 17 00:00:00 2001
+From: Antonio Langiu <antonio.langiu@studenti.polito.it>
+Date: Wed, 6 Dec 2017 13:21:00 +0100
+Subject: [PATCH] Add watchdog for ECC verification
+
+---
+ dtls.c       | 11 +++++++++--
+ dtls_debug.h |  2 +-
+ session.h    |  2 +-
+ 3 files changed, 11 insertions(+), 4 deletions(-)
+
+diff --git a/dtls.c b/dtls.c
+index d0a8c33..9eb575d 100644
+--- a/dtls.c
++++ b/dtls.c
+@@ -29,6 +29,9 @@
+ #include <stdlib.h>
+ #include "global.h"
+ #endif /* WITH_CONTIKI */
++#ifdef WITH_CONTIKI
++#include "dev/watchdog.h"
++#endif
+ #ifdef HAVE_INTTYPES_H
+ #define __STDC_FORMAT_MACROS
+ #include <inttypes.h>
+@@ -3266,7 +3269,6 @@ handle_handshake_msg(dtls_context_t *ctx, dtls_peer_t *peer, session_t *session,
+   /************************************************************************
+    * Server states
+    ************************************************************************/
+-
+   case DTLS_HT_CLIENT_KEY_EXCHANGE:
+     /* handle ClientHello, update msg and msglen and goto next if not finished */
+ 
+@@ -3530,12 +3532,15 @@ handle_handshake(dtls_context_t *ctx, dtls_peer_t *peer, session_t *session,
+     dtls_info("Added packet for reordering\n");
+     return 0;
+   } else if (dtls_uint16_to_int(hs_header->message_seq) == peer->handshake_params->hs_state.mseq_r) {
++    watchdog_stop();
+     /* Found the expected packet, use this and all the buffered packet */
+     int next = 1;
+ 
+     res = handle_handshake_msg(ctx, peer, session, role, state, data, data_length);
+-    if (res < 0)
++    if (res < 0) {
++        watchdog_start();
+       return res;
++    }
+ 
+     /* We do not know in which order the packet are in the list just search the list for every packet. */
+     while (next && peer->handshake_params) {
+@@ -3549,6 +3554,7 @@ handle_handshake(dtls_context_t *ctx, dtls_peer_t *peer, session_t *session,
+           next = 1;
+           res = handle_handshake_msg(ctx, peer, session, role, peer->state, node->data, node->length);
+           if (res < 0) {
++              watchdog_start();
+             return res;
+           }
+ 
+@@ -3558,6 +3564,7 @@ handle_handshake(dtls_context_t *ctx, dtls_peer_t *peer, session_t *session,
+         }
+       }
+     }
++    watchdog_start();
+     return res;
+   }
+   assert(0);
+diff --git a/dtls_debug.h b/dtls_debug.h
+index 80e56d6..f8fc64a 100644
+--- a/dtls_debug.h
++++ b/dtls_debug.h
+@@ -28,7 +28,7 @@
+ # ifndef DEBUG
+ #  define DEBUG DEBUG_PRINT
+ # endif /* DEBUG */
+-#include "net/ip/uip-debug.h"
++#include "ipv6/uip-debug.h"
+ 
+ #ifdef CONTIKI_TARGET_MBXXX
+ extern char __Stack_Init, _estack;
+diff --git a/session.h b/session.h
+index 8cd8a93..7fbdfd8 100644
+--- a/session.h
++++ b/session.h
+@@ -23,7 +23,7 @@
+ #include "global.h"
+ 
+ #ifdef WITH_CONTIKI
+-#include "ip/uip.h"
++#include "ipv6/uip.h"
+ typedef struct {
+   unsigned char size;
+   uip_ipaddr_t addr;
+-- 
+2.13.1
+

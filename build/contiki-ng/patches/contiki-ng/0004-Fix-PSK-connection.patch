@@ -1,0 +1,142 @@
+From 6a0c0056c2093ff9de80cf2c68d615daa13680bb Mon Sep 17 00:00:00 2001
+From: Antonio Langiu <antonio.langiu@studenti.polito.it>
+Date: Tue, 19 Dec 2017 02:42:29 +0100
+Subject: [PATCH] Fix PSK connection
+
+---
+ os/net/app-layer/coap/coap-dtls.c | 69 ++++++++++-----------------------------
+ os/net/app-layer/coap/coap-dtls.h | 10 ++++++
+ 2 files changed, 27 insertions(+), 52 deletions(-)
+
+diff --git a/os/net/app-layer/coap/coap-dtls.c b/os/net/app-layer/coap/coap-dtls.c
+index 0a353c654..024e7cabe 100644
+--- a/os/net/app-layer/coap/coap-dtls.c
++++ b/os/net/app-layer/coap/coap-dtls.c
+@@ -12,26 +12,6 @@
+ #define DEBUG DEBUG_NONE
+ #include "dtls_debug.h"
+ 
+-/*---------------------------------------------------------------------------*/
+-
+-#if defined DTLS_CONF_IDENTITY_HINT && defined DTLS_CONF_IDENTITY_HINT_LENGTH
+-#define DTLS_IDENTITY_HINT DTLS_CONF_IDENTITY_HINT
+-#define DTLS_IDENTITY_HINT_LENGTH DTLS_CONF_IDENTITY_HINT_LENGTH
+-#else
+-#define DTLS_IDENTITY_HINT "CoAP"
+-#define DTLS_IDENTITY_HINT_LENGTH 4
+-#endif
+-
+-#if defined DTLS_CONF_PSK_KEY && defined DTLS_CONF_PSK_KEY_LENGTH
+-#define DTLS_PSK_KEY_VALUE DTLS_CONF_PSK_KEY
+-#define DTLS_PSK_KEY_VALUE_LENGTH DTLS_CONF_PSK_KEY_LENGTH
+-#else
+-#define DTLS_PSK_KEY_VALUE "ThisIsOurSecret1"
+-#define DTLS_PSK_KEY_VALUE_LENGTH 16
+-#endif
+-
+-/*---------------------------------------------------------------------------*/
+-
+ static int
+ send_to_peer(struct dtls_context_t *ctx,
+              session_t *session, uint8 *data, size_t len);
+@@ -42,52 +22,36 @@ read_from_peer(struct dtls_context_t *ctx,
+ 
+ /*-----------------------------------------------------------------------------------*/
+ #ifdef DTLS_PSK
+-/* This function is the "key store" for tinyDTLS. It is called to
+- * retrieve a key for the given identiy within this particular
+- * session. */
++static dtls_psk_data_t* dtls_psk_data;
++void coap_set_psk_data(dtls_psk_data_t* data) {
++    dtls_psk_data = data;
++}
++
+ static int
+ get_psk_info(struct dtls_context_t *ctx, const session_t *session,
+          dtls_credentials_type_t type,
+          const unsigned char *id, size_t id_len,
+          unsigned char *result, size_t result_length) {
+-
+-  struct keymap_t {
+-    unsigned char *id;
+-    size_t id_length;
+-    unsigned char *key;
+-    size_t key_length;
+-  } psk[1] = {
+-    { (unsigned char *)DTLS_IDENTITY_HINT, DTLS_IDENTITY_HINT_LENGTH, (unsigned char *)DTLS_PSK_KEY_VALUE, DTLS_PSK_KEY_VALUE_LENGTH },
+-  };
+   if (type ==  DTLS_PSK_IDENTITY) {
+-    if (id_len) {
+-      dtls_debug("got psk_identity_hint: '%.*s'\n", id_len, id);
+-    }
+-
+-    if (result_length < psk[0].id_length) {
++    if (result_length < dtls_psk_data->hint_len) {
+       dtls_warn("cannot set psk_identity -- buffer too small\n");
+       return dtls_alert_fatal_create(DTLS_ALERT_INTERNAL_ERROR);
+     }
+ 
+-    memcpy(result, psk[0].id, psk[0].id_length);
+-    return psk[0].id_length;
++    memcpy(result, dtls_psk_data->hint, dtls_psk_data->hint_len);
++    return dtls_psk_data->hint_len;
+   } else if (type == DTLS_PSK_KEY) {
+-    if (id) {
+-      int i;
+-      for (i = 0; i < sizeof(psk)/sizeof(struct keymap_t); i++) {
+-        if (id_len == psk[i].id_length && memcmp(id, psk[i].id, id_len) == 0) {
+-          if (result_length < psk[i].key_length) {
+-            dtls_warn("buffer too small for PSK");
+-            return dtls_alert_fatal_create(DTLS_ALERT_INTERNAL_ERROR);
++      if (id && id_len == dtls_psk_data->hint_len && memcmp(id, dtls_psk_data->hint, id_len) == 0) {
++          if (result_length < dtls_psk_data->key_len) {
++              dtls_warn("buffer too small for PSK");
++              return dtls_alert_fatal_create(DTLS_ALERT_INTERNAL_ERROR);
+           }
+ 
+-          memcpy(result, psk[i].key, psk[i].key_length);
+-          return psk[i].key_length;
+-        }
++          memcpy(result, dtls_psk_data->key, dtls_psk_data->key_len);
++          return dtls_psk_data->key_len;
+       }
+-    }
+   } else {
+-    return 0;
++      return 0;
+   }
+ 
+   return dtls_alert_fatal_create(DTLS_ALERT_DECRYPT_ERROR);
+@@ -113,8 +77,9 @@ coap_init_communication_layer(uint16_t port)
+ 
+   struct uip_udp_conn *server_conn = udp_new(NULL, 0, NULL);
+   udp_bind(server_conn, port);
+-
++#if NDEBUG
+   dtls_set_log_level(DTLS_LOG_DEBUG);
++#endif
+ 
+   ctx = dtls_new_context(server_conn);
+   if(ctx) {
+diff --git a/os/net/app-layer/coap/coap-dtls.h b/os/net/app-layer/coap/coap-dtls.h
+index 88ff6dee8..a45381d9a 100644
+--- a/os/net/app-layer/coap/coap-dtls.h
++++ b/os/net/app-layer/coap/coap-dtls.h
+@@ -3,4 +3,14 @@
+ 
+ typedef struct dtls_context_t context_t;
+ 
++#ifdef CONN_DTLS_PSK
++typedef struct dtls_psk_data_t {
++    char* hint;
++    size_t hint_len;
++    char* key;
++    size_t key_len;
++} dtls_psk_data_t;
++void coap_set_psk_data(dtls_psk_data_t* data);
++#endif
++
+ #endif
+-- 
+2.13.1
+

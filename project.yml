@@ -1,0 +1,107 @@
+---
+
+:project:
+  :use_exceptions: FALSE
+  :use_test_preprocessor: TRUE
+  :use_auxiliary_dependencies: TRUE
+  :build_root: build/ceedling
+  :test_file_prefix: test_
+  :which_ceedling: gem
+  :default_tasks:
+    - test:all
+
+:extension:
+  :executable: .test
+
+:paths:
+  :test:
+    - test/**
+  :source:
+    - src/**
+    - test/support
+  :include:
+    - include/**
+    - ext/libcoap/include
+    - ext/tinydtls
+    - ext/tinycrypt/lib/include
+
+:defines:
+  :commmon: &common_defines
+    - POSIX
+    - WITH_SHA256
+    - SHA2_USE_INTTYPES_H
+    - LOGGER_VERBOSITY=4
+    # Security definitions
+    - WITH_TINYDTLS
+    - WITH_TINYCRYPT
+  :test:
+    - *common_defines
+
+:cmock:
+  :mock_prefix: mock_
+  :when_no_prototypes: :warn
+  :enforce_strict_ordering: TRUE
+  :fail_on_unexpected_calls: FALSE
+  :callback_include_count: FALSE
+  #:memcmp_if_unknown: FALSE
+  :includes:
+      - memory_file_posix.h
+  :plugins:
+    - :ignore
+    - :callback
+    - :expect_any_args
+  :treat_as:
+    uint8:    HEX8
+    uint16:   HEX16
+    uint32:   UINT32
+    int8:     INT8
+    bool:     UINT8
+
+:flags:
+  :test:
+    :compile:
+      :*:
+        - -Wall
+
+:gcov:
+  :html_report_type: detailed
+
+:tools:
+  :gcov_linker:
+     :executable: gcc
+     :arguments:
+        - -fprofile-arcs
+        - -ftest-coverage
+        - -O0
+        - ${1}
+        - ext/libcoap/.libs/libcoap-1.a
+        - ext/tinydtls/libtinydtls.a
+        - ext/tinycrypt/lib/libtinycrypt.a
+        - -o ${2}
+  :gcov_post_report_advanced:
+     :executable: gcovr
+     :optional: FALSE
+     :arguments:
+        - -p
+        - -b
+        - -e "^vendor.*|^build/|^test/|^ext/"
+        - --html
+        - --html-details
+        - -r .
+        - -o "build/test/artifacts/gcov/GcovCoverageResults.html"
+
+:libraries:
+ :placement: :end
+ :system:
+     - ext/libcoap/.libs/libcoap-1.a
+     - ext/tinydtls/libtinydtls.a
+     - ext/tinycrypt/lib/libtinycrypt.a
+
+:plugins:
+  :load_paths:
+    - "#{Ceedling.load_path}"
+  :enabled:
+    - stdout_pretty_tests_report
+    - module_generator
+    - gcov
+...

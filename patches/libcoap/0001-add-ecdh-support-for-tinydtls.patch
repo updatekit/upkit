@@ -1,0 +1,271 @@
+From 892b715d2a0daa6f1192e971eec972410849aeb6 Mon Sep 17 00:00:00 2001
+From: Antonio Langiu <antonio.langiu@studenti.polito.it>
+Date: Thu, 23 Nov 2017 20:14:13 +0100
+Subject: [PATCH] add ecdh support for tinydtls
+
+---
+ include/coap/coap_dtls.h | 10 +++++--
+ include/coap/net.h       | 16 ++++++++++
+ src/coap_tinydtls.c      | 78 ++++++++++++++++++++++++++++++++++++++++++------
+ src/net.c                | 44 +++++++++++++++++++++++++++
+ 4 files changed, 136 insertions(+), 12 deletions(-)
+
+diff --git a/include/coap/coap_dtls.h b/include/coap/coap_dtls.h
+index 3e640ef..e7c93de 100644
+--- a/include/coap/coap_dtls.h
++++ b/include/coap/coap_dtls.h
+@@ -8,19 +8,23 @@
+  * of use.
+  */
+ 
+-#ifndef _COAP_DTLS_H_
+-#define _COAP_DTLS_H_
+-
+ #include "net.h"
+ #include "coap_session.h"
+ #include "pdu.h"
+ 
++#ifndef _COAP_DTLS_H_
++#define _COAP_DTLS_H_
++
+ /**
+  * @defgroup dtls DTLS Support
+  * API functions for interfacing with DTLS libraries.
+  * @{
+  */
+ 
++typedef enum dtls_curve_t {
++    SECP256R1
++} dtls_curve_t;
++
+ /** Returns 1 if support for DTLS is enabled, or 0 otherwise. */
+ int coap_dtls_is_supported(void);
+ 
+diff --git a/include/coap/net.h b/include/coap/net.h
+index 4ee9954..12867bb 100644
+--- a/include/coap/net.h
++++ b/include/coap/net.h
+@@ -143,6 +143,13 @@ typedef struct coap_context_t {
+   uint8_t *psk_key;
+   size_t psk_key_len;
+ 
++  dtls_curve_t curve;
++  uint8_t *priv_key;
++  uint8_t *pub_key_x;
++  uint8_t *pub_key_y;
++  void *ecdsa_key;
++  int (*verify_key) (const coap_session_t *session, const uint8_t *other_pub_x, const uint8_t *other_pub_y, size_t key_size);
++
+   unsigned int session_timeout;	   /**< Number of seconds of inactivity after which an unused session will be closed. 0 means use default. */
+   unsigned int max_idle_sessions;  /**< Maximum number of simultaneous unused sessions per endpoint. 0 means no maximum. */
+   unsigned int keepalive_interval; /**< Minimum interval before sending a keepalive message. 0 means disabled. */
+@@ -225,6 +232,15 @@ void coap_context_set_psk( coap_context_t *ctx, const char *hint,
+                            const uint8_t *key, size_t key_len );
+ 
+ /**
++ * Set the context's default ecdsa key.
++ * TODO: finish the documentation
++ */
++void coap_context_set_ecdsa(coap_context_t *ctx, dtls_curve_t curve,
++        const uint8_t *priv_key, const uint8_t *pub_key_x,
++        const uint8_t *pub_key_y,
++        int (*verify_key) (const coap_session_t *session, const uint8_t *other_pub_x,
++            const uint8_t *other_pub_y, size_t key_size));
++/**
+  * Returns a new message id and updates @p context->message_id accordingly. The
+  * message id is returned in network byte order to make it easier to read in
+  * tracing tools.
+diff --git a/src/coap_tinydtls.c b/src/coap_tinydtls.c
+index 825f68e..1969121 100644
+--- a/src/coap_tinydtls.c
++++ b/src/coap_tinydtls.c
+@@ -155,6 +155,21 @@ dtls_event(struct dtls_context_t *dtls_context,
+   return 0;
+ }
+ 
++static int
++get_coap_ctx_from_dtls_ctx(struct dtls_context_t *dtls_context,
++    const session_t *dtls_session,
++    coap_context_t **coap_context,
++    coap_session_t **coap_session) {
++    coap_address_t remote_addr;
++    *coap_context = (coap_context_t *)dtls_get_app_data(dtls_context);
++    get_session_addr(dtls_session, &remote_addr);
++    *coap_session = coap_session_get_by_peer(*coap_context, &remote_addr, dtls_session->ifindex);
++    if (!*coap_session) {
++        return 0;
++    }
++    return 1;
++}
++
+ /* This function is the "key store" for tinyDTLS. It is called to
+  * retrieve a key for the given identity within this particular
+  * session. */
+@@ -171,8 +186,6 @@ get_psk_info(struct dtls_context_t *dtls_context,
+   static int client = 0;
+   static uint8_t psk[128];
+   static size_t psk_len = 0;
+-  coap_address_t remote_addr;
+-
+ 
+   if (type == DTLS_PSK_KEY && client) {
+     if (psk_len > result_length) {
+@@ -185,10 +198,8 @@ get_psk_info(struct dtls_context_t *dtls_context,
+   }
+ 
+   client = 0;
+-  coap_context = (coap_context_t *)dtls_get_app_data(dtls_context);
+-  get_session_addr(dtls_session, &remote_addr);
+-  coap_session = coap_session_get_by_peer(coap_context, &remote_addr, dtls_session->ifindex);
+-  if (!coap_session) {
++
++  if (!get_coap_ctx_from_dtls_ctx(dtls_context, dtls_session, &coap_context, &coap_session)) {
+     debug("cannot get PSK, session not found\n");
+     goto error;
+   }
+@@ -233,14 +244,58 @@ error:
+   return dtls_alert_fatal_create(fatal_error);
+ }
+ 
++static int
++get_ecdsa_key(struct dtls_context_t *dtls_context,
++        const session_t *dtls_session,
++        const dtls_ecdsa_key_t **result) {
++    coap_context_t *coap_context;
++    coap_session_t *coap_session;
++    if (!get_coap_ctx_from_dtls_ctx(dtls_context, dtls_session, &coap_context, &coap_session)) {
++        coap_log(LOG_WARNING, "error getting ecdsa_key\n");
++        return -1;
++    }
++    dtls_ecdsa_key_t* ecdsa_key = (dtls_ecdsa_key_t*) coap_malloc(sizeof(dtls_ecdsa_key_t));
++    if (coap_context->curve == SECP256R1) {
++        ecdsa_key->curve = DTLS_ECDH_CURVE_SECP256R1;
++    } else {
++       coap_log(LOG_WARNING, "Curve not supported\n");
++       return -1;
++    }
++    ecdsa_key->priv_key = coap_context->priv_key;
++    ecdsa_key->pub_key_x = coap_context->pub_key_x;
++    ecdsa_key->pub_key_y = coap_context->pub_key_y;
++    coap_context->ecdsa_key = ecdsa_key;
++    *result = ecdsa_key;
++    return 0;
++}
++
++static int
++verify_ecdsa_key(struct dtls_context_t *dtls_context,
++        const session_t *dtls_session,
++        const unsigned char *other_pub_x,
++        const unsigned char *other_pub_y,
++        size_t key_size) {
++    coap_context_t *coap_context;
++    coap_session_t *coap_session;
++    if (!get_coap_ctx_from_dtls_ctx(dtls_context, dtls_session, &coap_context, &coap_session)) {
++        coap_log(LOG_WARNING, "error verifying ecdsa_key\n");
++        return -1;
++    }
++    if (coap_context->verify_key)
++        return coap_context->verify_key(coap_session, other_pub_x, other_pub_y, key_size);
++    return -1;
++}
++
+ static dtls_handler_t cb = {
+   .write = dtls_send_to_peer,
+   .read = dtls_application_data,
+   .event = dtls_event,
++#ifndef WITHOUT_PSK
+   .get_psk_info = get_psk_info,
+-#ifdef WITH_ECC
+-  .get_ecdsa_key = NULL,
+-  .verify_ecdsa_key = NULL
++#endif
++#ifndef WITHOUT_ECDSA
++  .get_ecdsa_key = get_ecdsa_key,
++  .verify_ecdsa_key = verify_ecdsa_key
+ #endif
+ };
+ 
+@@ -249,6 +304,7 @@ coap_dtls_new_context(struct coap_context_t *coap_context) {
+   struct dtls_context_t *dtls_context = dtls_new_context(coap_context);
+   if (!dtls_context)
+     goto error;
++
+   dtls_set_handler(dtls_context, &cb);
+   return dtls_context;
+ error:
+@@ -330,6 +386,10 @@ coap_dtls_free_session(coap_session_t *coap_session) {
+       dtls_close(ctx, (session_t *)coap_session->tls);
+     debug("*** removed session %p\n", coap_session->tls);
+     coap_free_type(COAP_DTLS_SESSION, coap_session->tls);
++    if (coap_session->context->ecdsa_key) {
++        coap_free(coap_session->context->ecdsa_key);
++        coap_session->context->ecdsa_key = NULL;
++    }
+   }
+ }
+ 
+diff --git a/src/net.c b/src/net.c
+index e28d342..9d4fc2c 100644
+--- a/src/net.c
++++ b/src/net.c
+@@ -436,6 +436,42 @@ void coap_context_set_psk(coap_context_t *ctx,
+   }
+ }
+ 
++#define COPY_PARAM(ctx, param, len) {\
++  if (ctx->param) \
++      coap_free(ctx->param); \
++  ctx->param = NULL; \
++  if (param) {\
++      ctx->param = coap_malloc(len); \
++      if (ctx->param) { \
++          memcpy(ctx->param, param, len); \
++      } else { \
++          coap_log(LOG_ERR, "no memory to alloc %s\n", param); \
++      } \
++  }}\
++
++void coap_context_set_ecdsa(coap_context_t *ctx, dtls_curve_t curve,
++        const uint8_t *priv_key, const uint8_t *pub_key_x,
++        const uint8_t *pub_key_y,
++        int (*verify_key) (const coap_session_t *session, const uint8_t *other_pub_x,
++            const uint8_t *other_pub_y, size_t key_size)) {
++    int curve_len = -1;
++    if (curve == SECP256R1) {
++        curve_len = 32;
++    } else {
++        coap_log(LOG_ERR, "unsupported curve\n");
++        return;
++    }
++    ctx->curve = curve;
++
++    COPY_PARAM(ctx, priv_key, curve_len);
++    COPY_PARAM(ctx, pub_key_x, curve_len);
++    COPY_PARAM(ctx, pub_key_y, curve_len);
++    ctx->verify_key = NULL;
++    if (verify_key) {
++        ctx->verify_key = verify_key;
++    }
++}
++
+ coap_context_t *
+ coap_new_context(
+   const coap_address_t *listen_addr) {
+@@ -558,6 +594,14 @@ coap_free_context(coap_context_t *context) {
+   if (context->psk_key)
+     coap_free(context->psk_key);
+ 
++  if (context->priv_key)
++    coap_free(context->priv_key);
++
++  if (context->pub_key_x)
++    coap_free(context->pub_key_x);
++
++  if (context->pub_key_y)
++    coap_free(context->pub_key_y);
+ #ifndef WITH_CONTIKI
+   coap_free_type(COAP_CONTEXT, context);
+ #endif/* not WITH_CONTIKI */
+-- 
+2.13.1
+

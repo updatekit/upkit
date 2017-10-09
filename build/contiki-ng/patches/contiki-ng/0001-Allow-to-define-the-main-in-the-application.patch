@@ -1,0 +1,67 @@
+From 6b57f53c4ec3af52061350e1a70be253a30acdb3 Mon Sep 17 00:00:00 2001
+From: Antonio Langiu <antonio.langiu@studenti.polito.it>
+Date: Mon, 6 Nov 2017 17:42:59 +0100
+Subject: [PATCH] Allow to define the main in the application
+
+---
+ Makefile.include                     | 8 ++++++--
+ os/{ => core}/contiki-default-conf.h | 0
+ os/{ => core}/contiki-lib.h          | 0
+ os/{ => core}/contiki-net.h          | 0
+ os/{ => core}/contiki.h              | 0
+ os/{ => main}/contiki-main.c         | 0
+ 6 files changed, 6 insertions(+), 2 deletions(-)
+ rename os/{ => core}/contiki-default-conf.h (100%)
+ rename os/{ => core}/contiki-lib.h (100%)
+ rename os/{ => core}/contiki-net.h (100%)
+ rename os/{ => core}/contiki.h (100%)
+ rename os/{ => main}/contiki-main.c (100%)
+
+diff --git a/Makefile.include b/Makefile.include
+index 3b8c41605..0d071efc6 100644
+--- a/Makefile.include
++++ b/Makefile.include
+@@ -45,14 +45,18 @@ TARGET_BOARD_UPPERCASE := ${strip ${shell echo $(BOARD) | sed y!$(LOWERCASE)!$(U
+ CFLAGS += -DCONTIKI_BOARD_$(TARGET_BOARD_UPPERCASE)=1
+ endif
+ 
+-MODULES += os os/sys os/dev os/lib os/services
++MODULES += os os/core os/sys os/dev os/lib os/services
+ 
+ # Automatically include project-conf.h if found
+ ifneq ("$(wildcard project-conf.h)","")
+ CFLAGS += -DPROJECT_CONF_PATH=\"project-conf.h\"
+ endif
+ 
+-MODULES += os os/net os/net/mac os/storage
++MODULES += os os/core os/net os/net/mac os/storage
++
++ifneq ($(DISABLE_MAIN),1)
++	MODULES += os/main
++endif
+ 
+ oname = ${patsubst %.c,%.o,${patsubst %.S,%.o,$(1)}}
+ 
+diff --git a/os/contiki-default-conf.h b/os/core/contiki-default-conf.h
+similarity index 100%
+rename from os/contiki-default-conf.h
+rename to os/core/contiki-default-conf.h
+diff --git a/os/contiki-lib.h b/os/core/contiki-lib.h
+similarity index 100%
+rename from os/contiki-lib.h
+rename to os/core/contiki-lib.h
+diff --git a/os/contiki-net.h b/os/core/contiki-net.h
+similarity index 100%
+rename from os/contiki-net.h
+rename to os/core/contiki-net.h
+diff --git a/os/contiki.h b/os/core/contiki.h
+similarity index 100%
+rename from os/contiki.h
+rename to os/core/contiki.h
+diff --git a/os/contiki-main.c b/os/main/contiki-main.c
+similarity index 100%
+rename from os/contiki-main.c
+rename to os/main/contiki-main.c
+-- 
+2.13.1
+

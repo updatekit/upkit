@@ -50,3 +50,27 @@ modules.order
 Module.symvers
 Mkfile.old
 dkms.conf
+
+# Contiki folder
+./contiki
+symbols.c
+symbols.h
+obj_native/
+
+# Contiki
+*.co
+*.log
+*.native
+*.bin
+*.srf06-cc26xx
+
+# Testing
+assets/
+build/ceedling/*/*
+
+# Utils
+utils/fake_firmware_generator
+.vagrant
+ext/
+node_modules
+package-lock.json
