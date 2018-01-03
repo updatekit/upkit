@@ -74,3 +74,7 @@ utils/fake_firmware_generator
 ext/
 node_modules
 package-lock.json
+
+# Documentation
+
+build/documentation/*/**

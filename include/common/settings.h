@@ -1,5 +1,6 @@
-#ifndef _SETTINGS_H
-#define _SETTINGS_H
+// TODO remove this file
+#ifndef SETTINGS_H_
+#define SETTINGS_H_
 
 /* Deault configurations. Redefine with symbols in your
  * build system to override them
@@ -15,4 +16,4 @@
 #define MEMORY_OBJ_BUFFER_SIZE 0x1000
 #endif
 
-#endif
+#endif /* SETTINGS_H_ */

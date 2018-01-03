@@ -1,14 +1,33 @@
-#include "common/settings.h"
-#include "common/error.h"
-
+/** \file logger.h
+ * \brief Logging functions.
+ *
+ * 4 logging level are supported:
+ *  - Error: Just the errors are printed.
+ *  - Warn: Error and warnings are printed.
+ *  - Info: Error, warnign and also information strings.
+ *  - Debug: All the output is printed. This affect heavily the
+ *  memory footprint of the library.
+ * \author Antonio Langiu
+ * \defgroup Common
+ * \{
+ */
 #ifndef LOGGER_H_
 #define LOGGER_H_
 
-/* This variable indicates the log_impling level. If you want to change it
- * at runtime you can define the external symbol in your application.
- * In case you don't want it will be defined as a constant value, allowing
- * the compiler to remove the log_impling functions that are not needed
- * for that log_impling level
+#include "common/settings.h"
+#include "common/error.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif /* __cplusplus */
+
+/** The verbosity_level variable indicates the log_impling level. 
+ * If you want to change it at runtime you can define the external
+ * symbol in your application.
+ * In case you don't need to change it at runtime you can define it as
+ * a constant, defining the LOGGER_VERBOSITY define. In this way the 
+ * compiler will be able to optimize the code and remove the non needed
+ * debugging directives.
  */
 #ifdef LOGGER_VERBOSITY
 static const uint8_t verbosity_level = LOGGER_VERBOSITY;
@@ -53,4 +72,7 @@ extern uint8_t verbosity_level;
 #define log_error(err, args...) log_err(err, args)
 #define log_warn(args...) log_impl(VERBOSITY_WARN, args)
 
-#endif // LOGGER_H_
+#ifdef __cplusplus
+}
+#endif /* __cplusplus */
+#endif /* \} LOGGER_H_ */

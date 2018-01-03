@@ -1,31 +1,45 @@
+/** \file error.h
+ * \brief Errors definition.
+ *
+ * Each module should returns just errors of that particular module.
+ * In this way it is possible for the calling function to have a
+ * finite set of errors returned by the function.
+ * \author Antonio Langiu
+ * \defgroup Common
+ * \brief This module includes common component used in all the library.
+ *
+ * It includes utilities functions such as the logger and the error
+ * functions or the interface for some components that must be defined
+ * by the developer.
+ * \{
+ */
+#ifndef ERROR_H_
+#define ERROR_H_
+
 #include "common/settings.h"
 
-#ifndef __COMMON_ERROR_H
-#define __COMMON_ERROR_H
+#ifdef __cplusplus
+extern "C" {
+#endif /* __cplusplus */
 
 #define GENERATE_ENUM(ENUM) ENUM##_ERROR,
 #define GENERATE_STRING(STRING) #STRING,
 
-
-/* Each module should returns just errors of that particular module.
- * In this way it is possible for the calling function to have a
- * finite set of errors returned by the function
- */
 #define FOREACH_ERROR(ERROR) \
     /* Generic Errors */    \
-    ERROR(GENERIC)          \
-    ERROR(NOT_IMPLEMENTED)  \
+    ERROR(GENERIC)          /** Generic error */\
+    ERROR(NOT_IMPLEMENTED)  /** Method not implemented */\
     /* Transport Errors */  \
-    ERROR(TRANSPORT_INIT)   \
-    ERROR(CALLBACK)         \
-    ERROR(RESOLVER)         \
-    ERROR(INVALID_URL)      \
-    ERROR(BLOCK_WISE)       \
-    ERROR(INVALID_METHOD)   \
-    ERROR(INVALID_RESOURCE) \
-    ERROR(INVALID_DATA)     \
-    ERROR(INVALID_CONN_DATA) \
-    ERROR(REQUEST)          \
+    ERROR(TRANSPORT_INIT)   /** The transport initialization failed */\
+    ERROR(CALLBACK)         /** The callback could not be setted */\
+    ERROR(RESOLVER)         /** Error resolving the backend */\
+    ERROR(INVALID_URL)      /** The URL of the provided resource is invalid */\
+    ERROR(BLOCK_WISE)       /** Error during the Block-Wise transfer */\
+    ERROR(INVALID_METHOD)   /** The request method is invalid or not supported */\
+    ERROR(INVALID_RESOURCE) /** The requested resource is invalid */\
+    ERROR(INVALID_DATA)     /** The received data is invalid */\
+    ERROR(INVALID_CONN_DATA) /** The data used to inizialize the connection is invalid */\
+    ERROR(REQUEST)          /** Error performing the request */\
     ERROR(REQUEST_RST)      \
     ERROR(SEND)             \
     /* Memory Errors */     \
@@ -73,4 +87,7 @@ typedef enum {
 
 const char* err_as_str(pull_error err);
 
-#endif
+#ifdef __cplusplus
+}
+#endif /* __cplusplus */
+#endif /* \} ERROR_H_ */
