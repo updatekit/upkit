@@ -23,6 +23,13 @@ git clone --quiet --progress --recurse-submodules \
     ext/tinydtls
 echo "Cloning tinydtls...done"
 
+# Clone CryptoAuthlib
+echo "Cloning cryptoauthlib..."
+git clone --quiet --progress \
+    --single-branch --depth 2 https://github.com/AntonioLangiu/cryptoauthlib.git \
+    ext/cryptoauthlib
+echo "Cloning cryptoauthlib...done"
+
 # Patch the repositories
 PATCHDIR=patches
 for dir in $(cd $PATCHDIR && find * -type d -print); do
