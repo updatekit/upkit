@@ -17,6 +17,7 @@ clone() {
 clone libcoap https://github.com/obgm/libcoap.git
 clone tinydtls https://git.eclipse.org/r/tinydtls/org.eclipse.tinydtls
 clone tinycrypt https://github.com/01org/tinycrypt.git
+clone cryptoauthlib https://github.com/AntonioLangiu/cryptoauthlib.git
 
 # Patch the repositories
 PATCHDIR=patches
@@ -29,6 +30,7 @@ for dir in $(cd $PATCHDIR && find * -type d -print); do
         )
     done
 done
+
 # Clone and build the libcoap library
 echo "Build libcoap..."
 (
