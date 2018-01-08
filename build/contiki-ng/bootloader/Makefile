@@ -19,31 +19,45 @@ LIBPULL_INCLUDES = -I$(ROOTDIR)/include
 PROJECTDIRS = $(LIBPULL)
 PROJECT_SOURCEFILES = $(LIBPULL_SOURCEFILES)
 CFLAGS += $(LIBPULL_INCLUDES)
-CFLAGS += -DLOGGER_VERBOSITY=4 -DWITH_TINYDTLS
+CFLAGS += -DLOGGER_VERBOSITY=4
 
 # Size optimizations
 SMALL = 1
 MAKE_MAC = MAKE_MAC_NULLMAC
 MAKE_NET = MAKE_NET_NULLNET
 
-# Add Tinydtls sources
+# Security Configurations
+# The bootloader needs to use a cryptographic library to verify the digital
+# signature of the firmware before booting. Actually it supports Tinydtls
+# and CryptoAuthLib, the library to interact with the Atmel CryptoAuthentication
+# device. Select the library you want to include into the build.
+# Accepted values: TINYDTLS, CRYPTOAUTHLIB
+SEC_LIB ?= CRYPTOAUTHLIB
 ext= ../ext
-TINYDTLS += $(ext)/tinydtls $(ext)/tinydtls/aes $(ext)/tinydtls/sha2 $(ext)/tinydtls/ecc
-TINYDTLS_SOURCEFILES += dtls.c crypto.c hmac.c rijndael.c sha2.c
-TINYDTLS_SOURCEFILES += ccm.c netq.c dtls_time.c peer.c session.c ecc.c
-TINYDTLS_INCLUDES += -I$(ext)/tinydtls -I$(ext)/tinydtls/aes -I$(ext)/tinydtls/sha2 -I$(ext)/tinydtls/ecc
-ifeq ($(DTLS_DEBUG),1)
-	TINYDTLS_SOURCEFILES += dtls_debug.c
-else
-	CFLAGS += -DNDEBUG=0
+ifeq ($(SEC_LIB),TINYDTLS)
+	CFLAGS += -DWITH_TINYDTLS
+	# Add Tinydtls sources
+	PROJECTDIRS += $(ext)/tinydtls $(ext)/tinydtls/aes $(ext)/tinydtls/sha2 $(ext)/tinydtls/ecc
+	PROJECT_SOURCEFILES += dtls.c crypto.c hmac.c rijndael.c sha2.c
+	PROJECT_SOURCEFILES += ccm.c netq.c dtls_time.c peer.c session.c ecc.c
+	CFLAGS += -I$(ext)/tinydtls -I$(ext)/tinydtls/aes -I$(ext)/tinydtls/sha2 -I$(ext)/tinydtls/ecc
+	ifeq ($(DTLS_DEBUG),1)
+		TINYDTLS_SOURCEFILES += dtls_debug.c
+	else
+		CFLAGS += -DNDEBUG=0
+	endif
+	# Tinydtls configurations
+	CFLAGS += -DDTLS_CONF_ECC=1
+	CFLAGS += -DWITH_SHA256 -DSHA2_USE_INTTYPES_H
+else ifeq ($(SEC_LIB),CRYPTOAUTHLIB)
+	CFLAGS += -DWITH_CRYPTOAUTHLIB
+	CAUTHLIB_DIR = $(ext)/cryptoauthlib/lib/
+	PROJECTDIRS += $(CAUTHLIB_DIR) $(CAUTHLIB_DIR)/basic $(CAUTHLIB_DIR)/host $(CAUTHLIB_DIR)/hal
+	PROJECT_SOURCEFILES += $(notdir $(wildcard $(CAUTHLIB_DIR)/*.c $(CAUTHLIB_DIR)/basic/*.c $(CAUTHLIB_DIR)/host/*.c))
+	PROJECT_SOURCEFILES += hal_cc2650_i2c.c atca_hal.c
+	CFLAGS+= -I$(CAUTHLIB_DIR) -I$(CAUTHLIB_DIR)/basic -I$(CAUTHLIB_DIR)/host -I$(CAUTHLIB_DIR)/hal
+	CFLAGS+=-DATCA_HAL_I2C
 endif
-
-# Include Tinydtls into the build
-PROJECTDIRS += $(TINYDTLS)
-PROJECT_SOURCEFILES += $(TINYDTLS_SOURCEFILES)
-CFLAGS += $(TINYDTLS_INCLUDES)
-CFLAGS += -DDTLS_CONF_ECC=1
-CFLAGS += -DWITH_SHA256 -DSHA2_USE_INTTYPES_H
 
 # Bootloader configuration
 DISABLE_MAIN=1
