@@ -16,7 +16,7 @@ pull_error txp_init(txp_ctx* ctx, const char* addr, uint16_t port, conn_type typ
     switch (type) {
 #ifdef CONN_UDP
         case TXP_UDP:
-            ctx->port = COAPS_DEFAULT_PORT;
+            ctx->port = COAP_DEFAULT_PORT;
             break;
 #elif CONN_DTLS_PSK
         case TXP_DTLS_PSK:
