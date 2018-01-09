@@ -10,7 +10,6 @@
 #include "memory/metadata.h"
 #include "memory/memory_objects.h"
 #include "memory/memory.h"
-#include "common/loader.h"
 #include "common/error.h"
 #include "security/verifier.h"
 #include "security/sha256.h"
@@ -18,6 +17,10 @@
 #include "common/external.h"
 #include "bootloader.h"
 #include "../memory_headers.h"
+
+#ifdef WITH_CRYPTOAUTHLIB
+#include <cryptoauthlib.h>
+#endif
 
 #include "common/logger.h"
 
@@ -31,16 +34,19 @@ static const uint8_t y[32] = {
 };
 
 #define GOLD_IMAGE 1
+#define MEMORY_OBJ_BUFFER_SIZE 0x100
 
 static metadata mt;
 static bootloader_ctx ctx;
 static mem_object obj;
 static obj_id id;
 static mem_object obj_t, obj_dst_t;
+uint8_t buffer[MEMORY_OBJ_BUFFER_SIZE];
 
 static const obj_id internal_firmware = OBJ_RUN;
 
 void pull_bootloader() {
+
     log_info("Bootloader started\n");
     log_debug("Loading bootloader context\n");
     pull_error err = memory_open(&obj, BOOTLOADER_CTX);
@@ -50,12 +56,12 @@ void pull_bootloader() {
     }
     if (memory_read(&obj, &ctx, sizeof(ctx), 0x0) != sizeof(ctx)) {
         err = MEMORY_READ_ERROR;
-        log_error(err, "Failed reading Bootoader context\n");
+        log_error(err, "Error reading Bootoader context\n");
         goto error;
     }
     if ((ctx.startup_flags & FIRST_BOOT) == FIRST_BOOT) {
         log_info("Bootstrapping system\n");
-        log_info("Erasing slots\n");
+        log_debug("Erasing slots\n");
         obj_id i;
         memset(&mt, 0x0, sizeof(mt));
         for (i = 0; memory_objects[i] >= 0; i++) {
@@ -68,14 +74,13 @@ void pull_bootloader() {
 #if GOLD_IMAGE
         log_info("Storing gold image\n");
         watchdog_stop();
-        err = copy_firmware(internal_firmware, OBJ_GOLD, &obj_t, &obj_dst_t);
+        err = copy_firmware(internal_firmware, OBJ_GOLD, &obj_t, &obj_dst_t, buffer, MEMORY_OBJ_BUFFER_SIZE);
         if (err) {
-            log_error(err, "Failure while storing golden image\n");
+            log_error(err, "Error while storing golden image\n");
             goto error;
         }
         watchdog_start();
 #endif
-
         ctx.startup_flags = 0x0;
         if (memory_write(&obj, &ctx, sizeof(ctx), 0x0) != sizeof(ctx)) {
             log_warn("Error writing bootloader context\n");
@@ -83,7 +88,7 @@ void pull_bootloader() {
         };
         log_info("Bootstrap success\n");
     }
-    memory_close(&obj);
+    memory_close(&obj); // close bootloader context
     log_debug("Reading metadata of the internal image\n");
     err = read_firmware_metadata(internal_firmware, &mt, &obj_t);
     if (err) {
@@ -99,33 +104,41 @@ void pull_bootloader() {
     }
     log_debug("Newest firmware is in slot %u with version %x\n", id, version);
     if (version > get_version(&mt)) {
+        // TODO Here you should verify the signature before even copying it into
+        // internal memory
         log_info("Updating system to version: %x\n", version);
         int page = 0;
-        //uint32_t OldVIMSState = VIMSModeGet(VIMS_BASE);
-        //VIMSModeSet(VIMS_BASE, VIMS_CTL_MODE_GPRAM);
         for (page=5; page<=5+26; page++) {
             if (FlashSectorErase(0x1000*page) != FAPI_STATUS_SUCCESS) {
                 log_info("Error erasing page %d\n", page);
             }
         }
         if (page > 31) {
-            err = copy_firmware(id, internal_firmware, &obj_t, &obj_dst_t);
+            err = copy_firmware(id, internal_firmware, &obj_t, &obj_dst_t, buffer, MEMORY_OBJ_BUFFER_SIZE);
             if (err) {
                 log_error(err, "Failure updating to the new firmware\n");
             }
         }
-        //VIMSModeSet(VIMS_BASE, OldVIMSState);
     }
 error:
     log_info("Validating internal image\n");
     watchdog_stop();
-    err = verify_object(internal_firmware, digest_sha256, x, y, secp256r1, &obj_t);
+#ifdef WITH_CRYPTOAUTHLIB
+    ATCA_STATUS status = atcab_init(&cfg_ateccx08a_i2c_default);
+    if (status != ATCA_SUCCESS) {
+        log_error(GENERIC_ERROR, "Failure initializing ATECC508A\n");
+    }
+#endif
+    err = verify_object(internal_firmware, digest_sha256, x, y, secp256r1, &obj_t, buffer, MEMORY_OBJ_BUFFER_SIZE);
     if (err) {
         log_error(err, "Verification failed\n");
     }
     else {
         log_info("Verification successfull\n");
     }
+#ifdef WITH_CRYPTOAUTHLIB
+    atcab_release();
+#endif
     watchdog_start();
     log_info("Load the internal firmware\n");
     load_object(internal_firmware, &mt);
