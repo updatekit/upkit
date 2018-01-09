@@ -32,6 +32,11 @@ extern "C" {
         .finalize = lib##_sha256_final}
 
 #ifdef WITH_CRYPTOAUTHLIB
+    SHA256_INIT(cryptoauthlib_hw);
+    SHA256_UPDATE(cryptoauthlib_hw);
+    SHA256_FINAL(cryptoauthlib_hw);
+    DIGEST_FUNC(cryptoauthlib_hw);
+
     SHA256_INIT(cryptoauthlib);
     SHA256_UPDATE(cryptoauthlib);
     SHA256_FINAL(cryptoauthlib);

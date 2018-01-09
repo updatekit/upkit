@@ -43,8 +43,12 @@ typedef union digest_ctx {
   } sha256_tinycrypt;
 #endif
 #ifdef WITH_CRYPTOAUTHLIB
-  struct sha256_cryptoauthlib_t {
+  struct sha256_cryptoauthlib_hw_t {
     atca_sha256_ctx_t ctx;
+    uint8_t result[32];
+  } sha256_cryptoauthlib_hw;
+  struct sha256_cryptoauthlib_t {
+    atcac_sha2_256_ctx ctx;
     uint8_t result[32];
   } sha256_cryptoauthlib;
 #endif
