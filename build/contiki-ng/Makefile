@@ -24,6 +24,19 @@ PROJECT_SOURCEFILES += $(LIBPULL_SOURCEFILES)
 CFLAGS += $(LIBPULL_INCLUDES)
 CFLAGS += -DWITH_TINYDTLS -DLOGGER_VERBOSITY=4
 
+# Include CryptoAuthLib for performing verification using the
+# CryptoAuthentication hardware
+CRYPTOAUTHLIB=1
+ifeq ($(CRYPTOAUTHLIB),1)
+	CFLAGS += -DWITH_CRYPTOAUTHLIB
+	CAUTHLIB_DIR = ext/cryptoauthlib/lib/
+	PROJECTDIRS += $(CAUTHLIB_DIR) $(CAUTHLIB_DIR)/basic $(CAUTHLIB_DIR)/host $(CAUTHLIB_DIR)/hal
+	PROJECT_SOURCEFILES += $(notdir $(wildcard $(CAUTHLIB_DIR)/*.c $(CAUTHLIB_DIR)/basic/*.c $(CAUTHLIB_DIR)/host/*.c))
+	PROJECT_SOURCEFILES += hal_cc2650_i2c.c atca_hal.c
+	CFLAGS+= -I$(CAUTHLIB_DIR) -I$(CAUTHLIB_DIR)/basic -I$(CAUTHLIB_DIR)/host -I$(CAUTHLIB_DIR)/hal
+	CFLAGS+=-DATCA_HAL_I2C
+endif
+
 # Include Tinydtls sources
 TINYDTLS += ext/tinydtls ext/tinydtls/aes ext/tinydtls/sha2 ext/tinydtls/ecc
 TINYDTLS_SOURCEFILES += dtls.c crypto.c hmac.c rijndael.c sha2.c
@@ -42,7 +55,7 @@ CFLAGS += $(TINYDTLS_INCLUDES)
 CFLAGS += -DDTLS_CONF_ECC=1 -DWITH_SHA256 -DSHA2_USE_INTTYPES_H
 
 # CONN_TYPE can be CONN_UDP, CONN_DTLS_PSK, CONN_DTLS_ECDSA
-CONN_TYPE=CONN_DTLS_ECDSA
+CONN_TYPE=CONN_UDP
 CFLAGS += -D$(CONN_TYPE)=1
 ifeq ($(CONN_TYPE),CONN_UDP)
 	# I do not need to set any parameter

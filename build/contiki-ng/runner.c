@@ -127,7 +127,20 @@ PROCESS_THREAD(update_process, ev, data) {
         print_metadata(&mt);
         watchdog_stop();
         uint8_t buffer[BUFFER_LEN];
-        err = verify_object(id, digest_sha256, x, y, secp256r1, &obj_t, buffer, BUFFER_LEN);
+        digest_func digest;
+#ifdef WITH_CRYPTOAUTHLIB
+        digest = cryptoauthlib_digest_sha256;
+        ATCA_STATUS status = atcab_init(&cfg_ateccx08a_i2c_default);
+        if (status != ATCA_SUCCESS) {
+            log_error(GENERIC_ERROR, "Failure initializing ATECC508A\n");
+        }
+#endif
+        err = verify_object(id, digest, x, y, secp256r1, &obj_t, buffer, BUFFER_LEN);
+#ifdef WITH_CRYPTOAUTHLIB
+        if (status == ATCA_SUCCESS) {
+            atcab_release();
+        }
+ #endif
         if (err) {
             log_warn("Verification failed\n");
             memset(&mt, 0x0, sizeof(metadata));
