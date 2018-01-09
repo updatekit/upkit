@@ -1,7 +1,6 @@
-#include "common/loader.h"
-#include "common/settings.h"
 #include "common/logger.h"
 #include "memory/metadata.h"
+#include "memory/memory.h"
 
 #define OTA_RESET_VECTOR    0x4
 

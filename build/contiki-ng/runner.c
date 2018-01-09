@@ -1,4 +1,5 @@
 #include "contiki.h"
+
 #include "contiki-lib.h"
 #include "dev/watchdog.h"
 #include "leds.h"
@@ -100,7 +101,7 @@ PROCESS_THREAD(update_process, ev, data) {
             };
             COAP_SEND(txp);
             if (!rctx.firmware_received) {
-                printf("Setting the timer for 10 seconds\n");
+                log_debug("Setting the timer for 10 seconds\n");
                 etimer_set(&et, (CLOCK_SECOND*20));
                 PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
             }

@@ -8,7 +8,7 @@
 #ifdef CONN_DTLS_ECDSA
 int verify_key(uint8_t key_size,
         const uint8_t* server_pub_x, const uint8_t* server_pub_y) {
-    /* Authorize any server key */
+    /* Authorize any server certificate */
     return 1;
 }
 

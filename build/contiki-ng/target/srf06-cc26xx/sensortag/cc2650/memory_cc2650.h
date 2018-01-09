@@ -3,7 +3,6 @@
 
 #include "memory/memory.h"
 #include "memory/memory_objects.h"
-#include "common/settings.h"
 
 enum memory_type {
     EXTERNAL,
