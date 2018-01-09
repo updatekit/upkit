@@ -32,7 +32,7 @@ MAKE_NET = MAKE_NET_NULLNET
 # and CryptoAuthLib, the library to interact with the Atmel CryptoAuthentication
 # device. Select the library you want to include into the build.
 # Accepted values: TINYDTLS, CRYPTOAUTHLIB
-SEC_LIB ?= TINYDTLS
+SEC_LIB ?= CRYPTOAUTHLIB
 ext= ../ext
 ifeq ($(SEC_LIB),TINYDTLS)
 	CFLAGS += -DWITH_TINYDTLS
