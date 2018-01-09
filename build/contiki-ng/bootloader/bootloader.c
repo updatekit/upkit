@@ -49,12 +49,12 @@ void pull_bootloader() {
     log_debug("Loading bootloader context\n");
     pull_error err = memory_open(&obj, BOOTLOADER_CTX);
     if (err) {
-        log_error(err, "Error opening Bootoader context\n");
+        log_error(err, "Error opening Bootoader ctx\n");
         goto error;
     }
     if (memory_read(&obj, &ctx, sizeof(ctx), 0x0) != sizeof(ctx)) {
         err = MEMORY_READ_ERROR;
-        log_error(err, "Error reading Bootoader context\n");
+        log_error(err, "Error reading Bootoader ctx\n");
         goto error;
     }
     if ((ctx.startup_flags & FIRST_BOOT) == FIRST_BOOT) {
@@ -127,10 +127,12 @@ error:
         log_error(GENERIC_ERROR, "Failure initializing ATECC508A\n");
     }
 #endif
-    err = verify_object(internal_firmware, digest_sha256, x, y, secp256r1, &obj_t, buffer, MEMORY_OBJ_BUFFER_SIZE);
+    err = verify_object(internal_firmware, cryptoauthlib_digest_sha256, x, y, secp256r1, &obj_t, buffer, MEMORY_OBJ_BUFFER_SIZE);
     log_info("Verification %s\n", err? "failed":"successfull");
 #ifdef WITH_CRYPTOAUTHLIB
-    atcab_release();
+    if (status == ATCA_SUCCESS) {
+        atcab_release();
+    }
 #endif
     watchdog_start();
     log_info("Load the internal firmware\n");
