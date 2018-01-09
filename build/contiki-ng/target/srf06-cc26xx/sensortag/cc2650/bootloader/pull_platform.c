@@ -155,7 +155,7 @@ pull_platform_init_stage_one()
 
   ti_lib_int_master_enable();
 
-  //soc_rtc_init();
+  soc_rtc_init();
   //fade(LEDS_YELLOW);
 }
 /*---------------------------------------------------------------------------*/

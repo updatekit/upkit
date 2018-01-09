@@ -74,6 +74,8 @@ main(void)
 #endif
    pull_platform_init_stage_one();
 
+   clock_init();
+   rtimer_init();
    watchdog_init();
 
    pull_platform_init_stage_two();
