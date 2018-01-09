@@ -5,7 +5,6 @@
 #include "memory/metadata.h"
 #include "common/logger.h"
 #include "common/error.h"
-#include "common/settings.h"
 #include "common/external.h"
 
 pull_error get_newest_firmware(obj_id* obj, uint16_t* version, mem_object* obj_t) {
@@ -51,7 +50,7 @@ pull_error get_oldest_firmware(obj_id* obj, uint16_t* version, mem_object* obj_t
     return PULL_SUCCESS;
 }
 
-pull_error copy_firmware(obj_id s, obj_id d, mem_object* src, mem_object* dst) {
+pull_error copy_firmware(obj_id s, obj_id d, mem_object* src, mem_object* dst, uint8_t* buffer, size_t buffer_size) {
     pull_error err;
     metadata srcmt;
     int firmware_size = 0;
@@ -73,8 +72,7 @@ pull_error copy_firmware(obj_id s, obj_id d, mem_object* src, mem_object* dst) {
         memory_close(src);
         return COPY_FIRMWARE_ERROR;
     }
-    int offset = 0, step = MEMORY_OBJ_BUFFER_SIZE, readed = 0;
-    uint8_t buffer[MEMORY_OBJ_BUFFER_SIZE];
+    int offset = 0, step = buffer_size, readed = 0;
     while (offset < firmware_size && 
             (readed = memory_read(src, buffer, step, offset)) > 0) {
         if (memory_write(dst, buffer, readed, offset) != readed) {

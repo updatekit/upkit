@@ -14,7 +14,6 @@
 #ifndef LOGGER_H_
 #define LOGGER_H_
 
-#include "common/settings.h"
 #include "common/error.h"
 
 #ifdef __cplusplus
@@ -30,6 +29,7 @@ extern "C" {
  * debugging directives.
  */
 #ifdef LOGGER_VERBOSITY
+#include <stdint.h>
 static const uint8_t verbosity_level = LOGGER_VERBOSITY;
 #else
 extern uint8_t verbosity_level;

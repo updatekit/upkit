@@ -14,7 +14,6 @@
 #define MEMORY_OBJECTS_H_
 
 #include "common/error.h"
-#include "common/settings.h"
 #include "memory/memory.h"
 #include "memory/metadata.h"
 #include <stdint.h>
@@ -55,9 +54,17 @@ pull_error get_oldest_firmware(obj_id *obj, uint16_t *version,
  * \param d
  * \param src A temporary mem_object used by the function.
  * \param dst A temporary mem_object used by the function.
+ * \param buffer Buffer used to copy the object
+ * \param buffer_size The size of the buffer
+ * 
+ * \note The buffer will be used to read from object s and to write
+ * to obejct d. If you are working with flash and your memory implementation
+ * is not buffered you can pass a buffer with size equal to the size of a flash
+ * page.
+ *
  * \returns PULL_SUCCESS on success or a specific error otherwise.
  */
-pull_error copy_firmware(obj_id s, obj_id d, mem_object *src, mem_object *dst);
+pull_error copy_firmware(obj_id s, obj_id d, mem_object *src, mem_object *dst, uint8_t* buffer, size_t buffer_size);
 
 /**
  * \brief Read the metadata of the memory object.

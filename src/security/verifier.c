@@ -4,7 +4,6 @@
 #include "memory/memory.h"
 #include "memory/metadata.h"
 #include "security/verifier.h"
-#include "common/settings.h"
 #include "security/sha256.h"
 #include "security/ecc.h"
 #include "common/error.h"
@@ -13,7 +12,7 @@
 #include <stdio.h>
 
 pull_error verify_object(obj_id id, digest_func digest, const uint8_t* x, const uint8_t* y,
-        ecc_curve curve, mem_object* obj_t) {
+        ecc_curve curve, mem_object* obj_t, uint8_t* buffer, size_t buffer_len) {
     pull_error err;
     log_debug("Opening memory object\n");
     err = memory_open(obj_t, id);
@@ -31,27 +30,26 @@ pull_error verify_object(obj_id id, digest_func digest, const uint8_t* x, const 
         goto error;
     }
     log_debug("Calculating digest\n");
-    uint8_t buffer[MEMORY_OBJ_BUFFER_SIZE];
     digest_ctx ctx;
     err = digest.init(&ctx);
     if (err) {
         log_error(err, "Failure initializing digest object\n");
         goto error;
     }
-    int buffer_len = to_digest(&mt, buffer, MEMORY_OBJ_BUFFER_SIZE);
-    if (buffer_len < 0) {
+    int chunk_len = to_digest(&mt, buffer, buffer_len);
+    if (chunk_len < 0) {
         err = DIGEST_UPDATE_ERROR;
         log_error(err, "Failure getting metadata chunk for the digest\n");
         goto error;
     }
-    err = digest.update(&ctx, buffer, buffer_len);
+    err = digest.update(&ctx, buffer, chunk_len);
     if (err) {
         log_error(err, "Failure updating the digest\n");
         goto error;
     }
     address_t offset = get_offset(&mt);
     address_t final_offset = offset + get_size(&mt);
-    address_t step = MEMORY_OBJ_BUFFER_SIZE;
+    address_t step = buffer_len;
     int readed = 0;
     while (offset < final_offset &&
             (readed = memory_read(obj_t, buffer, step, offset)) > 0) {

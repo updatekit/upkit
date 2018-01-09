@@ -16,8 +16,6 @@
 #ifndef ERROR_H_
 #define ERROR_H_
 
-#include "common/settings.h"
-
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */

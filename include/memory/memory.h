@@ -18,7 +18,6 @@
 #define MEMORY_H_
 
 #include "common/error.h"
-#include "common/settings.h"
 #include <stdint.h>
 
 #ifdef __cplusplus

@@ -25,6 +25,10 @@ extern "C" {
 #include <tinycrypt/sha256.h>
 #endif
 
+#ifdef WITH_CRYPTOAUTHLIB
+#include <cryptoauthlib.h>
+#endif
+
 typedef union digest_ctx {
 #ifdef WITH_TINYDTLS
   struct sha256_tinydtls_t {
@@ -37,6 +41,12 @@ typedef union digest_ctx {
     struct tc_sha256_state_struct ctx;
     uint8_t result[32];
   } sha256_tinycrypt;
+#endif
+#ifdef WITH_CRYPTOAUTHLIB
+  struct sha256_cryptoauthlib_t {
+    atca_sha256_ctx_t ctx;
+    uint8_t result[32];
+  } sha256_cryptoauthlib;
 #endif
 } digest_ctx;
 
