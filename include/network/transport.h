@@ -20,7 +20,6 @@
 
 #include "common/error.h"
 #include "common/callback.h"
-#include "common/settings.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdint.h>

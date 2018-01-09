@@ -8,8 +8,6 @@
 #include "memory/memory_objects.h"
 #include "network/receiver.h"
 #include "network/subscriber.h"
-#include "common/settings.h"
-#include "common/loader.h"
 #include "transport/transport_ercoap.h"
 #include "memory_headers.h"
 #include "default_configs.h"
@@ -24,6 +22,8 @@ static const uint8_t y[32] = {
     0x14,0x75,0x33,0xec,0x17,0xb7,0x54,0x50,0xca,0x98,0x35,0xad,0x58,0xbe,0xd5,0xfa,
     0x48,0xbc,0xa0,0x24,0x81,0xba,0xfa,0x3d,0xcd,0x8d,0x5a,0x7f,0x40,0xbc,0x70,0x94
 };
+
+#define BUFFER_LEN 0x100
 
 PROCESS(update_process, "OTA Update process");
 PROCESS(main_process, "Main process");
@@ -126,7 +126,8 @@ PROCESS_THREAD(update_process, ev, data) {
         }
         print_metadata(&mt);
         watchdog_stop();
-        err = verify_object(id, digest_sha256, x, y, secp256r1, &obj_t);
+        uint8_t buffer[BUFFER_LEN];
+        err = verify_object(id, digest_sha256, x, y, secp256r1, &obj_t, buffer, BUFFER_LEN);
         if (err) {
             log_warn("Verification failed\n");
             memset(&mt, 0x0, sizeof(metadata));

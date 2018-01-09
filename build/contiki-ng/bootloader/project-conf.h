@@ -10,6 +10,8 @@
 // Reduce size removing process names
 #define PROCESS_CONF_NO_PROCESS_NAMES 1
 
+#define LOG_CONF_LEVEL_MAIN LOG_LEVEL_NONE
+
 #define UIP_CONF_TCP 0
 #define UIP_CONF_UDP 0
 

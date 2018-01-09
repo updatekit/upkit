@@ -1,7 +1,6 @@
 #ifndef _TRANSPORT_ERCOAP_H
 #define _TRANSPORT_ERCOAP_H
 
-#include "common/settings.h"
 #include "common/callback.h"
 #include "network/transport.h"
 

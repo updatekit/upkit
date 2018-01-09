@@ -19,7 +19,7 @@ LIBPULL_INCLUDES = -I$(ROOTDIR)/include
 PROJECTDIRS = $(LIBPULL)
 PROJECT_SOURCEFILES = $(LIBPULL_SOURCEFILES)
 CFLAGS += $(LIBPULL_INCLUDES)
-CFLAGS += -DLOGGER_VERBOSITY=3
+CFLAGS += -DLOGGER_VERBOSITY=4
 
 # Size optimizations
 SMALL = 1
@@ -32,7 +32,7 @@ MAKE_NET = MAKE_NET_NULLNET
 # and CryptoAuthLib, the library to interact with the Atmel CryptoAuthentication
 # device. Select the library you want to include into the build.
 # Accepted values: TINYDTLS, CRYPTOAUTHLIB
-SEC_LIB ?= CRYPTOAUTHLIB
+SEC_LIB ?= TINYDTLS
 ext= ../ext
 ifeq ($(SEC_LIB),TINYDTLS)
 	CFLAGS += -DWITH_TINYDTLS

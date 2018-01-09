@@ -1,7 +1,6 @@
 #include "network/transport.h"
 #include "common/error.h"
 #include "common/logger.h"
-#include "common/settings.h"
 #include "transport_ercoap.h"
 
 #include "pt.h"

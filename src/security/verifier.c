@@ -14,13 +14,11 @@
 pull_error verify_object(obj_id id, digest_func digest, const uint8_t* x, const uint8_t* y,
         ecc_curve curve, mem_object* obj_t, uint8_t* buffer, size_t buffer_len) {
     pull_error err;
-    log_debug("Opening memory object\n");
     err = memory_open(obj_t, id);
     if (err) {
         log_error(err, "Error opening object %d\n", id);
         goto error;
     }
-    log_debug("Reading the metadata from the object\n");
     // XXX this is very bad, but to fix it I should refactor the memory objects
     // to have the possibility to work on a already open object
     metadata mt;
@@ -29,7 +27,7 @@ pull_error verify_object(obj_id id, digest_func digest, const uint8_t* x, const 
         err = MEMORY_READ_ERROR;
         goto error;
     }
-    log_debug("Calculating digest\n");
+    log_info("Calculating digest\n");
     digest_ctx ctx;
     err = digest.init(&ctx);
     if (err) {
@@ -63,16 +61,15 @@ pull_error verify_object(obj_id id, digest_func digest, const uint8_t* x, const 
             step = final_offset - offset;
         }
     }
-    log_debug("Finalizing digest\n");
+    log_info("Finalizing digest\n");
     uint8_t* result = digest.finalize(&ctx);
-    log_debug("Calculated digest: %02x %02x\n", result[0], result[1]);
+    log_info("Calculated digest: %02x %02x\n", result[0], result[1]);
     err = ecc_verify(x, y, mt.vendor_signature_r, mt.vendor_signature_s, 
             result, digest.size, curve);
     if (err) {
         log_error(err, "Error during verification\n");
         goto error;
     }
-    log_debug("Verification passed\n");
     err = PULL_SUCCESS;
 error:
     memory_close(obj_t);

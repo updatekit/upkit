@@ -46,12 +46,10 @@ uint8_t buffer[MEMORY_OBJ_BUFFER_SIZE];
 static const obj_id internal_firmware = OBJ_RUN;
 
 void pull_bootloader() {
-
-    log_info("Bootloader started\n");
     log_debug("Loading bootloader context\n");
     pull_error err = memory_open(&obj, BOOTLOADER_CTX);
     if (err) {
-        log_error(err, "Failed opening Bootoader context\n");
+        log_error(err, "Error opening Bootoader context\n");
         goto error;
     }
     if (memory_read(&obj, &ctx, sizeof(ctx), 0x0) != sizeof(ctx)) {
@@ -130,12 +128,7 @@ error:
     }
 #endif
     err = verify_object(internal_firmware, digest_sha256, x, y, secp256r1, &obj_t, buffer, MEMORY_OBJ_BUFFER_SIZE);
-    if (err) {
-        log_error(err, "Verification failed\n");
-    }
-    else {
-        log_info("Verification successfull\n");
-    }
+    log_info("Verification %s\n", err? "failed":"successfull");
 #ifdef WITH_CRYPTOAUTHLIB
     atcab_release();
 #endif
