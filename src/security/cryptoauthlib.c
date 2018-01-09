@@ -2,6 +2,7 @@
 #include "security/sha256.h"
 #include "security/ecc.h"
 #include <string.h>
+#include <stdio.h>
 
 #ifdef WITH_CRYPTOAUTHLIB
 
@@ -9,21 +10,21 @@
 
 /* SHA 256 */
 
-inline pull_error sha256_init(digest_ctx* ctx) {
+inline pull_error cryptoauthlib_sha256_init(digest_ctx* ctx) {
     if (atcab_hw_sha2_256_init(&ctx->sha256_cryptoauthlib.ctx) != ATCA_SUCCESS) {
         return SHA256_INIT_ERROR;
     }
     return PULL_SUCCESS;
 }
 
-inline pull_error sha256_update(digest_ctx* ctx, void* data, size_t data_size) {
+inline pull_error cryptoauthlib_sha256_update(digest_ctx* ctx, void* data, size_t data_size) {
     if (atcab_hw_sha2_256_update(&ctx->sha256_cryptoauthlib.ctx, (const uint8_t *) data, data_size) != ATCA_SUCCESS) {
         return SHA256_UPDATE_ERROR;
     }
     return PULL_SUCCESS;
 }
 
-inline void* sha256_final(digest_ctx* ctx) {
+inline void* cryptoauthlib_sha256_final(digest_ctx* ctx) {
     if (atcab_hw_sha2_256_finish(&ctx->sha256_cryptoauthlib.ctx, (uint8_t*) &ctx->sha256_cryptoauthlib.result) != ATCA_SUCCESS) {
         return NULL;
     }

@@ -14,36 +14,43 @@
 extern "C" {
 #endif /* __cplusplus */
 
-/** 
- * \brief Init the digest function and context.
- * \param ctx Digest context structure to be initialized.
- * \note This function must be always called before calling update or final.
- * \returns PULL_SUCCESS on success or specific error otherwise.
- */
-pull_error sha256_init(digest_ctx *ctx);
+#define SHA256_INIT(lib) \
+    pull_error lib##_sha256_init(digest_ctx *ctx)
+#define SHA256_UPDATE(lib) \
+    pull_error lib##_sha256_update(digest_ctx *ctx, void *data, size_t data_size)
+#define SHA256_FINAL(lib) \
+    void * lib##_sha256_final(digest_ctx *ctx)
 
-/** 
- * \brief Feed the digest with new data. It can be called multiple times.
- * \param ctx The digest context previously initialized.
- * \param data The data to be passed to the algorithm.
- * \param data_size The size of the data.
- * \returns PULL_SUCCESS on success or specific error otherwise.
- */
-pull_error sha256_update(digest_ctx *ctx, void *data, size_t data_size);
+    /** This struct defines a set of default digest function.
+     * You can define your own structure adding the function
+     * you need.
+     */
+#define DIGEST_FUNC(lib) \
+    static const digest_func lib##_digest_sha256 = {.size = 32, \
+        .init = lib##_sha256_init, \
+        .update = lib##_sha256_update, \
+        .finalize = lib##_sha256_final}
 
-/** 
- * \brief Finalize the digest and stores it into the context.
- * \param ctx The digest context.
- * \returns PULL_SUCCESS on success or specific error otherwise.
- */
-void *sha256_final(digest_ctx *ctx);
+#ifdef WITH_CRYPTOAUTHLIB
+    SHA256_INIT(cryptoauthlib);
+    SHA256_UPDATE(cryptoauthlib);
+    SHA256_FINAL(cryptoauthlib);
+    DIGEST_FUNC(cryptoauthlib);
+#endif
 
-/** This static variable identifies this digest algorithm when doing
- * verification */
-static const digest_func digest_sha256 = {.size = 32,
-                                          .init = sha256_init,
-                                          .update = sha256_update,
-                                          .finalize = sha256_final};
+#ifdef WITH_TINYDTLS
+    SHA256_INIT(tinydtls);
+    SHA256_UPDATE(tinydtls);
+    SHA256_FINAL(tinydtls);
+    DIGEST_FUNC(tinydtls);
+#endif
+
+#ifdef WITH_TINYCRYPT
+    SHA256_INIT(tinycrypt);
+    SHA256_UPDATE(tinycrypt);
+    SHA256_FINAL(tinycrypt);
+    DIGEST_FUNC(tinycrypt);
+#endif
 
 #ifdef __cplusplus
 }
