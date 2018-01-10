@@ -30,9 +30,9 @@ CRYPTOAUTHLIB=1
 ifeq ($(CRYPTOAUTHLIB),1)
 	CFLAGS += -DWITH_CRYPTOAUTHLIB
 	CAUTHLIB_DIR = ext/cryptoauthlib/lib/
-	PROJECTDIRS += $(CAUTHLIB_DIR) $(CAUTHLIB_DIR)/basic $(CAUTHLIB_DIR)/host $(CAUTHLIB_DIR)/hal
-	PROJECT_SOURCEFILES += $(notdir $(wildcard $(CAUTHLIB_DIR)/*.c $(CAUTHLIB_DIR)/basic/*.c $(CAUTHLIB_DIR)/host/*.c))
-	PROJECT_SOURCEFILES += hal_cc2650_i2c.c atca_hal.c
+	PROJECTDIRS += $(CAUTHLIB_DIR) $(CAUTHLIB_DIR)/basic $(CAUTHLIB_DIR)/host $(CAUTHLIB_DIR)/hal $(CAUTHLIB_DIR)/crypto $(CAUTHLIB_DIR)/crypto/hashes
+	PROJECT_SOURCEFILES += $(notdir $(wildcard $(CAUTHLIB_DIR)/*.c $(CAUTHLIB_DIR)/basic/*.c $(CAUTHLIB_DIR)/host/*.c $(CAUTHLIB_DIR)/crypto/hashes/*.c))
+	PROJECT_SOURCEFILES += hal_cc2650_i2c.c atca_hal.c atca_crypto_sw_sha2.c
 	CFLAGS+= -I$(CAUTHLIB_DIR) -I$(CAUTHLIB_DIR)/basic -I$(CAUTHLIB_DIR)/host -I$(CAUTHLIB_DIR)/hal
 	CFLAGS+=-DATCA_HAL_I2C
 endif

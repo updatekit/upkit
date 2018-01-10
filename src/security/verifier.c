@@ -23,7 +23,7 @@ pull_error verify_object(obj_id id, digest_func digest, const uint8_t* x, const 
     // to have the possibility to work on a already open object
     metadata mt;
     if (memory_read(obj_t, (uint8_t*) &mt, sizeof(metadata), 0) != sizeof(metadata)) {
-        log_error(MEMORY_READ_ERROR, "Failure reading the metadata\n");
+        log_error(MEMORY_READ_ERROR, "Failure reading metadata\n");
         err = MEMORY_READ_ERROR;
         goto error;
     }
@@ -31,18 +31,18 @@ pull_error verify_object(obj_id id, digest_func digest, const uint8_t* x, const 
     digest_ctx ctx;
     err = digest.init(&ctx);
     if (err) {
-        log_error(err, "Failure initializing digest object\n");
+        log_error(err, "Error initializing digest\n");
         goto error;
     }
     int chunk_len = to_digest(&mt, buffer, buffer_len);
     if (chunk_len < 0) {
         err = DIGEST_UPDATE_ERROR;
-        log_error(err, "Failure getting metadata chunk for the digest\n");
+        log_error(err, "Failure passing metadata to digest\n");
         goto error;
     }
     err = digest.update(&ctx, buffer, chunk_len);
     if (err) {
-        log_error(err, "Failure updating the digest\n");
+        log_error(err, "Failure updating digest\n");
         goto error;
     }
     address_t offset = get_offset(&mt);
@@ -53,7 +53,7 @@ pull_error verify_object(obj_id id, digest_func digest, const uint8_t* x, const 
             (readed = memory_read(obj_t, buffer, step, offset)) > 0) {
         err = digest.update(&ctx, buffer, readed);
         if (err) {
-            log_error(err, "Failure updating the digest\n");
+            log_error(err, "Digest update\n");
             goto error;
         }
         offset += readed;
@@ -61,13 +61,11 @@ pull_error verify_object(obj_id id, digest_func digest, const uint8_t* x, const 
             step = final_offset - offset;
         }
     }
-    log_info("Finalizing digest\n");
     uint8_t* result = digest.finalize(&ctx);
-    log_info("Calculated digest: %02x %02x\n", result[0], result[1]);
+    log_debug("Digest: %02x %02x\n", result[0], result[1]);
     err = ecc_verify(x, y, mt.vendor_signature_r, mt.vendor_signature_s, 
             result, digest.size, curve);
     if (err) {
-        log_error(err, "Error during verification\n");
         goto error;
     }
     err = PULL_SUCCESS;

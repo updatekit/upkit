@@ -14,6 +14,8 @@
 #include "security/verifier.h"
 #include "security/sha256.h"
 
+#include "driverlib/flash.h"
+
 static const uint8_t x[32] = {
     0x8b,0x27,0x39,0x67,0x01,0x4b,0x1c,0xae,0xfe,0x8a,0x18,0x6e,0xea,0x27,0x86,0x34,
     0x0e,0xea,0x35,0x3d,0x8c,0x65,0xf6,0x59,0xfc,0xcb,0x23,0xd7,0xfa,0xab,0x7b,0x18
@@ -41,6 +43,21 @@ void* conn_data;
 static struct etimer et_led;
 PROCESS_THREAD(main_process, ev, data) {
     PROCESS_BEGIN();
+#ifdef DEBUG
+    /* This is a test to ensure that the image can not write the internal
+     * flash memory */
+    log_info("Trying to write internal memory");
+    uint8_t buff[32];
+    uint8_t i = 0xff;
+    memset(buff, 0x0, 32);
+    while (i>0) {
+        if (FlashProgram((uint8_t*) &buff, 0x0, 32) == FAPI_STATUS_SUCCESS) {
+            break;
+        }
+        i--;
+    }
+    printf("\nMemory is %s\n", i==0? "blocked": "not blocked");
+#endif
     do {
         leds_toggle(LEDS_RED);
         etimer_set(&et_led, (CLOCK_SECOND*1));

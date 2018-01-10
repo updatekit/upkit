@@ -33,7 +33,7 @@ static const uint8_t y[32] = {
     0x48,0xbc,0xa0,0x24,0x81,0xba,0xfa,0x3d,0xcd,0x8d,0x5a,0x7f,0x40,0xbc,0x70,0x94
 };
 
-#define GOLD_IMAGE 0
+#define RECOVERY_IMAGE 0
 #define MEMORY_OBJ_BUFFER_SIZE 0x100
 
 static metadata mt;
@@ -45,20 +45,27 @@ uint8_t buffer[MEMORY_OBJ_BUFFER_SIZE];
 
 static const obj_id internal_firmware = OBJ_RUN;
 
+void flash_write_protect() {
+    uint32_t page = 0;
+    for (page=0; page <= 31; page++) {
+        FlashProtectionSet(page, FLASH_WRITE_PROTECT);
+    }
+}
+
 void pull_bootloader() {
     log_debug("Loading bootloader context\n");
     pull_error err = memory_open(&obj, BOOTLOADER_CTX);
     if (err) {
-        log_error(err, "Error opening Bootoader ctx\n");
+        log_error(err, "Opening Bootoader Ctx\n");
         goto error;
     }
     if (memory_read(&obj, &ctx, sizeof(ctx), 0x0) != sizeof(ctx)) {
         err = MEMORY_READ_ERROR;
-        log_error(err, "Error reading Bootoader ctx\n");
+        log_error(err, "Reading Bootoader Ctx\n");
         goto error;
     }
     if ((ctx.startup_flags & FIRST_BOOT) == FIRST_BOOT) {
-        log_info("Bootstrapping system\n");
+        log_info("First Run\n");
         log_debug("Erasing slots\n");
         obj_id i;
         memset(&mt, 0x0, sizeof(mt));
@@ -69,15 +76,15 @@ void pull_bootloader() {
                 goto error; 
             }
         }
-#if GOLD_IMAGE
-        log_info("Storing gold image\n");
+#if RECOVERY_IMAGE
+        log_debug("Storing Recovery Image\n");
         watchdog_stop();
         err = copy_firmware(internal_firmware, OBJ_GOLD, &obj_t, &obj_dst_t, buffer, MEMORY_OBJ_BUFFER_SIZE);
+        watchdog_start();
         if (err) {
-            log_error(err, "Error while storing golden image\n");
+            log_error(err, "Error storing recovery image\n");
             goto error;
         }
-        watchdog_start();
 #endif
         ctx.startup_flags = 0x0;
         if (memory_write(&obj, &ctx, sizeof(ctx), 0x0) != sizeof(ctx)) {
@@ -128,13 +135,15 @@ error:
     }
 #endif
     err = verify_object(internal_firmware, cryptoauthlib_digest_sha256, x, y, secp256r1, &obj_t, buffer, MEMORY_OBJ_BUFFER_SIZE);
-    log_info("Verification %s\n", err? "failed":"successfull");
 #ifdef WITH_CRYPTOAUTHLIB
     if (status == ATCA_SUCCESS) {
         atcab_release();
     }
 #endif
     watchdog_start();
-    log_info("Load the internal firmware\n");
+    printf("Verification %s\n", err? "failed":"successfull");
+    log_info("Protecting flash memory\n");
+    flash_write_protect();
+    log_info("Loading the internal firmware\n");
     load_object(internal_firmware, &mt);
 }
