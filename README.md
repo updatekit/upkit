@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.com/AntonioLangiu/pull-iot.svg?token=wmyzpNgdG2qdqyV8yUxq&branch=master)](https://travis-ci.com/AntonioLangiu/pull-iot)
+[![Build Status](https://travis-ci.com/AntonioLangiu/Pull-IoT.svg?token=wmyzpNgdG2qdqyV8yUxq&branch=master)](https://travis-ci.com/AntonioLangiu/Pull-IoT)
 
 Pull-IoT is a C library to implement secure and portable
 updates for IoT devices. It targets [Class 1](https://tools.ietf.org/html/rfc7228#section-3)
