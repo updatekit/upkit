@@ -1,6 +1,6 @@
 # libpull: The Portable Updates Lightweight Library
 
-[![Build Status](https://travis-ci.com/AntonioLangiu/Pull-IoT.svg?token=wmyzpNgdG2qdqyV8yUxq&branch=master)](https://travis-ci.com/AntonioLangiu/Pull-IoT)
+[![Build Status](https://travis-ci.com/AntonioLangiu/pull-iot-private.svg?token=wmyzpNgdG2qdqyV8yUxq&branch=master)](https://travis-ci.com/AntonioLangiu/pull-iot-private)
 
 libpull is a C library to implement secure and portable updates on constrained IoT devices.
 It targets [Class 1](https://tools.ietf.org/html/rfc7228#section-3)
