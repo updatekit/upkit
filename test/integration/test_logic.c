@@ -6,7 +6,6 @@
 #include "simple_metadata.h"
 #include "receiver.h"
 #include "subscriber.h"
-#include "testing_settings.h"
 #include "memory_file_posix.h"
 #include "transport_libcoap.h"
 #include "async_libcoap.h"
@@ -21,7 +20,7 @@
 #include <unistd.h>
 
 #define POLLING_FREQUENCY 1
-
+#define BUFFER_SIZE 1024
 
 void logic(conn_type type, void* conn_data);
 
@@ -65,7 +64,9 @@ void logic(conn_type type, void* conn_data) {
     obj_id id;
     mem_object obj_t;
 
-    txp_init(&stxp, PROV_SERVER, 0, type, conn_data);
+    uint8_t buffer[BUFFER_SIZE];
+
+    txp_init(&stxp, "localhost", 0, type, conn_data);
 
     log_info("Subscribing to the server\n");
     pull_error err = subscribe(&sctx, &stxp, "version", &obj_t);
@@ -84,7 +85,7 @@ void logic(conn_type type, void* conn_data) {
         err = get_oldest_firmware(&id, &version, &obj_t);
         TEST_ASSERT_TRUE(!err);
         // download the image to the oldest slot
-        err = txp_init(&rtxp, PROV_SERVER, 0, type, conn_data);
+        err = txp_init(&rtxp, "localhost", 0, type, conn_data);
         TEST_ASSERT_TRUE(!err);
         err = receiver_open(&rctx, &rtxp, "firmware", id, &obj_t);
         TEST_ASSERT_TRUE(!err);
@@ -97,7 +98,7 @@ void logic(conn_type type, void* conn_data) {
         err = receiver_close(&rctx);
         TEST_ASSERT_TRUE(!err);
         TEST_ASSERT_TRUE(rctx.firmware_received);
-        err = verify_object(id, digest_sha256, x, y, secp256r1, &obj_t);
+        err = verify_object(id, tinydtls_digest_sha256, x, y, secp256r1, &obj_t, buffer, BUFFER_SIZE);
         TEST_ASSERT_TRUE(!err);
         break;
     }

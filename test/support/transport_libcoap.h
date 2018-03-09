@@ -1,11 +1,8 @@
 #ifndef TRANSPORT_LIBCOAP_H_
 #define TRANSPORT_LIBCOAP_H_
-#include "common/settings.h"
-#include "testing_settings.h"
 #include "network/transport.h"
 #include "common/error.h"
 #include "common/logger.h"
-#include "common/settings.h"
 #include "security/ecc.h"
 
 #include <coap/coap.h>

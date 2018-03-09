@@ -1,5 +1,4 @@
 #include "transport_libcoap.h"
-#include "testing_settings.h"
 
 #include <unistd.h>
 #include <sys/select.h>
@@ -12,6 +11,9 @@
 
 #define CALLBACK(a,b,c) ((void(*)())((cb_ctx_t*)ctx->app)->cb)(a,b,c,((cb_ctx_t*)ctx->app)->more)
 #define BCTX ((cb_ctx_t*)ctx->app)->bctx
+
+#define BLOCK_SIZE 4
+#define URI_SPLIT_SIZE 128
 
 static pull_error split_resource(const char* resource, coap_pdu_t* pdu);
 

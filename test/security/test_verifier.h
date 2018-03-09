@@ -14,7 +14,10 @@
 
 #define NO_MOCK(func) func##_StubWithCallback(func##_impl)
 
-void test_verify_object(void) {
+#define BUFFER_LEN 1024
+static uint8_t buffer[BUFFER_LEN];
+
+void test_verify_object(digest_func func) {
     NO_MOCK(memory_open);
     NO_MOCK(memory_read);
     NO_MOCK(memory_close);
@@ -24,42 +27,41 @@ void test_verify_object(void) {
 
     mem_object obj_t;
     pull_error err;
-    err = verify_object(OBJ_1, digest_sha256, x, y, secp256r1, &obj_t);
+    err = verify_object(OBJ_1, func, x, y, secp256r1, &obj_t, buffer, BUFFER_LEN);
     TEST_ASSERT_TRUE(!err);
 }
 
-void test_verify_object_invalid_object(void) {
+void test_verify_object_invalid_object(digest_func func) {
     mem_object obj_t;
     pull_error err;
-    err = verify_object(42, digest_sha256, x, y, secp256r1, &obj_t);
+    err = verify_object(42, func, x, y, secp256r1, &obj_t, buffer, BUFFER_LEN);
     TEST_ASSERT_TRUE(err);
 }
 
-void test_verify_object_invalid_read(void) {
+void test_verify_object_invalid_read(digest_func func) {
     NO_MOCK(memory_open);
     memory_read_IgnoreAndReturn(MEMORY_READ_ERROR);
     NO_MOCK(memory_close);
 
     mem_object obj_t;
     pull_error err;
-    err = verify_object(OBJ_1, digest_sha256, x, y, secp256r1, &obj_t);
+    err = verify_object(OBJ_1, func, x, y, secp256r1, &obj_t, buffer, BUFFER_LEN);
     TEST_ASSERT_TRUE(err == MEMORY_READ_ERROR);
 }
 
-void test_verify_object_invalid_digest_init(void) {
+void test_verify_object_invalid_digest_init(digest_func func) {
     NO_MOCK(memory_open);
     NO_MOCK(memory_read);
     NO_MOCK(memory_close);
 
     mem_object obj_t;
     pull_error err;
-    digest_func func = digest_sha256;
     func.init = invalid_init;
-    err = verify_object(OBJ_1, func, x, y, secp256r1, &obj_t);
+    err = verify_object(OBJ_1, func, x, y, secp256r1, &obj_t, buffer, BUFFER_LEN);
     TEST_ASSERT_TRUE(err == DIGEST_INIT_ERROR);
 }
 
-void test_verify_object_invalid_digest_update(void) {
+void test_verify_object_invalid_digest_update(digest_func func) {
     NO_MOCK(memory_open);
     NO_MOCK(memory_read);
     NO_MOCK(memory_close);
@@ -69,13 +71,12 @@ void test_verify_object_invalid_digest_update(void) {
 
     mem_object obj_t;
     pull_error err;
-    digest_func func = digest_sha256;
     func.update = invalid_update;
-    err = verify_object(OBJ_1, func, x, y, secp256r1, &obj_t);
+    err = verify_object(OBJ_1, func, x, y, secp256r1, &obj_t, buffer, BUFFER_LEN);
     TEST_ASSERT_TRUE(err == DIGEST_UPDATE_ERROR);
 }
 
-void test_verify_object_invalid_key(void) {
+void test_verify_object_invalid_key(digest_func func) {
     NO_MOCK(memory_open);
     NO_MOCK(memory_read);
     NO_MOCK(memory_close);
@@ -85,11 +86,11 @@ void test_verify_object_invalid_key(void) {
 
     mem_object obj_t;
     pull_error err;
-    err = verify_object(OBJ_1, digest_sha256, y, y, secp256r1, &obj_t);
+    err = verify_object(OBJ_1, func, y, y, secp256r1, &obj_t, buffer, BUFFER_LEN);
     TEST_ASSERT_TRUE(err == VERIFICATION_FAILED_ERROR);
 }
 
-void test_verify_object_invalid_metadata_to_digest(void) {
+void test_verify_object_invalid_metadata_to_digest(digest_func func) {
     NO_MOCK(memory_open);
     NO_MOCK(memory_read);
     NO_MOCK(memory_close);
@@ -99,16 +100,16 @@ void test_verify_object_invalid_metadata_to_digest(void) {
 
     mem_object obj_t;
     pull_error err;
-    err = verify_object(OBJ_1, digest_sha256, x, y, secp256r1, &obj_t);
+    err = verify_object(OBJ_1, func, x, y, secp256r1, &obj_t, buffer, BUFFER_LEN);
     TEST_ASSERT_TRUE(err == DIGEST_UPDATE_ERROR);
 }
 
-void test_verify_all(void) {
-    test_verify_object();
-    test_verify_object_invalid_object();
-    test_verify_object_invalid_read();
-    test_verify_object_invalid_digest_init();
-    test_verify_object_invalid_digest_update();
-    test_verify_object_invalid_key();
-    test_verify_object_invalid_metadata_to_digest();
+void test_verify_all(digest_func func) {
+    test_verify_object(func);
+    test_verify_object_invalid_object(func);
+    test_verify_object_invalid_read(func);
+    test_verify_object_invalid_digest_init(func);
+    test_verify_object_invalid_digest_update(func);
+    test_verify_object_invalid_key(func);
+    test_verify_object_invalid_metadata_to_digest(func);
 }

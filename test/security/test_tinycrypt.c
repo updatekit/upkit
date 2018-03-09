@@ -38,7 +38,7 @@ void test_ecc_verify_invalid_signature(void) {
 
 void test_sha256(void) {
     digest_ctx ctx;
-    digest_func digest = digest_sha256;
+    digest_func digest = tinycrypt_digest_sha256;
     pull_error err = digest.init(&ctx);
     TEST_ASSERT_TRUE(!err);
     err = digest.update(&ctx, (void*) data_g, 128);
@@ -49,14 +49,14 @@ void test_sha256(void) {
 }
 
 void test_sha256_invalid_init(void) {
-    digest_func digest = digest_sha256;
+    digest_func digest = tinycrypt_digest_sha256;
     pull_error err = digest.init(NULL);
     TEST_ASSERT_TRUE(err == SHA256_INIT_ERROR);
 }
 
 void test_sha256_invalid_update(void) {
     digest_ctx ctx;
-    digest_func digest = digest_sha256;
+    digest_func digest = tinycrypt_digest_sha256;
     pull_error err = digest.init(&ctx);
     TEST_ASSERT_TRUE(!err);
     err = digest.update(NULL, (void*) data_g, 128);
@@ -69,7 +69,7 @@ void test_sha256_invalid_update(void) {
 
 void test_sha256_invalid_final(void) {
     digest_ctx ctx;
-    digest_func digest = digest_sha256;
+    digest_func digest = tinycrypt_digest_sha256;
     pull_error err = digest.init(&ctx);
     TEST_ASSERT_TRUE(!err);
     err = digest.update(&ctx, (void*) data_g, 128);
@@ -79,5 +79,5 @@ void test_sha256_invalid_final(void) {
 }
 
 void test_verifier(void) {
-    test_verify_all();
+    test_verify_all(tinycrypt_digest_sha256);
 }

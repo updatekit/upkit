@@ -10,9 +10,9 @@
 #include "error.h"
 #include "async_libcoap.h"
 #include "transport_libcoap.h"
-#include "common/settings.h"
 #include "sample_data.h"
 
+#define PROV_SERVER "localhost"
 
 void setUp(void) {
 }

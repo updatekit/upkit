@@ -9,7 +9,6 @@
 #include <unistd.h>
 #include <assert.h>
 #include "common/logger.h"
-#include "common/settings.h"
 
 #include "memory_file_posix.h"
 

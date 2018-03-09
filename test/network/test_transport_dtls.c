@@ -4,9 +4,10 @@
 #include "error.h"
 #include "memory/metadata.h"
 #include "simple_metadata.h"
-#include "testing_settings.h"
 #include "sample_data.h"
 #include <coap/coap.h>
+
+#define PROV_SERVER "localhost"
 
 void get(void);
 void get_blockwise(void);

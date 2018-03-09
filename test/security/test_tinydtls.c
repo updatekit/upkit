@@ -37,7 +37,7 @@ void test_ecc_verify_invalid_signature(void) {
 
 void test_sha256(void) {
     digest_ctx ctx;
-    digest_func digest = digest_sha256;
+    digest_func digest = tinydtls_digest_sha256;
     digest.init(&ctx);
     digest.update(&ctx, (void*) data_g, 128);
     uint8_t* hash = digest.finalize(&ctx);
@@ -46,5 +46,5 @@ void test_sha256(void) {
 }
 
  void test_verifier(void) {
-     test_verify_all();
+     test_verify_all(tinydtls_digest_sha256);
  }

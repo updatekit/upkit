@@ -1,7 +1,6 @@
 #ifndef _MEMORY_FILE_POSIX_H
 #define _MEMORY_FILE_POSIX_H
 
-#include "common/settings.h"
 #include "memory/memory.h"
 #include "common/external.h"
 

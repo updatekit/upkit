@@ -11,8 +11,8 @@
 #include "async.h"
 #include "async_libcoap.h"
 #include <coap/coap.h>
-#include "common/settings.h"
 
+#define PROV_SERVER "localhost"
 
 void setUp(void) {
 }

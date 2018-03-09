@@ -8,6 +8,8 @@
 #include "simple_metadata.h"
 #include "metadata.h"
 
+#define BUFFER_SIZE 1024
+
 mem_object obj_run;
 mem_object obj_1;
 mem_object obj_2;
@@ -93,8 +95,9 @@ int file_compare(char* fname1, char* fname2) {
 
 void test_copy_firmware(void) {
     mem_object src;
-    mem_object dst; 
-	pull_error err = copy_firmware(OBJ_1, OBJ_RUN, &src, &dst);
+    mem_object dst;
+    uint8_t buffer[BUFFER_SIZE];
+	pull_error err = copy_firmware(OBJ_1, OBJ_RUN, &src, &dst, buffer, BUFFER_SIZE);
 	TEST_ASSERT_TRUE(!err);
 	TEST_ASSERT(file_compare("assets/expected_internal_flash_simulator", 
 				"assets/internal_flash_simulator") == 0);

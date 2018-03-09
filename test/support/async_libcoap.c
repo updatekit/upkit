@@ -1,5 +1,3 @@
-#include "common/settings.h"
-
 #include <coap/coap.h>
 #include <stdio.h>
 #include <stdlib.h>

@@ -1,5 +1,6 @@
 #include <coap/coap.h>
 #include <coap/coap_dtls.h>
+#include <stdio.h>
 
 #include "../server.h"
 
