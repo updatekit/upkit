@@ -4,7 +4,7 @@
 #include "memory/memory.h"
 #include "memory/metadata.h"
 #include "security/verifier.h"
-#include "security/sha256.h"
+#include "security/digest.h"
 #include "security/ecc.h"
 #include "common/error.h"
 #include "common/logger.h"

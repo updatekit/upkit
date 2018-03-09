@@ -1,5 +1,4 @@
 #include "security/digest.h"
-#include "security/sha256.h"
 #include "security/ecc.h"
 #include <string.h>
 

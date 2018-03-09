@@ -22,6 +22,8 @@
 #define POLLING_FREQUENCY 1
 #define BUFFER_SIZE 1024
 
+DIGEST_FUNC(tinydtls);
+
 void logic(conn_type type, void* conn_data);
 
 void setUp(void) {

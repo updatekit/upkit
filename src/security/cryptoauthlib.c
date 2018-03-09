@@ -1,5 +1,4 @@
 #include "security/digest.h"
-#include "security/sha256.h"
 #include "security/ecc.h"
 #include <string.h>
 #include <stdio.h>
@@ -57,7 +56,7 @@ inline void* cryptoauthlib_sha256_final(digest_ctx* ctx) {
 }
 /* ECC */
 
-pull_error ecc_verify(const uint8_t* x, const uint8_t* y, const uint8_t* r, const uint8_t* s,
+pull_error cryptoauthlib_ecc_verify(const uint8_t* x, const uint8_t* y, const uint8_t* r, const uint8_t* s,
         const void* data, uint16_t data_len, ecc_curve curve) {
     uint8_t pub_key[64];
     uint8_t signature[64];

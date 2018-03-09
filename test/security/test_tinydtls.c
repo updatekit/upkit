@@ -13,6 +13,8 @@
 #include "simple_metadata.h"
 #include "memory_file_posix.h"
 
+DIGEST_FUNC(tinydtls);
+
 int default_CSPRNG(uint8_t *dest, unsigned int size) {
     return 0;
 }

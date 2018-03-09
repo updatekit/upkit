@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 set -e
 
 ROOTDIR=$(cd $(dirname $0)/.. && pwd -P)

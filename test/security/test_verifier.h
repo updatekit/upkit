@@ -1,7 +1,6 @@
 #include "unity.h"
 #include "sample_data.h"
 #include "digest.h"
-#include "sha256.h"
 #include "error.h"
 #include "ecc.h"
 #include "memory_objects.h"

@@ -3,6 +3,7 @@
 #include "mock_metadata.h"
 #include "sample_data.h"
 #include "tinycrypt.h"
+#include "tinydtls.h"
 #include "digest.h"
 #include "sha256.h"
 #include "ecc.h"
@@ -13,6 +14,8 @@
 #include "memory_file_posix.h"
 #include "test_verifier.h"
 #include <string.h>
+
+DIGEST_FUNC(tinycrypt);
 
 int default_CSPRNG(uint8_t *dest, unsigned int size) {
     return 0;
