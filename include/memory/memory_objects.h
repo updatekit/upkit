@@ -15,7 +15,7 @@
 
 #include "common/error.h"
 #include "memory/memory.h"
-#include "memory/metadata.h"
+#include "memory/manifest.h"
 #include <stdint.h>
 #include <stdio.h>
 
@@ -49,7 +49,7 @@ pull_error get_oldest_firmware(obj_id *obj, uint16_t *version,
  * \brief Copy the firmware s into the firmware d.
  *
  * This function will use the size specified in the s firmware
- * metadata to correcly copy the firmware.
+ * manifest to correcly copy the firmware.
  * \param s
  * \param d
  * \param src A temporary mem_object used by the function.
@@ -67,26 +67,26 @@ pull_error get_oldest_firmware(obj_id *obj, uint16_t *version,
 pull_error copy_firmware(obj_id s, obj_id d, mem_object *src, mem_object *dst, uint8_t* buffer, size_t buffer_size);
 
 /**
- * \brief Read the metadata of the memory object.
+ * \brief Read the manifest of the memory object.
  *
  * This function will use the size specified in the s firmware
- * metadata to correcly copy the firmware.
+ * manifest to correcly copy the firmware.
  * \param[in] id Id of the object.
- * \param[out] mt Metadata of the memory object.
+ * \param[out] mt manifest of the memory object.
  * \param obj_t A temporary mem_object used by the function.
  * \returns PULL_SUCCESS on success or a specific error otherwise.
  */
-pull_error read_firmware_metadata(obj_id id, metadata *mt, mem_object *obj_t);
+pull_error read_firmware_manifest(obj_id id, manifest_t *mt, mem_object *obj_t);
 
 /**
- * \brief Write the metadata into the memory object.
+ * \brief Write the manifest into the memory object.
  *
  * \param[in] id The id of the object.
- * \param[in] mt The metadata to be written.
+ * \param[in] mt The manifest to be written.
  * \param obj_t A temporary mem_object used by the function.
  * \returns PULL_SUCCESS on success or a specific error otherwise.
  */
-pull_error write_firmware_metadata(obj_id id, const metadata *mt,
+pull_error write_firmware_manifest(obj_id id, const manifest_t *mt,
                                    mem_object *obj_t);
 
 #ifdef __cplusplus

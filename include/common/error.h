@@ -51,13 +51,13 @@ extern "C" {
     ERROR(MEMORY_READ)      \
     ERROR(MEMORY_WRITE)     \
     ERROR(MEMORY_FLUSH)     \
-    ERROR(READ_METADATA)    \
+    ERROR(READ_MANIFEST)    \
     /* Memory Objects Errors */ \
     ERROR(GET_NEWEST)       \
     ERROR(GET_OLDEST)       \
     ERROR(COPY_FIRMWARE)    \
     ERROR(INVALIDATE_OBJECT)\
-    ERROR(WRITE_METADATA)   \
+    ERROR(WRITE_MANIFEST)   \
     /* Receiver Errors */   \
     ERROR(RECEIVER_OPEN)    \
     ERROR(RECEIVER_CHUNK)   \

@@ -5,8 +5,9 @@
 #include "error.h"
 #include "memory_objects.h"
 #include "memory_file_posix.h"
-#include "simple_metadata.h"
-#include "metadata.h"
+#include "manifest.h"
+#include "simple_manifest.h"
+#include "simple_manifest_impl.h"
 
 #define BUFFER_SIZE 1024
 
@@ -45,26 +46,26 @@ void test_get_oldest_slot(void) {
     TEST_ASSERT_EQUAL_INT(OBJ_2, oldest);
 }
 
-void test_read_slot_metadata(void) {
-    metadata mt;
-    pull_error err = read_firmware_metadata(OBJ_1, &mt, &obj_t);
+void test_read_slot_manifest(void) {
+    manifest_t mt;
+    pull_error err = read_firmware_manifest(OBJ_1, &mt, &obj_t);
     TEST_ASSERT_TRUE(!err);
     TEST_ASSERT_EQUAL_HEX16(0xbeef, mt.vendor.version);
 }
 
-void test_write_slot_metadata(void) {
-    metadata mt_old, mt_new;
+void test_write_slot_manifest(void) {
+    manifest_t mt_old, mt_new;
     version_t version;
     obj_id newest;
     pull_error err;
-    err = read_firmware_metadata(OBJ_2, &mt_old, &obj_t);
+    err = read_firmware_manifest(OBJ_2, &mt_old, &obj_t);
     TEST_ASSERT_TRUE(!err);
     mt_new.vendor.version = 0xffff;
-    err = write_firmware_metadata(OBJ_2, &mt_new, &obj_t);
+    err = write_firmware_manifest(OBJ_2, &mt_new, &obj_t);
     TEST_ASSERT_TRUE(!err);
     get_newest_firmware(&newest, &version, &obj_t);
     TEST_ASSERT_EQUAL_INT8(OBJ_2, newest);
-    err = write_firmware_metadata(OBJ_2, &mt_old, &obj_t);
+    err = write_firmware_manifest(OBJ_2, &mt_old, &obj_t);
     TEST_ASSERT_TRUE(!err);
 }
 

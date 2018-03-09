@@ -2,19 +2,19 @@
 #include <string.h>
 
 #include "memory/memory_objects.h"
-#include "memory/metadata.h"
+#include "memory/manifest.h"
 #include "common/logger.h"
 #include "common/error.h"
 #include "common/external.h"
 
 pull_error get_newest_firmware(obj_id* obj, uint16_t* version, mem_object* obj_t) {
-    metadata mt;
+    manifest_t mt;
     pull_error err;
     uint8_t i;
     for (i=0; memory_objects[i] > 0; i++) {
-        err = read_firmware_metadata(memory_objects[i], &mt, obj_t);
+        err = read_firmware_manifest(memory_objects[i], &mt, obj_t);
         if (err) {
-            log_error(err, "Failure reading firmware metadata for object %d\n", memory_objects[i]);
+            log_error(err, "Failure reading firmware manifest for object %d\n", memory_objects[i]);
             return GET_NEWEST_ERROR;
         }
         if (i == 0) {
@@ -29,13 +29,13 @@ pull_error get_newest_firmware(obj_id* obj, uint16_t* version, mem_object* obj_t
 }
 
 pull_error get_oldest_firmware(obj_id* obj, uint16_t* version, mem_object* obj_t) {
-    metadata mt;
+    manifest_t mt;
     pull_error err;
     uint8_t i;
     for (i=0; memory_objects[i] > 0; i++) {
-        err = read_firmware_metadata(memory_objects[i], &mt, obj_t);
+        err = read_firmware_manifest(memory_objects[i], &mt, obj_t);
         if (err != PULL_SUCCESS) {
-            log_error(err, "Failure reading firmware metadata for obj %d\n", memory_objects[i]);
+            log_error(err, "Failure reading firmware manifest for obj %d\n", memory_objects[i]);
             return GET_OLDEST_ERROR;
         }
         if (i == 0) {
@@ -52,11 +52,11 @@ pull_error get_oldest_firmware(obj_id* obj, uint16_t* version, mem_object* obj_t
 
 pull_error copy_firmware(obj_id s, obj_id d, mem_object* src, mem_object* dst, uint8_t* buffer, size_t buffer_size) {
     pull_error err;
-    metadata srcmt;
+    manifest_t srcmt;
     int firmware_size = 0;
-    err = read_firmware_metadata(s, &srcmt, src);
+    err = read_firmware_manifest(s, &srcmt, src);
     if (err) {
-        log_error(err, "Error reading source metadata for object %d\n", s);
+        log_error(err, "Error reading source manifest for object %d\n", s);
         return COPY_FIRMWARE_ERROR;
     }
     firmware_size = get_size(&srcmt) + get_offset(&srcmt);
@@ -97,41 +97,41 @@ finish:
     return err;
 }
 
-pull_error read_firmware_metadata(obj_id id, metadata* mt, mem_object* obj) {
+pull_error read_firmware_manifest(obj_id id, manifest_t* mt, mem_object* obj) {
     pull_error err = memory_open(obj, id);
     if (err) {
         log_error(err, "Failure opening object %d\n", id);
-        return READ_METADATA_ERROR;
+        return READ_MANIFEST_ERROR;
     }
-    if (memory_read(obj, (uint8_t*) mt, sizeof(metadata), 0) != sizeof(metadata)) {
+    if (memory_read(obj, (uint8_t*) mt, sizeof(manifest_t), 0) != sizeof(manifest_t)) {
         log_error(MEMORY_READ_ERROR, "Failure reading object %d\n", id);
-        return READ_METADATA_ERROR;
+        return READ_MANIFEST_ERROR;
     }
     memory_close(obj);
     return PULL_SUCCESS;
 }
 
-pull_error write_firmware_metadata(obj_id id, const metadata* mt, mem_object* obj) {
+pull_error write_firmware_manifest(obj_id id, const manifest_t* mt, mem_object* obj) {
     pull_error err = memory_open(obj, id) != PULL_SUCCESS;
     if (err) {
         log_error(err, "Failure opening firmware\n");
-        return WRITE_METADATA_ERROR;
+        return WRITE_MANIFEST_ERROR;
     }
-    if (memory_write(obj, (uint8_t*) mt, sizeof(metadata), 0) != sizeof(metadata)) {
+    if (memory_write(obj, (uint8_t*) mt, sizeof(manifest_t), 0) != sizeof(manifest_t)) {
         memory_close(obj);
-        log_error(MEMORY_WRITE_ERROR, "Failure writing metadata into object %d\n", id);
-        return WRITE_METADATA_ERROR;
+        log_error(MEMORY_WRITE_ERROR, "Failure writing manifest into object %d\n", id);
+        return WRITE_MANIFEST_ERROR;
     }
     memory_close(obj);
     return PULL_SUCCESS;
 }
 
 pull_error invalidate_object(obj_id id, mem_object* obj_t) {
-    metadata nullmt;
-    memset(&nullmt, 0, sizeof(metadata));
-    pull_error err = write_firmware_metadata(id, &nullmt, obj_t);
+    manifest_t nullmt;
+    memset(&nullmt, 0, sizeof(manifest_t));
+    pull_error err = write_firmware_manifest(id, &nullmt, obj_t);
     if (err) {
-        log_error(err, "Failure writing firmware metadata on object%d\n", id);
+        log_error(err, "Failure writing firmware manifest on object%d\n", id);
         return INVALIDATE_OBJECT_ERROR;
     }
     return PULL_SUCCESS;

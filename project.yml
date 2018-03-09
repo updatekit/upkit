@@ -34,6 +34,8 @@
     # Security definitions
     - WITH_TINYDTLS
     - WITH_TINYCRYPT
+    # Manifest configurations
+    - SIMPLE_MANIFEST
   :test:
     - *common_defines
 
