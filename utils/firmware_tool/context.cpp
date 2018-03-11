@@ -7,9 +7,10 @@
 using json = nlohmann::json;
 
 #define PARSE_JSON(type, name, ...) \
-    auto name = config.find(#name); \
-    if (name != config.end()) { \
-        this->name = *name; \
+    if (this->name == "") { \
+        auto name = config.find(#name); \
+        if (name != config.end()) \
+            this->name = *name; \
     }
 
 int Context::parse_json() {
@@ -41,9 +42,10 @@ int Context::parse_arguments(int argc, char** argv) {
         return 0;
     }
     char** real_argv = &argv[i-1];
-    while ((opt = getopt(argc-i+1, real_argv, "va:l:s:p:c:b:f:k:m:")) != -1) {
+    while ((opt = getopt(argc-i+1, real_argv, "va:l:s:p:c:b:f:k:m:y:")) != -1) {
         switch (opt) {
             case 'v': verbosity++; break;
+            case 'y': config_file_name = std::string(real_argv[optind-1]); break;
             FOREACH_ARG(PARSE_ARG)
             default: 
               std::cout << "Invalid arg:" << real_argv[optind-1] << std::endl;

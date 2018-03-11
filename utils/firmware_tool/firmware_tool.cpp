@@ -12,14 +12,14 @@
     COMMAND(help, "list the commands")
 
 #define PRINT_HELP(name, description) \
-    std::cout << "  " << #name << ":\t" << #description << std::endl;
+    std::cout << "   " << #name << ":\t" << description << std::endl;
 
 #define ADD_FUNCTION(name, description) \
     commands[#name] = name##_command;
 
 int help_command(Context ctx) {
-    std::cout << "usage:" << ctx.get_prog_name() << "command [args]" << std::endl;
-    std::cout << "\tAvailable commands are:" << std::endl;
+    std::cout << "usage: " << ctx.get_prog_name() << " command [args]" << std::endl;
+    std::cout << "Available commands are:" << std::endl;
     FOREACH_COMMAND(PRINT_HELP);
     return EXIT_FAILURE;
 }
@@ -32,8 +32,8 @@ int main(int argc, char** argv) {
         return help_command(ctx);
     }
     auto search = commands.find(argv[1]);
-    ctx.parse_json();
     ctx.parse_arguments(argc, argv);
+    ctx.parse_json();
     if (ctx.get_verbosity() > 2) {
         ctx.print_arguments();
     }
