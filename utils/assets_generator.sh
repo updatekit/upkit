@@ -30,10 +30,10 @@ for v in $versions; do
     f="$fake_firmware$v"
     # Creating firmware of size 0x14000
     dd if=/dev/zero bs=4096 count=20 > $f.tmp
-    $FIRMWAREDIR/firmware_tools -vv -l $v -a $APPLICATION -b $f.tmp \
-    -p $FIRMWAREDIR/vend_key.priv -c $FIRMWAREDIR/vend_key.pub \
-    -k $FIRMWAREDIR/prov_key.priv -m $FIRMWAREDIR/prov_key.pub \
-    -f $ASSETSDIR/metadata metadata
+    $FIRMWAREDIR/firmware_tool manifest generate -y $FIRMWAREDIR/config.json -vv -l $v -a $APPLICATION -b $f.tmp \
+        -p $FIRMWAREDIR/keys/vendor.priv -c $FIRMWAREDIR/keys/vendor.pub \
+        -k $FIRMWAREDIR/keys/server.priv -m $FIRMWAREDIR/keys/server.pub \
+        -f $ASSETSDIR/metadata metadata
     hash=$(shasum -a 256 $f.tmp | cut -f 1 -d ' ')
     echo $hash
      srec_cat $ASSETSDIR/metadata -binary $f.tmp -binary -offset 0x100 -o $f -binary
