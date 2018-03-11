@@ -1,6 +1,17 @@
 #include "commands.hpp"
 #include <iostream>
+#include <fstream>
 #include <iomanip>
+
+bool write_binary(std::string file, uint8_t* data, size_t data_len) {
+    std::ofstream out(file, std::ios_base::binary);
+    if (!out) {
+        return false;
+    }
+    out.write((char*)data, data_len);
+    out.close();
+    return true;
+}
 /*int binary_writer(char *file_name, uint8_t*buffer, int len) {
     int file = open(file_name, O_WRONLY|O_CREAT|O_TRUNC, 0644);
     if (file < 0) {
@@ -28,28 +39,7 @@ int binary_reader(char *file_name, uint8_t*buffer, int len) {
     close(file);
     return 0;
 }
-
-void print_hex(char *title, unsigned char *buf, int buf_len) {
-    int i = 0;
-    fprintf(stdout, "%s\n", title);
-    for(i = 0; i < buf_len; ++i) {
-        fprintf(stdout, "0x%02x%s", buf[i], ( i + 1 ) % 16 == 0 ? ",\r\n" : "," );
-    }
-    printf("\n");
-}
-
-static void print_buf(char *title, unsigned char *buf, int buf_len) {
-    int i = 0;
-    fprintf(stdout, "%s\n", title);
-    for(i = 0; i < buf_len; ++i) {
-        fprintf(stdout, "0x%02x%s", buf[i], ( i + 1 ) % 16 == 0 ? ",\r\n" : "," );
-    }
-    printf("\n");
-}
-int check_exists(std::string path) {
-    struct stat buf;
-    return !stat(path.c_str(), &buf);
-}*/
+*/
 
 void print_buf(const unsigned char* data, size_t data_len, size_t offset) {
     for(size_t i = 0; i < data_len; ++i) { 
@@ -65,3 +55,5 @@ void print_buf(const unsigned char* data, size_t data_len, size_t offset) {
     std::setfill(' ');
     std::cout << std::endl;
 }
+
+

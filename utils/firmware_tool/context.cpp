@@ -26,7 +26,7 @@ int Context::parse_json() {
     return 0;
 }
 
-#define PARSE_ARG(type, name, arg_name) \
+#define PARSE_ARG(type, name, arg_name, ...) \
     case arg_name: name = std::string(real_argv[optind-1]); break;
 
 int Context::parse_arguments(int argc, char** argv) {
@@ -70,11 +70,11 @@ int Context::store_arguments() {
      return EXIT_SUCCESS;
 }
 
-#define PRINT_ARG(type, name, ...) \
+#define PRINT_ARG_VALUE(type, name, ...) \
     std::cout << " " << #name << ":\t" << name << std::endl;
 void Context::print_arguments() {
     std::cout << "The configured parameters are:" << std::endl;
-    FOREACH_ARG(PRINT_ARG);
+    FOREACH_ARG(PRINT_ARG_VALUE);
 }
 
 Context::Context(std::string name) {

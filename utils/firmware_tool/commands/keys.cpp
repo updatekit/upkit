@@ -7,6 +7,8 @@
 #include <tinycrypt/ecc_dh.h>
 #endif
 
+IMPLEMENT(keys)
+
 int keys_generate_command(Context ctx) {
     std::string subcommand = ctx.get_next_command();
     if (subcommand != "vendor" && subcommand != "server") {
@@ -27,39 +29,27 @@ int keys_generate_command(Context ctx) {
         std::cout << "Error generating keys" << std::endl;
         return EXIT_FAILURE;
     }
-
-    std::ofstream priv_out(ctx.get_server_priv_key(), std::ios_base::binary);
-    if (!priv_out) {
-        std::cout << "Error opening output file: " << ctx.get_server_priv_key() << std::endl;
-        return EXIT_FAILURE;
+    if (subcommand == "vendor") {
+        if (!write_binary(ctx.get_vendor_priv_key(), priv, 64)) { // XXX hardcoded value
+            std::cout << "Error writing private key" << std::endl;
+            return EXIT_FAILURE;
+        }
+        if (!write_binary(ctx.get_vendor_pub_key(), pub, 64)) { // XXX hardcoded value
+            std::cout << "Error writing public key" << std::endl;
+            return EXIT_FAILURE;
+        }
+    } else  {
+        if (!write_binary(ctx.get_server_priv_key(), priv, 64)) { // XXX hardcoded value
+            std::cout << "Error writing private key" << std::endl;
+            return EXIT_FAILURE;
+        }
+        if (!write_binary(ctx.get_server_pub_key(), pub, 64)) { // XXX hardcoded value
+            std::cout << "Error writing public key" << std::endl;
+            return EXIT_FAILURE;
+        }
     }
-    priv_out.write((char*)priv, 64);
-    priv_out.close();
-
-    std::ofstream pub_out(ctx.get_server_pub_key(), std::ios_base::binary);
-    if (!pub_out) {
-        std::cout << "Error opening output file: " << ctx.get_server_pub_key() << std::endl;
-        return EXIT_FAILURE;
-    }
-    pub_out.write((char*)pub, 64);
-    pub_out.close();
     return EXIT_SUCCESS;
 #endif
     std::cout << "The tool has been built without the key generation support" << std::endl;
     return EXIT_FAILURE;
-}
-
-int keys_help_command(Context ctx) {
-    // TODO implement
-    return EXIT_SUCCESS;
-}
-
-int keys_command(Context ctx) {
-    std::string subcommand = ctx.get_next_command();
-    if (subcommand == "generate") {
-        return keys_generate_command(ctx);
-    } else if (subcommand == "help") {
-        return keys_help_command(ctx);
-    }
-    return !keys_help_command(ctx);
 }

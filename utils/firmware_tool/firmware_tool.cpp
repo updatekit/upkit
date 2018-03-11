@@ -3,33 +3,34 @@
 
 #include <map>
 #include <iostream>
+#include <iomanip>
 #include <functional>
 
-#define FOREACH_COMMAND(COMMAND) \
-    COMMAND(keys, "generate or validate keys") \
-    COMMAND(manifest, "generate or validate manifest") \
-    COMMAND(configs, "generate or validate configs") \
-    COMMAND(help, "list the commands")
-
-#define PRINT_HELP(name, description) \
+#define PRINT_COMMAND_HELP(name, description) \
     std::cout << "   " << #name << ":\t" << description << std::endl;
 
 #define ADD_FUNCTION(name, description) \
     commands[#name] = name##_command;
 
-int help_command(Context ctx) {
-    std::cout << "usage: " << ctx.get_prog_name() << " command [args]" << std::endl;
+#define PRINT_SHORT_ARG(type, name, arg_name, ...) \
+    std::cout << " [-" << arg_name << " " << #name << "]"; 
+
+int help(Context ctx) {
+    std::cout << "usage: " + ctx.get_prog_name() << " <command>";
+    FOREACH_ARG(PRINT_SHORT_ARG)
+    std::cout << std::endl << std::endl;
     std::cout << "Available commands are:" << std::endl;
-    FOREACH_COMMAND(PRINT_HELP);
+    FOREACH_COMMAND(PRINT_COMMAND_HELP)
+    std::cout << std::endl;
     return EXIT_FAILURE;
 }
 
 int main(int argc, char** argv) {
     std::map<std::string, std::function<int(Context)>> commands;
     FOREACH_COMMAND(ADD_FUNCTION)
-    Context ctx(argv[0]);;
+    Context ctx(argv[0]);
     if (argc <= 1) {
-        return help_command(ctx);
+        return help(ctx);
     }
     auto search = commands.find(argv[1]);
     ctx.parse_arguments(argc, argv);
@@ -41,5 +42,5 @@ int main(int argc, char** argv) {
         return search->second(ctx);
     }
     std::cout << "Invalid command" << std::endl;
-    return help_command(ctx);
+    return help(ctx);
 }

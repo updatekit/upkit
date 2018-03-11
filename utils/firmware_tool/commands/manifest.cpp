@@ -16,7 +16,7 @@
 #define BUFFER_LEN 0x1000
 DIGEST_FUNC(tinycrypt);
 
-int sign(char* private_key, uint8_t* hash, int size, uint8_t* sig);
+IMPLEMENT(manifest)
 
 int manifest_generate_command(Context ctx) {
     manifest_t mt;
@@ -125,7 +125,7 @@ static void show_buffer(std::string name, const unsigned char* data, size_t data
     std::cout << std::setfill(' ');
 }
 
-int manifest_show_command(Context ctx) {
+int manifest_print_command(Context ctx) {
     std::ifstream input(ctx.get_out_file(), std::ios_base::binary);
     if (!input) {
         std::cerr << "Error opening firmware file: " << ctx.get_out_file() << std::endl;
@@ -234,23 +234,3 @@ int manifest_validate_command(Context ctx) {
     return EXIT_SUCCESS;
 }
 
-int manifest_help_command(Context ctx) {
-    std::cout << "Available commands are:" << std::endl;
-    std::cout << "   generate\tcreate a manifest using the input parameters" << std::endl;
-    std::cout << "   validate \tvalidate the content of the manifest" << std::endl;
-    std::cout << "   show    \tshow the recognized values of a manifest" << std::endl;
-    std::cout << "   help    \tshows this message" << std::endl;
-    return EXIT_SUCCESS;
-}
-
-int manifest_command(Context ctx) {
-    std::string subcommand = ctx.get_next_command();
-    if (subcommand == "generate") {
-        return manifest_generate_command(ctx);
-    } else if (subcommand == "show") {
-        return manifest_show_command(ctx);
-    } else if (subcommand == "validate") {
-        return manifest_validate_command(ctx);
-    }
-    return !manifest_help_command(ctx);
-}
