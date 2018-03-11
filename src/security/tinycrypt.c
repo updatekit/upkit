@@ -1,5 +1,6 @@
 #include "security/digest.h"
 #include "security/ecc.h"
+#include "common/error.h"
 #include <string.h>
 
 #ifdef WITH_TINYCRYPT
@@ -32,7 +33,7 @@ void* tinycrypt_sha256_final(digest_ctx* ctx) {
 
 /* ECC */
 
-pull_error tinycrypt_ecc_verify(const uint8_t* x, const uint8_t* y, const uint8_t* r, const uint8_t* s,
+pull_error ecc_verify(const uint8_t* x, const uint8_t* y, const uint8_t* r, const uint8_t* s,
         const void* data, uint16_t data_len, ecc_curve curve) {
     if (curve.type != CURVE_SECP256R1) {
         return NOT_SUPPORTED_CURVE_ERROR;
@@ -43,11 +44,19 @@ pull_error tinycrypt_ecc_verify(const uint8_t* x, const uint8_t* y, const uint8_
     memcpy(pub_key+32, y, 32);
     memcpy(signature, r, 32);
     memcpy(signature+32, s, 32);
-    if (uECC_verify(pub_key, (uint8_t*) data, (size_t) data_len, signature, uECC_secp256r1()) != 1) {
+    if (uECC_verify(pub_key, (uint8_t*) data, (size_t) data_len, signature, uECC_secp256r1()) != 1) { // XXX hardcoded curve
         return VERIFICATION_FAILED_ERROR;
 
     }
     return PULL_SUCCESS;
+}
+
+pull_error ecc_sign(const uint8_t* private_key, uint8_t *signature, 
+                    const void *data, uint16_t data_len, ecc_curve curve) {
+     if (uECC_sign(private_key, data, data_len, signature, uECC_secp256r1()) != 1) { // XXX hardcoded curve
+        return SIGN_FAILED_ERROR;
+     }
+     return PULL_SUCCESS;
 }
 
 #endif /* WITH_TINYCRYPT */

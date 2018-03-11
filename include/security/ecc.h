@@ -51,9 +51,24 @@ static const ecc_curve secp224r1 = {.type = CURVE_SECP224R1, .curve_size = 28};
  * \returns PULL_SUCCESS is verification succeded or the specific error
  * otherwise.
  */
-pull_error ecc_verify(const uint8_t *x, const uint8_t *y, const uint8_t *r,
-                      const uint8_t *s, const void *data, uint16_t data_len,
-                      ecc_curve curve);
+pull_error ecc_verify(const uint8_t *pub_x, const uint8_t *pub_y, const uint8_t *r,
+        const uint8_t *s, const void *data, uint16_t data_len, ecc_curve curve);
+
+
+/**
+ * \brief  Sign the data using the given ECC parameters
+ *
+ * \param private_key Private Key that will be used to sign.
+ * \param signature The buffer where the signature will be written.
+ * \param data The data to be signed.
+ * \param data_len The lenght of the data to be signed.
+ * \param curve The curve to be used for the signature.
+ *
+ * \returns PULL_SUCCESS if the signature was correctly performed or
+ * a specific error otherwise.
+ */
+pull_error ecc_sign(const uint8_t* private_key, uint8_t *signature,
+        const void *data, uint16_t data_len, ecc_curve curve);
 
 #ifdef __cplusplus
 }

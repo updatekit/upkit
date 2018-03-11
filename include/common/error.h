@@ -77,6 +77,8 @@ extern "C" {
     /* Verification Errors */ \
     ERROR(NOT_SUPPORTED_CURVE) \
     ERROR(VERIFICATION_FAILED) \
+    /* Signature Errors */ \
+    ERROR(SIGN_FAILED) \
 
 typedef enum {
     PULL_SUCCESS = 0,

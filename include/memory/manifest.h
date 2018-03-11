@@ -10,6 +10,8 @@
 #include "common/error.h"
 #include "common/types.h"
 #include "memory/simple_manifest.h"
+#include "security/digest.h"
+#include "security/ecc.h"
 #include <stdint.h>
 #include <stddef.h>
 
@@ -25,10 +27,10 @@ extern "C" {
     ITEM(uint8_t*, server_key_x) \
     ITEM(uint8_t*, server_key_y) \
     ITEM(uint8_t*, digest) \
-    ITEM(uint8_t*, vendor_signature_r, size_t* size) \
-    ITEM(uint8_t*, vendor_signature_s, size_t* size) \
-    ITEM(uint8_t*, server_signature_r, size_t* size) \
-    ITEM(uint8_t*, server_signature_s, size_t* size)
+    ITEM(uint8_t*, vendor_signature_r, uint8_t* size) \
+    ITEM(uint8_t*, vendor_signature_s, uint8_t* size) \
+    ITEM(uint8_t*, server_signature_r, uint8_t* size) \
+    ITEM(uint8_t*, server_signature_s, uint8_t* size)
 
 /** The scope of this file is to define the interface of a manifest. It can be
  * implemented using different encodings, but each approach should implement
@@ -51,6 +53,17 @@ FOREACH_ITEM(DEFINE_SETTER)
  * \param mt Pointer to a manifest structure.
  */
 void print_manifest(const manifest_t* mt);
+
+
+pull_error verify_manifest_vendor(manifest_t* mt, digest_func f, const uint8_t *pub_x,
+                                        const uint8_t *pub_y, ecc_curve curve);
+pull_error verify_manifest_server(manifest_t* mt, digest_func f, const uint8_t *pub_x,
+                                        const uint8_t *pub_y, ecc_curve curve);
+
+pull_error sign_manifest_vendor(manifest_t* mt, digest_func f, const uint8_t *private_key,
+                                    uint8_t* signature_buffer, ecc_curve curve);
+pull_error sign_manifest_server(manifest_t* mt, digest_func f, const uint8_t *private_key,
+                                    uint8_t* signature_buffer, ecc_curve curve);
 
 size_t get_vendor_digest_buffer(const manifest_t* mt, void** buffer);
 size_t gen_server_digest_buffer(const manifest_t* mt, void** buffer);

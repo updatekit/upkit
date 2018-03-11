@@ -19,8 +19,17 @@ FOREACH_ITEM(DEFINE_SETTER)
 
 void print_manifest_impl(const manifest_t* mt);
 
-size_t get_vendor_digest_buffer_impl(const manifest_t* mt, void** buffer);
+pull_error verify_manifest_vendor_impl(manifest_t* mt, digest_func f, const uint8_t *pub_x,
+        const uint8_t *pub_y, ecc_curve curve);
+pull_error verify_manifest_server_impl(manifest_t* mt, digest_func f, const uint8_t *pub_x,
+        const uint8_t *pub_y, ecc_curve curve);
 
+pull_error sign_manifest_vendor_impl(manifest_t* mt, digest_func f, const uint8_t *private_key,
+        uint8_t* signature_buffer, ecc_curve curve);
+pull_error sign_manifest_server_impl(manifest_t* mt, digest_func f, const uint8_t *private_key,
+        uint8_t* signature_buffer, ecc_curve curve);
+
+size_t get_vendor_digest_buffer_impl(const manifest_t* mt, void** buffer);
 size_t get_server_digest_buffer_impl(const manifest_t* mt, void** buffer);
 
 #endif /* SIMPLE_MANIFEST */

@@ -23,16 +23,16 @@ uint8_t *get_server_key_y(const manifest_t *mt) {
 uint8_t *get_digest(const manifest_t *mt) { 
     return get_digest_impl(mt); 
 }
-uint8_t* get_vendor_signature_r(const manifest_t *mt, size_t* size) {
+uint8_t* get_vendor_signature_r(const manifest_t *mt, uint8_t* size) {
     return get_vendor_signature_r_impl(mt, size);
 }
-uint8_t* get_vendor_signature_s(const manifest_t *mt, size_t* size) {
+uint8_t* get_vendor_signature_s(const manifest_t *mt, uint8_t* size) {
     return get_vendor_signature_s_impl(mt, size);
 }
-uint8_t* get_server_signature_r(const manifest_t *mt, size_t* size) {
+uint8_t* get_server_signature_r(const manifest_t *mt, uint8_t* size) {
     return get_server_signature_r_impl(mt, size);
 }
-uint8_t* get_server_signature_s(const manifest_t *mt, size_t* size) {
+uint8_t* get_server_signature_s(const manifest_t *mt, uint8_t* size) {
     return get_server_signature_s_impl(mt, size);
 }
 
@@ -57,21 +57,39 @@ void set_server_key_y(manifest_t *mt, uint8_t *server_key_y) {
 void set_digest(manifest_t *mt, uint8_t *digest) {
     set_digest_impl(mt, digest);
 }
-void set_vendor_signature_r(manifest_t *mt, uint8_t* vendor_signature_r, size_t *size) {
+void set_vendor_signature_r(manifest_t *mt, uint8_t* vendor_signature_r, uint8_t *size) {
     set_vendor_signature_r_impl(mt, vendor_signature_r, size);
 }
-void set_vendor_signature_s(manifest_t *mt, uint8_t* vendor_signature_r, size_t *size) {
+void set_vendor_signature_s(manifest_t *mt, uint8_t* vendor_signature_r, uint8_t *size) {
     set_vendor_signature_s_impl(mt, vendor_signature_r, size);
 }
-void set_server_signature_r(manifest_t *mt, uint8_t* server_signature_r, size_t *size) {
+void set_server_signature_r(manifest_t *mt, uint8_t* server_signature_r, uint8_t *size) {
     set_server_signature_r_impl(mt, server_signature_r, size);
 }
-void set_server_signature_s(manifest_t *mt, uint8_t* server_signature_r, size_t *size) {
+void set_server_signature_s(manifest_t *mt, uint8_t* server_signature_r, uint8_t *size) {
     set_server_signature_s_impl(mt, server_signature_r, size);
 }
 
 void print_manifest(const manifest_t *mt) {
     print_manifest_impl(mt);
+}
+
+pull_error verify_manifest_vendor(manifest_t* mt, digest_func f, const uint8_t *pub_x,
+        const uint8_t *pub_y, ecc_curve curve) {
+    return verify_manifest_vendor_impl(mt, f, pub_x, pub_y, curve);
+}
+pull_error verify_manifest_server(manifest_t* mt, digest_func f, const uint8_t *pub_x,
+        const uint8_t *pub_y, ecc_curve curve) {
+    return verify_manifest_server_impl(mt, f, pub_x, pub_y, curve);
+}
+
+pull_error sign_manifest_vendor(manifest_t* mt, digest_func f, const uint8_t *private_key, 
+                    uint8_t* signature_buffer, ecc_curve curve) {
+    return sign_manifest_vendor_impl(mt, f, private_key, signature_buffer, curve);
+}
+pull_error sign_manifest_server(manifest_t* mt, digest_func f, const uint8_t *private_key,
+                    uint8_t* signature_buffer, ecc_curve curve) {
+    return sign_manifest_server_impl(mt, f, private_key, signature_buffer, curve);
 }
 
 size_t get_server_digest_buffer(const manifest_t *mt, void **buffer) {
