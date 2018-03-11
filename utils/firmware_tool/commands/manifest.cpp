@@ -9,8 +9,8 @@
 #include <string>
 #include <sstream>
 #include <iostream>
-
-#include <tinycrypt/ecc_dsa.h>
+#include <iomanip>
+#include <string.h>
 
 /** XXX the next lines should be removed in a refactoring */
 #define BUFFER_LEN 0x1000
@@ -82,41 +82,31 @@ int manifest_generate_command(Context ctx) {
     uint8_t* hash = (uint8_t*) digest.finalize(&dctx); // TODO check the size of the hash
     set_digest(&mt, hash);
     // (6) Generate Vendor Signature
-    char* vend_priv_key_buffer = new char[32];
-    uint8_t* sig = new uint8_t[2*NUM_ECC_BYTES]; // XXX ardcoded value
+    uint8_t* vend_priv_key_buffer = new uint8_t[32];
+    uint8_t* signature = new uint8_t[64]; // XXX hardcoded value
     std::ifstream vend_priv_key(ctx.get_vendor_priv_key(), std::ios_base::binary);
     if (!vend_priv_key) {
         std::cout << "Impossible to read the vendor private key" << std::endl;
         return EXIT_FAILURE;
     }
-    vend_priv_key.read(vend_priv_key_buffer, 32); // TODO check for errors
+    vend_priv_key.read((char*)vend_priv_key_buffer, 32); // TODO check for errors && XXX hardcoded value
     vend_priv_key.close();
-    void* manifest_buffer;
-    size_t size = get_vendor_digest_buffer(&mt, &manifest_buffer);
-    err = digest.init(&dctx);
+ 
+    err = sign_manifest_vendor(&mt, digest, vend_priv_key_buffer, signature, secp256r1);
     if (err) {
-        std::cout << "Error initializing the hashing structure" << std::endl;
-        return EXIT_FAILURE;
-    }
-    digest.update(&dctx, manifest_buffer, size);
-    hash = (uint8_t*) digest.finalize(&dctx);
-    if (sign(vend_priv_key_buffer, hash, 32, sig) != 0) {
-        printf("Error generating signature\n");
+        std::cout << "Error signing the manifest" << std::endl;
         return EXIT_FAILURE;
     }
     delete[] vend_priv_key_buffer;
     // (7) Store the signature in the metadata and a standalone file
-    size_t ecc_size = 32;
-    set_vendor_signature_r(&mt, sig, &ecc_size); // XXX hardcoded value
-    set_vendor_signature_s(&mt, sig+32, &ecc_size); // XXX hardcoded value
     std::ofstream out_signature(ctx.get_signature_file(),  std::ios_base::binary);
     if (!out_signature) {
-        std::cout << "Error, impossible to write on file: " << ctx.get_signature_file() << std::endl;
+        std::cout << "Error writing on file: " << ctx.get_signature_file() << std::endl;
         return EXIT_FAILURE;
     }
-    out_signature.write((char*) sig, 64);
+    out_signature.write((char*) signature, 64);
     out_signature.close();
-    delete[] sig;
+    delete[] signature;
     // (8) write the metadata to the designed binary file
     std::ofstream out(ctx.get_out_file(), std::ios_base::out | std::ios_base::binary);
     if (!out) {
@@ -128,24 +118,139 @@ int manifest_generate_command(Context ctx) {
     return EXIT_SUCCESS;
 }
 
-int sign(char* private_key, uint8_t* hash, int size, uint8_t* sig) {
-    if (!uECC_sign((const uint8_t*)private_key, (uint8_t *) hash, size, sig, uECC_secp256r1())) { // hardcoded curve
-        std::cout << "Error during signature process" << std::endl;
-        return 1;
+static void show_buffer(std::string name, const unsigned char* data, size_t data_len, size_t offset) {
+    std::cout << "   " << name << ":";
+    std::cout << std::setw(offset - name.length() - 4) << " ";
+    print_buf(data, data_len, offset);
+    std::cout << std::setfill(' ');
+}
+
+int manifest_show_command(Context ctx) {
+    std::ifstream input(ctx.get_out_file(), std::ios_base::binary);
+    if (!input) {
+        std::cerr << "Error opening firmware file: " << ctx.get_out_file() << std::endl;
+        return EXIT_FAILURE;
     }
-    return 0;
+    manifest_t mt;
+    input.read((char*) &mt, sizeof(mt));
+    std::cout << ctx.get_out_file() << std::endl;
+    std::cout << "   version:\t  " << "0x" << std::hex << get_version(&mt) << std::endl;
+    std::cout << "   platform:\t  " << "0x" << std::hex << get_platform(&mt) << std::endl;
+    std::cout << "   size:\t  " << std::to_string(get_size(&mt)) << " B" <<  std::endl;
+    std::cout << "   offset:\t  " << "0x" << std::hex << get_offset(&mt) << " B" << std::endl;
+    size_t offset = 18;
+    show_buffer("server_key_x", get_server_key_x(&mt), 32, offset);
+    show_buffer("server_key_y", get_server_key_y(&mt), 32, offset);
+    show_buffer("digest", get_digest(&mt), 32, offset);
+    uint8_t size;
+    uint8_t* signature = get_vendor_signature_r(&mt, &size);
+    show_buffer("vendor_sig_r", signature, size, offset);
+    signature = get_vendor_signature_s(&mt, &size);
+    show_buffer("vendor_sig_s", signature, size, offset);
+    signature = get_server_signature_r(&mt, &size);
+    show_buffer("server_sig_r", signature, size, offset);
+    signature = get_server_signature_s(&mt, &size);
+    show_buffer("server_sig_s", signature, size, offset);
+    return EXIT_SUCCESS;
+}
+
+static void log_item(std::string name, bool value) {
+    std::cout << "   " << name << ":\t[" << ((!value)? "in":"") << "valid]" << std::endl;
+}
+
+int manifest_validate_command(Context ctx) {
+    std::cout << ctx.get_out_file() << std::endl;
+    manifest_t mt;
+    //manifest_init(&mt);
+    // (1) Read the manifest from the file
+    std::ifstream input(ctx.get_out_file(), std::ios_base::binary);
+    if (!input) {
+        std::cout << "Error reading manifest from file: " << ctx.get_out_file() << std::endl;
+        return EXIT_FAILURE;
+    }
+    input.read((char*) &mt, sizeof(manifest_t));
+    input.close();
+    
+    // (2) Validate Size
+    struct stat buf;
+    stat(ctx.get_binary_file().c_str(), &buf);
+    log_item("size", get_size(&mt) == buf.st_size);
+    // (3) Validate Digest
+    digest_ctx dctx;
+    digest_func digest = tinycrypt_digest_sha256;
+    pull_error err = digest.init(&dctx);
+    if (err) {
+        std::cout << "Error initializing the hashing structure" << std::endl;
+        return EXIT_FAILURE;
+    }
+    std::ifstream file(ctx.get_binary_file(), std::ios_base::in | std::ios_base::binary);
+    if (!file) {
+        std::cout << "Error opening the file:" << ctx.get_binary_file() << std::endl;
+        return EXIT_FAILURE;
+    }
+    char* buffer = new char[BUFFER_LEN];
+    while (!file.eof()) {
+        file.read(buffer, BUFFER_LEN);
+        err = digest.update(&dctx, buffer, file.gcount());
+        if (err) {
+            std::cout << "Error updating digest" << std::endl;
+            delete[] buffer;
+            return EXIT_FAILURE;
+        }
+    }
+    file.close();
+    delete[] buffer;
+    uint8_t* hash = (uint8_t*) digest.finalize(&dctx); // TODO check the size of the hash
+    log_item("digest", memcmp(get_digest(&mt), hash, digest.size) == 0);
+    // (4) Validate Server Public Key
+    std::ifstream server_pub_key(ctx.get_server_pub_key(), std::ios_base::binary);
+    if (!server_pub_key) {
+        std::cout << "Error opening server_pub_key: " << ctx.get_server_pub_key() << std::endl;
+        return EXIT_FAILURE;
+    }
+    uint8_t* server_public_key_buffer = new uint8_t[64];
+    server_pub_key.read((char*)server_public_key_buffer, 64); // XXX hardcoded size
+    server_pub_key.close();
+    log_item("server_key_x", memcmp(get_server_key_x(&mt), server_public_key_buffer, 32) == 0);
+    log_item("server_key_y", memcmp(get_server_key_y(&mt), server_public_key_buffer+32, 32) == 0);
+    // (5) Validate Vendor Signature
+    std::ifstream vendor_pub_key(ctx.get_vendor_pub_key(), std::ios_base::binary);
+    if (!server_pub_key) {
+        std::cout << "Error opening vendor_pub_key: " << ctx.get_server_pub_key() << std::endl;
+        return EXIT_FAILURE;
+    }
+    uint8_t* vendor_public_key_buffer = new uint8_t[64];
+    vendor_pub_key.read((char*)vendor_public_key_buffer, 64); // XXX hardcoded size
+    vendor_pub_key.close();
+    err = verify_manifest_vendor(&mt, digest, vendor_public_key_buffer,
+                                         vendor_public_key_buffer+32, secp256r1);
+    log_item("vendor_signature", err == PULL_SUCCESS);
+    delete[] vendor_public_key_buffer;
+    // (6) Validate Server Signature
+    err = verify_manifest_server(&mt, digest, server_public_key_buffer,
+                                         server_public_key_buffer+32, secp256r1);
+    log_item("server_signature", err == PULL_SUCCESS);
+    delete[] server_public_key_buffer;
+    return EXIT_SUCCESS;
 }
 
 int manifest_help_command(Context ctx) {
     std::cout << "Available commands are:" << std::endl;
     std::cout << "   generate\tcreate a manifest using the input parameters" << std::endl;
-    return 0;
+    std::cout << "   validate \tvalidate the content of the manifest" << std::endl;
+    std::cout << "   show    \tshow the recognized values of a manifest" << std::endl;
+    std::cout << "   help    \tshows this message" << std::endl;
+    return EXIT_SUCCESS;
 }
 
 int manifest_command(Context ctx) {
     std::string subcommand = ctx.get_next_command();
     if (subcommand == "generate") {
         return manifest_generate_command(ctx);
+    } else if (subcommand == "show") {
+        return manifest_show_command(ctx);
+    } else if (subcommand == "validate") {
+        return manifest_validate_command(ctx);
     }
-    return manifest_help_command(ctx);
+    return !manifest_help_command(ctx);
 }

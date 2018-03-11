@@ -1,3 +1,6 @@
+#include "commands.hpp"
+#include <iostream>
+#include <iomanip>
 /*int binary_writer(char *file_name, uint8_t*buffer, int len) {
     int file = open(file_name, O_WRONLY|O_CREAT|O_TRUNC, 0644);
     if (file < 0) {
@@ -47,3 +50,18 @@ int check_exists(std::string path) {
     struct stat buf;
     return !stat(path.c_str(), &buf);
 }*/
+
+void print_buf(const unsigned char* data, size_t data_len, size_t offset) {
+    for(size_t i = 0; i < data_len; ++i) { 
+        std::cout << std::setfill('0');
+        std::cout << std::hex << std::setw(2) << (int)data[i];
+        if (((i + 1) % 16) == 0 && i != data_len-1) {
+            std::cout << std::setfill(' ');
+            std::cout << std::endl << std::setw(offset) << " ";
+        } else {
+            std::cout << " ";
+        }
+    }
+    std::setfill(' ');
+    std::cout << std::endl;
+}
