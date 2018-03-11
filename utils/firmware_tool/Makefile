@@ -9,21 +9,22 @@ CFLAGS=-Wall -g $(INCLUDES) $(FLAGS)
 CXXFLAGS=-Wall -g -std=c++11 $(INCLUDES) $(FLAGS)
 
 CPPSRC= $(wildcard commands/*.cpp ./*.cpp)
-OBJ= $(patsubst src/%.cpp, obj/%.o, $(CPPSRC))
+OBJ= $(patsubst %.cpp, %.o, $(CPPSRC))
 
 CSRC= ../../ext/tinycrypt/lib/source/ecc_platform_specific.c
 CSRC+=../../src/memory/manifest.c ../../src/security/tinycrypt.c
 CSRC+=../../src/memory/simple_manifest_impl.c
-OBJ+= $(patsubst src/%.c, obj/%.o, $(CSRC))
+OBJ+= $(patsubst %.c, %.o, $(CSRC))
 
 firmware_tool: $(OBJ)
+	echo $(OBJ)
 	$(CXX) $(CXXFLAGS) $(LIBS) $(OBJ) -o $@
 
-obj/%.o: src/%.cpp
-	$(CXX) $(CFLAGS) -c $< -o $@
+%.o: %.cpp
+	$(CXX) $(CXXFLAGS) -c $< -o $@
 
-obj/%.o: src/%.c
+%.o: %.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
 clean:
-	rm -rf obj
+	rm -rf $(OBJ) firmware_tool
