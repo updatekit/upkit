@@ -1,0 +1,11 @@
+{
+    "binary_file": "firmware.hex",
+    "out_file": "manifest.bin",
+    "platform": "0x7213abb",
+    "server_priv_key": "keys/server.priv",
+    "server_pub_key": "keys/server.pub",
+    "signature_file": "signature.bin",
+    "vendor_priv_key": "keys/vendor.priv",
+    "vendor_pub_key": "keys/vendor.pub",
+    "version": "0xdead"
+}

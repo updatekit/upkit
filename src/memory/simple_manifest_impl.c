@@ -4,58 +4,85 @@
 
 #ifdef SIMPLE_MANIFEST
 
-inline version_t get_version_impl(const manifest_t* mt) {
+version_t get_version_impl(const manifest_t* mt) {
     return mt->vendor.version;
 }
-inline platform_t get_platform_impl(const manifest_t* mt) {
+platform_t get_platform_impl(const manifest_t* mt) {
     return mt->vendor.platform;
 }
-inline address_t get_size_impl(const manifest_t* mt) {
+address_t get_size_impl(const manifest_t* mt) {
     return mt->vendor.size;
 }
-inline address_t get_offset_impl(const manifest_t* mt) {
+address_t get_offset_impl(const manifest_t* mt) {
     return mt->vendor.offset;
 }
-inline uint8_t* get_digest_impl(const manifest_t* mt) {
+uint8_t* get_digest_impl(const manifest_t* mt) {
     return (uint8_t*) mt->vendor.digest;
 }
-inline uint8_t* get_server_key_x_impl(const manifest_t* mt) {
+uint8_t* get_server_key_x_impl(const manifest_t* mt) {
     return (uint8_t*) mt->vendor.server_key_x;
 }
-inline uint8_t* get_server_key_y_impl(const manifest_t* mt) {
+uint8_t* get_server_key_y_impl(const manifest_t* mt) {
     return (uint8_t*) mt->vendor.server_key_y;
 }
 
-inline void set_version_impl(manifest_t* mt, version_t version) {
+void set_version_impl(manifest_t* mt, version_t version) {
     mt->vendor.version = version;
 }
-inline void set_platform_impl(manifest_t* mt, platform_t platform) {
+void set_platform_impl(manifest_t* mt, platform_t platform) {
     mt->vendor.platform = platform;
 }
-inline void set_size_impl(manifest_t* mt, address_t size) {
+void set_size_impl(manifest_t* mt, address_t size) {
     mt->vendor.size = size;
 }
-inline void set_offset_impl(manifest_t* mt, address_t offset) {
+void set_offset_impl(manifest_t* mt, address_t offset) {
     mt->vendor.offset = offset;
 }
-inline void set_digest_impl(manifest_t* mt, uint8_t* digest) {
+void set_digest_impl(manifest_t* mt, uint8_t* digest) {
     // TODO    
 }
-inline void set_server_key_x_impl(manifest_t* mt, uint8_t* server_key_x) {
+void set_server_key_x_impl(manifest_t* mt, uint8_t* server_key_x) {
     // TODO    
 }
-inline void set_server_key_y_impl(manifest_t* mt, uint8_t* server_key_y) {
+void set_server_key_y_impl(manifest_t* mt, uint8_t* server_key_y) {
     // TODO    
 }
 
-int to_digest_impl(manifest_t* mt, void* buffer, size_t buffer_len) {
-    if (!buffer || buffer_len < sizeof(vendor_manifest_t)) {
-        return -1;
-    }
-    if (!memcpy(buffer, &mt->vendor, sizeof(vendor_manifest_t))) {
-        return  -1;
-    }
+uint8_t* get_vendor_signature_r_impl(const manifest_t *mt, size_t* size) {
+    return (uint8_t*) mt->vendor_signature_r;
+}
+uint8_t* get_vendor_signature_s_impl(const manifest_t *mt, size_t* size) {
+    return (uint8_t*) mt->vendor_signature_s;
+}
+uint8_t* get_server_signature_r_impl(const manifest_t *mt, size_t* size) {
+    return (uint8_t*) mt->server_signature_r;
+}
+uint8_t* get_server_signature_s_impl(const manifest_t *mt, size_t* size) {
+    return (uint8_t*) mt->server_signature_s;
+}
+
+
+void set_vendor_signature_r_impl(manifest_t *mt, uint8_t* vendor_signature_r, size_t *size) {
+    memcpy(mt->vendor_signature_r, vendor_signature_r, *size);
+}
+void set_vendor_signature_s_impl(manifest_t *mt, uint8_t* vendor_signature_s, size_t *size) {
+    memcpy(mt->vendor_signature_s, vendor_signature_s, *size);
+}
+void set_server_signature_r_impl(manifest_t *mt, uint8_t* server_signature_r, size_t *size) {
+    memcpy(mt->server_signature_r, server_signature_r, *size);
+}
+void set_server_signature_s_impl(manifest_t *mt, uint8_t* server_signature_s, size_t *size) {
+    memcpy(mt->server_signature_s, server_signature_s, *size);
+}
+
+size_t get_vendor_digest_buffer_impl(const manifest_t* mt, void** buffer) {
+    *buffer = (void*) &(mt->vendor);
     return sizeof(vendor_manifest_t);
+}
+
+size_t get_server_digest_buffer_impl(const manifest_t* mt, void** buffer) {
+    *buffer = (void*) &(mt->server);
+    return sizeof(server_manifest_t);
 }
 
 void print_manifest_impl(const manifest_t* mt) {

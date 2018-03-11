@@ -9,17 +9,17 @@
 
 /* SHA 256 */
 
-inline pull_error tinydtls_sha256_init(digest_ctx* ctx) {
+pull_error tinydtls_sha256_init(digest_ctx* ctx) {
     dtls_sha256_init(&ctx->sha256_tinydtls.ctx);
     return PULL_SUCCESS;
 }
 
-inline pull_error tinydtls_sha256_update(digest_ctx* ctx, void* data, size_t data_size) {
+pull_error tinydtls_sha256_update(digest_ctx* ctx, void* data, size_t data_size) {
     dtls_sha256_update(&ctx->sha256_tinydtls.ctx, (unsigned char*)data, data_size);
     return PULL_SUCCESS;
 }
 
-inline void* tinydtls_sha256_final(digest_ctx* ctx) {
+void* tinydtls_sha256_final(digest_ctx* ctx) {
     dtls_sha256_final((unsigned char*) &ctx->sha256_tinydtls.result, &ctx->sha256_tinydtls.ctx);
     return &ctx->sha256_tinydtls.result;
 }

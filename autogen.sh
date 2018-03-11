@@ -20,6 +20,7 @@ clone() {
 clone libcoap https://github.com/obgm/libcoap.git "16685d7"
 clone tinydtls https://git.eclipse.org/r/tinydtls/org.eclipse.tinydtls
 clone tinycrypt https://github.com/01org/tinycrypt.git
+clone jansson https://github.com/akheron/jansson.git
 #clone cryptoauthlib https://github.com/MicrochipTech/cryptoauthlib.git
 
 # Patch the repositories
@@ -34,7 +35,7 @@ for dir in $(cd $PATCHDIR && find * -type d -print); do
     done
 done
 
-# Clone and build the libcoap library
+# Build libcoap
 echo "Build libcoap..."
 (
   cd ext/libcoap && \
@@ -45,7 +46,7 @@ echo "Build libcoap..."
 )
 echo "Build libcoap...done"
 
-# Clone and build tinydtls
+# Build tinydtls
 echo "Build tinydtls..."
 (
   cd ext/tinydtls
@@ -58,8 +59,16 @@ echo "Build tinydtls..."
 )
 echo "Build tinydtls...done"
 
-#Build tinycrypt
+# Build tinycrypt
 (cd ext/tinycrypt && make)
+
+# Build jansson
+(
+    cd ext/jansson
+    autoreconf -i
+    ./configure
+    make
+)
 
 # Check the presence of the testing tool
 echo "Checking for ceedling test suite..."
