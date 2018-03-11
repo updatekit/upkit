@@ -1,7 +1,8 @@
 {
     "binary_file": "firmware.hex",
+    "offset": "0x100",
     "out_file": "manifest.bin",
-    "platform": "0x7213abb",
+    "platform": "0xbeef",
     "server_priv_key": "keys/server.priv",
     "server_pub_key": "keys/server.pub",
     "signature_file": "signature.bin",
