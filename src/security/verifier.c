@@ -23,10 +23,11 @@ pull_error verify_object(obj_id id, digest_func digest, const uint8_t* x, const 
     // to have the possibility to work on a already open object
     manifest_t mt;
     if (memory_read(obj_t, (uint8_t*) &mt, sizeof(manifest_t), 0) != sizeof(manifest_t)) {
-        log_error(MEMORY_READ_ERROR, "Failure reading manifest\n");
         err = MEMORY_READ_ERROR;
+        log_error(err, "Failure reading manifest\n");
         goto error;
     }
+
     log_info("Calculating digest\n");
     digest_ctx ctx;
     err = digest.init(&ctx);
@@ -37,6 +38,11 @@ pull_error verify_object(obj_id id, digest_func digest, const uint8_t* x, const 
     address_t offset = get_offset(&mt);
     address_t final_offset = offset + get_size(&mt);
     address_t step = buffer_len;
+    if (offset == final_offset) {
+        err = MEMORY_READ_ERROR;
+        log_error(err, "Invalid manifest\n");
+        goto error;
+    }
 
     int readed = 0;
     while (offset < final_offset &&
@@ -56,17 +62,20 @@ pull_error verify_object(obj_id id, digest_func digest, const uint8_t* x, const 
     uint8_t* hash = get_digest(&mt);
     if (hash == NULL) {
         err = VERIFICATION_FAILED_ERROR;
+        log_error(err, "Null hash");
         goto error;
     }
-    if (memcmp(result, hash, digest.size) == 0) {
+    if (memcmp(result, hash, digest.size) != 0) {
         err = VERIFICATION_FAILED_ERROR;
+        log_error(err, "Invalid hash");
         goto error;
     }
 
     err = verify_manifest_vendor(&mt, digest, x, y, curve);
     if (err) {
-        goto error;
+        return VERIFICATION_FAILED_ERROR;
     }
+    log_info("Vendor Signature Valid");
     // TODO verify server signature
     err = PULL_SUCCESS;
 error:

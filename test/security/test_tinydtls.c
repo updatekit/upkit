@@ -48,7 +48,7 @@ void test_sha256(void) {
 }
 
 #define DEFINE_TEST(name) \
-    void test_##name (void) {\
+    void test_verify_object_##name (void) {\
         verify_object_##name (tinydtls_digest_sha256); \
     }
 

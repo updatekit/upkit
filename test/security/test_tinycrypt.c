@@ -77,7 +77,7 @@ void test_sha256_invalid_final(void) {
 }
 
 #define DEFINE_TEST(name) \
-    void test_##name (void) {\
+    void test_verify_object_##name (void) {\
         verify_object_##name (tinycrypt_digest_sha256); \
     }
 
