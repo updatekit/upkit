@@ -16,8 +16,7 @@ CSRC+=../../src/memory/simple_manifest_impl.c
 OBJ+= $(patsubst %.c, %.o, $(CSRC))
 
 firmware_tool: $(OBJ)
-	echo $(OBJ)
-	$(CXX) $(CXXFLAGS) $(LIBS) $(OBJ) -o $@
+	$(CXX) $(CXXFLAGS) $(OBJ) $(LIBS) -o $@
 
 %.o: %.cpp
 	$(CXX) $(CXXFLAGS) -c $< -o $@
