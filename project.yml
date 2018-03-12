@@ -90,7 +90,7 @@
         - --html
         - --html-details
         - -r .
-        - -o "build/test/artifacts/gcov/GcovCoverageResults.html"
+        - -o "build/ceedling/artifacts/gcov/GcovCoverageResults.html"
 
 :libraries:
  :placement: :end

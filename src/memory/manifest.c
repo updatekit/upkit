@@ -91,11 +91,3 @@ pull_error sign_manifest_server(manifest_t* mt, digest_func f, const uint8_t *pr
                     uint8_t* signature_buffer, ecc_curve curve) {
     return sign_manifest_server_impl(mt, f, private_key, signature_buffer, curve);
 }
-
-size_t get_server_digest_buffer(const manifest_t *mt, void **buffer) {
-    return get_server_digest_buffer_impl(mt, buffer);
-}
-
-size_t get_vendor_digest_buffer(const manifest_t *mt, void **buffer) {
-    return get_vendor_digest_buffer_impl(mt, buffer);
-}

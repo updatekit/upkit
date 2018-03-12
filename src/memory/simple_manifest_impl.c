@@ -50,11 +50,11 @@ void set_server_key_y_impl(manifest_t* mt, uint8_t* server_key_y) {
 
 uint8_t* get_vendor_signature_r_impl(const manifest_t *mt, uint8_t* size) {
     *size = 32;
-    return (uint8_t*) mt->vendor_signature_r;
+    return (uint8_t*) (mt->vendor_signature_r);
 }
 uint8_t* get_vendor_signature_s_impl(const manifest_t *mt, uint8_t* size) {
     *size = 32;
-    return (uint8_t*) mt->vendor_signature_s;
+    return (uint8_t*) (mt->vendor_signature_s);
 }
 uint8_t* get_server_signature_r_impl(const manifest_t *mt, uint8_t* size) {
     *size = 32;
@@ -134,16 +134,6 @@ pull_error sign_manifest_server_impl(manifest_t* mt, digest_func f, const uint8_
     set_server_signature_r_impl(mt, signature_buffer, &curve.curve_size);
     set_server_signature_s_impl(mt, signature_buffer+curve.curve_size, &curve.curve_size);
     return err;
-}
-
-size_t get_vendor_digest_buffer_impl(const manifest_t* mt, void** buffer) {
-    *buffer = (void*) &(mt->vendor);
-    return sizeof(vendor_manifest_t);
-}
-
-size_t get_server_digest_buffer_impl(const manifest_t* mt, void** buffer) {
-    *buffer = (void*) &(mt->server);
-    return sizeof(server_manifest_t);
 }
 
 void print_manifest_impl(const manifest_t* mt) {

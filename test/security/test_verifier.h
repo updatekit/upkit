@@ -17,13 +17,12 @@
 static uint8_t buffer[BUFFER_LEN];
 
 #define FOREACH_TEST(TEST) \
-    TEST(invalid_key)
-    /*TEST(valid)\
+    TEST(valid)\
     TEST(invalid_object)\
     TEST(invalid_read)\
     TEST(invalid_digest_init)\
-    TEST(invalid_digest_update)\*/
-
+    TEST(invalid_digest_update)\
+    TEST(invalid_key)
 
 #define DECLARE_TEST(name) \
     void verify_object_##name (digest_func func);

@@ -65,9 +65,6 @@ pull_error sign_manifest_vendor(manifest_t* mt, digest_func f, const uint8_t *pr
 pull_error sign_manifest_server(manifest_t* mt, digest_func f, const uint8_t *private_key,
                                     uint8_t* signature_buffer, ecc_curve curve);
 
-size_t get_vendor_digest_buffer(const manifest_t* mt, void** buffer);
-size_t gen_server_digest_buffer(const manifest_t* mt, void** buffer);
-
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
