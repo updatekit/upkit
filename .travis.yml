@@ -11,7 +11,10 @@ addons:
       - gcovr
       - g++-4.9
 
-install: 
+before_install:
+  - export CC=gcc-4.9
+  - export CXX=g++-4.9
+install:
   - gem install ceedling
   - ./autogen.sh
   - (cd utils/server/ && make)
