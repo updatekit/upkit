@@ -19,6 +19,6 @@ install:
   - gem install ceedling
   - ./autogen.sh
   - (cd utils/server/ && make)
-  - ./utils/server/server.bin -v 10 -a assets & >/dev/null
+  - ./utils/server/server.bin -a assets & >/dev/null 2>&1
 
 script: ceedling test:all
