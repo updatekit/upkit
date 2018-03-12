@@ -38,18 +38,16 @@ pull_error ecc_verify(const uint8_t* x, const uint8_t* y, const uint8_t* r, cons
     return VERIFICATION_FAILED_ERROR;
 }
 
-pull_error ecc_sign(const uint8_t* private_key, const uint8_t *signature,
+pull_error ecc_sign(const uint8_t* private_key, uint8_t *signature,
         const void *data, uint16_t data_len, ecc_curve curve) {
-    uint8_t signature_DER[72];
-     if(dtls_ecdsa_create_sig_hash(private_key, curve.curve_size, data, data_len,
-                 signature_DER, signature_DER+36) == 0) {
-         // XXX This is not right! tinydtls encodes the signature in DER that requires
-         // up to 72 bytes. I'm passing to it just 64. I should refactor the
-         // signature to enable different encodings! Use TinyCrypt until this
-         // is not solved.
-        return SIGN_FAILED_ERROR
-     }
-     return SIGN_FAILED_ERROR;
+    uint32_t signature_DER[18];
+    dtls_ecdsa_create_sig_hash(private_key, curve.curve_size, data, data_len,
+            signature_DER, signature_DER+9);
+    // XXX This is not right! tinydtls encodes the signature in DER that requires
+    // up to 72 bytes. I'm passing to it just 64. I should refactor the
+    // signature to enable different encodings! Use TinyCrypt until this
+    // is not solved.
+    return SIGN_FAILED_ERROR;
 }
 
 #endif /* WITH_TINYDTLS */

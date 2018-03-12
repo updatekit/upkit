@@ -6,6 +6,7 @@
 #include "memory_objects.h"
 #include "memory_file_posix.h"
 #include "manifest.h"
+#include "tinycrypt.h"
 #include "simple_manifest.h"
 #include "simple_manifest_impl.h"
 

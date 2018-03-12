@@ -39,29 +39,29 @@ static void handler(pull_error txp_err, const char* data, int len, void* more) {
         break_loop(ctx->txp);
         return;
     }
-    if (!ctx->metadata_received) {
-        log_debug("Metadata still not received\n");
-        int16_t missing = sizeof(metadata)-ctx->received;
+    if (!ctx->manifest_received) {
+        log_debug("Manifest still not received\n");
+        int16_t missing = sizeof(manifest_t)-ctx->received;
         if (missing <= 0) {
-            log_debug("Metadata received\n");
-            print_metadata(&ctx->mt);
+            log_debug("Manifest received\n");
+            print_manifest(&ctx->mt);
             ctx->expected = get_size(&ctx->mt)+get_offset(&ctx->mt);
             // TODO find a way to check if the firmware to receive is
             // bigger than the object size
-            if (get_size(&ctx->mt) <= 0 /* ||ctx->mt.vendor.size > MAX_FIRMWARE_SIZE-sizeof(metadata)*/) {
+            if (get_size(&ctx->mt) <= 0 /* ||ctx->mt.vendor.size > MAX_FIRMWARE_SIZE-sizeof(manifest_t)*/) {
                 log_debug("Received an invalid size %d, aborting\n", (int) ctx->mt.vendor.size);
                 ctx->err = INVALID_SIZE_ERROR;
                 break_loop(ctx->txp);
                 return;
             }
-            ctx->metadata_received = 1;
+            ctx->manifest_received = 1;
         } else {
             uint8_t* mt_ptr = (uint8_t*) &ctx->mt;
-            memcpy(mt_ptr+ctx->received, data, ctx->received+len<=sizeof(metadata)? len: missing);
+            memcpy(mt_ptr+ctx->received, data, ctx->received+len<=sizeof(manifest_t)? len: missing);
         }
     }
     ctx->received+=len;
-    if (ctx->metadata_received) {
+    if (ctx->manifest_received) {
         log_info("Received %u bytes. Expected %u bytes\r", ctx->received, ctx->expected);
         if (ctx->received == ctx->expected) {
             ctx->firmware_received = 1;

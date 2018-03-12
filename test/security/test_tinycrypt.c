@@ -1,25 +1,20 @@
 #include "unity.h"
 #include "mock_memory.h"
-#include "mock_metadata.h"
+#include "mock_manifest.h"
 #include "sample_data.h"
 #include "tinycrypt.h"
-#include "tinydtls.h"
 #include "digest.h"
 #include "sha256.h"
 #include "ecc.h"
 #include "verifier.h"
 #include "error.h"
-#include "simple_metadata.h"
+#include "simple_manifest_impl.h"
 #include "memory_objects.h"
 #include "memory_file_posix.h"
 #include "test_verifier.h"
 #include <string.h>
 
 DIGEST_FUNC(tinycrypt);
-
-int default_CSPRNG(uint8_t *dest, unsigned int size) {
-    return 0;
-}
 
 void test_ecc_verify(void) {
     pull_error err;
@@ -81,6 +76,9 @@ void test_sha256_invalid_final(void) {
     TEST_ASSERT_TRUE(hash == NULL);
 }
 
-void test_verifier(void) {
-    test_verify_all(tinycrypt_digest_sha256);
-}
+#define DEFINE_TEST(name) \
+    void test_##name (void) {\
+        verify_object_##name (tinycrypt_digest_sha256); \
+    }
+
+FOREACH_TEST(DEFINE_TEST)

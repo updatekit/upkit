@@ -8,7 +8,7 @@
 #define SUBSCRIBER_H_
 
 #include "network/transport.h"
-#include "memory/metadata.h"
+#include "memory/manifest.h"
 #include "memory/memory.h"
 
 #ifdef __cplusplus
@@ -19,7 +19,7 @@ typedef struct {
     txp_ctx* txp;
     const char* resource;
     uint8_t has_updates;
-    metadata mt;
+    manifest_t mt;
 } subscriber_ctx;
 
 /** 

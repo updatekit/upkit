@@ -1,14 +1,15 @@
 #include "unity.h"
 #include "receiver.h"
 #include "memory.h"
-#include "metadata.h"
-#include "simple_metadata.h"
+#include "manifest.h"
+#include "simple_manifest_impl.h"
 #include "memory_objects.h"
 #include "memory_file_posix.h"
 #include "transport.h"
 #include "async.h"
 #include "error.h"
 #include "async_libcoap.h"
+#include "tinydtls.h"
 #include "transport_libcoap.h"
 #include "sample_data.h"
 
@@ -18,17 +19,17 @@ void setUp(void) {
 }
 
 void tearDown(void) {
-    metadata invalid_mt;
-    bzero(&invalid_mt, sizeof(metadata));
+    manifest_t invalid_mt;
+    bzero(&invalid_mt, sizeof(manifest_t));
     mem_object obj_t;
-    pull_error err = write_firmware_metadata(OBJ_2, &invalid_mt, &obj_t);
+    pull_error err = write_firmware_manifest(OBJ_2, &invalid_mt, &obj_t);
     TEST_ASSERT_TRUE(!err);
 }
 
 void test_get_firmware(void) {
     txp_ctx txp;
     receiver_ctx rcv;
-    pull_error err = txp_init(&txp, PROV_SERVER, 0, UDP, NULL);
+    pull_error err = txp_init(&txp, PROV_SERVER, 0, CONN_UDP, NULL);
     TEST_ASSERT_TRUE(!err);
     mem_object obj_t;
     err = receiver_open(&rcv, &txp, "firmware", OBJ_2, &obj_t);
@@ -53,7 +54,7 @@ void test_get_firmware_dtls(void) {
         .pub_key_x = (uint8_t*) x,
         .pub_key_y = (uint8_t*) y
     };
-    pull_error err = txp_init(&txp, PROV_SERVER, 0, DTLS_ECDH, &ecdh_data);
+    pull_error err = txp_init(&txp, PROV_SERVER, 0, CONN_DTLS_ECDH, &ecdh_data);
     TEST_ASSERT_TRUE(!err);
     mem_object obj_t;
     err = receiver_open(&rcv, &txp, "firmware", OBJ_2, &obj_t);

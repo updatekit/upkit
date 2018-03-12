@@ -2,9 +2,10 @@
 #include "network/transport.h"
 #include "transport_libcoap.h"
 #include "error.h"
-#include "memory/metadata.h"
-#include "simple_metadata.h"
+#include "memory/manifest.h"
+#include "simple_manifest_impl.h"
 #include "sample_data.h"
+#include "tinydtls.h"
 #include <coap/coap.h>
 
 #define PROV_SERVER "localhost"
@@ -41,7 +42,7 @@ void tearDown(void) {
 
 void test_udp(void) {
     // Set up udp connection
-    pull_error error = txp_init(&ctx, PROV_SERVER, 0, UDP, NULL);
+    pull_error error = txp_init(&ctx, PROV_SERVER, 0, CONN_UDP, NULL);
     TEST_ASSERT_TRUE(!error);
     get();
     echo();
@@ -57,7 +58,7 @@ void test_dtls_ecdsa(void) {
         .pub_key_x = (uint8_t *) x,
         .pub_key_y = (uint8_t *) y
     };
-    pull_error error = txp_init(&ctx, PROV_SERVER, 0, DTLS_ECDH, &ecdh_data);
+    pull_error error = txp_init(&ctx, PROV_SERVER, 0, CONN_DTLS_ECDH, &ecdh_data);
     TEST_ASSERT_TRUE(!error);
     get();
     echo();

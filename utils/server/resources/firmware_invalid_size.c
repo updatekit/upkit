@@ -2,7 +2,7 @@
 #include <coap/coap.h>
 #include <coap/coap_dtls.h>
 
-#include "memory/metadata.h"
+#include "memory/manifest.h"
 
 #include "../server.h"
 

@@ -2,7 +2,7 @@
 #define VERIFIER_H_
 
 #include "memory/memory.h"
-#include "memory/metadata.h"
+#include "memory/manifest.h"
 #include "security/verifier.h"
 #include "security/digest.h"
 #include "security/ecc.h"
@@ -21,9 +21,9 @@ pull_error verify_object(obj_id id, digest_func digest, const uint8_t* x, const 
     }
     // XXX this is very bad, but to fix it I should refactor the memory objects
     // to have the possibility to work on a already open object
-    metadata mt;
-    if (memory_read(obj_t, (uint8_t*) &mt, sizeof(metadata), 0) != sizeof(metadata)) {
-        log_error(MEMORY_READ_ERROR, "Failure reading metadata\n");
+    manifest_t mt;
+    if (memory_read(obj_t, (uint8_t*) &mt, sizeof(manifest_t), 0) != sizeof(manifest_t)) {
+        log_error(MEMORY_READ_ERROR, "Failure reading manifest\n");
         err = MEMORY_READ_ERROR;
         goto error;
     }
@@ -34,20 +34,10 @@ pull_error verify_object(obj_id id, digest_func digest, const uint8_t* x, const 
         log_error(err, "Error initializing digest\n");
         goto error;
     }
-    int chunk_len = to_digest(&mt, buffer, buffer_len);
-    if (chunk_len < 0) {
-        err = DIGEST_UPDATE_ERROR;
-        log_error(err, "Failure passing metadata to digest\n");
-        goto error;
-    }
-    err = digest.update(&ctx, buffer, chunk_len);
-    if (err) {
-        log_error(err, "Failure updating digest\n");
-        goto error;
-    }
     address_t offset = get_offset(&mt);
     address_t final_offset = offset + get_size(&mt);
     address_t step = buffer_len;
+
     int readed = 0;
     while (offset < final_offset &&
             (readed = memory_read(obj_t, buffer, step, offset)) > 0) {
@@ -61,13 +51,23 @@ pull_error verify_object(obj_id id, digest_func digest, const uint8_t* x, const 
             step = final_offset - offset;
         }
     }
+
     uint8_t* result = digest.finalize(&ctx);
-    log_debug("Digest: %02x %02x\n", result[0], result[1]);
-    err = ecc_verify(x, y, mt.vendor_signature_r, mt.vendor_signature_s, 
-            result, digest.size, curve);
+    uint8_t* hash = get_digest(&mt);
+    if (hash == NULL) {
+        err = VERIFICATION_FAILED_ERROR;
+        goto error;
+    }
+    if (memcmp(result, hash, digest.size) == 0) {
+        err = VERIFICATION_FAILED_ERROR;
+        goto error;
+    }
+
+    err = verify_manifest_vendor(&mt, digest, x, y, curve);
     if (err) {
         goto error;
     }
+    // TODO verify server signature
     err = PULL_SUCCESS;
 error:
     memory_close(obj_t);

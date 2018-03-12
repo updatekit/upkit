@@ -24,8 +24,8 @@ extern "C" {
 typedef struct receiver_ctx_ {
     const char* resource;
     mem_object* obj;
-    metadata mt;
-    int metadata_received;
+    manifest_t mt;
+    int manifest_received;
     pull_error err;
     uint8_t num_err;
     txp_ctx* txp;

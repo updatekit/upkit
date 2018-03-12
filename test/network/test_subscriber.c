@@ -5,9 +5,10 @@
 #include "memory_objects.h"
 #include "memory.h"
 #include "error.h"
-#include "simple_metadata.h"
-#include "metadata.h"
+#include "simple_manifest_impl.h"
+#include "manifest.h"
 #include "memory_file_posix.h"
+#include "tinycrypt.h"
 #include "async.h"
 #include "async_libcoap.h"
 #include <coap/coap.h>
@@ -33,7 +34,7 @@ static void check_update_cb(pull_error err, const char* data, int len, void* mor
 void test_updates_polling(void) {
     subscriber_ctx ctx;
     txp_ctx txp;
-    txp_init(&txp, PROV_SERVER, 0, UDP, NULL);
+    txp_init(&txp, PROV_SERVER, 0, CONN_UDP, NULL);
     mem_object obj_t;
     pull_error err = subscribe(&ctx, &txp, "version", &obj_t);
     TEST_ASSERT_TRUE(!err);

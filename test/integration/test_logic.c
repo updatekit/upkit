@@ -2,8 +2,8 @@
 
 #include "logger.h"
 #include "error.h"
-#include "metadata.h"
-#include "simple_metadata.h"
+#include "manifest.h"
+#include "simple_manifest_impl.h"
 #include "receiver.h"
 #include "subscriber.h"
 #include "memory_file_posix.h"
@@ -33,15 +33,15 @@ void setUp(void) {
 }
 
 void tearDown(void) {
-    metadata invalid_mt;
-    bzero(&invalid_mt, sizeof(metadata));
+    manifest_t invalid_mt;
+    bzero(&invalid_mt, sizeof(manifest_t));
     mem_object obj_t;
-    pull_error err = write_firmware_metadata(OBJ_2, &invalid_mt, &obj_t);
+    pull_error err = write_firmware_manifest(OBJ_2, &invalid_mt, &obj_t);
     TEST_ASSERT_TRUE(!err);
 }
 
 void test_logic_udp(void) {
-    logic(UDP, NULL);
+    logic(CONN_UDP, NULL);
 }
 
 void test_logic_dtls(void) {
@@ -52,7 +52,7 @@ void test_logic_dtls(void) {
         .pub_key_x = (uint8_t*) x,
         .pub_key_y = (uint8_t*) y
     };
-    logic(DTLS_ECDH, &ecdh_data);
+    logic(CONN_DTLS_ECDH, &ecdh_data);
 }
 
 // The test logic should update the OBJ_2 with the firmware with version 0xdead

@@ -27,9 +27,9 @@ typedef struct {
  * defined here you can find some predefined structs in
  * security/secure_transport.h. */
 typedef enum conn_type {
-    UDP, // No connection data
-    DTLS_PSK,
-    DTLS_ECDH
+    CONN_UDP, // No connection data
+    CONN_DTLS_PSK,
+    CONN_DTLS_ECDH
 } conn_type;
 
 typedef struct dtls_psk_data_t {

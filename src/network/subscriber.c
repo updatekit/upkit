@@ -16,7 +16,7 @@ pull_error subscribe(subscriber_ctx* ctx, txp_ctx* txp, const char* resource, me
         log_error(err, "Impossible to get newest firmware\n");
         return SUBSCRIBE_ERROR;
     }
-    read_firmware_metadata(id, &ctx->mt, obj_t);
+    read_firmware_manifest(id, &ctx->mt, obj_t);
     if (err) {
         log_error(err, "Impossible to get newest firmware metadata\n");
         return SUBSCRIBE_ERROR;

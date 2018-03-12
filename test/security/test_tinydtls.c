@@ -1,6 +1,6 @@
 #include "unity.h"
 #include "mock_memory.h"
-#include "mock_metadata.h"
+#include "mock_manifest.h"
 #include "ecc.h"
 #include "sample_data.h"
 #include "tinydtls.h"
@@ -10,7 +10,7 @@
 #include "error.h"
 #include "test_verifier.h"
 #include "verifier.h"
-#include "simple_metadata.h"
+#include "simple_manifest_impl.h"
 #include "memory_file_posix.h"
 
 DIGEST_FUNC(tinydtls);
@@ -47,6 +47,9 @@ void test_sha256(void) {
     TEST_ASSERT_EQUAL_MEMORY(hash_g, hash, 32);
 }
 
- void test_verifier(void) {
-     test_verify_all(tinydtls_digest_sha256);
- }
+#define DEFINE_TEST(name) \
+    void test_##name (void) {\
+        verify_object_##name (tinydtls_digest_sha256); \
+    }
+
+FOREACH_TEST(DEFINE_TEST)

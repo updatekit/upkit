@@ -21,7 +21,7 @@
 #include "config.h"
 #include "server.h"
 
-#include "memory/metadata.h"
+#include "memory/manifest.h"
 
 static int server_exit = 0;
 static server_ctx_t server_ctx = {
@@ -43,8 +43,8 @@ void update_server_context(server_ctx_t* ctx) {
         fprintf(stderr, "Impossible to open the firmware file\n");
         exit(EXIT_FAILURE);
     };
-    if (read(fwd, &ctx->mt, sizeof(metadata)) != sizeof(metadata)) {
-        fprintf(stderr, "Error reading firmware metadata\n");
+    if (read(fwd, &ctx->mt, sizeof(manifest_t)) != sizeof(manifest_t)) {
+        fprintf(stderr, "Error reading firmware manifest\n");
         exit(EXIT_FAILURE);
     }
     if (ctx->mapped_file) {
