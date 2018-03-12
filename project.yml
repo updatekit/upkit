@@ -18,12 +18,14 @@
     - test/**
   :source:
     - src/**
-    - test/support
+    - build/posix
   :include:
     - include/**
     - ext/libcoap/include
     - ext/tinydtls
     - ext/tinycrypt/lib/include
+  :support:
+    - test/support
 
 :defines:
   :commmon: &common_defines
@@ -86,10 +88,13 @@
      :arguments:
         - -p
         - -b
-        - -e "^vendor.*|^build/|^test/|^ext/"
+        - -e "^test/|^ext/"
+        - -f "build/posix"
+        - -f "src"
         - --html
         - --html-details
         - -r .
+        - -s
         - -o "build/ceedling/artifacts/gcov/GcovCoverageResults.html"
 
 :libraries:

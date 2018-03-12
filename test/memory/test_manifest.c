@@ -5,6 +5,7 @@
 #include "memory/simple_manifest.h"
 #include "simple_manifest_impl.h"
 #include "memory_file_posix.h"
+#include "invalid_digest.h"
 #include "sample_data.h"
 #include "tinycrypt.h"
 #include "digest.h"
@@ -12,31 +13,24 @@
 #include <string.h>
 
 #define BUFFER_LEN 1024
+DIGEST_FUNC(tinycrypt);
 
+/* Default parameters used for the test */
 version_t version_g = 0xdead;
 platform_t platform_g = 0xabcd;
 address_t size_g = 0x1000;
 address_t offset_g = 0x100; 
 unsigned char server_key_x_g[] = "server_key_x";
 unsigned char server_key_y_g[] = "server_key_y";
-unsigned char digest_g[32] = {
-    0xc8,0x05,0x66,0x45,0xd0,0x5d,0xb1,0x61,0x73,0x6f,0x84,0x50,0xce,0xab,0xc1,0x0a,
-    0x89,0xd8,0xd0,0x83,0xa3,0xab,0xd0,0x46,0xf4,0xa4,0xec,0xa6,0x0a,0xa7,0x6f,0x65
-};
-uint8_t signature[64] = {
-    0xc8,0x05,0x66,0x45,0xd0,0x5d,0xb1,0x61,0x73,0x6f,0x84,0x50,0xce,0xab,0xc1,0x0a,
-    0xc8,0x05,0x66,0x45,0xd0,0x5d,0xb1,0x61,0x73,0x6f,0x84,0x50,0xce,0xab,0xc1,0x0a,
-    0x89,0xd8,0xd0,0x83,0xa3,0xab,0xd0,0x46,0xf4,0xa4,0xec,0xa6,0x0a,0xa7,0x6f,0x65,
-    0x89,0xd8,0xd0,0x83,0xa3,0xab,0xd0,0x46,0xf4,0xa4,0xec,0xa6,0x0a,0xa7,0x6f,0x65
-};
-uint8_t* vendor_signature_r_g = signature;
-uint8_t* vendor_signature_s_g = signature+32;
-uint8_t* server_signature_r_g = signature;
-uint8_t* server_signature_s_g = signature+32;
+uint8_t* digest_g = (uint8_t*) hash_g;
+uint8_t* vendor_signature_r_g = (uint8_t*) r;
+uint8_t* vendor_signature_s_g = (uint8_t*) s;
+uint8_t* server_signature_r_g = (uint8_t*) r;
+uint8_t* server_signature_s_g = (uint8_t*)s;
 
+/* setUp function called every time a new test is executed */
 manifest_t mt;
 uint8_t size = 32;
-
 void setUp(void) {
     bzero(&mt, sizeof(manifest_t));
     set_size(&mt, size_g);
@@ -94,15 +88,21 @@ void test_manifest_server_signature_s(void) {
     TEST_ASSERT_EQUAL_UINT8(size, new_size);
 }
 
-DIGEST_FUNC(tinycrypt);
-
 void test_sign_verify_manifest_vendor(void) {
     uint8_t buffer[BUFFER_LEN];
     pull_error err = sign_manifest_vendor(&mt, tinycrypt_digest_sha256, priv_g, buffer, secp256r1);
     TEST_ASSERT_TRUE(err == PULL_SUCCESS);
     err = verify_manifest_vendor(&mt, tinycrypt_digest_sha256, x, y, secp256r1);
 }
-
+void test_sign_verify_manifest_vendor_invalid_digest(void) {
+    uint8_t buffer[BUFFER_LEN];
+    digest_func f = tinycrypt_digest_sha256;
+    f.init = invalid_init;
+    pull_error err = sign_manifest_vendor(&mt, f, priv_g, buffer, secp256r1);
+    TEST_ASSERT_TRUE(err);
+    err = verify_manifest_vendor(&mt, f, x, y, secp256r1);
+    TEST_ASSERT_TRUE(err);
+}
 void test_sign_verify_manifest_server(void) {
     uint8_t buffer[BUFFER_LEN];
     pull_error err = sign_manifest_server(&mt, tinycrypt_digest_sha256, priv_g, buffer, secp256r1);
