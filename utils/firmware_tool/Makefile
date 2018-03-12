@@ -3,15 +3,14 @@ LIBS=../../ext/tinycrypt/lib/libtinycrypt.a
 
 FLAGS= -DSIMPLE_MANIFEST -DWITH_TINYCRYPT
 
-CC=gcc
-CXX=g++
+CC ?= gcc
+CXX ?= g++
 CFLAGS=-Wall -g $(INCLUDES) $(FLAGS)
 CXXFLAGS=-Wall -g -std=c++11 $(INCLUDES) $(FLAGS)
 
 CPPSRC= $(wildcard commands/*.cpp ./*.cpp)
 OBJ= $(patsubst %.cpp, %.o, $(CPPSRC))
 
-CSRC= ../../ext/tinycrypt/lib/source/ecc_platform_specific.c
 CSRC+=../../src/memory/manifest.c ../../src/security/tinycrypt.c
 CSRC+=../../src/memory/simple_manifest_impl.c
 OBJ+= $(patsubst %.c, %.o, $(CSRC))
