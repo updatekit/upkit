@@ -1,7 +1,7 @@
 AUTOMAKE_OPTIONS = subdir-objects
 
-CXXFLAGS = -Wall -std=c++11 -I. -Icommands -I../../ext/tinycrypt/lib/include -I../../include
-CXXFLAGS += -I../../ext/tinydtls
+AM_CXXFLAGS = -Wall -std=c++11 -I. -Icommands -I../../ext/tinycrypt/lib/include -I../../include
+AM_CXXFLAGS += -I../../ext/tinydtls
 
 LIBS=../../libpull.a ../../ext/tinycrypt/lib/libtinycrypt.a
 

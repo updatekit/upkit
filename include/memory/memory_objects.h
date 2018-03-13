@@ -14,6 +14,8 @@
 #define MEMORY_OBJECTS_H_
 
 #include <common/libpull.h>
+#include <memory/memory.h>
+#include <memory/manifest.h>
 #include <stdint.h>
 #include <stdio.h>
 

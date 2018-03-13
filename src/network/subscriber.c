@@ -1,8 +1,8 @@
 #include "network/subscriber.h"
 #include "network/transport.h"
 #include "memory/memory_objects.h"
-#include "common/logger.h"
-#include "common/async.h"
+#include "common/libpull.h"
+#include "network/async.h"
 
 pull_error subscribe(subscriber_ctx* ctx, txp_ctx* txp, const char* resource, mem_object* obj_t) {
     pull_error err;

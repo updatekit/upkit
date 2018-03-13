@@ -1,5 +1,5 @@
-#ifndef LIBRARY_CONFIG_H_
-#define LIBRARY_CONFIG_H_
+#ifndef LIBPULL_CONFIG_H_
+#define LIBPULL_CONFIG_H_
 
 /* Use the simple manifest. */
 #undef SIMPLE_MANIFEST
@@ -13,4 +13,4 @@
 /* Define logger verbosity */
 #undef LOGGER_VERBOSITY
 
-#endif /* LIBRARY_CONFIG_H_ */
+#endif /* LIBPULL_CONFIG_H_ */

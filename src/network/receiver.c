@@ -1,9 +1,8 @@
 #include "network/receiver.h"
+#include "network/async.h"
 #include "memory/memory_objects.h"
 #include "memory/memory.h"
-#include "common/error.h"
-#include "common/logger.h"
-#include "common/async.h"
+#include "common/libpull.h"
 #include <string.h>
 
 #define MAX_RECEIVER_ERRORS 10

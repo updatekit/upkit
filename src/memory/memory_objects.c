@@ -1,11 +1,8 @@
-#include <stdio.h>
-#include <string.h>
-
 #include "memory/memory_objects.h"
+#include "memory/memory.h"
 #include "memory/manifest.h"
-#include "common/logger.h"
-#include "common/error.h"
-#include "common/external.h"
+#include <string.h>
+#include <stdio.h>
 
 pull_error get_newest_firmware(obj_id* obj, uint16_t* version, mem_object* obj_t) {
     manifest_t mt;

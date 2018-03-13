@@ -2,9 +2,10 @@ dnl Process this file with autoconf to produce a configure script.
 AC_INIT(libpull, 0.0.1, antonio@langiu.com)
 AM_INIT_AUTOMAKE([foreign])
 AM_SILENT_RULES([yes])
+AM_MAINTAINER_MODE([disable])
 
 dnl Config header
-AC_CONFIG_FILES([config.h:config.h.in])
+AC_CONFIG_HEADERS(include/common/libpull_config.h:libpull_config.h.in)
 
 dnl Checks for programs.
 AC_PROG_CC
@@ -71,4 +72,4 @@ AS_IF([test "x$with-tinydtls" != "xno"], [AC_DEFINE([WITH_TINYDTLS], [1],
 
 dnl check the presence of the library from the include path or from the ext path
 
-AC_OUTPUT(Makefile utils/firmware_tool/Makefile)
+AC_OUTPUT(Makefile utils/firmware_tool/Makefile utils/server/Makefile)
