@@ -35,7 +35,7 @@ class Context {
     std::string prog_name;
     std::string config_file_name = "config.json";
     std::vector<std::string> subcommands;
-    int current = 0;
+    uint8_t current = 0; // support at most 256 commands
 
     int verbosity = 0;
     FOREACH_ARG(DECLARE_ARG)

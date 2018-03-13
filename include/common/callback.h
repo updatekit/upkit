@@ -8,7 +8,7 @@
 #ifndef CALLBACK_H_
 #define CALLBACK_H_
 
-#include "common/error.h"
+#include "common/libpull.h"
 
 #ifdef __cplusplus
 extern "C" {

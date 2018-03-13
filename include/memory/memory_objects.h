@@ -13,9 +13,7 @@
 #ifndef MEMORY_OBJECTS_H_
 #define MEMORY_OBJECTS_H_
 
-#include "common/error.h"
-#include "memory/memory.h"
-#include "memory/manifest.h"
+#include <common/libpull.h>
 #include <stdint.h>
 #include <stdio.h>
 

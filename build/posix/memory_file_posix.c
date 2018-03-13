@@ -103,6 +103,9 @@ pull_error memory_flush_impl(mem_object* ctx) {
 }
 
 pull_error memory_close_impl(mem_object* ctx) {
+    if (ctx == NULL) {
+        return MEMORY_CLOSE_ERROR;
+    }
     if (close(ctx->fp) != 0) {
         return MEMORY_CLOSE_ERROR;
     }

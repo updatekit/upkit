@@ -8,7 +8,7 @@
 #include "simple_manifest_impl.h"
 #include "manifest.h"
 #include "memory_file_posix.h"
-#include "tinycrypt.h"
+#include "tinydtls.h"
 #include "async.h"
 #include "async_libcoap.h"
 #include <coap/coap.h>

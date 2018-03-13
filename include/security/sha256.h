@@ -7,7 +7,7 @@
 #ifndef SHA_256_H_
 #define SHA_256_H_
 
-#include "common/error.h"
+#include <common/libpull.h>
 #include "security/digest.h"
 
 #ifdef __cplusplus

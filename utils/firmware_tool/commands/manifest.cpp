@@ -1,7 +1,3 @@
-#include "commands.hpp"
-#include "memory/manifest.h"
-#include "security/digest.h"
-#include "security/sha256.h"
 #include <sys/stat.h>
 #include <unistd.h>
 #include <sys/types.h>
@@ -11,6 +7,10 @@
 #include <iostream>
 #include <iomanip>
 #include <string.h>
+#include "commands.hpp"
+#include "memory/manifest.h"
+#include "security/digest.h"
+#include "security/sha256.h"
 
 /** XXX the next lines should be removed in a refactoring */
 #define BUFFER_LEN 0x1000

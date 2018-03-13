@@ -1,0 +1,16 @@
+#ifndef LIBRARY_CONFIG_H_
+#define LIBRARY_CONFIG_H_
+
+/* Use the simple manifest. */
+#undef SIMPLE_MANIFEST
+
+/* Use tinycrypt as a cryptographic library. */
+#undef WITH_TINYCRYPT
+
+/* Use TinyDTLS as a cryptographic library. */
+#undef WITH_TINYDTLS
+
+/* Define logger verbosity */
+#undef LOGGER_VERBOSITY
+
+#endif /* LIBRARY_CONFIG_H_ */

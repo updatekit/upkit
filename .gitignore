@@ -1,6 +1,18 @@
 # Prerequisites
 *.d
 
+# Makefile folders
+**/.deps
+**/.dirstamp
+missing
+Makefile
+**/Makefile.in
+install.sh
+configure
+config.status
+autom4te.cache
+config.h
+
 # Object files
 *.o
 *.ko

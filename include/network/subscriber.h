@@ -7,6 +7,7 @@
 #ifndef SUBSCRIBER_H_
 #define SUBSCRIBER_H_
 
+#include <common/libpull.h>
 #include "network/transport.h"
 #include "memory/manifest.h"
 #include "memory/memory.h"

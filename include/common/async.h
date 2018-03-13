@@ -12,6 +12,7 @@
 #ifndef ASYNC_H_
 #define ASYNC_H_
 
+#include "common/libpull.h"
 #include "network/transport.h"
 
 #ifdef __cplusplus

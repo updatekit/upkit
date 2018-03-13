@@ -12,6 +12,7 @@
 #include "memory_objects.h"
 #include "memory_file_posix.h"
 #include "test_verifier.h"
+#include "tinycrypt_default_cspring.h"
 #include <string.h>
 
 DIGEST_FUNC(tinycrypt);
@@ -74,6 +75,18 @@ void test_sha256_invalid_final(void) {
     TEST_ASSERT_TRUE(!err);
     uint8_t* hash = digest.finalize(NULL);
     TEST_ASSERT_TRUE(hash == NULL);
+}
+
+void test_sign(void) {
+    uint8_t signature[64];
+    pull_error err = ecc_sign(priv_g, signature, hash_g, 32, secp256r1);
+    TEST_ASSERT_TRUE(!err);
+    TEST_ASSERT_TRUE(ecc_verify(x, y, signature, signature+32, hash_g, 32, secp256r1) == PULL_SUCCESS);
+}
+void test_sign_invalid_hash_size(void) {
+    uint8_t signature[64];
+    pull_error err = ecc_sign(priv_g, signature, hash_g, 10, secp256r1);
+    TEST_ASSERT_TRUE(!err); 
 }
 
 #define DEFINE_TEST(name) \

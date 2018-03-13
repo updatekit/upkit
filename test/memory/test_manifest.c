@@ -8,6 +8,7 @@
 #include "invalid_digest.h"
 #include "sample_data.h"
 #include "tinycrypt.h"
+#include "tinycrypt_default_cspring.h"
 #include "digest.h"
 #include "sha256.h"
 #include <string.h>

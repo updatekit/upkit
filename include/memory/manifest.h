@@ -7,8 +7,7 @@
 #ifndef MANIFEST_H_
 #define MANIFEST_H_
 
-#include "common/error.h"
-#include "common/types.h"
+#include "common/libpull.h"
 #include "memory/simple_manifest.h"
 #include "security/digest.h"
 #include "security/ecc.h"

@@ -7,7 +7,7 @@
 #ifndef SIMPLE_MANIFEST_H_
 #define SIMPLE_MANIFEST_H_
 
-#include "common/types.h"
+#include <common/libpull.h>
 
 #ifdef __cplusplus
 extern "C" {

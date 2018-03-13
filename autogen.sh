@@ -39,6 +39,7 @@ echo "Build libcoap..."
 (
   cd ext/libcoap && \
   ./autogen.sh && \
+  touch ext/tinydtls/install.sh
   ./configure --with-tinydtls --disable-shared \
   --disable-documentation --disable-examples && \
   make
@@ -69,14 +70,14 @@ command -v ceedling >/dev/null 2>&1 || \
 echo "Checking for ceedling test suite...done"
 
 # Building the firmware tool
-echo "Building the firmware tool..."
-(cd utils/firmware_tool && make)
-echo "Building the firmware tool...done"
+#echo "Building the firmware tool..."
+#(cd utils/firmware_tool && make)
+#echo "Building the firmware tool...done"
 
 # Create the assets for the test
-echo "Generating testing assets..."
-if [ -d "assets" ]; then
-    rm -rf assets/*
-fi
-./utils/assets_generator.sh
-echo "Generating testing assets...done"
+#echo "Generating testing assets..."
+#if [ -d "assets" ]; then
+#    rm -rf assets/*
+#fi
+#./utils/assets_generator.sh
+#echo "Generating testing assets...done"

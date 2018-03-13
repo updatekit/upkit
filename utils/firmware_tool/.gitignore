@@ -1,2 +1,6 @@
 *.bin
 firmware_tool
+commands/.deps/
+commands/.dirstamp
+Makefile
+.deps/

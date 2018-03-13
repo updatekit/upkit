@@ -40,17 +40,8 @@ extern uint8_t verbosity_level;
 #define VERBOSITY_INFO 3
 #define VERBOSITY_DEBUG 4
 
-/*static const char* LOG_STR[] = {
-    "ERROR: ",
-    "ERROR: ",
-    "WARN: ",
-    "INFO: ",
-    "DEBUG: "
-};
-*/
-
 #include <stdio.h>
-#define log_output(args...) printf(args)
+#define log_output(...) printf(__VA_ARGS__)
 
 #ifdef LOGGER_VERBOSITY
 

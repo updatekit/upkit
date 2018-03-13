@@ -18,8 +18,7 @@
 #ifndef TRANSPORT_H_
 #define TRANSPORT_H_
 
-#include "common/error.h"
-#include "common/callback.h"
+#include "common/libpull.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdint.h>

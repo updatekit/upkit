@@ -12,6 +12,7 @@
 #ifndef VERIFIER_H_
 #define VERIFIER_H_
 
+#include <common/libpull.h>
 #include "memory/memory.h"
 #include "security/digest.h"
 #include "security/ecc.h"

@@ -17,7 +17,7 @@
 #ifndef MEMORY_H_
 #define MEMORY_H_
 
-#include "common/error.h"
+#include <common/libpull.h>
 #include <stdint.h>
 
 #ifdef __cplusplus

@@ -1,21 +1,10 @@
-/* This module is in charge of receiving the firmware form the server.
- * It sends to the server the offset of the binary it wants to receive
- * and the server starts sending from that offset. This is not a common
- * approach on CoAP where a better solution would be based on the block
- * numebers but, this receiver will not be compatible just with coap
- * but with any receiver_txp protocol. The blockwise transfer of CoAP is
- * still used but, if for some reason the connection is broken then
- * the receiver will not send to the server the last block number
- * but instead the binary offset from which it wants to start a new
- * blockwise request */
-#include <string.h>
-
 #include "network/receiver.h"
 #include "memory/memory_objects.h"
 #include "memory/memory.h"
 #include "common/error.h"
 #include "common/logger.h"
 #include "common/async.h"
+#include <string.h>
 
 #define MAX_RECEIVER_ERRORS 10
 
@@ -41,6 +30,7 @@ static void handler(pull_error txp_err, const char* data, int len, void* more) {
     }
     if (!ctx->manifest_received) {
         log_debug("Manifest still not received\n");
+        printf("%d\n", ctx->received);
         int16_t missing = sizeof(manifest_t)-ctx->received;
         if (missing <= 0) {
             log_debug("Manifest received\n");
@@ -48,6 +38,8 @@ static void handler(pull_error txp_err, const char* data, int len, void* more) {
             ctx->expected = get_size(&ctx->mt)+get_offset(&ctx->mt);
             // TODO find a way to check if the firmware to receive is
             // bigger than the object size
+            // XXX the value returned by get_size is an unsigned and it does not
+            // make sense to check for <= 0; TODO fix it
             if (get_size(&ctx->mt) <= 0 /* ||ctx->mt.vendor.size > MAX_FIRMWARE_SIZE-sizeof(manifest_t)*/) {
                 log_debug("Received an invalid size %d, aborting\n", (int) ctx->mt.vendor.size);
                 ctx->err = INVALID_SIZE_ERROR;
@@ -103,12 +95,12 @@ pull_error receiver_chunk(receiver_ctx* ctx) {
         // Recoverable errors
         case MEMORY_WRITE_ERROR:
         case NETWORK_ERROR:
-            if (ctx->num_err >= MAX_RECEIVER_ERRORS) {
+            if (++ctx->num_err >= MAX_RECEIVER_ERRORS) {
                 return ctx->err;
             }
-            ctx->num_err = PULL_SUCCESS;
+            ctx->err = PULL_SUCCESS;
             break;
-        // Not recoverable error. The upgrade process should start again
+            // Not recoverable error. The upgrade process should start again
         case INVALID_SIZE_ERROR:
             return ctx->err;
         default: /* ignore all the other cases */ break;

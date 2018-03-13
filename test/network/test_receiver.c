@@ -33,13 +33,11 @@ void test_get_firmware(void) {
     TEST_ASSERT_TRUE(!err);
     mem_object obj_t;
     err = receiver_open(&rcv, &txp, "firmware", OBJ_2, &obj_t);
-    printf("Starting the firmware reception\n");
     while (!rcv.firmware_received) {
         err = receiver_chunk(&rcv);
         TEST_ASSERT_TRUE(!err);
         loop(&txp, 1000);
     }
-    printf("firmware downloaded\n");
     err = receiver_close(&rcv);
     TEST_ASSERT_TRUE(!err);
     txp_end(&txp);
@@ -70,27 +68,70 @@ void test_get_firmware_dtls(void) {
     txp_end(&txp);
 }
 
-/*
-TODO: refactor the receiver to handler the received error.
-In case of non recoverable errors it should abort the process.
-For example in this case the ota resource is not available on the
-server and thus the client should stop requisting for this resource
+void test_receiver_open_invalid_id(void) {
+    txp_ctx txp;
+    receiver_ctx rcv;
+    pull_error err = txp_init(&txp, PROV_SERVER, 0, CONN_UDP, NULL);
+    TEST_ASSERT_TRUE(!err);
+    mem_object obj_t;
+    err = receiver_open(&rcv, &txp, "firmware", 42, &obj_t);
+    TEST_ASSERT_TRUE(err == RECEIVER_OPEN_ERROR);
+}
+
+void test_receiver_chunk_invalid_transport(void) {
+    txp_ctx txp;
+    receiver_ctx rcv;
+    pull_error err = txp_init(&txp, PROV_SERVER, 0, CONN_UDP, NULL);
+    TEST_ASSERT_TRUE(!err);
+    mem_object obj_t;
+    err = receiver_open(&rcv, &txp, "firmware", OBJ_2, &obj_t);
+    TEST_ASSERT_TRUE(!err);
+    rcv.txp = NULL;
+    err = receiver_chunk(&rcv);
+    TEST_ASSERT_TRUE(err);
+}
+
+void test_receiver_close_invalid_memory(void) {
+    receiver_ctx rcv;
+    rcv.obj = NULL;
+    pull_error err = receiver_close(&rcv);
+    TEST_ASSERT_TRUE(err == RECEIVER_CLOSE_ERROR);
+}
+
 void test_get_firmware_invalid_resource(void) {
     txp_ctx txp;
     receiver_ctx rcv;
-    pull_error err = txp_init(&txp, PROV_SERVER, 0, UDP, NULL);
+    pull_error err = txp_init(&txp, PROV_SERVER, 0, CONN_UDP, NULL);
     TEST_ASSERT_TRUE(!err);
     mem_object obj_t;
-    err = receiver_open(&rcv, &txp, "ota", OBJ_1, &obj_t);
-    printf("Starting the firmware reception\n");
-    while (!rcv.firmware_received) {
+    err = receiver_open(&rcv, &txp, "antani", OBJ_2, &obj_t);
+    TEST_ASSERT_TRUE(!err);
+    while (!rcv.firmware_received && !err) {
         err = receiver_chunk(&rcv);
-        TEST_ASSERT_TRUE(!err);
+        if (err) {
+            continue; // This should be applied everywhere
+        }
         loop(&txp, 1000);
     }
-    printf("firmware downloaded\n");
-    err = receiver_close(&rcv);
+    TEST_ASSERT_TRUE_MESSAGE(err == NETWORK_ERROR, err_as_str(err));
+}
+
+/*
+void test_get_firmware_invalid_size(void) {
+    txp_ctx txp;
+    receiver_ctx rcv;
+    pull_error err = txp_init(&txp, PROV_SERVER, 0, CONN_UDP, NULL);
     TEST_ASSERT_TRUE(!err);
-    txp_end(&txp);
+    mem_object obj_t;
+    err = receiver_open(&rcv, &txp, "firmware/invalid_size", OBJ_2, &obj_t);
+    TEST_ASSERT_TRUE(!err);
+    while (!rcv.firmware_received && !err) {
+        err = receiver_chunk(&rcv);
+        if (err) {
+            continue; // This should be applied everywhere
+        }
+        loop(&txp, 1000);
+    }
+    TEST_ASSERT_TRUE_MESSAGE(err == INVALID_SIZE_ERROR, err_as_str(err));
 }
 */

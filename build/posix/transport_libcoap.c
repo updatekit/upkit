@@ -194,6 +194,9 @@ void handler_libcoap(struct coap_context_t * ctx,
 // all the received packets. If you need to manage more connections
 // simultaneously you should use two context and two sessions!
 pull_error txp_on_data(txp_ctx* ctx, callback handler, void* more) {
+    if (ctx == NULL || handler == NULL) {
+        return GENERIC_ERROR; // TODO SPECIALIZE THIS ERROR
+    }
     ctx->cb_ctx.cb = handler;
     ctx->cb_ctx.more = more;
     ctx->coap_ctx->app = &ctx->cb_ctx;

@@ -7,7 +7,7 @@
 #ifndef ECC_VERIFY_H_
 #define ECC_VERIFY_H_
 
-#include "common/error.h"
+#include <common/libpull.h>
 #include <stdint.h>
 
 #ifdef __cplusplus

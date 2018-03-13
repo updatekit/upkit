@@ -11,6 +11,7 @@
 #ifndef RECEIVER_H_
 #define RECEIVER_H_
 
+#include <common/libpull.h>
 #include "memory/memory_objects.h"
 #include "network/transport.h"
 

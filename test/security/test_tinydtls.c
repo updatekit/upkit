@@ -15,10 +15,6 @@
 
 DIGEST_FUNC(tinydtls);
 
-int default_CSPRNG(uint8_t *dest, unsigned int size) {
-    return 0;
-}
-
 void test_ecc_verify(void) {
     pull_error err;
     err = ecc_verify(x, y, r, s, hash_g, 32, secp256r1);
@@ -45,6 +41,14 @@ void test_sha256(void) {
     uint8_t* hash = digest.finalize(&ctx);
     TEST_ASSERT_TRUE(hash != NULL);
     TEST_ASSERT_EQUAL_MEMORY(hash_g, hash, 32);
+}
+
+void test_sign(void) {
+    uint8_t signature[64];
+    // TODO This test must be fixed when there is a correct implementation for
+    // TinyDTLS supporting the DER signature encoding format
+    pull_error err = ecc_sign(priv_g, signature, hash_g, 32, secp256r1);
+    TEST_ASSERT_TRUE(err == SIGN_FAILED_ERROR);
 }
 
 #define DEFINE_TEST(name) \

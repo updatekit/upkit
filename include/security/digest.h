@@ -8,7 +8,7 @@
 #ifndef DIGEST_H_
 #define DIGEST_H_
 
-#include "common/error.h"
+#include <common/libpull.h>
 #include <stddef.h>
 #include <stdint.h>
 
