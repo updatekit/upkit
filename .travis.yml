@@ -4,12 +4,8 @@ dist: trusty
 
 addons:
   apt:
-    sources:
-      - ubuntu-toolchain-r-test
     packages:
-      - srecord
       - gcovr
-      - g++-4.9
 
 before_install:
   - export CC=gcc-4.9
