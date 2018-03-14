@@ -12,17 +12,18 @@ FOREACH_ITEM(DEFINE_GETTER)
 
 
 #define DEFINE_STRUCT_ELEM(type, name, ...) \
-		type (*get_##name) (manifest_t*, ##__VA_ARGS__);
+		type (*get_##name) (const manifest_t*, ##__VA_ARGS__);
 
-	typedef struct {
-		FOREACH_ITEM(DEFINE_STRUCT_ELEM)
-			pull_error (*verify_manifest_vendor) (manifest_t*, digest_func, const uint8_t*, const uint8_t*, ecc_curve);
-		pull_error (*verify_manifest_server) (manifest_t*, digest_func, const uint8_t*, const uint8_t*, ecc_curve);
-		pull_error (*sign_manifest_vendor) (manifest_t*, digest_func, const uint8_t *, uint8_t*, ecc_curve);
-		pull_error (*sign_manifest_server) (manifest_t*, digest_func, const uint8_t*, uint8_t*, ecc_curve);
-	} manifest_mock_t;
+typedef struct {
+    FOREACH_ITEM(DEFINE_STRUCT_ELEM);
+    pull_error (*verify_manifest_vendor) (manifest_t*, digest_func, const uint8_t*, const uint8_t*, ecc_curve);
+    pull_error (*verify_manifest_server) (manifest_t*, digest_func, const uint8_t*, const uint8_t*, ecc_curve);
+    pull_error (*sign_manifest_vendor) (manifest_t*, digest_func, const uint8_t *, uint8_t*, ecc_curve);
+    pull_error (*sign_manifest_server) (manifest_t*, digest_func, const uint8_t*, uint8_t*, ecc_curve);
+} manifest_mock_t;
 
 extern manifest_mock_t manifest_mock;
+void manifest_mock_restore();
 
 #define DEFINE_INVALID_GETTER(type, name, ...) \
 	type get_##name##_invalid(const manifest_t* mt, ##__VA_ARGS__);

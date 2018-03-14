@@ -2,10 +2,13 @@
 
 manifest_mock_t manifest_mock;
 
-/* All the getter returns an integer or a pointer */
+/* All the getter returns an integer or a pointer 
+ * I'm doing a cast to the return type. In this way
+ * in the case of numbers it remains 0 and in case
+ * of a pointer is equal to NULL */
 #define IMPLEMENT_INVALID_GETTER(type, name, ...) \
     type get_##name##_invalid(const manifest_t* mt, ##__VA_ARGS__) { \
-        return NULL; \
+        return (type) 0; \
     }
 
 FOREACH_ITEM(IMPLEMENT_INVALID_GETTER);

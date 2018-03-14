@@ -4,6 +4,9 @@
 
 #define __FILENAME__ (strrchr(__FILE__, '/') ? strrchr(__FILE__, '/') + 1 : __FILE__)
 
+void setUp(void);
+void tearDown(void);
+
 #define IMPLEMENT_RUNNER(test_func, test_line) \
 { \
   Unity.CurrentTestName = #test_func; \
