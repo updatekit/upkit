@@ -7,10 +7,6 @@ addons:
     packages:
       - gcovr
 
-before_install:
-  - export CC=gcc-4.9
-  - export CXX=g++-4.9
-  - g++ --version
 install:
   - ./autogen.sh
   - ./configure
