@@ -16,9 +16,8 @@ before_install:
   - export CXX=g++-4.9
   - g++ --version
 install:
-  - gem install ceedling
   - ./autogen.sh
-  - (cd utils/server/ && make)
-  - ./utils/server/server.bin -a assets & >/dev/null 2>&1
+  - ./configure
+  - make run_server
 
-script: ceedling test:all
+script: make check
