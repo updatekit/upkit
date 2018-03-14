@@ -30,7 +30,7 @@ for v in $versions; do
     f="$fake_firmware$v"
     # Creating firmware of size 0x14000
     dd if=/dev/zero bs=4096 count=20 > $f.tmp
-    $FIRMWAREDIR/firmware_tool manifest generate -y $FIRMWAREDIR/config.json -vv -l $v -a $APPLICATION -b $f.tmp \
+    $FIRMWAREDIR/firmware_tool manifest generate -y $FIRMWAREDIR/config.toml -vv -l $v -a $APPLICATION -b $f.tmp \
         -p $FIRMWAREDIR/keys/vendor.priv -c $FIRMWAREDIR/keys/vendor.pub \
         -k $FIRMWAREDIR/keys/server.priv -m $FIRMWAREDIR/keys/server.pub \
         -f $ASSETSDIR/metadata metadata
