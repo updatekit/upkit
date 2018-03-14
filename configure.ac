@@ -72,4 +72,4 @@ AS_IF([test "x$with-tinydtls" != "xno"], [AC_DEFINE([WITH_TINYDTLS], [1],
 
 dnl check the presence of the library from the include path or from the ext path
 
-AC_OUTPUT(Makefile utils/firmware_tool/Makefile utils/server/Makefile)
+AC_OUTPUT(Makefile utils/firmware_tool/Makefile utils/server/Makefile test/Makefile)

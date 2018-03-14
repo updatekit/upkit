@@ -1,10 +1,8 @@
-#ifndef _MEMORY_FILE_POSIX_H
-#define _MEMORY_FILE_POSIX_H
+#ifndef MEMORY_FILE_POSIX_H_
+#define MEMORY_FILE_POSIX_H_
 
+#include "common/libpull.h"
 #include "memory/memory.h"
-#include "common/external.h"
-
-#ifdef POSIX
 
 struct mem_object_ {
     char* path;
@@ -38,5 +36,4 @@ pull_error memory_flush_impl(mem_object* ctx);
 
 pull_error memory_close_impl(mem_object* ctx);
 
-#endif // POSIX
-#endif // _MEMORY_FILE_POSIX_H
+#endif // MEMORY_FILE_POSIX_H_

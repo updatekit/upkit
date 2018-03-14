@@ -1,15 +1,24 @@
-#include <string.h>
-
-#include "unity.h"
-#include "memory.h"
-#include "error.h"
+#include "memory/memory.h"
+#include "common/error.h"
 #include "memory_file_posix.h"
 
-#define SIZE sizeof(content)
-#define REP 64
+#include <string.h>
+#include "test_runner.h"
+#include "unity.h"
+
+mem_object object;
+
+#define FOREACH_TEST(DO) \
+    DO(memory_read_sequential, 0) \
+    DO(memory_read_random, 0) \
+    DO(memory_write_sequential, 0) \
+    DO(memory_write_random, 0) \
+    DO(memory_invalid_object, 0)
+TEST_RUNNER();
 
 const char content[12] = {'m', 'e', 'm', 'o', 'r', 'y', '_', 't', 'e', 's', 't', '\n'};
-mem_object object;
+#define SIZE sizeof(content)
+#define REP 64
 
 void setUp(void) {
     TEST_ASSERT(memory_open(&object, TEST_MEMORY_FILE) == PULL_SUCCESS);

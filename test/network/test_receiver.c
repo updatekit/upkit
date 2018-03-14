@@ -1,17 +1,32 @@
-#include "unity.h"
-#include "receiver.h"
-#include "memory.h"
-#include "manifest.h"
-#include "simple_manifest_impl.h"
-#include "memory_objects.h"
-#include "memory_file_posix.h"
-#include "transport.h"
-#include "async.h"
-#include "error.h"
-#include "async_libcoap.h"
-#include "tinydtls.h"
+#include "network/receiver.h"
+#include "memory/memory.h"
+#include "memory/manifest.h"
+#include "memory/simple_manifest.h"
+#include "memory/memory_objects.h"
+#include "network/transport.h"
+#include "network/async.h"
+#include "common/error.h"
+
+#ifdef WITH_CEEDLING
+#include "security/tinydtls.h"
+#endif
+
+#include "memory_file_posix.h" // Posix
 #include "transport_libcoap.h"
-#include "sample_data.h"
+#include "async_libcoap.h"
+
+#include "test_runner.h" // Test Support
+#include "sample_data.h" // Test Support
+#include "unity.h"
+
+#define FOREACH_TEST(DO) \
+    DO(get_firmware, 0) \
+    DO(get_firmware_dtls, 0) \
+    DO(receiver_open_invalid_id, 0) \
+    DO(receiver_chunk_invalid_transport, 0) \
+    DO(receiver_close_invalid_memory, 0) \
+    DO(get_firmware_invalid_resource, 0)
+TEST_RUNNER();
 
 #define PROV_SERVER "localhost"
 

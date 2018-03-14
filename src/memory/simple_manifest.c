@@ -1,5 +1,6 @@
-#include "simple_manifest_impl.h"
-#include "common/logger.h"
+#include "memory/simple_manifest.h"
+#include "memory/manifest.h"
+#include "common/libpull.h"
 #include <string.h>
 
 #ifdef SIMPLE_MANIFEST

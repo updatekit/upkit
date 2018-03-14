@@ -1,3 +1,5 @@
+#include "./memory_file_posix.h"
+#include "common/libpull.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
@@ -8,18 +10,15 @@
 #include <string.h>
 #include <unistd.h>
 #include <assert.h>
-#include "common/logger.h"
-
-#include "memory_file_posix.h"
 
 const int8_t memory_objects[] = { OBJ_1, OBJ_2, OBJ_END};
 
 char* memory_objects_mapper[] = {
     [OBJ_GOLD] = "antani",
-    [OBJ_RUN] = "assets/internal_flash_simulator",
-    [OBJ_1] = "assets/external_flash_simulator",
-    [OBJ_2] = "assets/external_flash_simulator",
-    [TEST_MEMORY_FILE] = "assets/test_memory",
+    [OBJ_RUN] = "../assets/internal_flash_simulator",
+    [OBJ_1] = "../assets/external_flash_simulator",
+    [OBJ_2] = "../assets/external_flash_simulator",
+    [TEST_MEMORY_FILE] = "../assets/test_memory",
 };
 int memory_objects_start[] = {
     [OBJ_GOLD] = 0,
@@ -60,7 +59,7 @@ pull_error memory_open_impl(mem_object* ctx, obj_id obj) {
         log_error(MEMORY_MAPPING_ERROR, "Error mapping the resource\n");
         return MEMORY_MAPPING_ERROR;
     }
-    ctx->fp = open(ctx->path, O_RDWR | O_CREAT);
+    ctx->fp = open(ctx->path, O_RDWR);
     if (ctx->fp < 0) {
         log_error(MEMORY_OPEN_ERROR, "Impossible to open the file %s\n", ctx->path);
         return MEMORY_OPEN_ERROR;

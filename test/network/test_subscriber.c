@@ -1,17 +1,25 @@
-#include "unity.h"
-#include "subscriber.h"
-#include "transport.h"
-#include "transport_libcoap.h"
-#include "memory_objects.h"
-#include "memory.h"
-#include "error.h"
-#include "simple_manifest_impl.h"
-#include "manifest.h"
+#include "common/error.h"
+#include "network/subscriber.h"
+#include "network/transport.h"
+#include "network/async.h"
+#include "network/transport_libcoap.h"
+#include "memory/memory_objects.h"
+#include "memory/memory.h"
+#include "memory/simple_manifest.h"
+#include "memory/manifest.h"
 #include "memory_file_posix.h"
 #include "tinydtls.h"
-#include "async.h"
+
 #include "async_libcoap.h"
 #include <coap/coap.h>
+
+#include "test_runner.c"
+#include "unity.h"
+
+#define FOREACH_TEST(DO) \
+    DO(update_polling,0)
+TEST_RUNNER();
+
 
 #define PROV_SERVER "localhost"
 

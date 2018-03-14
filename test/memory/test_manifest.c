@@ -1,17 +1,39 @@
-#include "unity.h"
 #include "common/error.h"
 #include "memory/manifest.h"
 #include "memory/memory.h"
 #include "memory/simple_manifest.h"
-#include "simple_manifest_impl.h"
-#include "memory_file_posix.h"
-#include "invalid_digest.h"
-#include "sample_data.h"
-#include "tinycrypt.h"
-#include "tinycrypt_default_cspring.h"
-#include "digest.h"
-#include "sha256.h"
+#include "memory/simple_manifest.h"
+#include "security/digest.h"
+#include "security/sha256.h"
+#include "memory_file_posix.h" // Posix file
+
+#ifdef WITH_CEEDLING
+#include "security/tinycrypt.h"
+#endif
+
+#include "tinycrypt_default_cspring.h" // Test Support
+#include "invalid_digest.h" // Test Support
+#include "sample_data.h" // Test Support
+#include "unity.h"
+#include "test_runner.h"
 #include <string.h>
+
+#define FOREACH_TEST(DO) \
+    DO(manifest_version, 0) \
+    DO(manifest_platform, 0) \
+    DO(manifest_size,0) \
+    DO(manifest_offset,0) \
+    DO(manifest_server_key_x,0) \
+    DO(manifest_server_key_y,0) \
+    DO(manifest_digest,0) \
+    DO(manifest_vendor_signature_r,0) \
+    DO(manifest_vendor_signature_s,0) \
+    DO(manifest_server_signature_r,0) \
+    DO(manifest_server_signature_s,0) \
+    DO(sign_verify_manifest_vendor,0) \
+    DO(sign_verify_manifest_server,0) \
+    DO(sign_verify_manifest_vendor_invalid_digest,0)
+TEST_RUNNER();
 
 #define BUFFER_LEN 1024
 DIGEST_FUNC(tinycrypt);

@@ -1,35 +1,92 @@
-#include "unity.h"
-#include "sample_data.h"
-#include "digest.h"
-#include "error.h"
-#include "ecc.h"
-#include "memory_objects.h"
-#include "verifier.h"
-#include "manifest.h"
-#include "memory_file_posix.h"
-#include "simple_manifest_impl.h"
-#include "invalid_digest.h"
+#include "common/error.h"
+#include "security/digest.h"
+#include "security/ecc.h"
+#include "security/verifier.h"
+#include "memory/memory_objects.h"
+#include "memory/manifest.h"
 
-#include "mock_memory.h"
-#define NO_MOCK(func) func##_StubWithCallback(func##_impl)
+#include "invalid_digest.h" // Test Support
+#include "sample_data.h" // Test Support
+
+//#include "mock_memory.h"
+//#define NO_MOCK(func) func##_StubWithCallback(func##_impl)
+#define NO_MOCK(a)
 
 #define BUFFER_LEN 1024
 static uint8_t buffer[BUFFER_LEN];
 
-#define FOREACH_TEST(TEST) \
-    TEST(valid)\
-    TEST(invalid_object)\
-    TEST(invalid_read)\
-    TEST(invalid_digest_init)\
-    TEST(invalid_digest_update)\
-    TEST(invalid_key)
+void test_ecc_verify(void) {
+    pull_error err;
+    err = ecc_verify(x, y, r, s, hash_g, 32, secp256r1);
+    TEST_ASSERT_TRUE(err == PULL_SUCCESS);
+}
 
-#define DECLARE_TEST(name) \
-    void verify_object_##name (digest_func func);
+void test_ecc_verify_invalid_curve(void) {
+    pull_error err;
+    err = ecc_verify(x, y, r, s, hash_g, 32, secp224r1);
+    TEST_ASSERT_TRUE(err == NOT_SUPPORTED_CURVE_ERROR);
+}
 
-FOREACH_TEST(DECLARE_TEST)
+void test_ecc_verify_invalid_signature(void) {
+    pull_error err;
+    err = ecc_verify(x, y, r, s, priv_g, 32, secp256r1);
+    TEST_ASSERT_TRUE(err == VERIFICATION_FAILED_ERROR);
+}
 
-void verify_object_valid(digest_func func) {
+void test_sha256(void) {
+    digest_ctx ctx;
+    pull_error err = func.init(&ctx);
+    TEST_ASSERT_TRUE(!err);
+    err = func.update(&ctx, (void*) data_g, 128);
+    TEST_ASSERT_TRUE(!err);
+    uint8_t* hash = func.finalize(&ctx);
+    TEST_ASSERT_TRUE(hash != NULL);
+    TEST_ASSERT_EQUAL_MEMORY(hash_g, hash, 32);
+}
+
+void test_sha256_invalid_init(void) {
+    digest_func digest = func;
+    pull_error err = digest.init(NULL);
+    TEST_ASSERT_TRUE(err == SHA256_INIT_ERROR);
+}
+
+void test_sha256_invalid_update(void) {
+    digest_ctx ctx;
+    digest_func digest = func;
+    pull_error err = digest.init(&ctx);
+    TEST_ASSERT_TRUE(!err);
+    err = digest.update(NULL, (void*) data_g, 128);
+    TEST_ASSERT_TRUE(SHA256_UPDATE_ERROR);
+    err = digest.update(&ctx, NULL, 128);
+    TEST_ASSERT_TRUE(SHA256_UPDATE_ERROR);
+    err = digest.update(&ctx, (void*) data_g, 0);
+    TEST_ASSERT_TRUE(SHA256_UPDATE_ERROR);
+}
+
+void test_sha256_invalid_final(void) {
+    digest_ctx ctx;
+    digest_func digest = func;
+    pull_error err = digest.init(&ctx);
+    TEST_ASSERT_TRUE(!err);
+    err = digest.update(&ctx, (void*) data_g, 128);
+    TEST_ASSERT_TRUE(!err);
+    uint8_t* hash = digest.finalize(NULL);
+    TEST_ASSERT_TRUE(hash == NULL);
+}
+
+void test_sign(void) {
+    uint8_t signature[64];
+    pull_error err = ecc_sign(priv_g, signature, hash_g, 32, secp256r1);
+    TEST_ASSERT_TRUE(!err);
+    TEST_ASSERT_TRUE(ecc_verify(x, y, signature, signature+32, hash_g, 32, secp256r1) == PULL_SUCCESS);
+}
+void test_sign_invalid_hash_size(void) {
+    uint8_t signature[64];
+    pull_error err = ecc_sign(priv_g, signature, hash_g, 10, secp256r1);
+    TEST_ASSERT_TRUE(!err);
+}
+
+void test_verify_object_valid(void) {
     NO_MOCK(memory_open);
     NO_MOCK(memory_read);
     NO_MOCK(memory_close);
@@ -42,16 +99,16 @@ void verify_object_valid(digest_func func) {
     TEST_ASSERT_TRUE_MESSAGE(err == PULL_SUCCESS, err_as_str(err));
 }
 
-void verify_object_invalid_object(digest_func func) {
+void test_verify_object_invalid_object(void) {
     mem_object obj_t;
     pull_error err;
     err = verify_object(42, func, x, y, secp256r1, &obj_t, buffer, BUFFER_LEN);
     TEST_ASSERT_TRUE(err);
 }
 
-void verify_object_invalid_read(digest_func func) {
+void test_verify_object_invalid_read(void) {
     NO_MOCK(memory_open);
-    memory_read_IgnoreAndReturn(MEMORY_READ_ERROR);
+    //memory_read_IgnoreAndReturn(MEMORY_READ_ERROR);
     NO_MOCK(memory_close);
 
     mem_object obj_t;
@@ -60,7 +117,7 @@ void verify_object_invalid_read(digest_func func) {
     TEST_ASSERT_TRUE(err == MEMORY_READ_ERROR);
 }
 
-void verify_object_invalid_digest_init(digest_func func) {
+void test_verify_object_invalid_digest_init(void) {
     NO_MOCK(memory_open);
     NO_MOCK(memory_read);
     NO_MOCK(memory_close);
@@ -72,7 +129,7 @@ void verify_object_invalid_digest_init(digest_func func) {
     TEST_ASSERT_TRUE(err == DIGEST_INIT_ERROR);
 }
 
-void verify_object_invalid_digest_update(digest_func func) {
+void test_verify_object_invalid_digest_update(void) {
     NO_MOCK(memory_open);
     NO_MOCK(memory_read);
     NO_MOCK(memory_close);
@@ -87,7 +144,7 @@ void verify_object_invalid_digest_update(digest_func func) {
     TEST_ASSERT_TRUE(err == DIGEST_UPDATE_ERROR);
 }
 
-void verify_object_invalid_key(digest_func func) {
+void test_verify_object_invalid_key(void) {
     NO_MOCK(memory_open);
     NO_MOCK(memory_read);
     NO_MOCK(memory_close);
@@ -100,5 +157,3 @@ void verify_object_invalid_key(digest_func func) {
     pull_error err = verify_object(OBJ_1, func, y, y, secp256r1, &obj_t, buffer, BUFFER_LEN);
     TEST_ASSERT_TRUE_MESSAGE(err == VERIFICATION_FAILED_ERROR, err_as_str(err));
 }
-
-

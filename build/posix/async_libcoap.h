@@ -1,7 +1,7 @@
 #ifndef _ASYNC_LIBCOAP_H
 #define _ASYNC_LIBCOAP_H
 
-#include "common/async.h"
+#include "network/async.h"
 #include "network/transport.h"
 #include "transport_libcoap.h"
 

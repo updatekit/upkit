@@ -1,12 +1,20 @@
-#include "unity.h"
+#include "common/error.h"
 #include "network/transport.h"
 #include "transport_libcoap.h"
-#include "error.h"
 #include "memory/manifest.h"
-#include "simple_manifest_impl.h"
-#include "sample_data.h"
+#include "memory/simple_manifest.h"
+
 #include "tinydtls.h"
 #include <coap/coap.h>
+
+#include "sample_data.h"
+#include "test_runner.h"
+#include "unity.h"
+
+#define FOREACH_TEST(DO) \
+    DO(udp, 0) \
+    DO(dtls_ecdsa, 0)
+TEST_RUNNER();
 
 #define PROV_SERVER "localhost"
 

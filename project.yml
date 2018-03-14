@@ -40,6 +40,7 @@
     - SIMPLE_MANIFEST
   :test:
     - *common_defines
+    - WITH_CEEDLING
 
 :cmock:
   :mock_prefix: mock_

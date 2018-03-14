@@ -1,14 +1,23 @@
+#include "unity.h"
+#include "memory/memory.h"
+#include "common/error.h"
+#include "memory/memory_objects.h"
+#include "memory_file_posix.h"
+#include "memory/manifest.h"
+#include "tinydtls.h"
+#include "memory/simple_manifest.h"
+#include "test_runner.h"
 #include <stdio.h>
 #include <stdlib.h>
-#include "unity.h"
-#include "memory.h"
-#include "error.h"
-#include "memory_objects.h"
-#include "memory_file_posix.h"
-#include "manifest.h"
-#include "tinydtls.h"
-#include "simple_manifest.h"
-#include "simple_manifest_impl.h"
+
+#define FOREACH_TEST(DO) \
+    DO(get_newest_firmware, 0) \
+    DO(get_oldest_slot, 0) \
+    DO(read_slot_manifest, 0) \
+    DO(write_slot_manifest, 0) \
+    DO(copy_firmware, 0)
+
+TEST_RUNNER();
 
 #define BUFFER_SIZE 1024
 
@@ -101,6 +110,6 @@ void test_copy_firmware(void) {
     uint8_t buffer[BUFFER_SIZE];
 	pull_error err = copy_firmware(OBJ_1, OBJ_RUN, &src, &dst, buffer, BUFFER_SIZE);
 	TEST_ASSERT_TRUE(!err);
-	TEST_ASSERT(file_compare("assets/expected_internal_flash_simulator", 
-				"assets/internal_flash_simulator") == 0);
+	TEST_ASSERT(file_compare("../assets/expected_internal_flash_simulator", 
+				"../assets/internal_flash_simulator") == 0);
 }
