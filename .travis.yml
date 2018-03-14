@@ -18,6 +18,11 @@ before_install:
 install:
   - ./autogen.sh
   - ./configure
-  - make run_server
 
-script: make check
+script: 
+  - make
+  - make firmware_tool
+  - make server
+  - make assets
+  - make run_server
+  - make check
