@@ -5,8 +5,7 @@
 #include <fstream>
 
 #define PARSE_TOML_ELEM(type, name, ...) \
-    val = config->get_as<std::string>(#name);\
-    if (val) { \
+    if (this->name == "" &&  (val = config->get_as<std::string>(#name))) {;\
         this->name = *val; \
     }
 
