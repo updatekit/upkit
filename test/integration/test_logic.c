@@ -1,23 +1,35 @@
-#include "unity.h"
+#include "common/logger.h"
+#include "common/error.h"
+#include "network/receiver.h"
+#include "network/subscriber.h"
+#include "network/transport.h"
+#include "network/async.h"
+#include "security/ecc.h"
+#include "security/sha256.h"
+#include "security/verifier.h"
+#include "memory/memory_objects.h"
+#include "memory/memory.h"
+#include "memory/manifest.h"
+#include "memory/simple_manifest.h"
 
-#include "logger.h"
-#include "error.h"
-#include "manifest.h"
-#include "simple_manifest_impl.h"
-#include "receiver.h"
-#include "subscriber.h"
 #include "memory_file_posix.h"
 #include "transport_libcoap.h"
-#include "async_libcoap.h"
-#include "memory_objects.h"
-#include "sample_data.h"
-#include "ecc.h"
-#include "sha256.h"
-#include "verifier.h"
-#include "tinydtls.h"
-#include "memory.h"
 
+#ifdef WITH_CEEDLING
+#include "security/tinydtls.h"
+
+#include "network/async_libcoap.h"
+#endif
+
+#include "support/sample_data.h"
+#include "support/test_runner.h"
+#include "unity.h"
 #include <unistd.h>
+
+#define FOREACH_TEST(DO) \
+    DO(logic_dtls,0) \
+    DO(logic_udp, 0)
+TEST_RUNNER();
 
 #define POLLING_FREQUENCY 1
 #define BUFFER_SIZE 1024
@@ -27,9 +39,9 @@ DIGEST_FUNC(tinydtls);
 void logic(conn_type type, void* conn_data);
 
 void setUp(void) {
-    override_memory_object(OBJ_1, "assets/external_flash_simulator_updated", 0x19000, 0x32000);
-    override_memory_object(OBJ_2, "assets/external_flash_simulator_updated", 0x32000, 0x4B000);
-    override_memory_object(OBJ_RUN, "assets/internal_flash_simulator_updated", 0x7000, 0x20000);
+    override_memory_object(OBJ_1, "../assets/external_flash_simulator_updated", 0x19000, 0x32000);
+    override_memory_object(OBJ_2, "../assets/external_flash_simulator_updated", 0x32000, 0x4B000);
+    override_memory_object(OBJ_RUN, "../assets/internal_flash_simulator_updated", 0x7000, 0x20000);
 }
 
 void tearDown(void) {

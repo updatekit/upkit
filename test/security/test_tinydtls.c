@@ -6,6 +6,9 @@
 #include "security/verifier.h"
 #include "common/error.h"
 
+#ifdef WITH_CEEDLING
+#include "security/tinydtls.h"
+#endif
 
 #include "memory_mock.h" // Mock
 #include "memory_file_posix.h" // Real Implmentation

@@ -7,3 +7,4 @@ test_subscriber
 test_tinycrypt
 test_tinydtls
 test_transport_dtls
+test_logic

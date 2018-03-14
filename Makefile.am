@@ -16,11 +16,11 @@ pkginclude_HEADERS = include/common/error.h
 assets: firmware_tool
 	./utils/assets_generator.sh
 
-firmware_tool:
+firmware_tool: libpull.a
 	$(MAKE) -C utils/firmware_tool
 
 run_server: server assets
 	./utils/server/server -a assets
 
-server:
+server: libpull.a
 	$(MAKE) -C utils/server

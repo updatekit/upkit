@@ -28,8 +28,8 @@ extern "C" {
  * compiler will be able to optimize the code and remove the non needed
  * debugging directives.
  */
-#ifdef LOGGER_VERBOSITY
 #include <stdint.h>
+#ifdef LOGGER_VERBOSITY
 static const uint8_t verbosity_level = LOGGER_VERBOSITY;
 #else
 extern uint8_t verbosity_level;

@@ -25,6 +25,7 @@
     - ext/tinydtls
     - ext/tinycrypt/lib/include
   :support:
+    - build/posix
     - test/support
 
 :defines:

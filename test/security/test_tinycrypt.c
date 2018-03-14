@@ -5,6 +5,10 @@
 #include "security/ecc.h"
 #include "security/verifier.h"
 #include "common/error.h"
+#ifdef WITH_CEEDLING
+#include "security/tinycrypt.h"
+#include "tinycrypt_default_cspring.h"
+#endif
 
 #include "memory_mock.h" // Mock 
 #include "memory_file_posix.h" // Real Implmentation
