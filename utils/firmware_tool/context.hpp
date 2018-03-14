@@ -48,8 +48,6 @@ class Context {
         void print_arguments();
         int get_verbosity();
 
-        int store_arguments();
-
         std::string get_next_command();
         std::string get_prog_name();
         FOREACH_ARG(DECLARE_GETTER)

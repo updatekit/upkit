@@ -19,7 +19,6 @@
 
 #define FOREACH_configs_COMMAND(COMMAND) \
     COMMAND(configs, print, "print the current configuration") \
-    COMMAND(configs, store, "store the current configuration") \
     COMMAND(configs, validate, "validate the current configuration") \
     COMMAND(configs, help, "print a detailed help message for the configs command")
 
@@ -65,3 +64,4 @@ FOREACH_COMMAND(DECLARE);
 /** Utils **/
 void print_buf(const unsigned char* data, size_t data_len, size_t offset);
 bool write_binary(std::string file, uint8_t* data, size_t data_len);
+bool file_exists(std::string file_name);

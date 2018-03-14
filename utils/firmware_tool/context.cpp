@@ -52,22 +52,6 @@ int Context::parse_arguments(int argc, char** argv) {
     return 0;
 }
 
-#define STORE_ARG(type, name, ...) \
-    config[#name] = name;
-
-int Context::store_arguments() {
-     /*json config;
-     std::fstream file;
-     file.open (config_file_name, std::ios::out | std::ios::in);
-     file >> config;
-     file.seekp(std::ios_base::beg);
-     FOREACH_ARG(STORE_ARG);
-     file << std::setw(4) << config << std::endl;
-     file.close();
-     */
-     return EXIT_SUCCESS;
-}
-
 #define PRINT_ARG_VALUE(type, name, ...) \
     std::cout << std::left << " " << std::setw(20) << #name  \
     << std::setw(20) << std::left << name << std::endl;
