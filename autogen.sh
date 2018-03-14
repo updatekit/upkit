@@ -54,7 +54,7 @@ echo "Build tinydtls...done")
 
 # Build tinycrypt
 echo "Build tinycrypt..."
-(cd ext/tinycrypt && make libtinycrypt.a)
+(cd ext/tinycrypt && make ENABLE_TESTS=false)
 echo "Build tinycrypt...done"
 
 autoreconf -i
