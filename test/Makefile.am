@@ -19,8 +19,6 @@ MEMORY_IMPL = ../build/posix/memory_file_posix.c
 ALL_SRC = $(UNITY_SRC) $(COMMON_SRC) $(MEMORY_SRC) $(SECURITY_SRC) $(MANIFEST_SRC) $(NETWORK_SRC)
 ALL_SRC += $(NETWORK_IMPL) $(MEMORY_IMPL)
 
-
-
 MEMORY_MOCK_ALL_SRC = $(UNITY_SRC) $(COMMON_SRC) $(SECURITY_SRC) $(MANIFEST_SRC) $(NETWORK_SRC)
 MEMORY_MOCK_ALL_SRC += $(NETWORK_IMPL) $(MEMORY_IMPL) ../src/memory/memory_objects.c mocks/memory_mock.c
 
