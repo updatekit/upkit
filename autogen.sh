@@ -29,36 +29,32 @@ for dir in $(cd $PATCHDIR && find * -type d -print); do
     for f in $(find $PATCHDIR/$dir -maxdepth 1 -name *.patch); do
         patch=$PWD/$f
         echo "Applying patch: $patch"
-        (cd ext/$dir/
-        git am $patch
-        )
+        (cd ext/$dir && git am $patch)
     done
 done
 
 # Build libcoap
-echo "Build libcoap..."
-(
-  cd ext/libcoap && \
-  ./autogen.sh && \
-  touch ext/tinydtls/install.sh
-  ./configure --with-tinydtls --disable-shared \
-  --disable-documentation --disable-examples && \
-  make
-)
-echo "Build libcoap...done"
+(echo "Build libcoap..."
+cd ext/libcoap
+./autogen.sh
+touch ext/tinydtls/install.sh
+./configure --with-tinydtls --disable-shared --disable-examples
+make
+echo "Build libcoap...done")
 
 # Build tinydtls
-echo "Build tinydtls..."
-(
-  cd ext/tinydtls
-  # Avoid error of configure (this file is not needed in the way we use tinydtls)
-  touch install.sh
-  POSIX_OPTIMIZATIONS="-Os -ffunction-sections -fdata-sections -Wl,--gc-sections"
-  autoreconf -i --force
-  ./configure --without-debug
-  make libtinydtls.a CFLAGS="$POSIX_OPTIMIZATIONS"
-)
-echo "Build tinydtls...done"
+(echo "Build tinydtls..."
+cd ext/tinydtls
+touch install.sh
+POSIX_OPTIMIZATIONS="-Os -ffunction-sections -fdata-sections -Wl,--gc-sections"
+autoreconf -i --force
+./configure --without-debug
+make libtinydtls.a CFLAGS="$POSIX_OPTIMIZATIONS"
+echo "Build tinydtls...done")
 
 # Build tinycrypt
-(cd ext/tinycrypt && make)
+echo "Build tinycrypt..."
+(cd ext/tinycrypt && make libtinycrypt.a)
+echo "Build tinycrypt...done"
+
+autoreconf -i
