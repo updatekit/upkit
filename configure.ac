@@ -5,6 +5,11 @@ AM_SILENT_RULES([yes])
 AM_MAINTAINER_MODE([disable])
 
 dnl Config header
+dnl I am exporting the configuration files in the header since it
+dnl modifies the API of the library. It does not modify the functions
+dnl but it specifies the implementation of some struct and unions and
+dnl thus when the library is compiled in this way it relies on these
+dnl structures.
 AC_CONFIG_HEADERS(include/common/libpull_config.h:libpull_config.h.in)
 
 dnl Checks for programs.
@@ -13,6 +18,9 @@ AC_PROG_CXX
 AC_PROG_INSTALL
 dnl AM_PROG_AR
 AC_PROG_RANLIB
+
+dnl Recursive targets
+AC_CONFIG_FILES([Makefile test/Makefile utils/firmware_tool/Makefile utils/server/Makefile])
 
 dnl Checks for libraries.
 
@@ -72,4 +80,4 @@ AS_IF([test "x$with-tinydtls" != "xno"], [AC_DEFINE([WITH_TINYDTLS], [1],
 
 dnl check the presence of the library from the include path or from the ext path
 
-AC_OUTPUT(Makefile utils/firmware_tool/Makefile utils/server/Makefile test/Makefile)
+AC_OUTPUT

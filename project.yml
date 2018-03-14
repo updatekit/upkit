@@ -42,25 +42,26 @@
     - *common_defines
     - WITH_CEEDLING
 
-:cmock:
-  :mock_prefix: mock_
-  :when_no_prototypes: :warn
-  :enforce_strict_ordering: TRUE
-  :fail_on_unexpected_calls: FALSE
-  :callback_include_count: FALSE
-  #:memcmp_if_unknown: FALSE
-  :includes:
-      - memory_file_posix.h
-  :plugins:
-    - :ignore
-    - :callback
-    - :expect_any_args
-  :treat_as:
-    uint8:    HEX8
-    uint16:   HEX16
-    uint32:   UINT32
-    int8:     INT8
-    bool:     UINT8
+# Not using cmock to mocking headers      
+#:cmock:
+#  :mock_prefix: mock_
+#  :when_no_prototypes: :warn
+#  :enforce_strict_ordering: TRUE
+#  :fail_on_unexpected_calls: FALSE
+#  :callback_include_count: FALSE
+#  #:memcmp_if_unknown: FALSE
+#  :includes:
+#      - memory_file_posix.h
+#  :plugins:
+#    - :ignore
+#    - :callback
+#    - :expect_any_args
+#  :treat_as:
+#    uint8:    HEX8
+#    uint16:   HEX16
+##    uint32:   UINT32
+#    int8:     INT8
+#    bool:     UINT8
 
 :flags:
   :test:

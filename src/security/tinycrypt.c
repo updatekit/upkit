@@ -10,21 +10,21 @@
 /* SHA 256 */
 
 pull_error tinycrypt_sha256_init(digest_ctx* ctx) {
-    if (tc_sha256_init(&ctx->sha256_tinycrypt.ctx) != 1) {
-        return SHA256_INIT_ERROR;
+    if (ctx == NULL || tc_sha256_init(&ctx->sha256_tinycrypt.ctx) != 1) {
+        return DIGEST_INIT_ERROR;
     }
     return PULL_SUCCESS;
 }
 
 pull_error tinycrypt_sha256_update(digest_ctx* ctx, void* data, size_t data_size) {
-    if (tc_sha256_update(&ctx->sha256_tinycrypt.ctx, (const uint8_t *) data, (size_t) data_size) != 1) {
-        return SHA256_UPDATE_ERROR;
+    if (ctx == NULL || data == NULL || tc_sha256_update(&ctx->sha256_tinycrypt.ctx, (const uint8_t *) data, (size_t) data_size) != 1) {
+        return DIGEST_UPDATE_ERROR;
     }
     return PULL_SUCCESS;
 }
 
 void* tinycrypt_sha256_final(digest_ctx* ctx) {
-    if (tc_sha256_final((uint8_t*) &ctx->sha256_tinycrypt.result, 
+    if (ctx == NULL || tc_sha256_final((uint8_t*) &ctx->sha256_tinycrypt.result, 
                 &ctx->sha256_tinycrypt.ctx) != 1) {
         return NULL;
     }

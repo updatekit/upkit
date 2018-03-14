@@ -10,16 +10,25 @@
 /* SHA 256 */
 
 pull_error tinydtls_sha256_init(digest_ctx* ctx) {
+    if (ctx == NULL) {
+        return DIGEST_INIT_ERROR;
+    }
     dtls_sha256_init(&ctx->sha256_tinydtls.ctx);
     return PULL_SUCCESS;
 }
 
 pull_error tinydtls_sha256_update(digest_ctx* ctx, void* data, size_t data_size) {
+    if (ctx == NULL || data == NULL) {
+        return DIGEST_UPDATE_ERROR;
+    }
     dtls_sha256_update(&ctx->sha256_tinydtls.ctx, (unsigned char*)data, data_size);
     return PULL_SUCCESS;
 }
 
 void* tinydtls_sha256_final(digest_ctx* ctx) {
+    if (ctx == NULL) {
+        return NULL;
+    }
     dtls_sha256_final((unsigned char*) &ctx->sha256_tinydtls.result, &ctx->sha256_tinydtls.ctx);
     return &ctx->sha256_tinydtls.result;
 }

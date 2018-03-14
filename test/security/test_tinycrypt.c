@@ -1,7 +1,3 @@
-#include "memory/memory.h"
-#include "memory/manifest.h"
-
-#include "memory/simple_manifest.h"
 #include "memory/memory_objects.h"
 #include "sample_data.h"
 #include "security/digest.h"
@@ -9,6 +5,12 @@
 #include "security/ecc.h"
 #include "security/verifier.h"
 #include "common/error.h"
+
+#include "memory_mock.h" // Mock 
+#include "memory_file_posix.h" // Real Implmentation
+
+#include "manifest_mock.h" // Mock
+#include "memory/simple_manifest.h" // Real Implementation
 
 #include <string.h>
 
@@ -39,4 +41,6 @@ TEST_RUNNER();
 
 void setUp() {
     func = tinycrypt_digest_sha256;
+    memory_mock_restore();
+    manifest_mock_restore();
  }

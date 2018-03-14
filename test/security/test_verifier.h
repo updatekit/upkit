@@ -4,13 +4,13 @@
 #include "security/verifier.h"
 #include "memory/memory_objects.h"
 #include "memory/manifest.h"
+#include "memory/memory.h"
+
+#include "memory_mock.h"
+#include "manifest_mock.h"
 
 #include "invalid_digest.h" // Test Support
 #include "sample_data.h" // Test Support
-
-//#include "mock_memory.h"
-//#define NO_MOCK(func) func##_StubWithCallback(func##_impl)
-#define NO_MOCK(a)
 
 #define BUFFER_LEN 1024
 static uint8_t buffer[BUFFER_LEN];
@@ -47,7 +47,7 @@ void test_sha256(void) {
 void test_sha256_invalid_init(void) {
     digest_func digest = func;
     pull_error err = digest.init(NULL);
-    TEST_ASSERT_TRUE(err == SHA256_INIT_ERROR);
+    TEST_ASSERT_TRUE(err == DIGEST_INIT_ERROR);
 }
 
 void test_sha256_invalid_update(void) {
@@ -56,11 +56,11 @@ void test_sha256_invalid_update(void) {
     pull_error err = digest.init(&ctx);
     TEST_ASSERT_TRUE(!err);
     err = digest.update(NULL, (void*) data_g, 128);
-    TEST_ASSERT_TRUE(SHA256_UPDATE_ERROR);
+    TEST_ASSERT_TRUE(err = DIGEST_UPDATE_ERROR);
     err = digest.update(&ctx, NULL, 128);
-    TEST_ASSERT_TRUE(SHA256_UPDATE_ERROR);
+    TEST_ASSERT_TRUE(err = DIGEST_UPDATE_ERROR);
     err = digest.update(&ctx, (void*) data_g, 0);
-    TEST_ASSERT_TRUE(SHA256_UPDATE_ERROR);
+    TEST_ASSERT_TRUE(err = DIGEST_UPDATE_ERROR);
 }
 
 void test_sha256_invalid_final(void) {
@@ -87,13 +87,6 @@ void test_sign_invalid_hash_size(void) {
 }
 
 void test_verify_object_valid(void) {
-    NO_MOCK(memory_open);
-    NO_MOCK(memory_read);
-    NO_MOCK(memory_close);
-    NO_MOCK(get_size);
-    NO_MOCK(get_offset);
-    NO_MOCK(get_digest);
-
     mem_object obj_t;
     pull_error err = verify_object(OBJ_1, func, x, y, secp256r1, &obj_t, buffer, BUFFER_LEN);
     TEST_ASSERT_TRUE_MESSAGE(err == PULL_SUCCESS, err_as_str(err));
@@ -107,9 +100,7 @@ void test_verify_object_invalid_object(void) {
 }
 
 void test_verify_object_invalid_read(void) {
-    NO_MOCK(memory_open);
-    //memory_read_IgnoreAndReturn(MEMORY_READ_ERROR);
-    NO_MOCK(memory_close);
+    memory_mock.memory_read_impl = memory_read_invalid;
 
     mem_object obj_t;
     pull_error err;
@@ -118,41 +109,22 @@ void test_verify_object_invalid_read(void) {
 }
 
 void test_verify_object_invalid_digest_init(void) {
-    NO_MOCK(memory_open);
-    NO_MOCK(memory_read);
-    NO_MOCK(memory_close);
-
     mem_object obj_t;
     pull_error err;
     func.init = invalid_init;
     err = verify_object(OBJ_1, func, x, y, secp256r1, &obj_t, buffer, BUFFER_LEN);
-    TEST_ASSERT_TRUE(err == DIGEST_INIT_ERROR);
+    TEST_ASSERT_TRUE_MESSAGE(err == DIGEST_INIT_ERROR, err_as_str(err));
 }
 
 void test_verify_object_invalid_digest_update(void) {
-    NO_MOCK(memory_open);
-    NO_MOCK(memory_read);
-    NO_MOCK(memory_close);
-    NO_MOCK(get_size);
-    NO_MOCK(get_offset);
-    NO_MOCK(get_digest);
-
     mem_object obj_t;
     pull_error err;
     func.update = invalid_update;
     err = verify_object(OBJ_1, func, x, y, secp256r1, &obj_t, buffer, BUFFER_LEN);
-    TEST_ASSERT_TRUE(err == DIGEST_UPDATE_ERROR);
+    TEST_ASSERT_TRUE_MESSAGE(err == DIGEST_UPDATE_ERROR, err_as_str(err));
 }
 
 void test_verify_object_invalid_key(void) {
-    NO_MOCK(memory_open);
-    NO_MOCK(memory_read);
-    NO_MOCK(memory_close);
-    NO_MOCK(get_size);
-    NO_MOCK(get_offset);
-    NO_MOCK(get_digest);
-    NO_MOCK(verify_manifest_vendor);
-
     mem_object obj_t;
     pull_error err = verify_object(OBJ_1, func, y, y, secp256r1, &obj_t, buffer, BUFFER_LEN);
     TEST_ASSERT_TRUE_MESSAGE(err == VERIFICATION_FAILED_ERROR, err_as_str(err));

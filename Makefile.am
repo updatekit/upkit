@@ -12,3 +12,9 @@ libpull_a_SOURCES += src/security/verifier.c src/security/tinycrypt.c src/securi
 
 pkginclude_HEADERS = include/common/error.h
 # TODO Finish including all the headers
+
+firmware_tool:
+	$(MAKE) -C utils/firmware_tool
+
+server:
+	$(MAKE) -C utils/server
