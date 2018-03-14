@@ -2,17 +2,17 @@
 
 title = "Configuration Example"
 
-[firmware configurations]
-version = 0xdead
-platform = 0xbeef
-offset = 0x100
+# Firmware Configurations
+version = "0xdead"
+platform = "0xbeef"
+offset = "0x100"
 
-[paths]
+# Paths
 signature_file = "signature.bin"
 binary_file = "firmware.hex"
 out_file = "manifest.bin"
 
-[keys] 
+# Keys
 server_priv_key = "keys/server.priv"
 server_pub_key = "keys/server.pub"
 vendor_priv_key = "keys/vendor.priv"

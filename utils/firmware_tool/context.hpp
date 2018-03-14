@@ -28,12 +28,13 @@
     }\
 
 #define PRINT_ARG(type, name, arg_name, help) \
-    std::cout << "   -" << arg_name << " " << #name << "  " << "\t" << help << std::endl;
+    std::cout << std::left << "   -" << std::setw(5) << arg_name \
+    << std::setw(20) << #name << std::setw(40) << help << std::endl;
 
 class Context {
 
     std::string prog_name;
-    std::string config_file_name = "config.json";
+    std::string config_file_name = "config.toml";
     std::vector<std::string> subcommands;
     uint8_t current = 0; // support at most 256 commands
 
@@ -42,7 +43,7 @@ class Context {
     
     public:
         Context(std::string);
-        int parse_json();
+        int parse_conf();
         int parse_arguments(int argc, char** argv);
         void print_arguments();
         int get_verbosity();

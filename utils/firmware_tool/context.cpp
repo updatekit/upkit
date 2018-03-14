@@ -1,28 +1,25 @@
 #include "context.hpp"
-#include "json.hpp"
+#include "cpptoml.h"
 #include <getopt.h>
 #include <iostream>
 #include <fstream>
 
-using json = nlohmann::json;
-
-#define PARSE_JSON(type, name, ...) \
-    if (this->name == "") { \
-        auto name = config.find(#name); \
-        if (name != config.end()) \
-            this->name = *name; \
+#define PARSE_TOML_ELEM(type, name, ...) \
+    val = config->get_as<std::string>(#name);\
+    if (val) { \
+        this->name = *val; \
     }
 
-int Context::parse_json() {
-    json config;
-    std::ifstream file(config_file_name, std::ifstream::in);
-    if (!file.is_open()) {
-        std::cout << "No configuration file present at path " << config_file_name << std::endl;
+int Context::parse_conf() {
+    std::shared_ptr<cpptoml::table> config;
+    try {
+    config = cpptoml::parse_file(config_file_name);
+    } catch (cpptoml::parse_exception e) {
+        std::cerr << e.what() << std::endl;
         return 1;
     }
-    /* XXX This can throw exceptions */
-    file >> config;
-    FOREACH_ARG(PARSE_JSON);
+    cpptoml::option<std::string> val;
+    FOREACH_ARG(PARSE_TOML_ELEM);
     return 0;
 }
 
@@ -59,7 +56,7 @@ int Context::parse_arguments(int argc, char** argv) {
     config[#name] = name;
 
 int Context::store_arguments() {
-     json config;
+     /*json config;
      std::fstream file;
      file.open (config_file_name, std::ios::out | std::ios::in);
      file >> config;
@@ -67,11 +64,13 @@ int Context::store_arguments() {
      FOREACH_ARG(STORE_ARG);
      file << std::setw(4) << config << std::endl;
      file.close();
+     */
      return EXIT_SUCCESS;
 }
 
 #define PRINT_ARG_VALUE(type, name, ...) \
-    std::cout << " " << #name << ":\t" << name << std::endl;
+    std::cout << std::left << " " << std::setw(20) << #name  \
+    << std::setw(20) << std::left << name << std::endl;
 void Context::print_arguments() {
     std::cout << "The configured parameters are:" << std::endl;
     FOREACH_ARG(PRINT_ARG_VALUE);

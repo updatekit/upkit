@@ -34,7 +34,7 @@ int main(int argc, char** argv) {
     }
     auto search = commands.find(argv[1]);
     ctx.parse_arguments(argc, argv);
-    ctx.parse_json();
+    ctx.parse_conf();
     if (ctx.get_verbosity() > 2) {
         ctx.print_arguments();
     }

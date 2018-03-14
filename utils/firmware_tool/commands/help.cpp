@@ -1,7 +1,9 @@
 #include "commands.hpp"
+#include <iostream>
 
 #define PRINT_COMMAND_FULL(name, description) \
-        std::cout << "   " << #name << ":\t" << description << std::endl; \
+        std::cout << std::left << "   " << std::setw(15) << #name \
+        << std::setw(40) << description << std::endl; \
         FOREACH_##name##_COMMAND(PRINT_HELP) \
         std::cout << std::endl;
 

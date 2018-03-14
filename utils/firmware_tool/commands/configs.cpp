@@ -1,8 +1,5 @@
 #include "commands.hpp"
-#include "../json.hpp"
 #include <fstream>
-
-using json = nlohmann::json;
 
 IMPLEMENT(configs)
 
@@ -16,6 +13,6 @@ int configs_validate_command(Context ctx) {
 }
 
 int configs_print_command(Context ctx) {
-    // TODO implemnet
+    ctx.print_arguments();
     return 0;
 }

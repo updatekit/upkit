@@ -1,4 +1,5 @@
 #include "../context.hpp"
+#include <iomanip>
 
 #define FOREACH_COMMAND(COMMAND) \
     COMMAND(keys, "manage cryptographic keys") \
@@ -37,7 +38,8 @@ FOREACH_COMMAND(DECLARE);
 #undef DECLARE
 
 #define PRINT_HELP(category, name, description) \
-    std::cout << "     " << #name << ":\t" << description << std::endl;
+    std::cout << std::left << "     " << std::setw(15) << #name \
+    << std::setw(40) << description << std::endl;
 
 #define HELP_FUNCTION(name) \
     int name##_help_command(Context ctx) {\
