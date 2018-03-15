@@ -11,6 +11,9 @@ all: ota
 # Size optimizations
 SMALL = 1
 
+# Default configurations
+CFLAGS += -DSIMPLE_MANIFEST -DLOGGER_VERBOSITY=4
+
 # Include libpull sources
 ROOTDIR=../..
 LIBPULL += $(ROOTDIR)/src/network $(ROOTDIR)/src/common $(ROOTDIR)/src/memory 
@@ -48,6 +51,7 @@ ifeq ($(DTLS_DEBUG),1)
 else
 	CFLAGS += -DNDEBUG=0
 endif
+
 # Add Tinydtls to the build
 PROJECTDIRS += $(TINYDTLS)
 PROJECT_SOURCEFILES += $(TINYDTLS_SOURCEFILES)

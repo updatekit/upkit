@@ -11,21 +11,21 @@
 
 /* Hardware */
 
-inline pull_error cryptoauthlib_hw_sha256_init(digest_ctx* ctx) {
+pull_error cryptoauthlib_hw_sha256_init(digest_ctx* ctx) {
     if (atcab_hw_sha2_256_init(&ctx->sha256_cryptoauthlib_hw.ctx) != ATCA_SUCCESS) {
         return SHA256_INIT_ERROR;
     }
     return PULL_SUCCESS;
 }
 
-inline pull_error cryptoauthlib_hw_sha256_update(digest_ctx* ctx, void* data, size_t data_size) {
+pull_error cryptoauthlib_hw_sha256_update(digest_ctx* ctx, void* data, size_t data_size) {
     if (atcab_hw_sha2_256_update(&ctx->sha256_cryptoauthlib_hw.ctx, (const uint8_t *) data, data_size) != ATCA_SUCCESS) {
         return SHA256_UPDATE_ERROR;
     }
     return PULL_SUCCESS;
 }
 
-inline void* cryptoauthlib_hw_sha256_final(digest_ctx* ctx) {
+void* cryptoauthlib_hw_sha256_final(digest_ctx* ctx) {
     if (atcab_hw_sha2_256_finish(&ctx->sha256_cryptoauthlib_hw.ctx, (uint8_t*) &ctx->sha256_cryptoauthlib.result) != ATCA_SUCCESS) {
         return NULL;
     }
@@ -34,21 +34,21 @@ inline void* cryptoauthlib_hw_sha256_final(digest_ctx* ctx) {
 
 /* Software */
 
-inline pull_error cryptoauthlib_sha256_init(digest_ctx* ctx) {
+pull_error cryptoauthlib_sha256_init(digest_ctx* ctx) {
     if (atcac_sw_sha2_256_init(&ctx->sha256_cryptoauthlib.ctx) != ATCA_SUCCESS) {
         return SHA256_INIT_ERROR;
     }
     return PULL_SUCCESS;
 }
 
-inline pull_error cryptoauthlib_sha256_update(digest_ctx* ctx, void* data, size_t data_size) {
+pull_error cryptoauthlib_sha256_update(digest_ctx* ctx, void* data, size_t data_size) {
     if (atcac_sw_sha2_256_update(&ctx->sha256_cryptoauthlib.ctx, (const uint8_t *) data, data_size) != ATCA_SUCCESS) {
         return SHA256_UPDATE_ERROR;
     }
     return PULL_SUCCESS;
 }
 
-inline void* cryptoauthlib_sha256_final(digest_ctx* ctx) {
+void* cryptoauthlib_sha256_final(digest_ctx* ctx) {
     if (atcac_sw_sha2_256_finish(&ctx->sha256_cryptoauthlib.ctx, (uint8_t*) &ctx->sha256_cryptoauthlib.result) != ATCA_SUCCESS) {
         return NULL;
     }
@@ -56,7 +56,7 @@ inline void* cryptoauthlib_sha256_final(digest_ctx* ctx) {
 }
 /* ECC */
 
-pull_error cryptoauthlib_ecc_verify(const uint8_t* x, const uint8_t* y, const uint8_t* r, const uint8_t* s,
+pull_error ecc_verify(const uint8_t* x, const uint8_t* y, const uint8_t* r, const uint8_t* s,
         const void* data, uint16_t data_len, ecc_curve curve) {
     uint8_t pub_key[64];
     uint8_t signature[64];

@@ -1,5 +1,5 @@
-#include "common/logger.h"
-#include "memory/metadata.h"
+#include "common/libpull.h"
+#include "memory/manifest.h"
 #include "memory/memory.h"
 
 #define OTA_RESET_VECTOR    0x4
@@ -9,7 +9,7 @@
 #include "ti-lib.h"
 #include "dev/watchdog.h"
 
-void load_object(obj_id id, metadata* mt) {
+void load_object(obj_id id, manifest_t* mt) {
     uint32_t destination_address = 0;
     /// XXX HARDCODED VALUE
     destination_address = 0x5000+get_offset(mt);

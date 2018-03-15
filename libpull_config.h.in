@@ -2,15 +2,23 @@
 #define LIBPULL_CONFIG_H_
 
 /* Use the simple manifest. */
+#ifndef SIMPLE_MANIFEST
 #undef SIMPLE_MANIFEST
+#endif
 
 /* Use tinycrypt as a cryptographic library. */
+#ifndef WITH_TINYCRYPT
 #undef WITH_TINYCRYPT
+#endif
 
 /* Use TinyDTLS as a cryptographic library. */
+#ifndef WITH_TINYDTLS
 #undef WITH_TINYDTLS
+#endif
 
 /* Define logger verbosity */
+#ifndef LOGGER_VERBOSITY
 #undef LOGGER_VERBOSITY
+#endif
 
 #endif /* LIBPULL_CONFIG_H_ */

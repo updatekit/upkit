@@ -1,31 +1,28 @@
 #include "contiki.h"
-
 #include "contiki-lib.h"
 #include "dev/watchdog.h"
 #include "leds.h"
 
-#include "common/logger.h"
+#include "common/libpull.h"
 #include "memory/memory_objects.h"
+#include "memory/manifest.h"
 #include "network/receiver.h"
 #include "network/subscriber.h"
-#include "transport/transport_ercoap.h"
-#include "memory_headers.h"
-#include "default_configs.h"
 #include "security/verifier.h"
 #include "security/sha256.h"
 
-#include "driverlib/flash.h"
+#include "default_configs.h"
+#include "transport/transport_ercoap.h"
+#include "memory_headers.h"
 
-static const uint8_t x[32] = {
-    0x8b,0x27,0x39,0x67,0x01,0x4b,0x1c,0xae,0xfe,0x8a,0x18,0x6e,0xea,0x27,0x86,0x34,
-    0x0e,0xea,0x35,0x3d,0x8c,0x65,0xf6,0x59,0xfc,0xcb,0x23,0xd7,0xfa,0xab,0x7b,0x18
-};
-static const uint8_t y[32] = {
-    0x14,0x75,0x33,0xec,0x17,0xb7,0x54,0x50,0xca,0x98,0x35,0xad,0x58,0xbe,0xd5,0xfa,
-    0x48,0xbc,0xa0,0x24,0x81,0xba,0xfa,0x3d,0xcd,0x8d,0x5a,0x7f,0x40,0xbc,0x70,0x94
-};
+/* This is only specific to CC26xx */
+#if TARGET == srf06-cc26xx
+#include "driverlib/flash.h"
+#endif
 
 #define BUFFER_LEN 0x100
+
+DIGEST_FUNC(cryptoauthlib);
 
 PROCESS(update_process, "OTA Update process");
 PROCESS(main_process, "Main process");
@@ -133,15 +130,15 @@ PROCESS_THREAD(update_process, ev, data) {
             log_info("Error receving firmware...restarting\n");
             continue;
         }
-        metadata mt;
-        err = read_firmware_metadata(id, &mt, &obj_t);
+        manifest_t mt;
+        err = read_firmware_manifest(id, &mt, &obj_t);
         if (err) {
-            log_error(err, "Failure reading firmware metadata, aborting\n");
-            memset(&mt, 0x0, sizeof(metadata));
-            write_firmware_metadata(id, &mt, &obj_t);
+            log_error(err, "Failure reading firmware manifest, aborting\n");
+            memset(&mt, 0x0, sizeof(manifest_t));
+            write_firmware_manifest(id, &mt, &obj_t);
             continue;
         }
-        print_metadata(&mt);
+        print_manifest(&mt);
         watchdog_stop();
         uint8_t buffer[BUFFER_LEN];
         digest_func digest;
@@ -160,8 +157,8 @@ PROCESS_THREAD(update_process, ev, data) {
  #endif
         if (err) {
             log_warn("Verification failed\n");
-            memset(&mt, 0x0, sizeof(metadata));
-            write_firmware_metadata(id, &mt, &obj_t);
+            memset(&mt, 0x0, sizeof(manifest_t));
+            write_firmware_manifest(id, &mt, &obj_t);
             continue;
         }
         watchdog_start();
