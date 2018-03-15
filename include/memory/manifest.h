@@ -26,33 +26,45 @@ extern "C" {
     ITEM(uint8_t*, server_key_x) \
     ITEM(uint8_t*, server_key_y) \
     ITEM(uint8_t*, digest) \
-    ITEM(uint8_t*, vendor_signature_r, uint8_t* size) \
-    ITEM(uint8_t*, vendor_signature_s, uint8_t* size) \
-    ITEM(uint8_t*, server_signature_r, uint8_t* size) \
-    ITEM(uint8_t*, server_signature_s, uint8_t* size)
+    ITEM(uint16_t, udid) \
+    ITEM(uint16_t, random) \
+    /* These other item take another parameter of type uint8_t* size */ \
+    ITEM##_MEMORY(uint8_t*, vendor_signature_r) \
+    ITEM##_MEMORY(uint8_t*, vendor_signature_s) \
+    ITEM##_MEMORY(uint8_t*, server_signature_r) \
+    ITEM##_MEMORY(uint8_t*, server_signature_s)
 
 /** The scope of this file is to define the interface of a manifest. It can be
  * implemented using different encodings, but each approach should implement
  * this interface to be usable by the library */
 
-#define DEFINE_GETTER(type, name, ...) \
-    type get_##name(const manifest_t* mt, ##__VA_ARGS__);
+#define DEFINE_GETTER(type, name) \
+    type get_##name(const manifest_t* mt);
 
-#define DEFINE_SETTER(type, name, ...) \
-    void set_##name(manifest_t* mt, type name, ##__VA_ARGS__);
+#define DEFINE_SETTER(type, name) \
+    void set_##name(manifest_t* mt, type name);
+
+/* Memory getters return a pointer to the memory buffer and its size */
+#define DEFINE_GETTER_MEMORY(type, name) \
+    type get_##name(const manifest_t* mt, uint8_t* size);
+
+/* Memory setters return 0 if success or 1 if error */
+#define DEFINE_SETTER_MEMORY(type, name) \
+    int set_##name(manifest_t* mt, type name, uint8_t size);
 
 FOREACH_ITEM(DEFINE_GETTER)
 FOREACH_ITEM(DEFINE_SETTER)
 
 #undef DEFINE_GETTER
 #undef DEFINE_SETTER
+#undef DEFINE_GETTER_MEMORY
+#undef DEFINE_SETTER_MEMORY
 
 /** 
  * \brief Print manifest known values.
  * \param mt Pointer to a manifest structure.
  */
 void print_manifest(const manifest_t* mt);
-
 
 pull_error verify_manifest_vendor(manifest_t* mt, digest_func f, const uint8_t *pub_x,
                                         const uint8_t *pub_y, ecc_curve curve);

@@ -17,5 +17,6 @@
 #include "common/error.h"
 #include "common/callback.h"
 #include "common/logger.h"
+#include "common/identity.h"
 
 #endif /* LIBPULL_H_ */

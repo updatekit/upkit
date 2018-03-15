@@ -28,7 +28,7 @@ typedef struct {
 
 /** Manifest filled by the server */
 typedef struct {
-    uint16_t device_id; /** Flags used to describe the device identificator */
+    uint16_t udid; /** Flags used to describe the device identificator */
     uint16_t random; /** Random numer used to personalize each request */
     uint16_t self_checking_flags; /** Flags used to perform self checking after update */
 } server_manifest_t;

@@ -52,7 +52,7 @@ static void handler(pull_error txp_err, const char* data, int len, void* more) {
     }
     ctx->received+=len;
     if (ctx->manifest_received) {
-        log_info("Received %lu bytes. Expected %lu bytes\r", ctx->received, ctx->expected);
+        log_info("Received %u bytes. Expected %u bytes\r", ctx->received, ctx->expected);
         if (ctx->received == ctx->expected) {
             ctx->firmware_received = 1;
             ctx->err = PULL_SUCCESS;

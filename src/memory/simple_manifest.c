@@ -26,6 +26,12 @@ uint8_t* get_server_key_x_impl(const manifest_t* mt) {
 uint8_t* get_server_key_y_impl(const manifest_t* mt) {
     return (uint8_t*) mt->vendor.server_key_y;
 }
+uint16_t get_udid(const manifest_t* mt) {
+    return mt->server.udid;
+}
+uint16_t get_random(const manifest_t* mt) {
+    return mt->server.random;
+}
 
 void set_version_impl(manifest_t* mt, version_t version) {
     mt->vendor.version = version;
@@ -48,7 +54,15 @@ void set_server_key_x_impl(manifest_t* mt, uint8_t* server_key_x) {
 void set_server_key_y_impl(manifest_t* mt, uint8_t* server_key_y) {
     memcpy(mt->vendor.server_key_y, server_key_y, 32); // XXX hardcoded value
 }
+void set_udid(manifest_t* mt, uint16_t udid) {
+    mt->server.udid = udid;
+}
+void set_random(manifest_t* mt, uint16_t random_val) {
+    mt->server.random = random_val;
+}
 
+
+/* Memory getter and setters */
 uint8_t* get_vendor_signature_r_impl(const manifest_t *mt, uint8_t* size) {
     *size = 32;
     return (uint8_t*) (mt->vendor_signature_r);
@@ -67,17 +81,29 @@ uint8_t* get_server_signature_s_impl(const manifest_t *mt, uint8_t* size) {
 }
 
 
-void set_vendor_signature_r_impl(manifest_t *mt, uint8_t* vendor_signature_r, uint8_t *size) {
-    memcpy(mt->vendor_signature_r, vendor_signature_r, *size);
+int set_vendor_signature_r_impl(manifest_t *mt, uint8_t* vendor_signature_r, uint8_t size) {
+    if (size != 32) { // XXX hardcoded value
+        return 1;
+    }
+    return memcpy(mt->vendor_signature_r, vendor_signature_r, size) != mt->vendor_signature_r;
 }
-void set_vendor_signature_s_impl(manifest_t *mt, uint8_t* vendor_signature_s, uint8_t *size) {
-    memcpy(mt->vendor_signature_s, vendor_signature_s, *size);
+int set_vendor_signature_s_impl(manifest_t *mt, uint8_t* vendor_signature_s, uint8_t size) {
+    if (size != 32) { // XXX hardcoded value
+        return 1;
+    }
+    return memcpy(mt->vendor_signature_s, vendor_signature_s, size) != mt->vendor_signature_s;
 }
-void set_server_signature_r_impl(manifest_t *mt, uint8_t* server_signature_r, uint8_t *size) {
-    memcpy(mt->server_signature_r, server_signature_r, *size);
+int set_server_signature_r_impl(manifest_t *mt, uint8_t* server_signature_r, uint8_t size) {
+    if (size != 32) { // XXX hardcoded value
+        return 1;
+    }
+    return memcpy(mt->server_signature_r, server_signature_r, size) != mt->server_signature_r;
 }
-void set_server_signature_s_impl(manifest_t *mt, uint8_t* server_signature_s, uint8_t *size) {
-    memcpy(mt->server_signature_s, server_signature_s, *size);
+int set_server_signature_s_impl(manifest_t *mt, uint8_t* server_signature_s, uint8_t size) {
+    if (size != 32) { // XXX hardcoded value
+        return 1;
+    }
+    return memcpy(mt->server_signature_s, server_signature_s, size) != mt->server_signature_s;
 }
 
 static pull_error verify_data_impl(uint8_t* data, digest_func f, const uint8_t *pub_x,
@@ -124,16 +150,16 @@ static pull_error sign_data_impl(uint8_t* data, digest_func f, const uint8_t *pr
 pull_error sign_manifest_vendor_impl(manifest_t* mt, digest_func f, const uint8_t *private_key,
                                    uint8_t* signature_buffer, ecc_curve curve) {
     pull_error err = sign_data_impl((uint8_t*) &mt->vendor, f, private_key, signature_buffer, curve);
-    set_vendor_signature_r_impl(mt, signature_buffer, &curve.curve_size);
-    set_vendor_signature_s_impl(mt, signature_buffer+curve.curve_size, &curve.curve_size);
+    set_vendor_signature_r_impl(mt, signature_buffer, curve.curve_size);
+    set_vendor_signature_s_impl(mt, signature_buffer+curve.curve_size, curve.curve_size);
     return err;
 }
 
 pull_error sign_manifest_server_impl(manifest_t* mt, digest_func f, const uint8_t *private_key,
                                    uint8_t* signature_buffer, ecc_curve curve) {
     pull_error err = sign_data_impl((uint8_t*) &mt->server, f, private_key, signature_buffer, curve);
-    set_server_signature_r_impl(mt, signature_buffer, &curve.curve_size);
-    set_server_signature_s_impl(mt, signature_buffer+curve.curve_size, &curve.curve_size);
+    set_server_signature_r_impl(mt, signature_buffer, curve.curve_size);
+    set_server_signature_s_impl(mt, signature_buffer+curve.curve_size, curve.curve_size);
     return err;
 }
 
