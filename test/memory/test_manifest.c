@@ -92,22 +92,22 @@ void test_manifest_digest(void) {
 }
 void test_manifest_vendor_signature_r(void) {
     uint8_t new_size;
-    TEST_ASSERT_EQUAL_MEMORY(vendor_signature_r_g, get_vendor_signature_r(&mt, &new_size), new_size);
+    TEST_ASSERT_EQUAL_MEMORY(vendor_signature_r_g, get_vendor_signature_r(&mt, &new_size), size);
     TEST_ASSERT_EQUAL_UINT8(size, new_size);
 }
 void test_manifest_vendor_signature_s(void) {
     uint8_t new_size;
-    TEST_ASSERT_EQUAL_MEMORY(vendor_signature_s_g, get_vendor_signature_s(&mt, &new_size), new_size);
+    TEST_ASSERT_EQUAL_MEMORY(vendor_signature_s_g, get_vendor_signature_s(&mt, &new_size), size);
     TEST_ASSERT_EQUAL_UINT8(size, new_size);
 }
 void test_manifest_server_signature_r(void) {
     uint8_t new_size;
-    TEST_ASSERT_EQUAL_MEMORY(server_signature_r_g, get_server_signature_r(&mt, &new_size), new_size);
+    TEST_ASSERT_EQUAL_MEMORY(server_signature_r_g, get_server_signature_r(&mt, &new_size), size);
     TEST_ASSERT_EQUAL_UINT8(size, new_size);
 }
 void test_manifest_server_signature_s(void) {
     uint8_t new_size;
-    TEST_ASSERT_EQUAL_MEMORY(server_signature_s_g, get_server_signature_s(&mt, &new_size), new_size);
+    TEST_ASSERT_EQUAL_MEMORY(server_signature_s_g, get_server_signature_s(&mt, &new_size), size);
     TEST_ASSERT_EQUAL_UINT8(size, new_size);
 }
 

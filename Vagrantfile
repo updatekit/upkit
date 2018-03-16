@@ -2,7 +2,7 @@ $script = <<SCRIPT
 echo "Installing required packages"
 sudo apt-get update
 # Installing build toolchain
-sudo apt-get install -y git libtool autoconf automake pkg-config srecord valgrind
+sudo apt-get install -y g++ git libtool autoconf automake pkg-config srecord valgrind
 SCRIPT
 
 Vagrant.configure("2") do |config|
