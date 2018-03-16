@@ -17,5 +17,5 @@ script:
   - make firmware_tool
   - make server
   - make assets
-  - make run_server &
+  - make run_server & >/dev/null 2>&1
   - make check
