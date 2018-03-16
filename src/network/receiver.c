@@ -66,12 +66,14 @@ static void handler(pull_error txp_err, const char* data, int len, void* more) {
     }
 }
 
-pull_error receiver_open(receiver_ctx* ctx, txp_ctx* txp, const char* resource, obj_id i, mem_object* obj) {
+pull_error receiver_open(receiver_ctx* ctx, txp_ctx* txp, identity_t identity,
+        const char* resource, obj_id i, mem_object* obj) {
     memset(ctx, 0, sizeof(receiver_ctx));
     ctx->txp = txp;
     ctx->err = PULL_SUCCESS;
     ctx->obj = obj;
     ctx->resource = resource;
+    ctx->identity = identity;
     log_info("Receiving on memory object %d\n", i);
     pull_error err = memory_open(ctx->obj, i);
     if (err) {
@@ -103,7 +105,13 @@ pull_error receiver_chunk(receiver_ctx* ctx) {
             return ctx->err;
         default: /* ignore all the other cases */ break;
     }
-    err = txp_request(ctx->txp, GET_BLOCKWISE2, ctx->resource, (const char*) &ctx->start_offset, sizeof(uint32_t));
+    receiver_msg_t msg = {
+        .msg_version = MESSAGE_VERSION,
+        .offset = ctx->start_offset,
+        .udid = ctx->identity.udid,
+        .random = ctx->identity.random
+    };
+    err = txp_request(ctx->txp, GET_BLOCKWISE2, ctx->resource, (const char*) &msg, sizeof(receiver_msg_t));
     if (err) {
         log_error(err, "Failure setting receiver request\n");
         return RECEIVER_CHUNK_ERROR;

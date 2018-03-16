@@ -51,13 +51,13 @@ FOREACH_ITEM(IMPLEMENT_SETTER)
 
 
 pull_error verify_manifest_vendor_impl(manifest_t* mt, digest_func f, const uint8_t *pub_x,
-            const uint8_t *pub_y, ecc_curve curve);
+            const uint8_t *pub_y, ecc_func_t ef);
 pull_error verify_manifest_server_impl(manifest_t* mt, digest_func f, const uint8_t *pub_x,
-        const uint8_t *pub_y, ecc_curve curve);
+        const uint8_t *pub_y, ecc_func_t ef);
 pull_error sign_manifest_vendor_impl(manifest_t* mt, digest_func f, const uint8_t *private_key,
-        uint8_t* signature_buffer, ecc_curve curve);
+        uint8_t* signature_buffer, ecc_func_t ef);
 pull_error sign_manifest_server_impl(manifest_t* mt, digest_func f, const uint8_t *private_key,
-        uint8_t* signature_buffer, ecc_curve curve);
+        uint8_t* signature_buffer, ecc_func_t ef);
 
 void print_manifest_impl(const manifest_t* mt);
 
@@ -66,18 +66,18 @@ void print_manifest(const manifest_t *mt) {
 }
 
 pull_error verify_manifest_vendor(manifest_t* mt, digest_func f, const uint8_t *pub_x,
-        const uint8_t *pub_y, ecc_curve curve) {
-    return verify_manifest_vendor_impl(mt, f, pub_x, pub_y, curve);
+        const uint8_t *pub_y, ecc_func_t ef) {
+    return verify_manifest_vendor_impl(mt, f, pub_x, pub_y, ef);
 }
 pull_error verify_manifest_server(manifest_t* mt, digest_func f, const uint8_t *pub_x,
-        const uint8_t *pub_y, ecc_curve curve) {
-    return verify_manifest_server_impl(mt, f, pub_x, pub_y, curve);
+        const uint8_t *pub_y, ecc_func_t ef) {
+    return verify_manifest_server_impl(mt, f, pub_x, pub_y, ef);
 }
 pull_error sign_manifest_vendor(manifest_t* mt, digest_func f, const uint8_t *private_key, 
-        uint8_t* signature_buffer, ecc_curve curve) {
-    return sign_manifest_vendor_impl(mt, f, private_key, signature_buffer, curve);
+        uint8_t* signature_buffer, ecc_func_t ef) {
+    return sign_manifest_vendor_impl(mt, f, private_key, signature_buffer, ef);
 }
 pull_error sign_manifest_server(manifest_t* mt, digest_func f, const uint8_t *private_key,
-        uint8_t* signature_buffer, ecc_curve curve) {
-    return sign_manifest_server_impl(mt, f, private_key, signature_buffer, curve);
+        uint8_t* signature_buffer, ecc_func_t ef) {
+    return sign_manifest_server_impl(mt, f, private_key, signature_buffer, ef);
 }

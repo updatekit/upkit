@@ -61,10 +61,9 @@ void test_udp(void) {
 void test_dtls_ecdsa(void) {
     // Set up dtls ecdh connection
     dtls_ecdh_data_t ecdh_data = {
-        .curve = CURVE_SECP256R1,
-        .priv_key = (uint8_t *) priv_g,
-        .pub_key_x = (uint8_t *) x,
-        .pub_key_y = (uint8_t *) y
+        .priv_key = (uint8_t *) dtls_client_priv_g,
+        .pub_key_x = (uint8_t *) dtls_client_x_g,
+        .pub_key_y = (uint8_t *) dtls_client_y_g
     };
     pull_error error = txp_init(&ctx, PROV_SERVER, 0, CONN_DTLS_ECDH, &ecdh_data);
     TEST_ASSERT_TRUE(!error);

@@ -35,22 +35,16 @@ void* tinydtls_sha256_final(digest_ctx* ctx) {
 
 /* ECC */
 
-pull_error ecc_verify(const uint8_t* x, const uint8_t* y, const uint8_t* r, const uint8_t* s,
-        const void* data, uint16_t data_len, ecc_curve curve) {
-    if (curve.type != CURVE_SECP256R1) {
-        return NOT_SUPPORTED_CURVE_ERROR;
-    }
-    if (dtls_ecdsa_verify_sig_hash(x, y, curve.curve_size, 
-                data, data_len, (unsigned char*) r, (unsigned char*) s) == 0) {
-        return PULL_SUCCESS;
-    }
-    return VERIFICATION_FAILED_ERROR;
+pull_error tinydtls_secp256r1_ecc_verify(const uint8_t* x, const uint8_t* y, 
+        const uint8_t* r, const uint8_t* s, const void* data, uint16_t data_len) {
+    int ret = dtls_ecdsa_verify_sig_hash(x, y, 32, data, data_len, (unsigned char*) r, (unsigned char*) s);
+    return ret == 0 ? PULL_SUCCESS : VERIFICATION_FAILED_ERROR;
 }
 
-pull_error ecc_sign(const uint8_t* private_key, uint8_t *signature,
-        const void *data, uint16_t data_len, ecc_curve curve) {
+pull_error tinydtls_secp256r1_ecc_sign(const uint8_t* private_key, uint8_t *signature,
+        const void *data, uint16_t data_len) {
     uint32_t signature_DER[18];
-    dtls_ecdsa_create_sig_hash(private_key, curve.curve_size, data, data_len,
+    dtls_ecdsa_create_sig_hash(private_key, 32, data, data_len,
             signature_DER, signature_DER+9);
     // XXX This is not right! tinydtls encodes the signature in DER that requires
     // up to 72 bytes. I'm passing to it just 64. I should refactor the

@@ -23,6 +23,7 @@ extern "C" {
  * Receiver context used to hold data for the receiver function
  */
 typedef struct receiver_ctx_ {
+    identity_t identity;
     const char* resource;
     mem_object* obj;
     manifest_t mt;
@@ -36,6 +37,14 @@ typedef struct receiver_ctx_ {
     uint32_t received;
 } receiver_ctx;
 
+#define MESSAGE_VERSION 0x1
+typedef struct {
+    uint32_t offset;
+    uint16_t udid;
+    uint16_t random;
+    uint8_t msg_version;
+} receiver_msg_t;
+
 /** 
  * \brief Open the receiver context.
  * This function start the connection with the backend. It uses a
@@ -46,6 +55,7 @@ typedef struct receiver_ctx_ {
  * \param ctx The receiver context that should be passed to every receiver
  * function.
  * \param txp The transport object. It must be already initialized.
+ * \param identity The device identity used for this particular request
  * \param resource The resource we want to download from the backend.
  * \param id Memory object used to store the received data.
  * \param obj The memory object structure defined by the programmer.
@@ -53,7 +63,8 @@ typedef struct receiver_ctx_ {
  * \returns PULL_SUCCESS in case the receiver was correcly initialized or
  * the specific error otherwise.
  */
-pull_error receiver_open(receiver_ctx* ctx, txp_ctx* txp, const char* resource, obj_id id, mem_object* obj);
+pull_error receiver_open(receiver_ctx* ctx, txp_ctx* txp, identity_t identity,
+                        const char* resource, obj_id id, mem_object* obj);
 
 /** 
  * \brief Receive and store a chunk of the update into the memory object.

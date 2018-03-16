@@ -17,42 +17,36 @@ static uint8_t buffer[BUFFER_LEN];
 
 void test_ecc_verify(void) {
     pull_error err;
-    err = ecc_verify(x, y, r, s, hash_g, 32, secp256r1);
+    err = ef.verify(vendor_x_g, vendor_y_g, vendor_r_g, vendor_s_g, hash_g, ef.curve_size);
     TEST_ASSERT_TRUE(err == PULL_SUCCESS);
-}
-
-void test_ecc_verify_invalid_curve(void) {
-    pull_error err;
-    err = ecc_verify(x, y, r, s, hash_g, 32, secp224r1);
-    TEST_ASSERT_TRUE(err == NOT_SUPPORTED_CURVE_ERROR);
 }
 
 void test_ecc_verify_invalid_signature(void) {
     pull_error err;
-    err = ecc_verify(x, y, r, s, priv_g, 32, secp256r1);
+    err = ef.verify(server_x_g, server_y_g, vendor_r_g, vendor_s_g, server_priv_g, ef.curve_size);
     TEST_ASSERT_TRUE(err == VERIFICATION_FAILED_ERROR);
 }
 
 void test_sha256(void) {
     digest_ctx ctx;
-    pull_error err = func.init(&ctx);
+    pull_error err = df.init(&ctx);
     TEST_ASSERT_TRUE(!err);
-    err = func.update(&ctx, (void*) data_g, 128);
+    err = df.update(&ctx, (void*) data_g, 128);
     TEST_ASSERT_TRUE(!err);
-    uint8_t* hash = func.finalize(&ctx);
+    uint8_t* hash = df.finalize(&ctx);
     TEST_ASSERT_TRUE(hash != NULL);
     TEST_ASSERT_EQUAL_MEMORY(hash_g, hash, 32);
 }
 
 void test_sha256_invalid_init(void) {
-    digest_func digest = func;
+    digest_func digest = df;
     pull_error err = digest.init(NULL);
     TEST_ASSERT_TRUE(err == DIGEST_INIT_ERROR);
 }
 
 void test_sha256_invalid_update(void) {
     digest_ctx ctx;
-    digest_func digest = func;
+    digest_func digest = df;
     pull_error err = digest.init(&ctx);
     TEST_ASSERT_TRUE(!err);
     err = digest.update(NULL, (void*) data_g, 128);
@@ -65,7 +59,7 @@ void test_sha256_invalid_update(void) {
 
 void test_sha256_invalid_final(void) {
     digest_ctx ctx;
-    digest_func digest = func;
+    digest_func digest = df;
     pull_error err = digest.init(&ctx);
     TEST_ASSERT_TRUE(!err);
     err = digest.update(&ctx, (void*) data_g, 128);
@@ -76,26 +70,26 @@ void test_sha256_invalid_final(void) {
 
 void test_sign(void) {
     uint8_t signature[64];
-    pull_error err = ecc_sign(priv_g, signature, hash_g, 32, secp256r1);
+    pull_error err = ef.sign(server_priv_g, signature, hash_g, ef.curve_size);
     TEST_ASSERT_TRUE(!err);
-    TEST_ASSERT_TRUE(ecc_verify(x, y, signature, signature+32, hash_g, 32, secp256r1) == PULL_SUCCESS);
+    TEST_ASSERT_TRUE(ef.verify(server_x_g, server_y_g, signature, signature+32, hash_g, ef.curve_size) == PULL_SUCCESS);
 }
 void test_sign_invalid_hash_size(void) {
     uint8_t signature[64];
-    pull_error err = ecc_sign(priv_g, signature, hash_g, 10, secp256r1);
+    pull_error err = ef.sign(server_priv_g, signature, hash_g, 10);
     TEST_ASSERT_TRUE(!err);
 }
 
 void test_verify_object_valid(void) {
     mem_object obj_t;
-    pull_error err = verify_object(OBJ_1, func, x, y, secp256r1, &obj_t, buffer, BUFFER_LEN);
+    pull_error err = verify_object(OBJ_1, df, vendor_x_g, vendor_y_g, ef, &obj_t, buffer, BUFFER_LEN);
     TEST_ASSERT_TRUE_MESSAGE(err == PULL_SUCCESS, err_as_str(err));
 }
 
 void test_verify_object_invalid_object(void) {
     mem_object obj_t;
     pull_error err;
-    err = verify_object(42, func, x, y, secp256r1, &obj_t, buffer, BUFFER_LEN);
+    err = verify_object(42, df, vendor_x_g, vendor_y_g, ef, &obj_t, buffer, BUFFER_LEN);
     TEST_ASSERT_TRUE(err);
 }
 
@@ -104,28 +98,28 @@ void test_verify_object_invalid_read(void) {
 
     mem_object obj_t;
     pull_error err;
-    err = verify_object(OBJ_1, func, x, y, secp256r1, &obj_t, buffer, BUFFER_LEN);
+    err = verify_object(OBJ_1, df, vendor_x_g, vendor_y_g, ef, &obj_t, buffer, BUFFER_LEN);
     TEST_ASSERT_TRUE(err == MEMORY_READ_ERROR);
 }
 
 void test_verify_object_invalid_digest_init(void) {
     mem_object obj_t;
     pull_error err;
-    func.init = invalid_init;
-    err = verify_object(OBJ_1, func, x, y, secp256r1, &obj_t, buffer, BUFFER_LEN);
+    df.init = invalid_init;
+    err = verify_object(OBJ_1, df, vendor_x_g, vendor_y_g, ef, &obj_t, buffer, BUFFER_LEN);
     TEST_ASSERT_TRUE_MESSAGE(err == DIGEST_INIT_ERROR, err_as_str(err));
 }
 
 void test_verify_object_invalid_digest_update(void) {
     mem_object obj_t;
     pull_error err;
-    func.update = invalid_update;
-    err = verify_object(OBJ_1, func, x, y, secp256r1, &obj_t, buffer, BUFFER_LEN);
+    df.update = invalid_update;
+    err = verify_object(OBJ_1, df, vendor_x_g, vendor_y_g, ef, &obj_t, buffer, BUFFER_LEN);
     TEST_ASSERT_TRUE_MESSAGE(err == DIGEST_UPDATE_ERROR, err_as_str(err));
 }
 
 void test_verify_object_invalid_key(void) {
     mem_object obj_t;
-    pull_error err = verify_object(OBJ_1, func, y, y, secp256r1, &obj_t, buffer, BUFFER_LEN);
+    pull_error err = verify_object(OBJ_1, df, vendor_y_g, vendor_y_g, ef, &obj_t, buffer, BUFFER_LEN);
     TEST_ASSERT_TRUE_MESSAGE(err == VERIFICATION_FAILED_ERROR, err_as_str(err));
 }

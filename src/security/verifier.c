@@ -12,7 +12,7 @@
 #include <stdio.h>
 
 pull_error verify_object(obj_id id, digest_func digest, const uint8_t* x, const uint8_t* y,
-        ecc_curve curve, mem_object* obj_t, uint8_t* buffer, size_t buffer_len) {
+        ecc_func_t ef, mem_object* obj_t, uint8_t* buffer, size_t buffer_len) {
     pull_error err;
     err = memory_open(obj_t, id);
     if (err) {
@@ -71,12 +71,17 @@ pull_error verify_object(obj_id id, digest_func digest, const uint8_t* x, const 
         goto error;
     }
 
-    err = verify_manifest_vendor(&mt, digest, x, y, curve);
+    err = verify_manifest_vendor(&mt, digest, x, y, ef);
     if (err) {
         return VERIFICATION_FAILED_ERROR;
     }
     log_info("Vendor Signature Valid");
-    // TODO verify server signature
+    // XXX server and vendor are using the same key
+    err = verify_manifest_server(&mt, digest, x, y, ef);
+    if (err) {
+        return VERIFICATION_FAILED_ERROR;
+    }
+    log_info("Server Signature Valid");
     err = PULL_SUCCESS;
 error:
     memory_close(obj_t);

@@ -66,15 +66,15 @@ FOREACH_ITEM(DEFINE_SETTER)
  */
 void print_manifest(const manifest_t* mt);
 
-pull_error verify_manifest_vendor(manifest_t* mt, digest_func f, const uint8_t *pub_x,
-                                        const uint8_t *pub_y, ecc_curve curve);
-pull_error verify_manifest_server(manifest_t* mt, digest_func f, const uint8_t *pub_x,
-                                        const uint8_t *pub_y, ecc_curve curve);
+pull_error verify_manifest_vendor(manifest_t* mt, digest_func df, const uint8_t *pub_x,
+                                        const uint8_t *pub_y, ecc_func_t ef);
+pull_error verify_manifest_server(manifest_t* mt, digest_func df, const uint8_t *pub_x,
+                                        const uint8_t *pub_y, ecc_func_t ef);
 
-pull_error sign_manifest_vendor(manifest_t* mt, digest_func f, const uint8_t *private_key,
-                                    uint8_t* signature_buffer, ecc_curve curve);
-pull_error sign_manifest_server(manifest_t* mt, digest_func f, const uint8_t *private_key,
-                                    uint8_t* signature_buffer, ecc_curve curve);
+pull_error sign_manifest_vendor(manifest_t* mt, digest_func df, const uint8_t *private_key,
+                                    uint8_t* signature_buffer, ecc_func_t ef);
+pull_error sign_manifest_server(manifest_t* mt, digest_func df, const uint8_t *private_key,
+                                    uint8_t* signature_buffer, ecc_func_t ef);
 
 #ifdef __cplusplus
 }

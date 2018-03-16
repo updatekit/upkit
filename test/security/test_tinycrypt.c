@@ -22,13 +22,13 @@
 #include "unity.h"
 
 DIGEST_FUNC(tinycrypt);
-digest_func func;
+digest_func df;
+ecc_func_t ef;
 
 #include "test_verifier.h"
 
 #define FOREACH_TEST(DO) \
     DO(ecc_verify, 0)\
-    DO(ecc_verify_invalid_curve, 0)\
     DO(ecc_verify_invalid_signature, 0)\
     DO(sha256, 0)\
     DO(sha256_invalid_init, 0)\
@@ -44,7 +44,8 @@ digest_func func;
 TEST_RUNNER();
 
 void setUp() {
-    func = tinycrypt_digest_sha256;
+    df = tinycrypt_digest_sha256;
+    ef = tinycrypt_secp256r1_ecc;
     memory_mock_restore();
     manifest_mock_restore();
  }

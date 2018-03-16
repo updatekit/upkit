@@ -11,6 +11,7 @@ typedef struct server_ctx_t {
     manifest_t mt;
     struct coap_resource_t* resource_version;
     const unsigned char* mapped_file;
+    manifest_t* mapped_file_manifest;
     size_t mapped_file_len;
     /// TODO add a server state instead of failing. Just return a 500 error to
     // the client

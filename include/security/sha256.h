@@ -21,10 +21,10 @@ extern "C" {
 #define SHA256_FINAL(lib) \
     void * lib##_sha256_final(digest_ctx *ctx)
 
-    /** This struct defines a set of default digest function.
-     * You can define your own structure adding the function
-     * you need.
-     */
+/** This struct defines a set of default digest function.
+ * You can define your own structure adding the function
+ * you need.
+ */
 #define DIGEST_FUNC(lib) \
     static const digest_func lib##_digest_sha256 = {.size = 32, \
         .init = lib##_sha256_init, \

@@ -63,16 +63,7 @@ pull_error txp_init(txp_ctx* ctx, const char* addr, uint16_t port, conn_type typ
             if (!ecdh_data) {
                 return INVALID_CONN_DATA_ERROR;
             }
-            dtls_curve_t dtls_curve;
-            switch (ecdh_data->curve) {
-                case CURVE_SECP256R1:
-                    dtls_curve = SECP256R1;
-                    break;
-                default:
-                    printf("Invalid curve\n");
-                    return INVALID_CONN_DATA_ERROR;
-            }
-            coap_context_set_ecdsa(ctx->coap_ctx, dtls_curve,
+            coap_context_set_ecdsa(ctx->coap_ctx, SECP256R1,
                     ecdh_data->priv_key, ecdh_data->pub_key_x,
                     ecdh_data->pub_key_y, libcoap_verify_key);
             break;
@@ -245,7 +236,7 @@ pull_error txp_request(txp_ctx* ctx, rest_method method, const char* resource,
         ctx->cb_ctx.bctx.enabled = 0;
     }
     if (length > 0 && data != NULL) {
-        if (coap_add_data(request, length, (const uint8_t*) data) < 0) {
+        if (coap_add_data(request, length, (const uint8_t*) data) == 0) {
             log_error(INVALID_DATA_ERROR, "Error adding data\n");
             coap_delete_pdu(request);
             return INVALID_DATA_ERROR;

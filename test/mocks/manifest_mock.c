@@ -6,14 +6,21 @@ manifest_mock_t manifest_mock;
  * I'm doing a cast to the return type. In this way
  * in the case of numbers it remains 0 and in case
  * of a pointer is equal to NULL */
-#define IMPLEMENT_INVALID_GETTER(type, name, ...) \
-    type get_##name##_invalid(const manifest_t* mt, ##__VA_ARGS__) { \
+#define IMPLEMENT_INVALID_GETTER(type, name) \
+    type get_##name##_invalid(const manifest_t* mt) { \
         return (type) 0; \
+    }
+#define IMPLEMENT_INVALID_GETTER_MEMORY(type, name) \
+    type get_##name##_invalid(const manifest_t* mt, uint8_t* size) { \
+        *size = 0; \
+        return NULL; \
     }
 
 FOREACH_ITEM(IMPLEMENT_INVALID_GETTER);
 
-#define RESTORE_VALID_GETTER(type, name, ...) \
+#define RESTORE_VALID_GETTER(type, name) \
+    manifest_mock.get_##name = get_##name##_impl;
+#define RESTORE_VALID_GETTER_MEMORY(type, name) \
     manifest_mock.get_##name = get_##name##_impl;
 
 void manifest_mock_restore() {
@@ -64,38 +71,38 @@ uint8_t* get_server_signature_s(const manifest_t *mt, uint8_t* size) {
     return manifest_mock.get_server_signature_s(mt, size);
 }
 pull_error verify_manifest_vendor(manifest_t* mt, digest_func f, const uint8_t *pub_x,
-        const uint8_t *pub_y, ecc_curve curve) {
-    return manifest_mock.verify_manifest_vendor(mt, f, pub_x, pub_y, curve);
+        const uint8_t *pub_y, ecc_func_t ef) {
+    return manifest_mock.verify_manifest_vendor(mt, f, pub_x, pub_y, ef);
 }
 pull_error verify_manifest_server(manifest_t* mt, digest_func f, const uint8_t *pub_x,
-        const uint8_t *pub_y, ecc_curve curve) {
-    return manifest_mock.verify_manifest_server(mt, f, pub_x, pub_y, curve);
+        const uint8_t *pub_y, ecc_func_t ef) {
+    return manifest_mock.verify_manifest_server(mt, f, pub_x, pub_y, ef);
 }
 pull_error sign_manifest_vendor(manifest_t* mt, digest_func f, const uint8_t *private_key,
-                    uint8_t* signature_buffer, ecc_curve curve) {
-    return manifest_mock.sign_manifest_vendor(mt, f, private_key, signature_buffer, curve);
+                    uint8_t* signature_buffer, ecc_func_t ef) {
+    return manifest_mock.sign_manifest_vendor(mt, f, private_key, signature_buffer, ef);
 }
 pull_error sign_manifest_server(manifest_t* mt, digest_func f, const uint8_t *private_key,
-                    uint8_t* signature_buffer, ecc_curve curve) {
-    return manifest_mock.sign_manifest_server(mt, f, private_key, signature_buffer, curve);
+                    uint8_t* signature_buffer, ecc_func_t ef) {
+    return manifest_mock.sign_manifest_server(mt, f, private_key, signature_buffer, ef);
 }
 
 /* Invalid functions */
 
 pull_error verify_manifest_vendor_invalid(manifest_t* mt, digest_func f, const uint8_t *pub_x,
-		const uint8_t *pub_y, ecc_curve curve) {
+		const uint8_t *pub_y, ecc_func_t ef) {
 	return GENERIC_ERROR;
 }
 pull_error verify_manifest_server_invalid(manifest_t* mt, digest_func f, const uint8_t *pub_x,
-		const uint8_t *pub_y, ecc_curve curve) {
+		const uint8_t *pub_y, ecc_func_t ef) {
 	return GENERIC_ERROR;
 }
 
 pull_error sign_manifest_vendor_invalid(manifest_t* mt, digest_func f, const uint8_t *private_key,
-		uint8_t* signature_buffer, ecc_curve curve) {
+		uint8_t* signature_buffer, ecc_func_t ef) {
 	return GENERIC_ERROR;
 }
 pull_error sign_manifest_server_invalid(manifest_t* mt, digest_func f, const uint8_t *private_key,
-		uint8_t* signature_buffer, ecc_curve curve) {
+		uint8_t* signature_buffer, ecc_func_t ef) {
 	return GENERIC_ERROR;
 }

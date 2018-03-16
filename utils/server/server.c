@@ -60,11 +60,12 @@ void update_server_context(server_ctx_t* ctx) {
     }
     ctx->mapped_file_len = s.st_size;
     /* Memory-map the file. */
-    ctx->mapped_file = mmap (0, ctx->mapped_file_len, PROT_READ, MAP_PRIVATE, fwd, 0);
+    ctx->mapped_file = mmap (0, ctx->mapped_file_len, PROT_READ | PROT_WRITE, MAP_PRIVATE, fwd, 0);
     if (ctx->mapped_file == MAP_FAILED) {
         fprintf(stderr, "Failed to map the file %s\n", strerror (errno));
         exit(EXIT_FAILURE);
     }
+    ctx->mapped_file_manifest = (manifest_t*)ctx->mapped_file;
     close(fwd);
 }
 

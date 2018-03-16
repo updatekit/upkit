@@ -91,8 +91,7 @@ int manifest_generate_command(Context ctx) {
     }
     vend_priv_key.read((char*)vend_priv_key_buffer, 32); // TODO check for errors && XXX hardcoded value
     vend_priv_key.close();
- 
-    err = sign_manifest_vendor(&mt, digest, vend_priv_key_buffer, signature, secp256r1);
+    err = sign_manifest_vendor(&mt, digest, vend_priv_key_buffer, signature, tinycrypt_secp256r1_ecc);
     if (err) {
         std::cout << "Error signing the manifest" << std::endl;
         return EXIT_FAILURE;
@@ -106,8 +105,26 @@ int manifest_generate_command(Context ctx) {
     }
     out_signature.write((char*) signature, 64);
     out_signature.close();
+    // (8) Perform also the server signature // XXX this should be done only
+    // during testing
+    set_udid(&mt, 0xabcd);
+    set_random(&mt, 0x1234);
+    uint8_t* server_priv_key_buffer = new uint8_t[32];
+    std::ifstream server_priv_key(ctx.get_server_priv_key(), std::ios_base::binary);
+    if (!server_priv_key) {
+        std::cout << "Impossible to read the server private key" << std::endl;
+        return EXIT_FAILURE;
+    }
+    server_priv_key.read((char*)server_priv_key_buffer, 32); // TODO check for errors && XXX hardcoded value
+    server_priv_key.close();
+    err = sign_manifest_server(&mt, digest, server_priv_key_buffer, signature, tinycrypt_secp256r1_ecc);
+    if (err) {
+        std::cout << "Error signing the manifest" << std::endl;
+        return EXIT_FAILURE;
+    }
     delete[] signature;
-    // (8) write the metadata to the designed binary file
+    delete[] server_priv_key_buffer;
+    // (9) write the metadata to the designed binary file
     std::ofstream out(ctx.get_out_file(), std::ios_base::out | std::ios_base::binary);
     if (!out) {
         std::cout << "Impossible to write on file: " << ctx.get_out_file() << std::endl;
@@ -185,23 +202,24 @@ int manifest_validate_command(Context ctx) {
     }
     std::ifstream file(ctx.get_binary_file(), std::ios_base::in | std::ios_base::binary);
     if (!file) {
-        std::cout << "Error opening the file:" << ctx.get_binary_file() << std::endl;
-        return EXIT_FAILURE;
-    }
-    char* buffer = new char[BUFFER_LEN];
-    while (!file.eof()) {
-        file.read(buffer, BUFFER_LEN);
-        err = digest.update(&dctx, buffer, file.gcount());
-        if (err) {
-            std::cout << "Error updating digest" << std::endl;
-            delete[] buffer;
-            return EXIT_FAILURE;
+        log_item("digest", false);
+    } else { 
+        char* buffer = new char[BUFFER_LEN];
+        while (!file.eof()) {
+            file.read(buffer, BUFFER_LEN);
+            err = digest.update(&dctx, buffer, file.gcount());
+            if (err) {
+                std::cout << "Error updating digest" << std::endl;
+                delete[] buffer;
+                return EXIT_FAILURE;
+            }
         }
+        file.close();
+        delete[] buffer;
+        uint8_t* hash = (uint8_t*) digest.finalize(&dctx); // TODO check the size of the hash
+        log_item("digest", memcmp(get_digest(&mt), hash, digest.size) == 0);
     }
-    file.close();
-    delete[] buffer;
-    uint8_t* hash = (uint8_t*) digest.finalize(&dctx); // TODO check the size of the hash
-    log_item("digest", memcmp(get_digest(&mt), hash, digest.size) == 0);
+    
     // (4) Validate Server Public Key
     std::ifstream server_pub_key(ctx.get_server_pub_key(), std::ios_base::binary);
     if (!server_pub_key) {
@@ -223,12 +241,12 @@ int manifest_validate_command(Context ctx) {
     vendor_pub_key.read((char*)vendor_public_key_buffer, 64); // XXX hardcoded size
     vendor_pub_key.close();
     err = verify_manifest_vendor(&mt, digest, vendor_public_key_buffer,
-                                         vendor_public_key_buffer+32, secp256r1);
+                                         vendor_public_key_buffer+32, tinycrypt_secp256r1_ecc);
     log_item("vendor_signature", err == PULL_SUCCESS);
     delete[] vendor_public_key_buffer;
     // (6) Validate Server Signature
     err = verify_manifest_server(&mt, digest, server_public_key_buffer,
-                                         server_public_key_buffer+32, secp256r1);
+                                         server_public_key_buffer+32, tinycrypt_secp256r1_ecc);
     log_item("server_signature", err == PULL_SUCCESS);
     delete[] server_public_key_buffer;
     return EXIT_SUCCESS;

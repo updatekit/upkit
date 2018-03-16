@@ -44,7 +44,7 @@ extern "C" {
  * otherwise.
  */
 pull_error verify_object(obj_id id, digest_func f, const uint8_t *x,
-                         const uint8_t *y, ecc_curve curve, mem_object *obj_t,
+                         const uint8_t *y, ecc_func_t ef, mem_object *obj_t,
                          uint8_t* buffer, size_t buffer_len);
 
 #ifdef __cplusplus

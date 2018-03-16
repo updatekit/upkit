@@ -39,7 +39,6 @@ typedef struct dtls_psk_data_t {
 } dtls_psk_data_t;
 
 typedef struct dtls_ecdh_data_t {
-    curve_t curve;
     uint8_t* priv_key;
     uint8_t* pub_key_x;
     uint8_t* pub_key_y;

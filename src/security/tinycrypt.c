@@ -33,27 +33,24 @@ void* tinycrypt_sha256_final(digest_ctx* ctx) {
 
 /* ECC */
 
-pull_error ecc_verify(const uint8_t* x, const uint8_t* y, const uint8_t* r, const uint8_t* s,
-        const void* data, uint16_t data_len, ecc_curve curve) {
-    if (curve.type != CURVE_SECP256R1) {
-        return NOT_SUPPORTED_CURVE_ERROR;
-    }
+pull_error tinycrypt_secp256r1_ecc_verify(const uint8_t* x, const uint8_t* y, const uint8_t* r, const uint8_t* s,
+        const void* data, uint16_t data_len) {
     uint8_t pub_key[64];
     uint8_t signature[64];
     memcpy(pub_key, x, 32);
     memcpy(pub_key+32, y, 32);
     memcpy(signature, r, 32);
     memcpy(signature+32, s, 32);
-    if (uECC_verify(pub_key, (uint8_t*) data, (size_t) data_len, signature, uECC_secp256r1()) != 1) { // XXX hardcoded curve
+    if (uECC_verify(pub_key, (uint8_t*) data, (size_t) data_len, signature, uECC_secp256r1()) != 1) {
         return VERIFICATION_FAILED_ERROR;
 
     }
     return PULL_SUCCESS;
 }
 
-pull_error ecc_sign(const uint8_t* private_key, uint8_t *signature, 
-                    const void *data, uint16_t data_len, ecc_curve curve) {
-     if (uECC_sign(private_key, data, data_len, signature, uECC_secp256r1()) != 1) { // XXX hardcoded curve
+pull_error tinycrypt_secp256r1_ecc_sign(const uint8_t* private_key, uint8_t *signature, 
+                    const void *data, uint16_t data_len) {
+     if (uECC_sign(private_key, data, data_len, signature, uECC_secp256r1()) != 1) {
         return SIGN_FAILED_ERROR;
      }
      return PULL_SUCCESS;

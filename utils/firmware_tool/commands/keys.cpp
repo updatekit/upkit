@@ -16,10 +16,7 @@ int keys_generate_command(Context ctx) {
         std::cout << "Add the vendor or server command" << std::endl; // XXX this could be clear
         return EXIT_FAILURE;
     }
-#if WITH_TINYDTLS
-    std::cout << "The tool has been built without the key generation support" << std::endl;
-    return EXIT_FAILURE;
-#elif WITH_TINYCRYPT
+#if WITH_TINYCRYPT == 1
     uint8_t priv[64];
     uint8_t pub[64];
     uECC_word_t hash_words[64];

@@ -14,61 +14,39 @@
 extern "C" {
 #endif /* __cplusplus */
 
-/** Enumeration of the supported curves. Some of them may not be supported by
- * the choosed ECC library.*/
-typedef enum curve_t {
-  CURVE_SECP256R1, /** Default NIST curve. */
-  CURVE_SECP224R1
-} curve_t;
+typedef struct {
+    pull_error (*verify) (const uint8_t *, const uint8_t*, const uint8_t*,
+            const uint8_t*, const void*, uint16_t);
+    pull_error (*sign) (const uint8_t*, uint8_t*, const void*, uint16_t);
+    uint8_t curve_size;
+} ecc_func_t;
 
-/** Structure used to describe a curve */
-typedef struct ecc_curve {
-  curve_t type;       /** Enumeration indicating the curve. */
-  uint8_t curve_size; /** Size of the curve. */
-} ecc_curve;
+#define ECC_VERIFY(impl) \
+    pull_error impl##_ecc_verify(const uint8_t *pub_x, const uint8_t *pub_y, const uint8_t *r, \
+        const uint8_t *s, const void *data, uint16_t data_len)
 
-/** Default structures describing curves \{ */
-static const ecc_curve secp256r1 = {.type = CURVE_SECP256R1, .curve_size = 32};
-static const ecc_curve secp224r1 = {.type = CURVE_SECP224R1, .curve_size = 28};
-/** \} */
+#define ECC_SIGN(impl) \
+    pull_error impl##_ecc_sign(const uint8_t* private_key, uint8_t *signature, \
+        const void *data, uint16_t data_len)
 
-/**
- * \brief  Verify the ECC digital signature.
- *
- * The function verify the signature on some data, normally a hash.
- *
- * \param x The X parameter of the signer's public key.
- * \param y The Y parameter of the signer's public key.
- * \param r The R parameter of the signature.
- * \param s The S parameter of the signature
- * \param data The data on which the signature should be verified
- * \param data_len The lenght of the data.
- * \param curve The ECC curve used to generate the signature.
- *
- * \note The lenght of the signature parameters (X, Y, R, S) is
- * identified by the curve parameter.
- *
- * \returns PULL_SUCCESS is verification succeded or the specific error
- * otherwise.
- */
-pull_error ecc_verify(const uint8_t *pub_x, const uint8_t *pub_y, const uint8_t *r,
-        const uint8_t *s, const void *data, uint16_t data_len, ecc_curve curve);
+#define ECC_FUNC(impl, size) \
+    static const ecc_func_t impl##_ecc = { \
+        .verify = impl##_ecc_verify, \
+        .sign = impl##_ecc_sign, \
+        .curve_size = size \
+    };
 
+#ifdef WITH_TINYDTLS
+    ECC_VERIFY(tinydtls_secp256r1);
+    ECC_SIGN(tinydtls_secp256r1);
+    ECC_FUNC(tinydtls_secp256r1, 32);
+#endif
 
-/**
- * \brief  Sign the data using the given ECC parameters
- *
- * \param private_key Private Key that will be used to sign.
- * \param signature The buffer where the signature will be written.
- * \param data The data to be signed.
- * \param data_len The lenght of the data to be signed.
- * \param curve The curve to be used for the signature.
- *
- * \returns PULL_SUCCESS if the signature was correctly performed or
- * a specific error otherwise.
- */
-pull_error ecc_sign(const uint8_t* private_key, uint8_t *signature,
-        const void *data, uint16_t data_len, ecc_curve curve);
+#ifdef WITH_TINYCRYPT
+    ECC_VERIFY(tinycrypt_secp256r1);
+    ECC_SIGN(tinycrypt_secp256r1);
+    ECC_FUNC(tinycrypt_secp256r1, 32);
+#endif
 
 #ifdef __cplusplus
 }
