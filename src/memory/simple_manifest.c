@@ -26,11 +26,8 @@ uint8_t* get_server_key_x_impl(const manifest_t* mt) {
 uint8_t* get_server_key_y_impl(const manifest_t* mt) {
     return (uint8_t*) mt->vendor.server_key_y;
 }
-uint16_t get_udid_impl(const manifest_t* mt) {
-    return mt->server.udid;
-}
-uint16_t get_random_impl(const manifest_t* mt) {
-    return mt->server.random;
+identity_t get_identity_impl(const manifest_t* mt) {
+    return mt->server.identity;
 }
 
 void set_version_impl(manifest_t* mt, version_t version) {
@@ -54,11 +51,8 @@ void set_server_key_x_impl(manifest_t* mt, uint8_t* server_key_x) {
 void set_server_key_y_impl(manifest_t* mt, uint8_t* server_key_y) {
     memcpy(mt->vendor.server_key_y, server_key_y, 32); // XXX hardcoded value
 }
-void set_udid_impl(manifest_t* mt, uint16_t udid) {
-    mt->server.udid = udid;
-}
-void set_random_impl(manifest_t* mt, uint16_t random_val) {
-    mt->server.random = random_val;
+void set_identity_impl(manifest_t* mt, identity_t identity) {
+    mt->server.identity = identity;
 }
 
 

@@ -63,6 +63,7 @@ extern "C" {
     ERROR(RECEIVER_CHUNK)   \
     ERROR(RECEIVER_CLOSE)   \
     ERROR(INVALID_SIZE)     \
+    ERROR(INVALID_IDENTITY) \
     ERROR(NETWORK)          \
     /* Subscriber Errors */ \
     ERROR(SUBSCRIBE)        \

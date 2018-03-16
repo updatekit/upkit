@@ -33,6 +33,12 @@ static void handler(pull_error txp_err, const char* data, int len, void* more) {
         if (missing <= 0) {
             log_debug("Manifest received\n");
             print_manifest(&ctx->mt);
+            if (validate_identity(ctx->identity, get_identity(&ctx->mt)) != PULL_SUCCESS) { 
+                log_debug("Received identity invalid\n");
+                ctx->err = INVALID_IDENTITY_ERROR;
+                break_loop(ctx->txp);
+                return;
+            }
             ctx->expected = get_size(&ctx->mt)+get_offset(&ctx->mt);
             // TODO find a way to check if the firmware to receive is
             // bigger than the object size

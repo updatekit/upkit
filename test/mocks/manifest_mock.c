@@ -8,7 +8,7 @@ manifest_mock_t manifest_mock;
  * of a pointer is equal to NULL */
 #define IMPLEMENT_INVALID_GETTER(type, name) \
     type get_##name##_invalid(const manifest_t* mt) { \
-        return (type) 0; \
+        return (type) NULL; \
     }
 #define IMPLEMENT_INVALID_GETTER_MEMORY(type, name) \
     type get_##name##_invalid(const manifest_t* mt, uint8_t* size) { \
@@ -25,6 +25,8 @@ FOREACH_ITEM(IMPLEMENT_INVALID_GETTER);
 
 void manifest_mock_restore() {
     FOREACH_ITEM(RESTORE_VALID_GETTER);
+    manifest_mock.get_identity = get_identity_impl;
+    manifest_mock.set_identity = set_identity_impl;
     manifest_mock.verify_manifest_vendor = verify_manifest_vendor_impl; 
     manifest_mock.verify_manifest_server = verify_manifest_server_impl;
     manifest_mock.sign_manifest_vendor = sign_manifest_vendor_impl;
@@ -70,6 +72,15 @@ uint8_t* get_server_signature_r(const manifest_t *mt, uint8_t* size) {
 uint8_t* get_server_signature_s(const manifest_t *mt, uint8_t* size) {
     return manifest_mock.get_server_signature_s(mt, size);
 }
+
+/* Valid functions */
+identity_t get_identity(const manifest_t* mt) {
+    return get_identity_impl(mt);
+}
+void set_identity(manifest_t* mt, identity_t identity) {
+    set_identity_impl(mt, identity);
+}
+
 pull_error verify_manifest_vendor(manifest_t* mt, digest_func f, const uint8_t *pub_x,
         const uint8_t *pub_y, ecc_func_t ef) {
     return manifest_mock.verify_manifest_vendor(mt, f, pub_x, pub_y, ef);
@@ -88,6 +99,16 @@ pull_error sign_manifest_server(manifest_t* mt, digest_func f, const uint8_t *pr
 }
 
 /* Invalid functions */
+identity_t invalid_identity_g = {
+    .udid = 0x0000,
+    .random = 0x0000
+};
+identity_t get_identity_invalid(const manifest_t* mt) {
+    return invalid_identity_g;
+}
+void set_identity_invalid(manifest_t* mt, identity_t identity) {
+    mt->server.identity = invalid_identity_g;
+}
 
 pull_error verify_manifest_vendor_invalid(manifest_t* mt, digest_func f, const uint8_t *pub_x,
 		const uint8_t *pub_y, ecc_func_t ef) {

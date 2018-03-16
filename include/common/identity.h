@@ -9,5 +9,6 @@ typedef struct {
 } identity_t;
 
 pull_error update_random(identity_t* identity);
+pull_error validate_identity(identity_t valid_identity, identity_t received_identity);
 
 #endif /* IDENTITY_H_ */

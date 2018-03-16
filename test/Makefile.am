@@ -3,11 +3,14 @@ AM_CFLAGS = -Wall -I. -I../include -I../ext/tinycrypt/lib/include -I../ext/tinyd
 AM_CFLAGS += -I../build/posix -Isupport -I../ext/unity/src -I../ext/libcoap/include -Imocks
 AM_CFLAGS += -DHAVE_CONFIG_H
 
+# Default target
+all: check
+
 LIBS = ../ext/libcoap/.libs/libcoap-1.a ../ext/tinydtls/libtinydtls.a
 LIBS += ../ext/tinycrypt/lib/libtinycrypt.a
 
 UNITY_SRC = ../ext/unity/src/unity.c
-COMMON_SRC = ../src/common/error.c
+COMMON_SRC = ../src/common/error.c ../src/common/identity.c
 MEMORY_SRC = ../src/memory/memory_objects.c 
 SECURITY_SRC = ../src/security/verifier.c
 NETWORK_SRC = ../src/network/receiver.c ../src/network/subscriber.c

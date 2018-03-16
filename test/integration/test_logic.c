@@ -17,8 +17,7 @@
 
 #ifdef WITH_CEEDLING
 #include "security/tinydtls.h"
-
-#include "network/async_libcoap.h"
+#include "async_libcoap.h"
 #endif
 
 #include "support/sample_data.h"
@@ -59,9 +58,9 @@ void test_logic_udp(void) {
 void test_logic_dtls(void) {
     // Set up dtls ecdh connection
     static dtls_ecdh_data_t ecdh_data = {
-        .priv_key = (uint8_t*) server_priv_g, // I should create a specific key for the client
-        .pub_key_x = (uint8_t*) server_x_g,
-        .pub_key_y = (uint8_t*) server_y_g
+        .priv_key = (uint8_t*) dtls_client_priv_g,
+        .pub_key_x = (uint8_t*) dtls_client_x_g,
+        .pub_key_y = (uint8_t*) dtls_client_y_g
     };
     logic(CONN_DTLS_ECDH, &ecdh_data);
 }
@@ -111,7 +110,7 @@ void logic(conn_type type, void* conn_data) {
         err = receiver_close(&rctx);
         TEST_ASSERT_TRUE(!err);
         TEST_ASSERT_TRUE(rctx.firmware_received);
-        err = verify_object(id, tinydtls_digest_sha256, server_x_g, server_y_g, tinydtls_secp256r1_ecc, 
+        err = verify_object(id, tinydtls_digest_sha256, vendor_x_g, vendor_y_g, tinydtls_secp256r1_ecc, 
                                         &obj_t, buffer, BUFFER_SIZE);
         TEST_ASSERT_TRUE(!err);
         break;

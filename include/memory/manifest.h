@@ -26,8 +26,6 @@ extern "C" {
     ITEM(uint8_t*, server_key_x) \
     ITEM(uint8_t*, server_key_y) \
     ITEM(uint8_t*, digest) \
-    ITEM(uint16_t, udid) \
-    ITEM(uint16_t, random) \
     /* These other item take another parameter of type uint8_t* size */ \
     ITEM##_MEMORY(uint8_t*, vendor_signature_r) \
     ITEM##_MEMORY(uint8_t*, vendor_signature_s) \
@@ -65,6 +63,9 @@ FOREACH_ITEM(DEFINE_SETTER)
  * \param mt Pointer to a manifest structure.
  */
 void print_manifest(const manifest_t* mt);
+
+identity_t get_identity(const manifest_t* mt);
+void set_identity(manifest_t* mt, identity_t identity);
 
 pull_error verify_manifest_vendor(manifest_t* mt, digest_func df, const uint8_t *pub_x,
                                         const uint8_t *pub_y, ecc_func_t ef);

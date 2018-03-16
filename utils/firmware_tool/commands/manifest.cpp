@@ -18,6 +18,11 @@ DIGEST_FUNC(tinycrypt);
 
 IMPLEMENT(manifest)
 
+identity_t default_identity = {
+    .udid = 0xabcd,
+    .random = 0x1234
+};
+
 int manifest_generate_command(Context ctx) {
     manifest_t mt;
     //manifest_init(&mt);
@@ -107,8 +112,8 @@ int manifest_generate_command(Context ctx) {
     out_signature.close();
     // (8) Perform also the server signature // XXX this should be done only
     // during testing
-    set_udid(&mt, 0xabcd);
-    set_random(&mt, 0x1234);
+
+    set_identity(&mt, default_identity);
     uint8_t* server_priv_key_buffer = new uint8_t[32];
     std::ifstream server_priv_key(ctx.get_server_priv_key(), std::ios_base::binary);
     if (!server_priv_key) {

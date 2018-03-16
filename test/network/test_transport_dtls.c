@@ -55,7 +55,6 @@ void test_udp(void) {
     get();
     echo();
     stress_echo();
-    get_blockwise();
 }
 
 void test_dtls_ecdsa(void) {
@@ -70,7 +69,6 @@ void test_dtls_ecdsa(void) {
     get();
     echo();
     stress_echo();
-    get_blockwise();
 }
 
 
@@ -136,15 +134,4 @@ void get(void) {
     TEST_ASSERT_TRUE(!error);
     LOOP_CONDITION(cb_called < 2);
     TEST_ASSERT_EQUAL_INT(2, cb_called);
-}
-
-void get_blockwise(void) {
-    cb_called = 0;
-    max_retry_g = 15;
-    pull_error error = txp_on_data(&ctx, handler_blockwise, NULL);
-    TEST_ASSERT_TRUE(!error);
-    error = txp_request(&ctx, GET_BLOCKWISE2, "firmware", NULL, 0);
-    TEST_ASSERT_TRUE(!error);
-    LOOP_CONDITION(cb_called < 20);
-    TEST_ASSERT_EQUAL_INT(20, cb_called);
 }
