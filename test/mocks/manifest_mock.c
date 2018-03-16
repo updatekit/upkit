@@ -8,7 +8,7 @@ manifest_mock_t manifest_mock;
  * of a pointer is equal to NULL */
 #define IMPLEMENT_INVALID_GETTER(type, name) \
     type get_##name##_invalid(const manifest_t* mt) { \
-        return (type) NULL; \
+        return (type) 0; \
     }
 #define IMPLEMENT_INVALID_GETTER_MEMORY(type, name) \
     type get_##name##_invalid(const manifest_t* mt, uint8_t* size) { \
