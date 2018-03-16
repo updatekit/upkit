@@ -21,23 +21,24 @@
 
 #define FOREACH_TEST(DO) \
     DO(get_firmware, 0) \
-/*    DO(get_firmware_dtls, 0) \
-    DO(receiver_open_invalid_id, 0) \
+    DO(get_firmware_dtls, 0) \
     DO(receiver_chunk_invalid_transport, 0) \
-    DO(receiver_close_invalid_memory, 0) \
-    DO(get_firmware_invalid_resource, 0)*/
+    DO(get_firmware_invalid_resource, 0)
 TEST_RUNNER();
 
 #define PROV_SERVER "localhost"
 
+mem_object obj;
+
 void setUp(void) {
+    TEST_ASSERT_TRUE(memory_open(&obj, OBJ_2) == PULL_SUCCESS);
 }
 
 void tearDown(void) {
     manifest_t invalid_mt;
+    /* Restore state */
     bzero(&invalid_mt, sizeof(manifest_t));
-    mem_object obj_t;
-    pull_error err = write_firmware_manifest(OBJ_2, &invalid_mt, &obj_t);
+    pull_error err = write_firmware_manifest(&obj, &invalid_mt);
     TEST_ASSERT_TRUE(!err);
 }
 
@@ -46,8 +47,7 @@ void test_get_firmware(void) {
     receiver_ctx rcv;
     pull_error err = txp_init(&txp, PROV_SERVER, 0, CONN_UDP, NULL);
     TEST_ASSERT_TRUE(!err);
-    mem_object obj_t;
-    err = receiver_open(&rcv, &txp, identity_g, "firmware", OBJ_2, &obj_t);
+    err = receiver_open(&rcv, &txp, identity_g, "firmware", &obj);
     while (!rcv.firmware_received) {
         err = receiver_chunk(&rcv);
         TEST_ASSERT_TRUE(!err);
@@ -58,20 +58,17 @@ void test_get_firmware(void) {
     txp_end(&txp);
 }
 
-/*
 void test_get_firmware_dtls(void) {
     txp_ctx txp;
     receiver_ctx rcv;
     dtls_ecdh_data_t ecdh_data = {
-        .curve = CURVE_SECP256R1,
-        .priv_key = (uint8_t*) priv_g,
-        .pub_key_x = (uint8_t*) x,
-        .pub_key_y = (uint8_t*) y
+        .priv_key = (uint8_t *) dtls_client_priv_g,
+        .pub_key_x = (uint8_t *) dtls_client_x_g,
+        .pub_key_y = (uint8_t *) dtls_client_y_g
     };
     pull_error err = txp_init(&txp, PROV_SERVER, 0, CONN_DTLS_ECDH, &ecdh_data);
     TEST_ASSERT_TRUE(!err);
-    mem_object obj_t;
-    err = receiver_open(&rcv, &txp, "firmware", OBJ_2, &obj_t);
+    err = receiver_open(&rcv, &txp, identity_g, "firmware", &obj);
     printf("Starting receiving the firmware\n");
     while (!rcv.firmware_received) {
         err = receiver_chunk(&rcv);
@@ -84,34 +81,17 @@ void test_get_firmware_dtls(void) {
     txp_end(&txp);
 }
 
-void test_receiver_open_invalid_id(void) {
-    txp_ctx txp;
-    receiver_ctx rcv;
-    pull_error err = txp_init(&txp, PROV_SERVER, 0, CONN_UDP, NULL);
-    TEST_ASSERT_TRUE(!err);
-    mem_object obj_t;
-    err = receiver_open(&rcv, &txp, "firmware", 42, &obj_t);
-    TEST_ASSERT_TRUE(err == RECEIVER_OPEN_ERROR);
-}
 
 void test_receiver_chunk_invalid_transport(void) {
     txp_ctx txp;
     receiver_ctx rcv;
     pull_error err = txp_init(&txp, PROV_SERVER, 0, CONN_UDP, NULL);
     TEST_ASSERT_TRUE(!err);
-    mem_object obj_t;
-    err = receiver_open(&rcv, &txp, "firmware", OBJ_2, &obj_t);
+    err = receiver_open(&rcv, &txp, identity_g, "firmware", &obj);
     TEST_ASSERT_TRUE(!err);
     rcv.txp = NULL;
     err = receiver_chunk(&rcv);
     TEST_ASSERT_TRUE(err);
-}
-
-void test_receiver_close_invalid_memory(void) {
-    receiver_ctx rcv;
-    rcv.obj = NULL;
-    pull_error err = receiver_close(&rcv);
-    TEST_ASSERT_TRUE(err == RECEIVER_CLOSE_ERROR);
 }
 
 void test_get_firmware_invalid_resource(void) {
@@ -119,8 +99,7 @@ void test_get_firmware_invalid_resource(void) {
     receiver_ctx rcv;
     pull_error err = txp_init(&txp, PROV_SERVER, 0, CONN_UDP, NULL);
     TEST_ASSERT_TRUE(!err);
-    mem_object obj_t;
-    err = receiver_open(&rcv, &txp, "antani", OBJ_2, &obj_t);
+    err = receiver_open(&rcv, &txp, identity_g, "antani", &obj);
     TEST_ASSERT_TRUE(!err);
     while (!rcv.firmware_received && !err) {
         err = receiver_chunk(&rcv);
@@ -137,8 +116,7 @@ void test_get_firmware_invalid_size(void) {
     receiver_ctx rcv;
     pull_error err = txp_init(&txp, PROV_SERVER, 0, CONN_UDP, NULL);
     TEST_ASSERT_TRUE(!err);
-    mem_object obj_t;
-    err = receiver_open(&rcv, &txp, "firmware/invalid_size", OBJ_2, &obj_t);
+    err = receiver_open(&rcv, &txp, identity_g, "firmware/invalid_size", &obj);
     TEST_ASSERT_TRUE(!err);
     while (!rcv.firmware_received && !err) {
         err = receiver_chunk(&rcv);
@@ -149,4 +127,3 @@ void test_get_firmware_invalid_size(void) {
     }
     TEST_ASSERT_TRUE_MESSAGE(err == INVALID_SIZE_ERROR, err_as_str(err));
 }
-*/

@@ -43,7 +43,7 @@ test_manifest_SOURCES = memory/test_manifest.c $(ALL_SRC) $(TINYCRYPT_SRC)
 # Network tests
 test_receiver_SOURCES = network/test_receiver.c $(ALL_SRC) $(TINYDTLS_SRC)
 #test_receiver_memory_invalid_SOURCES
-test_subscriber_SOURCES = network/test_receiver.c $(ALL_SRC) $(TINYDTLS_SRC)
+test_subscriber_SOURCES = network/test_subscriber.c $(ALL_SRC) $(TINYDTLS_SRC)
 test_transport_dtls_SOURCES = network/test_transport_dtls.c $(ALL_SRC) $(TINYDTLS_SRC)
 
 # Security tests

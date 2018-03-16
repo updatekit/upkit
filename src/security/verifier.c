@@ -2,6 +2,7 @@
 #define VERIFIER_H_
 
 #include "memory/memory.h"
+#include "memory/memory_objects.h"
 #include "memory/manifest.h"
 #include "security/verifier.h"
 #include "security/digest.h"
@@ -11,28 +12,34 @@
 #include <string.h>
 #include <stdio.h>
 
-pull_error verify_object(obj_id id, digest_func digest, const uint8_t* x, const uint8_t* y,
-        ecc_func_t ef, mem_object* obj_t, uint8_t* buffer, size_t buffer_len) {
-    pull_error err;
-    err = memory_open(obj_t, id);
-    if (err) {
-        log_error(err, "Error opening object %d\n", id);
-        goto error;
-    }
-    // XXX this is very bad, but to fix it I should refactor the memory objects
-    // to have the possibility to work on a already open object
-    manifest_t mt;
-    if (memory_read(obj_t, (uint8_t*) &mt, sizeof(manifest_t), 0) != sizeof(manifest_t)) {
-        err = MEMORY_READ_ERROR;
-        log_error(err, "Failure reading manifest\n");
-        goto error;
-    }
+enum verifier_states {
+    GET_OBJECT_MANIFEST,
+    CALCULATING_DIGEST,
+    VERIFY_DIGEST,
+    VERIFY_VENDOR_SIGNATURE,
+    VERIFY_SERVER_SIGNATURE
+};
 
-    log_info("Calculating digest\n");
-    digest_ctx ctx;
-    err = digest.init(&ctx);
+/* The memory object should be already opened */
+pull_error verify_object(mem_object* obj, digest_func digest, const uint8_t* x, const uint8_t* y,
+        ecc_func_t ef, uint8_t* buffer, size_t buffer_len) {
+    pull_error err;
+    enum verifier_states state;
+    if (obj == NULL || x == NULL || y == NULL || buffer == NULL || buffer_len == 0) {
+        return INVALID_ARGUMENTS_ERROR;
+    }
+    /************* GET_OBJECT_MANIFEST ***************/
+    state = GET_OBJECT_MANIFEST;
+    manifest_t mt;
+    err = read_firmware_manifest(obj, &mt);
     if (err) {
-        log_error(err, "Error initializing digest\n");
+        err = MEMORY_READ_ERROR;
+        goto error;
+    }
+    /************* CALCULATING DIGEST ****************/
+    state = CALCULATING_DIGEST;
+    digest_ctx ctx;
+    if ((err = digest.init(&ctx)) != PULL_SUCCESS) {
         goto error;
     }
     address_t offset = get_offset(&mt);
@@ -40,16 +47,13 @@ pull_error verify_object(obj_id id, digest_func digest, const uint8_t* x, const 
     address_t step = buffer_len;
     if (offset == final_offset) {
         err = MEMORY_READ_ERROR;
-        log_error(err, "Invalid manifest\n");
         goto error;
     }
-
     int readed = 0;
     while (offset < final_offset &&
-            (readed = memory_read(obj_t, buffer, step, offset)) > 0) {
+            (readed = memory_read(obj, buffer, step, offset)) > 0) {
         err = digest.update(&ctx, buffer, readed);
         if (err) {
-            log_error(err, "Digest update\n");
             goto error;
         }
         offset += readed;
@@ -57,34 +61,38 @@ pull_error verify_object(obj_id id, digest_func digest, const uint8_t* x, const 
             step = final_offset - offset;
         }
     }
-
     uint8_t* result = digest.finalize(&ctx);
+    /***************** VERIFY DIGEST *************/
+    state = VERIFY_DIGEST;
+    log_debug("Verifying digest\n");
     uint8_t* hash = get_digest(&mt);
     if (hash == NULL) {
-        err = VERIFICATION_FAILED_ERROR;
-        log_error(err, "Null hash");
+        err = INVALID_MANIFEST_ERROR;
         goto error;
     }
     if (memcmp(result, hash, digest.size) != 0) {
         err = VERIFICATION_FAILED_ERROR;
-        log_error(err, "Invalid hash");
+        log_debug("Invalid hash\n");
         goto error;
     }
 
+    /********** VERIFY_VENDOR_SIGNATURE ***********/
+    state = VERIFY_VENDOR_SIGNATURE;
     err = verify_manifest_vendor(&mt, digest, x, y, ef);
     if (err) {
         return VERIFICATION_FAILED_ERROR;
     }
-    log_info("Vendor Signature Valid");
-    // XXX server and vendor are using the same key
+    log_info("Vendor Signature Valid\n");
+    /********** VERIFY_SERVER_SIGNATURE ***********/
+    state = VERIFY_SERVER_SIGNATURE;
     err = verify_manifest_server(&mt, digest, x, y, ef);
     if (err) {
         return VERIFICATION_FAILED_ERROR;
     }
-    log_info("Server Signature Valid");
-    err = PULL_SUCCESS;
+    log_info("Server Signature Valid\n");
+    return PULL_SUCCESS;
 error:
-    memory_close(obj_t);
+    log_error(err, "Error in the verification process in phase %d\n", state);
     return err;
 }
 

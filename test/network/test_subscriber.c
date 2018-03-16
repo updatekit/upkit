@@ -2,7 +2,6 @@
 #include "network/subscriber.h"
 #include "network/transport.h"
 #include "network/async.h"
-#include "network/transport_libcoap.h"
 #include "memory/memory_objects.h"
 #include "memory/memory.h"
 #include "memory/simple_manifest.h"
@@ -10,10 +9,11 @@
 #include "memory_file_posix.h"
 #include "tinydtls.h"
 
+#include "transport_libcoap.h"
 #include "async_libcoap.h"
 #include <coap/coap.h>
 
-#include "test_runner.c"
+#include "test_runner.h"
 #include "unity.h"
 
 #define FOREACH_TEST(DO) \
@@ -39,7 +39,7 @@ static void check_update_cb(pull_error err, const char* data, int len, void* mor
     break_loop(ctx->txp);
 }
 
-void test_updates_polling(void) {
+void test_update_polling(void) {
     subscriber_ctx ctx;
     txp_ctx txp;
     txp_init(&txp, PROV_SERVER, 0, CONN_UDP, NULL);

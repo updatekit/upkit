@@ -177,7 +177,9 @@ int manifest_print_command(Context ctx) {
 }
 
 static void log_item(std::string name, bool value) {
-    std::cout << "   " << name << ":\t[" << ((!value)? "in":"") << "valid]" << std::endl;
+    std::cout << std::left << "   " << std::setw(20) << name;
+    std::string validity = "[" + std::string(((!value)? "in":"")) + "valid]";
+    std::cout << std::setw(10) << validity << std::endl;
 }
 
 int manifest_validate_command(Context ctx) {

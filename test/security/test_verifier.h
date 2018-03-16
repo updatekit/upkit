@@ -81,45 +81,39 @@ void test_sign_invalid_hash_size(void) {
 }
 
 void test_verify_object_valid(void) {
-    mem_object obj_t;
-    pull_error err = verify_object(OBJ_1, df, vendor_x_g, vendor_y_g, ef, &obj_t, buffer, BUFFER_LEN);
+    pull_error err = verify_object(&obj_1, df, vendor_x_g, vendor_y_g, ef, buffer, BUFFER_LEN);
     TEST_ASSERT_TRUE_MESSAGE(err == PULL_SUCCESS, err_as_str(err));
 }
 
 void test_verify_object_invalid_object(void) {
-    mem_object obj_t;
     pull_error err;
-    err = verify_object(42, df, vendor_x_g, vendor_y_g, ef, &obj_t, buffer, BUFFER_LEN);
+    err = verify_object(NULL, df, vendor_x_g, vendor_y_g, ef, buffer, BUFFER_LEN);
     TEST_ASSERT_TRUE(err);
 }
 
 void test_verify_object_invalid_read(void) {
     memory_mock.memory_read_impl = memory_read_invalid;
 
-    mem_object obj_t;
     pull_error err;
-    err = verify_object(OBJ_1, df, vendor_x_g, vendor_y_g, ef, &obj_t, buffer, BUFFER_LEN);
+    err = verify_object(&obj_1, df, vendor_x_g, vendor_y_g, ef, buffer, BUFFER_LEN);
     TEST_ASSERT_TRUE(err == MEMORY_READ_ERROR);
 }
 
 void test_verify_object_invalid_digest_init(void) {
-    mem_object obj_t;
     pull_error err;
     df.init = invalid_init;
-    err = verify_object(OBJ_1, df, vendor_x_g, vendor_y_g, ef, &obj_t, buffer, BUFFER_LEN);
+    err = verify_object(&obj_1, df, vendor_x_g, vendor_y_g, ef, buffer, BUFFER_LEN);
     TEST_ASSERT_TRUE_MESSAGE(err == DIGEST_INIT_ERROR, err_as_str(err));
 }
 
 void test_verify_object_invalid_digest_update(void) {
-    mem_object obj_t;
     pull_error err;
     df.update = invalid_update;
-    err = verify_object(OBJ_1, df, vendor_x_g, vendor_y_g, ef, &obj_t, buffer, BUFFER_LEN);
+    err = verify_object(&obj_1, df, vendor_x_g, vendor_y_g, ef, buffer, BUFFER_LEN);
     TEST_ASSERT_TRUE_MESSAGE(err == DIGEST_UPDATE_ERROR, err_as_str(err));
 }
 
 void test_verify_object_invalid_key(void) {
-    mem_object obj_t;
-    pull_error err = verify_object(OBJ_1, df, vendor_y_g, vendor_y_g, ef, &obj_t, buffer, BUFFER_LEN);
+    pull_error err = verify_object(&obj_1, df, vendor_y_g, vendor_y_g, ef, buffer, BUFFER_LEN);
     TEST_ASSERT_TRUE_MESSAGE(err == VERIFICATION_FAILED_ERROR, err_as_str(err));
 }

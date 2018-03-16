@@ -1,21 +1,19 @@
 #!/bin/sh
 # This script creates an ota image, containing the bootloader,
-# the metadata and the binary image
+# the manifest and the binary image
 set -e
 
 ROOTDIR=$(cd $(dirname $0) && pwd -P)
 
 # Default paths
 FIRMWARE_TOOL_DIR="$ROOTDIR/../../utils/firmware_tool/"
-FIRMWARE_TOOL="$FIRMWARE_TOOL_DIR/firmware_tools"
+FIRMWARE_TOOL="$FIRMWARE_TOOL_DIR/firmware_tool"
 FIRMWARE_DIR="$ROOTDIR/firmware"
 
 # Configurations
-VERSION="0001"
-APPLICATION="1111"
 BOOTLOADER="$ROOTDIR/bootloader/bootloader.hex"
 BOOTLOADER_CTX="$ROOTDIR/bootloader/bootloader_ctx.bin"
-METADATA="$FIRMWARE_DIR/metadata.bin"
+MANIFEST="$FIRMWARE_DIR/manifest.bin"
 IMAGE="$ROOTDIR/runner.bin"
 FIRMWARE="$ROOTDIR/firmware/firmware.bin"
 
@@ -46,36 +44,18 @@ check_firmware_tool() {
         (cd $FIRMWARE_TOOL_DIR && make);
         echo "Build firmware tool...done"
     fi
-
-    cp $FIRMWARE_TOOL $FIRMWARE_DIR/firmware_tools
-    FIRMWARE_TOOL=$FIRMWARE_DIR/firmware_tools
 }
 
-check_keys() {
-    if [[ ! -f $FIRMWARE_DIR/prov_key.priv || ! -f $FIRMWARE_DIR/prov_key.pub ]]; then
-        echo "Copying default provisioning keys..."
-        cp $FIRMWARE_TOOL_DIR/prov_key.priv $FIRMWARE_DIR/prov_key.priv
-        cp $FIRMWARE_TOOL_DIR/prov_key.pub $FIRMWARE_DIR/prov_key.pub
-        echo "Copying default provisioning keys...done"
-    fi
-    if [[ ! -f $FIRMWARE_DIR/vend_key.priv || ! -f $FIRMWARE_DIR/vend_key.pub ]]; then
-        echo "Copying default vendor keys..."
-        cp $FIRMWARE_TOOL_DIR/vend_key.pub $FIRMWARE_DIR/vend_key.pub
-        cp $FIRMWARE_TOOL_DIR/vend_key.priv $FIRMWARE_DIR/vend_key.priv
-        echo "Copying default vendor keys...done"
-    fi
-}
-
-generate_metadata() {
-    echo "Generating firmware metadata..."
-    (cd $FIRMWARE_DIR && $FIRMWARE_TOOL -vv -l $VERSION -a $APPLICATION -b $IMAGE metadata)
-    echo "Generating firmware metadata...done"
+generate_manifest() {
+    echo "Generating firmware manifest..."
+    ($FIRMWARE_TOOL manifest generate -vv)
+    echo "Generating firmware manifest...done"
 }
 
 generate_ota_image() {
-    echo "Adding the metadata to the firmware..."
-    srec_cat $METADATA -binary $IMAGE -binary -offset 0x100 -o $FIRMWARE -binary
-    echo "Adding the metadata to the firmware...done"
+    echo "Adding the manifest to the firmware..."
+    srec_cat $MANIFEST -binary $IMAGE -binary -offset 0x100 -o $FIRMWARE -binary
+    echo "Adding the manifest to the firmware...done"
 }
 
 generate_flashable_firmware() {
@@ -89,7 +69,6 @@ generate_flashable_firmware() {
 
 check_args
 check_firmware_tool
-check_keys
-generate_metadata
+generate_manifest
 generate_ota_image
 generate_flashable_firmware

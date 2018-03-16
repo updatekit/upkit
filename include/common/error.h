@@ -27,6 +27,7 @@ extern "C" {
     /* Generic Errors */    \
     ERROR(GENERIC)          /** Generic error */\
     ERROR(NOT_IMPLEMENTED)  /** Method not implemented */\
+    ERROR(INVALID_ARGUMENTS) \
     /* Transport Errors */  \
     ERROR(TRANSPORT_INIT)   /** The transport initialization failed */\
     ERROR(CALLBACK)         /** The callback could not be setted */\
@@ -58,6 +59,8 @@ extern "C" {
     ERROR(COPY_FIRMWARE)    \
     ERROR(INVALIDATE_OBJECT)\
     ERROR(WRITE_MANIFEST)   \
+    /* Manifeste */         \
+    ERROR(INVALID_MANIFEST) \
     /* Receiver Errors */   \
     ERROR(RECEIVER_OPEN)    \
     ERROR(RECEIVER_CHUNK)   \

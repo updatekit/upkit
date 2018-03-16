@@ -37,6 +37,11 @@ mem_object obj_t;
 static struct etimer et;
 void* conn_data;
 
+static identity_t identity_g = {
+    .udid = 0xdead,
+    .random = 0xbeef
+};
+
 static struct etimer et_led;
 PROCESS_THREAD(main_process, ev, data) {
     PROCESS_BEGIN();
@@ -100,7 +105,7 @@ PROCESS_THREAD(update_process, ev, data) {
             continue;
         }
         // download the image to the oldest slot
-        err = receiver_open(&rctx, &txp, "firmware", id, &obj_t);
+        err = receiver_open(&rctx, &txp, identity_g, "firmware", id, &obj_t);
         if (err) {
             log_error(err, "Error opening the receiver\n");
             receiver_close(&rctx);
@@ -141,15 +146,17 @@ PROCESS_THREAD(update_process, ev, data) {
         print_manifest(&mt);
         watchdog_stop();
         uint8_t buffer[BUFFER_LEN];
+        // TODO define the digest func accordign to the choosed library
         digest_func digest;
 #ifdef WITH_CRYPTOAUTHLIB
         digest = cryptoauthlib_digest_sha256;
+
         ATCA_STATUS status = atcab_init(&cfg_ateccx08a_i2c_default);
         if (status != ATCA_SUCCESS) {
             log_error(GENERIC_ERROR, "Failure initializing ATECC508A\n");
         }
 #endif
-        err = verify_object(id, digest, x, y, secp256r1, &obj_t, buffer, BUFFER_LEN);
+        err = verify_object(id, digest, x, y, cryptoauthlib_ecc, &obj_t, buffer, BUFFER_LEN);
 #ifdef WITH_CRYPTOAUTHLIB
         if (status == ATCA_SUCCESS) {
             atcab_release();

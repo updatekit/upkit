@@ -46,8 +46,9 @@ void setUp(void) {
 void tearDown(void) {
     manifest_t invalid_mt;
     bzero(&invalid_mt, sizeof(manifest_t));
-    mem_object obj_t;
-    pull_error err = write_firmware_manifest(OBJ_2, &invalid_mt, &obj_t);
+    mem_object obj_2;
+    TEST_ASSERT_TRUE(memory_open(&obj_2, OBJ_2));
+    pull_error err = write_firmware_manifest(&obj_2, &invalid_mt);
     TEST_ASSERT_TRUE(!err);
 }
 
@@ -74,6 +75,7 @@ void logic(conn_type type, void* conn_data) {
     receiver_ctx rctx;
     txp_ctx rtxp;
     obj_id id;
+    mem_object new_obj;
     mem_object obj_t;
 
     uint8_t buffer[BUFFER_SIZE];
@@ -99,7 +101,10 @@ void logic(conn_type type, void* conn_data) {
         // download the image to the oldest slot
         err = txp_init(&rtxp, "localhost", 0, type, conn_data);
         TEST_ASSERT_TRUE(!err);
-        err = receiver_open(&rctx, &rtxp, identity_g, "firmware", id, &obj_t);
+        // open destination object
+        err = memory_open(&new_obj, id);
+        TEST_ASSERT_TRUE(!err);
+        err = receiver_open(&rctx, &rtxp, identity_g, "firmware", &new_obj);
         TEST_ASSERT_TRUE(!err);
         while (!rctx.firmware_received) {
             err= receiver_chunk(&rctx);
@@ -110,8 +115,9 @@ void logic(conn_type type, void* conn_data) {
         err = receiver_close(&rctx);
         TEST_ASSERT_TRUE(!err);
         TEST_ASSERT_TRUE(rctx.firmware_received);
-        err = verify_object(id, tinydtls_digest_sha256, vendor_x_g, vendor_y_g, tinydtls_secp256r1_ecc, 
-                                        &obj_t, buffer, BUFFER_SIZE);
+        err = verify_object(&new_obj, tinydtls_digest_sha256, vendor_x_g, vendor_y_g, tinydtls_secp256r1_ecc, 
+                                     buffer, BUFFER_SIZE);
+        memory_close(&new_obj);
         TEST_ASSERT_TRUE(!err);
         break;
     }

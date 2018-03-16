@@ -57,14 +57,13 @@ typedef struct {
  * \param txp The transport object. It must be already initialized.
  * \param identity The device identity used for this particular request
  * \param resource The resource we want to download from the backend.
- * \param id Memory object used to store the received data.
- * \param obj The memory object structure defined by the programmer.
+ * \param obj Memory object used to store the received data. It must be opened.
  * 
  * \returns PULL_SUCCESS in case the receiver was correcly initialized or
  * the specific error otherwise.
  */
 pull_error receiver_open(receiver_ctx* ctx, txp_ctx* txp, identity_t identity,
-                        const char* resource, obj_id id, mem_object* obj);
+                        const char* resource, mem_object* obj);
 
 /** 
  * \brief Receive and store a chunk of the update into the memory object.

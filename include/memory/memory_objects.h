@@ -31,8 +31,7 @@ extern "C" {
  * \param[in] obj_t A temporary mem_object used by the function.
  * \returns PULL_SUCCESS on success or a specific error otherwise.
  */
-pull_error get_newest_firmware(obj_id *id, uint16_t *version,
-                               mem_object *obj_t);
+pull_error get_newest_firmware(obj_id *id, version_t *version, mem_object *obj_t);
 
 /**
  * \brief Get the id of the memory object containing the oldest firmware.
@@ -42,18 +41,15 @@ pull_error get_newest_firmware(obj_id *id, uint16_t *version,
  * \param[in] obj_t A temporary mem_object used by the function.
  * \returns PULL_SUCCESS on success or a specific error otherwise.
  */
-pull_error get_oldest_firmware(obj_id *obj, uint16_t *version,
-                               mem_object *obj_t);
+pull_error get_oldest_firmware(obj_id *obj, version_t *version, mem_object *obj_t);
 
 /**
  * \brief Copy the firmware s into the firmware d.
  *
  * This function will use the size specified in the s firmware
  * manifest to correcly copy the firmware.
- * \param s
- * \param d
- * \param src A temporary mem_object used by the function.
- * \param dst A temporary mem_object used by the function.
+ * \param src The source memory object.
+ * \param dst The destination memory object.
  * \param buffer Buffer used to copy the object
  * \param buffer_size The size of the buffer
  * 
@@ -64,30 +60,39 @@ pull_error get_oldest_firmware(obj_id *obj, uint16_t *version,
  *
  * \returns PULL_SUCCESS on success or a specific error otherwise.
  */
-pull_error copy_firmware(obj_id s, obj_id d, mem_object *src, mem_object *dst, uint8_t* buffer, size_t buffer_size);
+pull_error copy_firmware(mem_object *src, mem_object *dst, uint8_t* buffer, size_t buffer_size);
 
 /**
  * \brief Read the manifest of the memory object.
  *
  * This function will use the size specified in the s firmware
  * manifest to correcly copy the firmware.
- * \param[in] id Id of the object.
+ *
+ * \param obj_t The memory object where the manifeset is stored.
  * \param[out] mt manifest of the memory object.
- * \param obj_t A temporary mem_object used by the function.
  * \returns PULL_SUCCESS on success or a specific error otherwise.
  */
-pull_error read_firmware_manifest(obj_id id, manifest_t *mt, mem_object *obj_t);
+pull_error read_firmware_manifest(mem_object *obj, manifest_t *mt);
 
 /**
  * \brief Write the manifest into the memory object.
  *
- * \param[in] id The id of the object.
+ * \param obj_t The memory object where the manifeset must be stored.
  * \param[in] mt The manifest to be written.
- * \param obj_t A temporary mem_object used by the function.
  * \returns PULL_SUCCESS on success or a specific error otherwise.
  */
-pull_error write_firmware_manifest(obj_id id, const manifest_t *mt,
-                                   mem_object *obj_t);
+pull_error write_firmware_manifest(mem_object *obj_t, const manifest_t *mt);
+
+/** 
+ * \brief  Invalidate a memory object
+ * 
+ * \param id Id of the object to invalidate.
+ * \param obj_t temporary variable used to open the object.
+ * 
+ * \returns   
+ */
+pull_error invalidate_object(obj_id id, mem_object* obj_t);
+
 
 #ifdef __cplusplus
 }

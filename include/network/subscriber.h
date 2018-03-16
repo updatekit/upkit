@@ -20,7 +20,7 @@ typedef struct {
     txp_ctx* txp;
     const char* resource;
     uint8_t has_updates;
-    manifest_t mt;
+    version_t current_version;
 } subscriber_ctx;
 
 /** 

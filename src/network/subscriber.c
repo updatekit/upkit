@@ -10,18 +10,11 @@ pull_error subscribe(subscriber_ctx* ctx, txp_ctx* txp, const char* resource, me
     ctx->resource = resource;
     obj_id id;
     log_debug("Getting the newest firmware from memory\n");
-    uint16_t latest_version; // TODO Refactor the way the memmory functions works
-    err = get_newest_firmware(&id, &latest_version, obj_t);
+    err = get_newest_firmware(&id, &ctx->current_version, obj_t);
     if (err) {
         log_error(err, "Impossible to get newest firmware\n");
         return SUBSCRIBE_ERROR;
     }
-    read_firmware_manifest(id, &ctx->mt, obj_t);
-    if (err) {
-        log_error(err, "Impossible to get newest firmware metadata\n");
-        return SUBSCRIBE_ERROR;
-    }
-    log_debug("Latest version metadata %d\n", get_version(&ctx->mt));
     ctx->has_updates = 0;
     return PULL_SUCCESS;
 }
@@ -35,8 +28,8 @@ void subscriber_cb(pull_error err, const char* data, int len, void* more) {
     }
     uint16_t provisioning_version = *((uint16_t*)data);
     log_info("Latest_version: %4x Provisioning version %4x\n",
-            ctx->mt.vendor.version, provisioning_version);
-    if (provisioning_version > ctx->mt.vendor.version) {
+            ctx->current_version, provisioning_version);
+    if (provisioning_version > ctx->current_version) {
         log_info("An update is available\n");
         ctx->has_updates = 1;
     }

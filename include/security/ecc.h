@@ -48,6 +48,12 @@ typedef struct {
     ECC_FUNC(tinycrypt_secp256r1, 32);
 #endif
 
+#ifdef WITH_CRYPTOAUTHLIB
+    ECC_VERIFY(cryptoauthlib);
+    ECC_SIGN(cryptoauthlib);
+    ECC_FUNC(cryptoauthlib, 32);
+#endif
+
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */

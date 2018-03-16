@@ -58,7 +58,7 @@ void test_get_oldest_slot(void) {
 
 void test_read_slot_manifest(void) {
     manifest_t mt;
-    pull_error err = read_firmware_manifest(OBJ_1, &mt, &obj_t);
+    pull_error err = read_firmware_manifest(&obj_1, &mt);
     TEST_ASSERT_TRUE(!err);
     TEST_ASSERT_EQUAL_HEX16(0xbeef, mt.vendor.version);
 }
@@ -68,14 +68,14 @@ void test_write_slot_manifest(void) {
     version_t version;
     obj_id newest;
     pull_error err;
-    err = read_firmware_manifest(OBJ_2, &mt_old, &obj_t);
+    err = read_firmware_manifest(&obj_2, &mt_old);
     TEST_ASSERT_TRUE(!err);
     mt_new.vendor.version = 0xffff;
-    err = write_firmware_manifest(OBJ_2, &mt_new, &obj_t);
+    err = write_firmware_manifest(&obj_2, &mt_new);
     TEST_ASSERT_TRUE(!err);
     get_newest_firmware(&newest, &version, &obj_t);
     TEST_ASSERT_EQUAL_INT8(OBJ_2, newest);
-    err = write_firmware_manifest(OBJ_2, &mt_old, &obj_t);
+    err = write_firmware_manifest(&obj_2, &mt_old);
     TEST_ASSERT_TRUE(!err);
 }
 
@@ -85,10 +85,10 @@ int file_compare(char* fname1, char* fname2) {
 	fp1 = fopen(fname1, "r");
 	fp2 = fopen(fname2, "r");
 	if (fp1 == NULL) {
-		printf("Cannot open %s for reading ", fname1);
+		printf("Cannot open %s for reading\n", fname1);
 		exit(1);
 	} else if (fp2 == NULL) {
-		printf("Cannot open %s for reading ", fname2);
+		printf("Cannot open %s for reading\n", fname2);
 		exit(1);
 	}
 
@@ -105,10 +105,8 @@ int file_compare(char* fname1, char* fname2) {
 }
 
 void test_copy_firmware(void) {
-    mem_object src;
-    mem_object dst;
     uint8_t buffer[BUFFER_SIZE];
-	pull_error err = copy_firmware(OBJ_1, OBJ_RUN, &src, &dst, buffer, BUFFER_SIZE);
+	pull_error err = copy_firmware(&obj_2, &obj_run, buffer, BUFFER_SIZE);
 	TEST_ASSERT_TRUE(!err);
 	TEST_ASSERT(file_compare("../assets/expected_internal_flash_simulator", 
 				"../assets/internal_flash_simulator") == 0);

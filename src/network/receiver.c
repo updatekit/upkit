@@ -58,7 +58,7 @@ static void handler(pull_error txp_err, const char* data, int len, void* more) {
     }
     ctx->received+=len;
     if (ctx->manifest_received) {
-        log_info("Received %u bytes. Expected %u bytes\r", ctx->received, ctx->expected);
+        log_info("Received %lu bytes. Expected %lu bytes\r", ctx->received, ctx->expected);
         if (ctx->received == ctx->expected) {
             ctx->firmware_received = 1;
             ctx->err = PULL_SUCCESS;
@@ -73,19 +73,14 @@ static void handler(pull_error txp_err, const char* data, int len, void* more) {
 }
 
 pull_error receiver_open(receiver_ctx* ctx, txp_ctx* txp, identity_t identity,
-        const char* resource, obj_id i, mem_object* obj) {
+        const char* resource, mem_object* obj) {
     memset(ctx, 0, sizeof(receiver_ctx));
     ctx->txp = txp;
     ctx->err = PULL_SUCCESS;
     ctx->obj = obj;
     ctx->resource = resource;
     ctx->identity = identity;
-    log_info("Receiving on memory object %d\n", i);
-    pull_error err = memory_open(ctx->obj, i);
-    if (err) {
-        log_error(err, "Impossible to open the object %d\n", i);
-        return RECEIVER_OPEN_ERROR;
-    }
+    ctx->obj = obj;
     ctx->firmware_received = 0;
     return PULL_SUCCESS;
 }
@@ -126,10 +121,6 @@ pull_error receiver_chunk(receiver_ctx* ctx) {
 }
 
 pull_error receiver_close(receiver_ctx* ctx) {
-    pull_error err = memory_close(ctx->obj);
-    if (err) {
-        log_error(err, "Failure closing memory\n");
-        return RECEIVER_CLOSE_ERROR;
-    }
+    /* Do nothing */
     return PULL_SUCCESS;
 }

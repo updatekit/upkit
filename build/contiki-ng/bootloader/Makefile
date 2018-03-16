@@ -67,7 +67,7 @@ endif
 # Bootloader configuration
 DISABLE_MAIN=1
 OTA_OFFSET=0x0
-PAGES=6
+PAGES=5
 OTA_LENGTH=0x1000*$(PAGES)
 LINKER_DEFINES=-DOTA_OFFSET=$(OTA_OFFSET) -DOTA_LENGTH=$(OTA_LENGTH)
 # The bootloader_ctx must be compiled for x86, so use direcly gcc

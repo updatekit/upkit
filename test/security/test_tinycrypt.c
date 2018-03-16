@@ -24,6 +24,7 @@
 DIGEST_FUNC(tinycrypt);
 digest_func df;
 ecc_func_t ef;
+mem_object obj_1;
 
 #include "test_verifier.h"
 
@@ -44,6 +45,7 @@ ecc_func_t ef;
 TEST_RUNNER();
 
 void setUp() {
+    TEST_ASSERT_TRUE(memory_open(&obj_1, OBJ_1) == PULL_SUCCESS);
     df = tinycrypt_digest_sha256;
     ef = tinycrypt_secp256r1_ecc;
     memory_mock_restore();

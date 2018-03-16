@@ -28,12 +28,11 @@ extern "C" {
  * the signature stored into the memory object metadata. The ECC signature
  * does not accept any format to reduce space used to store keys.
  *
- * \param[in] id The id of the memory object.
+ * \param[in] obj_t The memory object to validate
  * \param[in] f The digest function.
  * \param[in] x The X parameter of the signer's public key.
  * \param[in] y The Y parameter of the signer's public key.
  * \param[in] curve The curve parameters.
- * \param[in] obj_t A temporary memory object.
  * \param[in] buffer The buffer used to read data from the object
  * \param[in] buffer_len The size of the buffer
  *
@@ -43,8 +42,8 @@ extern "C" {
  * \returns PULL_SUCCESS if verification succeded or the specific error
  * otherwise.
  */
-pull_error verify_object(obj_id id, digest_func f, const uint8_t *x,
-                         const uint8_t *y, ecc_func_t ef, mem_object *obj_t,
+pull_error verify_object(const mem_object* obj, digest_func f, const uint8_t *x,
+                         const uint8_t *y, ecc_func_t ef,
                          uint8_t* buffer, size_t buffer_len);
 
 #ifdef __cplusplus

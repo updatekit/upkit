@@ -105,13 +105,13 @@ int memory_write_impl(mem_object* ctx, const void* memory_buffer, uint16_t size,
                 buffer_full+=size; // Questo è un errore, perchè magari stavo sovrascrivendo qualcosa
             } else {
                 uint16_t chunk_size = BUFFER_SIZE-buffer_full;
-                memcpy(&buffer[buffer_full], memory_buffer, chunk_size);
+                memcpy(&buffer[buffer_full], memory_buffer, chunk_size); /// XXX Check for errors
                 if (memory_flush_impl(ctx) != PULL_SUCCESS) {
                     log_error(MEMORY_WRITE_ERROR, "Error while writing the buffer\n");
                     return -1;
                 }
                 buffer_offset = ctx->start_offset+offset+chunk_size;
-                memcpy(&buffer[buffer_full], memory_buffer+chunk_size, size-chunk_size);
+                memcpy(&buffer[buffer_full], memory_buffer+chunk_size, size-chunk_size); /// XXX Check for errors
             }
             return size;
         }

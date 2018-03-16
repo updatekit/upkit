@@ -56,14 +56,11 @@ void* cryptoauthlib_sha256_final(digest_ctx* ctx) {
 }
 /* ECC */
 
-pull_error ecc_verify(const uint8_t* x, const uint8_t* y, const uint8_t* r, const uint8_t* s,
-        const void* data, uint16_t data_len, ecc_curve curve) {
+pull_error cryptoauthlib_ecc_verify(const uint8_t* x, const uint8_t* y, const uint8_t* r, const uint8_t* s,
+        const void* data, uint16_t data_len) {
     uint8_t pub_key[64];
     uint8_t signature[64];
     bool is_verified;
-    if (curve.type != CURVE_SECP256R1) {
-        return NOT_SUPPORTED_CURVE_ERROR;
-    }
     if (data_len != 32) {
         return VERIFICATION_FAILED_ERROR;
     }
@@ -76,6 +73,11 @@ pull_error ecc_verify(const uint8_t* x, const uint8_t* y, const uint8_t* r, cons
         return VERIFICATION_FAILED_ERROR;
     }
     return is_verified? PULL_SUCCESS: VERIFICATION_FAILED_ERROR;
+}
+
+pull_error cryptoauthlib_ecc_sign(const uint8_t* private_key, uint8_t *signature,
+                     const void *data, uint16_t data_len) {
+    return NOT_IMPLEMENTED_ERROR;
 }
 
 #endif /* WITH_TINYCRYPT */
