@@ -56,7 +56,7 @@ AC_ARG_ENABLE([log-debug], AC_HELP_STRING([--enable-log-debug],
 AC_ARG_ENABLE([log-verbosity], AC_HELP_STRING([--disable-log-verbosity], 
               [Disable verbosity @<:@default=no@:>@]), [verbosity=0])
 AS_IF([test "x$verbosity" == "x"], [
-    AC_DEFINE([LOGGER_VERBOSITY], [3],[Define logger verbosity.])
+    AC_DEFINE([LOGGER_VERBOSITY], [4],[Define logger verbosity.])
 ], [
     AC_DEFINE_UNQUOTED([LOGGER_VERBOSITY], [$verbosity],[Define logger verbosity.])
 ])

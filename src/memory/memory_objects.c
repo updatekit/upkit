@@ -37,6 +37,7 @@ pull_error get_oldest_firmware(obj_id* obj, version_t* version, mem_object* obj_
     uint8_t i;
     for (i=0; memory_objects[i] > 0; i++) {
         err = memory_open(obj_t, memory_objects[i]);
+        // XXX here i return without closing the object 
         if (err) {
             log_error(err, "Failure opening firmware id %d\n", memory_objects[i]);
             return GET_NEWEST_ERROR;

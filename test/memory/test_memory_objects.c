@@ -106,8 +106,8 @@ int file_compare(char* fname1, char* fname2) {
 
 void test_copy_firmware(void) {
     uint8_t buffer[BUFFER_SIZE];
-	pull_error err = copy_firmware(&obj_2, &obj_run, buffer, BUFFER_SIZE);
-	TEST_ASSERT_TRUE(!err);
+	pull_error err = copy_firmware(&obj_1, &obj_run, buffer, BUFFER_SIZE);
+	TEST_ASSERT_TRUE_MESSAGE(!err, err_as_str(err));
 	TEST_ASSERT(file_compare("../assets/expected_internal_flash_simulator", 
-				"../assets/internal_flash_simulator") == 0);
+    				"../assets/internal_flash_simulator") == 0);
 }

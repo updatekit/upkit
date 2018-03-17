@@ -13,13 +13,13 @@ struct mem_object_ {
 
 enum memory_objects_enum {
     OBJ_FIRST = 0,
-    OBJ_GOLD,          
-    OBJ_RUN,      
-    OBJ_1,      
-    OBJ_2,  
+    OBJ_GOLD = 1,
+    OBJ_RUN = 2,
+    OBJ_1 = 3,
+    OBJ_2 = 4,
     /// Other files used for testing
-    TEST_MEMORY_FILE,
-    OBJ_LAST
+    TEST_MEMORY_FILE = 5,
+    OBJ_LAST = 6
 };
 
 /******* Testing functions *******/
