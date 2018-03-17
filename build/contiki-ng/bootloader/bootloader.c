@@ -18,10 +18,6 @@
 #include "../memory_headers.h"
 #include "../default_configs.h"
 
-#ifdef WITH_CRYPTOAUTHLIB
-#include <cryptoauthlib.h>
-#endif
-
 #define START_PAGE 5
 #define END_PAGE 31
 
@@ -29,7 +25,19 @@
 #define MEMORY_OBJ_BUFFER_SIZE 0x100
 #define FLASH_PAGE_SIZE 0x1000
 
+#ifdef WITH_CRYPTOAUTHLIB
+#include <cryptoauthlib.h>
 DIGEST_FUNC(cryptoauthlib);
+#elif WITH_TINYDTLS
+DIGEST_FUNC(tinydtls);
+#elif WITH_TINYCRYPT
+DIGEST_FUNC(tinycrypt);
+// To perform the verification I do not need any rng. Define e dummy
+// function to make tinycrypt happy.
+int default_CSPRNG(uint8_t *dest, unsigned int size) {
+    return 0;
+}
+#endif
 
 /**** TODO update the states */
 enum bootloader_states {
@@ -59,6 +67,22 @@ static mem_object obj_t;
 static mem_object internal_object;
 static mem_object new_firmware;
 
+static digest_func df;
+static ecc_func_t ef;
+
+void specialize_crypto_functions() {
+#if WITH_CRYPTOAUTHLIB
+    df = cryptoauthlib_digest_sha256;
+    ef = cryptoauthlib_ecc;
+#elif WITH_TINYDTLS
+    df = tinydtls_digest_sha256;
+    ef = tinydtls_secp256r1_ecc;
+#elif WITH_TINYCRYPT
+    df = tinycrypt_digest_sha256;
+    ef = tinycrypt_secp256r1_ecc;
+#endif
+}
+
 pull_error restore_recovery_image() {
     // TODO implement
     return GENERIC_ERROR;
@@ -72,6 +96,7 @@ void flash_write_protect() {
 }
 
 void pull_bootloader() {
+    specialize_crypto_functions();
     /************ OPEN INTERNAL IMAGE **********/
     state = OPEN_INTERNAL_IMAGE;
     pull_error err = memory_open(&internal_object, OBJ_RUN);
@@ -145,8 +170,7 @@ void pull_bootloader() {
         }
         /*********** VALIDATE_EXTERNAL_IMAGE *********/
         state = VALIDATE_EXTERNAL_IMAGE;
-        err = verify_object(&new_firmware, cryptoauthlib_digest_sha256, x, y, cryptoauthlib_ecc, 
-                                buffer, MEMORY_OBJ_BUFFER_SIZE);
+        err = verify_object(&new_firmware, df, x, y, ef, buffer, MEMORY_OBJ_BUFFER_SIZE);
         if (err) {
             goto error;    
         }
@@ -178,8 +202,7 @@ boot:
     }
 #endif
     watchdog_stop();
-    err = verify_object(&internal_object, cryptoauthlib_digest_sha256, x, y, cryptoauthlib_ecc,
-                                buffer, MEMORY_OBJ_BUFFER_SIZE);
+    err = verify_object(&internal_object, df, x, y, ef, buffer, MEMORY_OBJ_BUFFER_SIZE);
     watchdog_start();
     if (err) {
         if (RECOVERY_IMAGE == 0 || restore_recovery_image() != PULL_SUCCESS) {
@@ -187,7 +210,7 @@ boot:
         }
     }
 #ifdef WITH_CRYPTOAUTHLIB
-    if (status == ATCA_SUCCESS) {
+    if (!err) {
         atcab_release();
     }
 #endif

@@ -15,27 +15,44 @@
 #include "transport/transport_ercoap.h"
 #include "memory_headers.h"
 
-/* This is only specific to CC26xx */
 #if TARGET == srf06-cc26xx
 #include "driverlib/flash.h"
 #endif
 
 #define BUFFER_LEN 0x100
 
+#ifdef WITH_CRYPTOAUTHLIB
+#include <cryptoauthlib.h>
 DIGEST_FUNC(cryptoauthlib);
+#elif WITH_TINYDTLS
+DIGEST_FUNC(tinydtls);
+#elif WITH_TINYCRYPT
+DIGEST_FUNC(tinycrypt);
+// To perform the verification I do not need any rng. Define e dummy
+// function to make tinycrypt happy.
+int default_CSPRNG(uint8_t *dest, unsigned int size) {
+    return 0;
+}
+#endif
 
 PROCESS(update_process, "OTA Update process");
 PROCESS(main_process, "Main process");
 AUTOSTART_PROCESSES(&update_process, &main_process);
 
-txp_ctx txp;
-subscriber_ctx sctx;
-receiver_ctx rctx;
+static txp_ctx txp;
+static subscriber_ctx sctx;
+static receiver_ctx rctx;
 
-obj_id id;
-mem_object obj_t;
+static obj_id id;
+static mem_object obj_t;
+static mem_object new_firmware;
 static struct etimer et;
-void* conn_data;
+
+static void* conn_data;
+static conn_type type;
+
+static digest_func df;
+static ecc_func_t ef;
 
 static identity_t identity_g = {
     .udid = 0xdead,
@@ -68,18 +85,36 @@ PROCESS_THREAD(main_process, ev, data) {
     PROCESS_END();
 }
 
-PROCESS_THREAD(update_process, ev, data) {
-    PROCESS_BEGIN();
+void specialize_crypto_functions() {
+#if WITH_CRYPTOAUTHLIB
+    df = cryptoauthlib_digest_sha256;
+    ef = cryptoauthlib_ecc;
+#elif WITH_TINYDTLS
+    df = tinydtls_digest_sha256;
+    ef = tinydtls_secp256r1_ecc;
+#elif WITH_TINYCRYPT
+    df = tinycrypt_digest_sha256;
+    ef = tinycrypt_secp256r1_ecc;
+#endif
+}
+
+void specialize_conn_functions() {
 #ifdef CONN_UDP
-    conn_type type = TXP_UDP;
+    type = TXP_UDP;
     conn_data = NULL;
 #elif CONN_DTLS_ECDSA
-    conn_type type = TXP_DTLS_ECDSA;
+    type = TXP_DTLS_ECDSA;
     conn_data = &dtls_ecdsa_data;
 #elif CONN_DTLS_PSK
-    conn_type type = TXP_DTLS_PSK;
+    type = TXP_DTLS_PSK;
     conn_data = &dtls_psk_data;
 #endif
+}
+
+PROCESS_THREAD(update_process, ev, data) {
+    PROCESS_BEGIN();
+    specialize_crypto_functions();
+    specialize_conn_functions();
 
     txp_init(&txp, "", COAPS_DEFAULT_PORT, type, conn_data);
     log_info("Subscribing to the server\n");
@@ -104,8 +139,15 @@ PROCESS_THREAD(update_process, ev, data) {
             log_error(err, "Error getting the oldest slot\n");
             continue;
         }
+        // open the oldest slot
+        err = memory_open(&new_firmware, id);
+        if (err) {
+            log_error(err, "Error opening the object for storing\n");
+            continue;
+        }
         // download the image to the oldest slot
-        err = receiver_open(&rctx, &txp, identity_g, "firmware", id, &obj_t);
+        // XXX refactor the code to close the opened firmware at each failure
+        err = receiver_open(&rctx, &txp, identity_g, "firmware", &new_firmware);
         if (err) {
             log_error(err, "Error opening the receiver\n");
             receiver_close(&rctx);
@@ -135,37 +177,26 @@ PROCESS_THREAD(update_process, ev, data) {
             log_info("Error receving firmware...restarting\n");
             continue;
         }
-        manifest_t mt;
-        err = read_firmware_manifest(id, &mt, &obj_t);
-        if (err) {
-            log_error(err, "Failure reading firmware manifest, aborting\n");
-            memset(&mt, 0x0, sizeof(manifest_t));
-            write_firmware_manifest(id, &mt, &obj_t);
-            continue;
-        }
-        print_manifest(&mt);
         watchdog_stop();
         uint8_t buffer[BUFFER_LEN];
-        // TODO define the digest func accordign to the choosed library
-        digest_func digest;
 #ifdef WITH_CRYPTOAUTHLIB
-        digest = cryptoauthlib_digest_sha256;
-
         ATCA_STATUS status = atcab_init(&cfg_ateccx08a_i2c_default);
         if (status != ATCA_SUCCESS) {
             log_error(GENERIC_ERROR, "Failure initializing ATECC508A\n");
         }
 #endif
-        err = verify_object(id, digest, x, y, cryptoauthlib_ecc, &obj_t, buffer, BUFFER_LEN);
+        err = verify_object(&new_firmware, df, x, y, ef, buffer, BUFFER_LEN);
 #ifdef WITH_CRYPTOAUTHLIB
-        if (status == ATCA_SUCCESS) {
+        if (!err) {
             atcab_release();
         }
  #endif
         if (err) {
             log_warn("Verification failed\n");
-            memset(&mt, 0x0, sizeof(manifest_t));
-            write_firmware_manifest(id, &mt, &obj_t);
+            err = invalidate_object(id, &obj_t);
+            if (err) {
+                log_error(err, "Error invalidating object");
+            }
             continue;
         }
         watchdog_start();

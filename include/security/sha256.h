@@ -26,7 +26,7 @@ extern "C" {
  * you need.
  */
 #define DIGEST_FUNC(lib) \
-    static const digest_func lib##_digest_sha256 = {.size = 32, \
+    static digest_func lib##_digest_sha256 = {.size = 32, \
         .init = lib##_sha256_init, \
         .update = lib##_sha256_update, \
         .finalize = lib##_sha256_final}

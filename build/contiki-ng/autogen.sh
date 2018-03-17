@@ -16,7 +16,7 @@ git submodule update --init --recursive
 )
 echo "Cloning the Contiki-NG repository...done"
 
-# Clone and build tinydtls
+# Clone TinyDTLS
 echo "Cloning tinydtls..."
 git clone --quiet --progress --recurse-submodules \
     --single-branch --depth 2 https://git.eclipse.org/r/tinydtls/org.eclipse.tinydtls \
@@ -29,6 +29,13 @@ git clone --quiet --progress \
     --single-branch --depth 2 https://github.com/AntonioLangiu/cryptoauthlib.git \
     ext/cryptoauthlib
 echo "Cloning cryptoauthlib...done"
+
+# Clone tinycrypt
+echo "Cloning tinycrypt..."
+git clone --quiet --progress \
+    --single-branch --depth 2 https://github.com/01org/tinycrypt.git \
+    ext/tinycrypt
+echo "Cloning tinycrypt...done"
 
 # Patch the repositories
 PATCHDIR=patches

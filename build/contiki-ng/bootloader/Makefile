@@ -6,8 +6,16 @@ BOARDDIR = ../target/$(TARGET)/$(BOARD)
 CONTIKI_PROJECT=bootloader
 all: ota
 
-# Default configs
-CFLAGS += -DSIMPLE_MANIFEST -DLOGGER_VERBOSITY=3
+#####################################################
+# 				Configurable Parameters             #
+#####################################################
+# Accepted values: 0 1 2 3 
+LOGGER_VERBOSITY ?= 3
+# Accepted values: TINYDTLS, CRYPTOAUTHLIB, TINYCRYPT
+SEC_LIB ?= CRYPTOAUTHLIB
+#####################################################
+#   		   End Configurable Parameters          #
+#####################################################
 
 # Add libpull sources
 ROOTDIR=../../..
@@ -15,27 +23,22 @@ LIBPULL = $(ROOTDIR)/src/common $(ROOTDIR)/src/memory $(ROOTDIR)/src/security
 LIBPULL += $(BOARDDIR) $(BOARDDIR)/bootloader
 LIBPULL_SOURCEFILES = $(notdir $(shell find $(LIBPULL) -maxdepth 1 \( -name '*.c' ! -name 'linker_script.c' \) ))
 LIBPULL_INCLUDES = -I$(ROOTDIR)/include
+CFLAGS += -DSIMPLE_MANIFEST -DLOGGER_VERBOSITY=$(LOGGER_VERBOSITY)
 
 # Include libpull sources
 PROJECTDIRS = $(LIBPULL)
 PROJECT_SOURCEFILES = $(LIBPULL_SOURCEFILES)
 CFLAGS += $(LIBPULL_INCLUDES)
 
-# Size optimizations
+# Contiki-NG Size optimizations
 SMALL = 1
 MAKE_MAC = MAKE_MAC_NULLMAC
 MAKE_NET = MAKE_NET_NULLNET
 
 # Security Configurations
-# The bootloader needs to use a cryptographic library to verify the digital
-# signature of the firmware before booting. Actually it supports Tinydtls
-# and CryptoAuthLib, the library to interact with the Atmel CryptoAuthentication
-# device. Select the library you want to include into the build.
-# Accepted values: TINYDTLS, CRYPTOAUTHLIB
-SEC_LIB ?= CRYPTOAUTHLIB
 ext= ../ext
 ifeq ($(SEC_LIB),TINYDTLS)
-	CFLAGS += -DWITH_TINYDTLS
+	CFLAGS += -DWITH_TINYDTLS=1
 	# Add Tinydtls sources
 	PROJECTDIRS += $(ext)/tinydtls $(ext)/tinydtls/aes $(ext)/tinydtls/sha2 $(ext)/tinydtls/ecc
 	PROJECT_SOURCEFILES += dtls.c crypto.c hmac.c rijndael.c sha2.c
@@ -59,9 +62,14 @@ else ifeq ($(SEC_LIB),CRYPTOAUTHLIB)
 	CFLAGS+= -I$(CAUTHLIB_DIR) -I$(CAUTHLIB_DIR)/basic 
 	CFLAGS+= -I$(CAUTHLIB_DIR)/host -I$(CAUTHLIB_DIR)/hal -I$(CAUTHLIB_DIR)/crypto
 	CFLAGS+=-DATCA_HAL_I2C
+else ifeq ($(SEC_LIB),TINYCRYPT)
+	CFLAGS += -DWITH_TINYCRYPT=1
+	CFLAGS += -I$(ext)/tinycrypt/lib/include
+	PROJECTDIRS += $(ext)/tinycrypt/lib/source
+	PROJECT_SOURCEFILES += ecc_dsa.c sha256.c utils.c ecc.c
 endif
 
-# Bootloader configuration
+# Bootloader Configurations
 DISABLE_MAIN=1
 OTA_OFFSET=$(BOOTLOADER_START)
 OTA_LENGTH=$(BOOTLOADER_END)-$(BOOTLOADER_START)
