@@ -22,14 +22,19 @@
 #include <cryptoauthlib.h>
 #endif
 
+#define START_PAGE 5
+#define END_PAGE 31
+
 #define RECOVERY_IMAGE 0
 #define MEMORY_OBJ_BUFFER_SIZE 0x100
 #define FLASH_PAGE_SIZE 0x1000
 
 DIGEST_FUNC(cryptoauthlib);
 
+/**** TODO update the states */
 enum bootloader_states {
-    READ_BOOTLOADER_CTX = 0,
+    OPEN_INTERNAL_IMAGE = 0,
+    READ_BOOTLOADER_CTX,
     ERASE_SLOTS,
     STORE_RECOVERY_IMAGE,
     WRITE_BOOTLOADER_CTX,
@@ -42,15 +47,17 @@ enum bootloader_states {
 };
 
 static enum bootloader_states state;
+
 static manifest_t mt;
 static bootloader_ctx ctx;
-static mem_object obj;
 static obj_id id;
-static mem_object obj_t, obj_dst_t;
+
 uint8_t buffer[MEMORY_OBJ_BUFFER_SIZE];
 
-static const obj_id internal_firmware = OBJ_RUN;
-
+static mem_object bootloader_object;
+static mem_object obj_t;
+static mem_object internal_object;
+static mem_object new_firmware;
 
 pull_error restore_recovery_image() {
     // TODO implement
@@ -65,14 +72,20 @@ void flash_write_protect() {
 }
 
 void pull_bootloader() {
-    /************ READ_BOOTLOADER_CTX **********/
-    state = READ_BOOTLOADER_CTX;
-    log_debug("Loading bootloader context\n");
-    pull_error err = memory_open(&obj, BOOTLOADER_CTX);
+    /************ OPEN INTERNAL IMAGE **********/
+    state = OPEN_INTERNAL_IMAGE;
+    pull_error err = memory_open(&internal_object, OBJ_RUN);
     if (err) {
         goto error;
     }
-    if (memory_read(&obj, &ctx, sizeof(ctx), 0x0) != sizeof(ctx)) {
+    /************ READ_BOOTLOADER_CTX **********/
+    state = READ_BOOTLOADER_CTX;
+    log_debug("Loading bootloader context\n");
+    err = memory_open(&bootloader_object, BOOTLOADER_CTX);
+    if (err) {
+        goto error;
+    }
+    if (memory_read(&bootloader_object, &ctx, sizeof(ctx), 0x0) != sizeof(ctx)) {
         err = MEMORY_READ_ERROR;
         goto error;
     }
@@ -80,9 +93,8 @@ void pull_bootloader() {
         state = ERASE_SLOTS;
         log_debug("Erasing slots\n");
         obj_id i;
-        memset(&mt, 0x0, sizeof(mt));
         for (i = 0; memory_objects[i] >= 0; i++) {
-            err = write_firmware_manifest(memory_objects[i], &mt, &obj_t);
+            err = invalidate_object(memory_objects[i], &obj_t);
             if (err) {
                 goto error; 
             }
@@ -90,8 +102,13 @@ void pull_bootloader() {
 #if RECOVERY_IMAGE
         state = STORE_RECOVERY_IMAGE;
         log_debug("Storing Recovery Image\n");
+        // Open OBJ_GOLD
+        err = memory_open(&obj_gold, OBJ_GOLD);
+        if (err) {
+            goto err;
+        }
         watchdog_stop();
-        err = copy_firmware(internal_firmware, OBJ_GOLD, &obj_t, &obj_dst_t, buffer, MEMORY_OBJ_BUFFER_SIZE);
+        err = copy_firmware(&internal_object, &obj_gold, buffer, MEMORY_OBJ_BUFFER_SIZE);
         watchdog_start();
         if (err) {
             goto error;
@@ -99,16 +116,16 @@ void pull_bootloader() {
 #endif
         state = WRITE_BOOTLOADER_CTX;
         ctx.startup_flags = 0x0;
-        if (memory_write(&obj, &ctx, sizeof(ctx), 0x0) != sizeof(ctx)) {
+        if (memory_write(&bootloader_object, &ctx, sizeof(ctx), 0x0) != sizeof(ctx)) {
             goto error;
         };
         log_debug("Bootstrap Success\n");
     }
-    memory_close(&obj); // close bootloader context
+    memory_close(&bootloader_object); // close bootloader context
     /************ READ_RUNNING_MANIFEST ************/
     state  = READ_RUNNING_MANIFEST;
     log_debug("Reading manifest of the internal image\n");
-    err = read_firmware_manifest(internal_firmware, &mt, &obj_t);
+    err = read_firmware_manifest(&internal_object, &mt);
     if (err) {
         goto error;
     }
@@ -121,27 +138,30 @@ void pull_bootloader() {
     }
     log_debug("Newest firmware is in slot %u with version %x\n", id, version);
     if (version > get_version(&mt)) {
+        /*********** OPEN NEW IMAGE *********/
+        err = memory_open(&new_firmware, id);
+        if (err) {
+            goto error;
+        }
         /*********** VALIDATE_EXTERNAL_IMAGE *********/
         state = VALIDATE_EXTERNAL_IMAGE;
-        err = verify_object(id, cryptoauthlib_digest_sha256, x, y, cryptoauthlib_ecc, 
-                &obj_t, buffer, MEMORY_OBJ_BUFFER_SIZE);
+        err = verify_object(&new_firmware, cryptoauthlib_digest_sha256, x, y, cryptoauthlib_ecc, 
+                                buffer, MEMORY_OBJ_BUFFER_SIZE);
         if (err) {
             goto error;    
         }
         /*********** UPDATE_FIRMWARE **********/
         state = UPDATE_FIRMWARE;
         int page = 0;
-        for (page=5; page<=5+26; page++) { // XXX hardcoded pages
+        for (page=START_PAGE; page<=END_PAGE; page++) { // XXX hardcoded pages
             if (FlashSectorErase(FLASH_PAGE_SIZE*page) != FAPI_STATUS_SUCCESS) {
                 log_info("Error erasing page %d\n", page);
                 goto error;
             }
         }
-        if (page > 31) {
-            err = copy_firmware(id, internal_firmware, &obj_t, &obj_dst_t, buffer, MEMORY_OBJ_BUFFER_SIZE);
-            if (err) {
-                goto error;
-            }
+        err = copy_firmware(&new_firmware, &internal_object, buffer, MEMORY_OBJ_BUFFER_SIZE);
+        if (err) {
+            goto error;
         }
     }
     goto boot;
@@ -158,8 +178,8 @@ boot:
     }
 #endif
     watchdog_stop();
-    err = verify_object(internal_firmware, cryptoauthlib_digest_sha256, x, y, cryptoauthlib_ecc,
-                                    &obj_t, buffer, MEMORY_OBJ_BUFFER_SIZE);
+    err = verify_object(&internal_object, cryptoauthlib_digest_sha256, x, y, cryptoauthlib_ecc,
+                                buffer, MEMORY_OBJ_BUFFER_SIZE);
     watchdog_start();
     if (err) {
         if (RECOVERY_IMAGE == 0 || restore_recovery_image() != PULL_SUCCESS) {
@@ -173,7 +193,7 @@ boot:
 #endif
     state = BOOT;
     flash_write_protect();
-    load_object(internal_firmware, &mt);
+    load_object(OBJ_RUN, &mt); // refactor this function
 fatal_error:
     /* If you arrive here, you should reboot and try again */
     log_info("The bootloader encountered a fatal error");

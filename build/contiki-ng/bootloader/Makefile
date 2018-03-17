@@ -1,8 +1,5 @@
 # Makefile for the Bootloader
-ifndef TARGET
-	TARGET=srf06-cc26xx
-	BOARD=sensortag/cc2650
-endif
+include ../Makefile.conf
 
 BOARDDIR = ../target/$(TARGET)/$(BOARD)
 
@@ -66,10 +63,10 @@ endif
 
 # Bootloader configuration
 DISABLE_MAIN=1
-OTA_OFFSET=0x0
-PAGES=5
-OTA_LENGTH=0x1000*$(PAGES)
+OTA_OFFSET=$(BOOTLOADER_START)
+OTA_LENGTH=$(BOOTLOADER_END)-$(BOOTLOADER_START)
 LINKER_DEFINES=-DOTA_OFFSET=$(OTA_OFFSET) -DOTA_LENGTH=$(OTA_LENGTH)
+
 # The bootloader_ctx must be compiled for x86, so use direcly gcc
 ctx:
 	gcc -Wall bootloader_ctx.c -o bootloader_ctx

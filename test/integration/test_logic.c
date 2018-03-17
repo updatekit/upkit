@@ -89,7 +89,7 @@ void logic(conn_type type, void* conn_data) {
         // Check if there are updates
         log_info("Checking for updates\n");
         while (!sctx.has_updates) {
-            check_updates(&sctx, subscriber_cb); // check for errors
+            TEST_ASSERT_TRUE(!check_updates(&sctx, subscriber_cb));
             loop_once(&stxp, 1000);
             sleep(POLLING_FREQUENCY);
         }

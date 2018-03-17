@@ -3,6 +3,9 @@
 # the manifest and the binary image
 set -e
 
+# Include the configuration file
+source Makefile.conf
+
 ROOTDIR=$(cd $(dirname $0) && pwd -P)
 
 # Default paths
@@ -54,15 +57,16 @@ generate_manifest() {
 
 generate_ota_image() {
     echo "Adding the manifest to the firmware..."
-    srec_cat $MANIFEST -binary $IMAGE -binary -offset 0x100 -o $FIRMWARE -binary
+    srec_cat $MANIFEST -binary $IMAGE -binary -offset $MANIFEST_SIZE -o $FIRMWARE -binary
     echo "Adding the manifest to the firmware...done"
 }
 
 generate_flashable_firmware() {
     echo "Adding the bootloader to the firmware..."
-    cmd="srec_cat $BOOTLOADER -intel -crop 0x0 0x5000 0x1FFA8 0x20000 \
-        $FIRMWARE -binary -offset 0x5000 -crop 0x5000 0x1F000 \
-        $BOOTLOADER_CTX -binary -offset 0x1F000 -crop 0x1F000 0x1FFA8"
+    cmd="srec_cat $BOOTLOADER -intel -crop $BOOTLOADER_START $BOOTLOADER_END $CCFG_START $CCFG_END \
+        $FIRMWARE -binary -offset $RUNNING_IMAGE_START -crop $RUNNING_IMAGE_START $RUNNING_IMAGE_END \
+        $BOOTLOADER_CTX -binary -offset $BOOTLOADER_CTX_START -crop $BOOTLOADER_CTX_START $BOOTLOADER_CTX_END"
+
     $cmd -o firmware.hex -intel
     $cmd -o firmware.bin -binary
 }

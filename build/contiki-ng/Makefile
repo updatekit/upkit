@@ -1,8 +1,6 @@
-# Target Platform
-ifndef TARGET
-	TARGET=srf06-cc26xx
-	BOARD=sensortag/cc2650
-endif
+# Makefile to build the OTA image
+include Makefile.conf
+
 BOARDDIR = target/$(TARGET)/$(BOARD)
 
 CONTIKI_PROJECT=runner
@@ -80,10 +78,10 @@ MODULES += os/net/app-layer/coap
 
 # OTA flags
 CFLAGS += -DOTA=1
-OTA_OFFSET=0x5100
-PAGES=26
-OTA_LENGTH=0x1000*$(PAGES)
+OTA_OFFSET=$(RUNNING_IMAGE_START)+$(MANIFEST_SIZE)
+OTA_LENGTH=$(RUNNING_IMAGE_END)-$(RUNNING_IMAGE_START)
 LINKER_DEFINES=-DOTA_OFFSET=$(OTA_OFFSET) -DOTA_LENGTH=$(OTA_LENGTH) -DCCFG_DISABLE=1
+
 ota:
 	$(Q)$(LD) -P -E $(LINKER_DEFINES) $(BOARDDIR)/linker_script.c -o linker_script.ld
 	$(MAKE) $(CONTIKI_PROJECT) LDSCRIPT=linker_script.ld
