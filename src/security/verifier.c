@@ -80,19 +80,19 @@ pull_error verify_object(mem_object* obj, digest_func digest, const uint8_t* x, 
     state = VERIFY_VENDOR_SIGNATURE;
     err = verify_manifest_vendor(&mt, digest, x, y, ef);
     if (err) {
-        return VERIFICATION_FAILED_ERROR;
+        goto error;
     }
     log_debug("Vendor Signature Valid\n");
     /********** VERIFY_SERVER_SIGNATURE ***********/
     state = VERIFY_SERVER_SIGNATURE;
     err = verify_manifest_server(&mt, digest, x, y, ef);
     if (err) {
-        return VERIFICATION_FAILED_ERROR;
+        goto error;
     }
     log_debug("Server Signature Valid\n");
     return PULL_SUCCESS;
 error:
-    log_error(err, "Error in the verification process in phase %d\n", state);
+    log_error(err, "Error in the verification process in phase %d: %s\n", state, err_as_str(err));
     return err;
 }
 
