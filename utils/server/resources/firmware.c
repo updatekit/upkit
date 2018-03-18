@@ -23,18 +23,26 @@ extern void resource_firmware(coap_context_t *ctx,
     server_ctx_t* server_ctx = (server_ctx_t*) coap_get_app_data(ctx);
 
     receiver_msg_t* msg;
+    uint8_t* raw_message;
     size_t size = sizeof(receiver_msg_t);
-    int err = coap_get_data(request, &size, (uint8_t**) &msg);
+    int err = coap_get_data(request, &size, &raw_message);
     if (err == 0) {
         printf("Received data is not correct\n");
         response->code = COAP_RESPONSE_CODE(400);
         return;
     }
+    if (size != sizeof(receiver_msg_t)) {
+        printf("Received data size is not valid\n");
+        response->code = COAP_RESPONSE_CODE(400);
+        return;
+    }
+    msg = (receiver_msg_t*) raw_message;
 
     // Make the manifest specific for the request
     // TODO When moving the server to c++ store temporarely
     // the specific manifest for a N number of requuests
     // XXX now the signature is calculated at each request
+    printf("Received request from identity: %04x %04x\n", msg->udid, msg->random);
     identity_t identity = {
         .udid = msg->udid,
         .random = msg->random

@@ -18,12 +18,8 @@
 #include "../memory_headers.h"
 #include "../default_configs.h"
 
-#define START_PAGE 5
-#define END_PAGE 31
-
-#define RECOVERY_IMAGE 0
-#define MEMORY_OBJ_BUFFER_SIZE 0x100
-#define FLASH_PAGE_SIZE 0x1000
+#define BUFFER_SIZE PAGE_SIZE // Defined in Makefile.conf
+#define FLASH_PAGE_SIZE PAGE_SIZE // Defined in Makefile.conf
 
 #ifdef WITH_CRYPTOAUTHLIB
 #include <cryptoauthlib.h>
@@ -60,7 +56,7 @@ static manifest_t mt;
 static bootloader_ctx ctx;
 static obj_id id;
 
-uint8_t buffer[MEMORY_OBJ_BUFFER_SIZE];
+uint8_t buffer[BUFFER_SIZE];
 
 static mem_object bootloader_object;
 static mem_object obj_t;
@@ -90,12 +86,22 @@ pull_error restore_recovery_image() {
 
 void flash_write_protect() {
     uint32_t page = 0;
-    for (page=0; page <= 31; page++) {
+    for (page=BOOTLOADER_START_PAGE; page<=IMAGE_END_PAGE; page++) {
         FlashProtectionSet(page, FLASH_WRITE_PROTECT);
     }
 }
 
+#ifdef EVALUATE_TIME
+static uint16_t test_id = 0;
+static rtimer_clock_t timer;
+#endif
+
+
 void pull_bootloader() {
+#ifdef EVALUATE_TIME
+    test_id = RTIMER_NOW();
+    timer = RTIMER_NOW();
+#endif
     specialize_crypto_functions();
     /************ OPEN INTERNAL IMAGE **********/
     state = OPEN_INTERNAL_IMAGE;
@@ -124,7 +130,7 @@ void pull_bootloader() {
                 goto error; 
             }
         }
-#if RECOVERY_IMAGE
+#if RECOVERY_IMAGE == 1
         state = STORE_RECOVERY_IMAGE;
         log_debug("Storing Recovery Image\n");
         // Open OBJ_GOLD
@@ -133,7 +139,7 @@ void pull_bootloader() {
             goto err;
         }
         watchdog_stop();
-        err = copy_firmware(&internal_object, &obj_gold, buffer, MEMORY_OBJ_BUFFER_SIZE);
+        err = copy_firmware(&internal_object, &obj_gold, buffer, BUFFER_SIZE);
         watchdog_start();
         if (err) {
             goto error;
@@ -149,7 +155,7 @@ void pull_bootloader() {
     memory_close(&bootloader_object); // close bootloader context
     /************ READ_RUNNING_MANIFEST ************/
     state  = READ_RUNNING_MANIFEST;
-    log_debug("Reading manifest of the internal image\n");
+    log_debug("Reading image manifest\n");
     err = read_firmware_manifest(&internal_object, &mt);
     if (err) {
         goto error;
@@ -161,7 +167,7 @@ void pull_bootloader() {
     if (err) {
         goto error;
     }
-    log_debug("Newest firmware is in slot %u with version %x\n", id, version);
+    log_debug("Newest firmware: slot %u with version %x\n", id, version);
     if (version > get_version(&mt)) {
         /*********** OPEN NEW IMAGE *********/
         err = memory_open(&new_firmware, id);
@@ -170,20 +176,20 @@ void pull_bootloader() {
         }
         /*********** VALIDATE_EXTERNAL_IMAGE *********/
         state = VALIDATE_EXTERNAL_IMAGE;
-        err = verify_object(&new_firmware, df, x, y, ef, buffer, MEMORY_OBJ_BUFFER_SIZE);
+        err = verify_object(&new_firmware, df, x, y, ef, buffer, BUFFER_SIZE);
         if (err) {
             goto error;    
         }
         /*********** UPDATE_FIRMWARE **********/
         state = UPDATE_FIRMWARE;
         int page = 0;
-        for (page=START_PAGE; page<=END_PAGE; page++) { // XXX hardcoded pages
+        for (page=IMAGE_START_PAGE; page<=IMAGE_END_PAGE; page++) {
             if (FlashSectorErase(FLASH_PAGE_SIZE*page) != FAPI_STATUS_SUCCESS) {
                 log_info("Error erasing page %d\n", page);
                 goto error;
             }
         }
-        err = copy_firmware(&new_firmware, &internal_object, buffer, MEMORY_OBJ_BUFFER_SIZE);
+        err = copy_firmware(&new_firmware, &internal_object, buffer, BUFFER_SIZE);
         if (err) {
             goto error;
         }
@@ -192,7 +198,7 @@ void pull_bootloader() {
 error:
     log_error(err, "The bootloader encountered an error in phase %d\n", state);
 boot:
-    log_info("Booting");
+    log_info("Booting\n");
     /************ VALIDATING_IMAGE *********/
 #ifdef WITH_CRYPTOAUTHLIB
     ATCA_STATUS status = atcab_init(&cfg_ateccx08a_i2c_default);
@@ -202,7 +208,7 @@ boot:
     }
 #endif
     watchdog_stop();
-    err = verify_object(&internal_object, df, x, y, ef, buffer, MEMORY_OBJ_BUFFER_SIZE);
+    err = verify_object(&internal_object, df, x, y, ef, buffer, BUFFER_SIZE);
     watchdog_start();
     if (err) {
         if (RECOVERY_IMAGE == 0 || restore_recovery_image() != PULL_SUCCESS) {
@@ -216,6 +222,10 @@ boot:
 #endif
     state = BOOT;
     flash_write_protect();
+#ifdef EVALUATE_TIME
+    timer = (RTIMER_NOW() - timer);
+    printf("BOOTLOADER_TIME %u,%u,%u,%u\n", test_id, get_version(&mt), timer, RTIMER_SECOND);
+#endif
     load_object(OBJ_RUN, &mt); // refactor this function
 fatal_error:
     /* If you arrive here, you should reboot and try again */

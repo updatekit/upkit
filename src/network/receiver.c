@@ -34,7 +34,7 @@ static void handler(pull_error txp_err, const char* data, int len, void* more) {
             log_debug("Manifest received\n");
             print_manifest(&ctx->mt);
             if (validate_identity(ctx->identity, get_identity(&ctx->mt)) != PULL_SUCCESS) { 
-                log_debug("Received identity invalid\n");
+                log_debug("Received invalid identity\n");
                 ctx->err = INVALID_IDENTITY_ERROR;
                 break_loop(ctx->txp);
                 return;
@@ -106,13 +106,11 @@ pull_error receiver_chunk(receiver_ctx* ctx) {
             return ctx->err;
         default: /* ignore all the other cases */ break;
     }
-    receiver_msg_t msg = {
-        .msg_version = MESSAGE_VERSION,
-        .offset = ctx->start_offset,
-        .udid = ctx->identity.udid,
-        .random = ctx->identity.random
-    };
-    err = txp_request(ctx->txp, GET_BLOCKWISE2, ctx->resource, (const char*) &msg, sizeof(receiver_msg_t));
+    ctx->msg.msg_version = MESSAGE_VERSION;
+    ctx->msg.offset = ctx->start_offset;
+    ctx->msg.udid = ctx->identity.udid;
+    ctx->msg.random = ctx->identity.random;
+    err = txp_request(ctx->txp, GET_BLOCKWISE2, ctx->resource, (const char*) &(ctx->msg), sizeof(receiver_msg_t));
     if (err) {
         log_error(err, "Failure setting receiver request\n");
         return RECEIVER_CHUNK_ERROR;

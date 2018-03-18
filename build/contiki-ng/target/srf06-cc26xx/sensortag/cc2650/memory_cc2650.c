@@ -11,7 +11,7 @@
 #include "board-peripherals.h"
 #include "memory_cc2650.h"
 
-#define BUFFER_SIZE 0x100
+#define BUFFER_SIZE PAGE_SIZE // Defined in Makefile.conf
 
 static uint32_t buffer_offset = 0; // it is signed
 static uint16_t buffer_full = 0;
@@ -29,11 +29,11 @@ int memory_object_mapper[] = {
      [OBJ_2] = EXTERNAL,
 };
 int memory_object_start[] = {
-     [OBJ_RUN] = 0x5000,
+     [BOOTLOADER_CTX] = BOOTLOADER_CTX_START_OFFSET, // Defined in Makefile.conf
      [OBJ_GOLD] = 0x1A000,
+     [OBJ_RUN] = IMAGE_START_PAGE*PAGE_SIZE, // Defined in Makefile.conf
      [OBJ_1] = 0x34000,
-     [OBJ_2] = 0x4E000,
-     [BOOTLOADER_CTX] = 0x1F000
+     [OBJ_2] = 0x4E000
 };
 
 pull_error memory_open_impl(mem_object* ctx, obj_id obj) {
@@ -64,8 +64,6 @@ int memory_read_impl(mem_object* ctx, void* memory_buffer, uint16_t size, uint32
         }
         return size;
     } else if (ctx->type == INTERNAL) {
-        // Reading the cc2650 internal memory is as easy as accessing direcly
-        // the memory offset
         uint8_t* memory_offset = (uint8_t*) (ctx->start_offset+offset);
         if (memcpy(memory_buffer, memory_offset, size) != memory_buffer) {
             log_error(MEMORY_READ_ERROR, "Error reading internal memory\n");
@@ -82,15 +80,15 @@ pull_error memory_flush_impl(mem_object* ctx) {
     }
     if (!ext_flash_erase(buffer_offset, buffer_full)) {
         log_error(MEMORY_ERASE_ERROR, "Error erasing erasing flash\n");
-        //ext_flash_close();
+        //ext_flash_close(); // XXX what can go bad?
         return MEMORY_FLUSH_ERROR;
     }
     if (!ext_flash_write(buffer_offset, buffer_full, buffer)) {
         log_error(MEMORY_WRITE_ERROR, "Error writing into external flash\n");
-        //ext_flash_close();
+        //ext_flash_close(); // XXX what can go bad?
         return MEMORY_FLUSH_ERROR;
     }
-    log_debug("Flushing buffer of size %d\n", buffer_full);
+    log_debug("\nFlushing buffer of size %d\n", buffer_full);
     buffer_full = 0;
     buffer_offset = 0;
     return PULL_SUCCESS;

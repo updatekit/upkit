@@ -19,7 +19,7 @@
 #include "driverlib/flash.h"
 #endif
 
-#define BUFFER_LEN 0x100
+#define BUFFER_LEN PAGE_SIZE
 
 #ifdef WITH_CRYPTOAUTHLIB
 #include <cryptoauthlib.h>
@@ -55,8 +55,8 @@ static digest_func df;
 static ecc_func_t ef;
 
 static identity_t identity_g = {
-    .udid = 0xdead,
-    .random = 0xbeef
+    .udid = 0x1234,
+    .random = 0x5678
 };
 
 static struct etimer et_led;
@@ -168,6 +168,7 @@ PROCESS_THREAD(update_process, ev, data) {
             }
         }
         log_info("Firmware received\n");
+
         err = receiver_close(&rctx);
         if (err) {
             log_error(err, "Error closing the reciver\n");

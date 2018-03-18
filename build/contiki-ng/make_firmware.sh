@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # This script creates an ota image, containing the bootloader,
 # the manifest and the binary image
 set -e
@@ -63,12 +63,26 @@ generate_ota_image() {
 
 generate_flashable_firmware() {
     echo "Adding the bootloader to the firmware..."
-    cmd="srec_cat $BOOTLOADER -intel -crop $BOOTLOADER_START $BOOTLOADER_END $CCFG_START $CCFG_END \
-        $FIRMWARE -binary -offset $RUNNING_IMAGE_START -crop $RUNNING_IMAGE_START $RUNNING_IMAGE_END \
-        $BOOTLOADER_CTX -binary -offset $BOOTLOADER_CTX_START -crop $BOOTLOADER_CTX_START $BOOTLOADER_CTX_END"
+    # I assume the bootloader start offset as 0 since is the default address to
+    # load instructions
+    BOOTLOADER_START_OFFSET=0x0
+    let BOOTLOADER_END_OFFSET=$BOOTLOADER_END_PAGE*$PAGE_SIZE
+    let IMAGE_START_OFFSET=$IMAGE_START_PAGE*$PAGE_SIZE
+    let IMAGE_END_OFFSET=$IMAGE_END_PAGE*$PAGE_SIZE
+    cmd="srec_cat $BOOTLOADER -intel -crop \
+                        $BOOTLOADER_START_OFFSET $BOOTLOADER_END_OFFSET \
+                        $CCFG_START_OFFSET $CCFG_END_OFFSET \
+                $FIRMWARE -binary -offset $IMAGE_START_OFFSET -crop \
+                        $IMAGE_START_OFFSET $IMAGE_END_OFFSET \
+                $BOOTLOADER_CTX -binary -offset $BOOTLOADER_CTX_START_OFFSET -crop \
+                        $BOOTLOADER_CTX_START_OFFSET $BOOTLOADER_CTX_END_OFFSET"
 
+    echo $cmd
     $cmd -o firmware.hex -intel
     $cmd -o firmware.bin -binary
+    echo "Adding the bootloader to the firmware...done"
+    echo "Intel format created: firmware.hex"
+    echo "Binary format created: firmware.bin"
 }
 
 check_args

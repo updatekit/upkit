@@ -19,6 +19,14 @@
 extern "C" {
 #endif /* __cplusplus */
 
+#define MESSAGE_VERSION 0x1
+typedef struct {
+    uint32_t offset;
+    uint16_t udid;
+    uint16_t random;
+    uint8_t msg_version;
+} receiver_msg_t;
+
 /** 
  * Receiver context used to hold data for the receiver function
  */
@@ -35,15 +43,10 @@ typedef struct receiver_ctx_ {
     uint8_t firmware_received;
     uint32_t start_offset;
     uint32_t received;
+    receiver_msg_t msg;
 } receiver_ctx;
 
-#define MESSAGE_VERSION 0x1
-typedef struct {
-    uint32_t offset;
-    uint16_t udid;
-    uint16_t random;
-    uint8_t msg_version;
-} receiver_msg_t;
+
 
 /** 
  * \brief Open the receiver context.

@@ -13,11 +13,11 @@
 #include <stdio.h>
 
 enum verifier_states {
-    GET_OBJECT_MANIFEST,
-    CALCULATING_DIGEST,
-    VERIFY_DIGEST,
-    VERIFY_VENDOR_SIGNATURE,
-    VERIFY_SERVER_SIGNATURE
+    GET_OBJECT_MANIFEST = 0,
+    CALCULATING_DIGEST = 1,
+    VERIFY_DIGEST = 2,
+    VERIFY_VENDOR_SIGNATURE = 3,
+    VERIFY_SERVER_SIGNATURE = 4
 };
 
 /* The memory object should be already opened */

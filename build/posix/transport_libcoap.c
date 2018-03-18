@@ -149,7 +149,7 @@ void handler_libcoap(struct coap_context_t * ctx,
                         ((coap_opt_block_num(block_opt) + 1) << 4) |
                         BLOCK_SIZE), buf);
             if (BCTX.length > 0 && BCTX.data != NULL) {
-                if (coap_add_data(pdu, BCTX.length, (const uint8_t*) BCTX.data) < 0) {
+                if (coap_add_data(pdu, BCTX.length, (const uint8_t*) BCTX.data) == 0) {
                     log_error(REQUEST_ERROR, "Error adding data\n");
                     coap_delete_pdu(pdu);
                     CALLBACK(REQUEST_ERROR, NULL, 0);
@@ -236,6 +236,8 @@ pull_error txp_request(txp_ctx* ctx, rest_method method, const char* resource,
         ctx->cb_ctx.bctx.enabled = 0;
     }
     if (length > 0 && data != NULL) {
+        ctx->cb_ctx.bctx.data = data;
+        ctx->cb_ctx.bctx.length = length;
         if (coap_add_data(request, length, (const uint8_t*) data) == 0) {
             log_error(INVALID_DATA_ERROR, "Error adding data\n");
             coap_delete_pdu(request);
