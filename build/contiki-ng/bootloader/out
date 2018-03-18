@@ -1,7 +1,0 @@
-20000684 l       .bss		 00000100 buffer
-200008c6 g       .bss		 00000100 buffer
-00003a20 g     F .text		 000000ec memcpy
-00000964 g     F .text		 0000010c memory_write_impl
-00000ac4 g     F .text		 0000011c pull_board_init
-00000490 g     F .text		 00000120 copy_firmware
-00000620 g     F .text		 000001d4 verify_object

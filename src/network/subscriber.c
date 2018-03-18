@@ -15,7 +15,7 @@ pull_error subscribe(subscriber_ctx* ctx, txp_ctx* txp, const char* resource, me
         log_error(err, "Impossible to get newest firmware\n");
         return SUBSCRIBE_ERROR;
     }
-    printf("the id of the newest firmware is %d\n", id);
+    log_debug("the id of the newest firmware is %d\n", id);
     ctx->has_updates = 0;
     return PULL_SUCCESS;
 }

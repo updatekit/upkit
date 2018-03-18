@@ -43,7 +43,7 @@ extern uint8_t verbosity_level;
 #include <stdio.h>
 #define log_output(...) printf(__VA_ARGS__)
 
-#ifdef LOGGER_VERBOSITY
+#if LOGGER_VERBOSITY > 0
 
 #define log_impl(verbosity, args...) \
     if (verbosity <= verbosity_level) { \
@@ -55,7 +55,7 @@ extern uint8_t verbosity_level;
 
 #else /* LOGGER_VERBOSITY */
 #define log_impl(...)
-//#define log_err(verbosity, error, args...) log_output("%s %d\n", LOG_STR[verbosity], error);
+#define log_err(...)
 #endif /* LOGGER_VERBOSITY */
 
 #define log_debug(args...) log_impl(VERBOSITY_DEBUG, args)

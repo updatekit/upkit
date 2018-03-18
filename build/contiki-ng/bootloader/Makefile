@@ -10,13 +10,15 @@ all: ota
 # 				Configurable Parameters             #
 #####################################################
 # Accepted values: 0 1 2 3 
-LOGGER_VERBOSITY ?= 3
+LOGGER_VERBOSITY ?= 0
 # Accepted values: TINYDTLS, CRYPTOAUTHLIB, TINYCRYPT
-SEC_LIB ?= TINYDTLS
+SEC_LIB ?= CRYPTOAUTHLIB
 #####################################################
 #   		   End Configurable Parameters          #
 #####################################################
 
+
+WERROR=0
 # Add libpull sources
 ROOTDIR=../../..
 LIBPULL = $(ROOTDIR)/src/common $(ROOTDIR)/src/memory $(ROOTDIR)/src/security
