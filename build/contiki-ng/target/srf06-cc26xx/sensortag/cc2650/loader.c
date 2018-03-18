@@ -9,11 +9,12 @@
 #include "ti-lib.h"
 #include "dev/watchdog.h"
 
+// Defined in Makefile.conf
+#define IMAGE_START_OFFSET IMAGE_START_PAGE*PAGE_SIZE
+
 void load_object(obj_id id, manifest_t* mt) {
-    uint32_t destination_address = 0;
-    /// XXX HARDCODED VALUE
-    destination_address = 0x5000+get_offset(mt);
-    log_info("loading address %lx\n", destination_address);
+    uint32_t destination_address = IMAGE_START_OFFSET+get_offset(mt);
+    log_debug("loading address %lx\n", destination_address);
 
     ti_lib_int_master_disable();
     HWREG(NVIC_VTABLE) = destination_address;

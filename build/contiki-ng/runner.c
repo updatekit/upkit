@@ -178,6 +178,8 @@ PROCESS_THREAD(update_process, ev, data) {
             log_debug("Error receving firmware...restarting\n");
             continue;
         }
+        memory_close(&new_firmware);
+        memory_open(&new_firmware, id, READ_ONLY);
         watchdog_stop();
         uint8_t buffer[BUFFER_LEN];
 #ifdef WITH_CRYPTOAUTHLIB
@@ -188,9 +190,7 @@ PROCESS_THREAD(update_process, ev, data) {
 #endif
         err = verify_object(&new_firmware, df, x, y, ef, buffer, BUFFER_LEN);
 #ifdef WITH_CRYPTOAUTHLIB
-        if (!err) {
-            atcab_release();
-        }
+        atcab_release();
  #endif
         if (err) {
             log_info("Verification failed\n");

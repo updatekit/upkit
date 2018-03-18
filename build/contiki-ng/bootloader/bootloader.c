@@ -160,6 +160,7 @@ void pull_bootloader() {
     if (err) {
         goto error;
     }
+    print_manifest(&mt);
     uint16_t version = 0; 
     /************ GET_NEWEST_FIRMWARE *************/
     state = GET_NEWEST_FIRMWARE;
@@ -215,16 +216,15 @@ boot:
         }
     }
 #ifdef WITH_CRYPTOAUTHLIB
-    if (!err) {
-        atcab_release();
-    }
+    atcab_release();
 #endif
     state = BOOT;
     flash_write_protect();
 #ifdef EVALUATE_TIME
     timer = (RTIMER_NOW() - timer);
-    printf("BOOTLOADER_TIME %u,%u,%u,%u\n", test_id, get_version(&mt), timer, RTIMER_SECOND);
+    log_info("BOOTLOADER_TIME %u,%u,%u,%u\n", test_id, get_version(&mt), timer, RTIMER_SECOND);
 #endif
+    log_info("Loading object\n");
     load_object(OBJ_RUN, &mt); // refactor this function
 fatal_error:
     /* If you arrive here, you should reboot and try again */

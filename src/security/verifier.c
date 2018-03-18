@@ -1,14 +1,13 @@
 #ifndef VERIFIER_H_
 #define VERIFIER_H_
 
+#include "common/libpull.h"
 #include "memory/memory.h"
 #include "memory/memory_objects.h"
 #include "memory/manifest.h"
 #include "security/verifier.h"
 #include "security/digest.h"
 #include "security/ecc.h"
-#include "common/error.h"
-#include "common/logger.h"
 #include <string.h>
 #include <stdio.h>
 
@@ -23,11 +22,9 @@ enum verifier_states {
 /* The memory object should be already opened */
 pull_error verify_object(mem_object* obj, digest_func digest, const uint8_t* x, const uint8_t* y,
         ecc_func_t ef, uint8_t* buffer, size_t buffer_len) {
+    PULL_ASSERT(obj == NULL || x == NULL || y == NULL || buffer == NULL || buffer_len == 0);
     pull_error err;
     enum verifier_states state;
-    if (obj == NULL || x == NULL || y == NULL || buffer == NULL || buffer_len == 0) {
-        return INVALID_ARGUMENTS_ERROR;
-    }
     /************* GET_OBJECT_MANIFEST ***************/
     state = GET_OBJECT_MANIFEST;
     manifest_t mt;
@@ -45,6 +42,7 @@ pull_error verify_object(mem_object* obj, digest_func digest, const uint8_t* x, 
     address_t offset = get_offset(&mt);
     address_t final_offset = offset + get_size(&mt);
     address_t step = buffer_len;
+    log_debug("Digest: initial offset %lu final offset %lu\n", offset, final_offset);
     if (offset == final_offset) {
         err = MEMORY_READ_ERROR;
         goto error;
