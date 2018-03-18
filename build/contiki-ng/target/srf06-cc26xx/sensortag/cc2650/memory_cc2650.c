@@ -65,7 +65,7 @@ pull_error memory_open_impl(mem_object* ctx, obj_id obj, mem_mode_t mode) {
             external_memory_open++;
         }
         if (ctx->mode == WRITE_ALL) {
-            for (offset = ctx->end_offset; offset < ctx->end_offset; offset += FLASH_PAGE_SIZE) {
+            for (offset = ctx->start_offset; offset < ctx->end_offset; offset += FLASH_PAGE_SIZE) {
                 if (!ext_flash_erase(offset, FLASH_PAGE_SIZE)) {
                     log_debug("Error ereasing page %d\n", offset/FLASH_PAGE_SIZE);
                     return MEMORY_OPEN_ERROR;
@@ -119,16 +119,6 @@ pull_error memory_flush_impl(mem_object* ctx) {
     log_debug("\nFlushing buffer of size %d\n", buffer_full);
     if (!ext_flash_write(buffer_offset, buffer_full, buffer)) {
         log_debug("Error writing into external flash\n");
-        return MEMORY_FLUSH_ERROR;
-    }
-    // Check the written bytes
-    uint8_t buffer_check[10];
-    if (!ext_flash_read(buffer_offset, 10, buffer_check)) {
-        log_debug("Error checking the written bytes\n");
-        return MEMORY_FLUSH_ERROR;
-    }
-    if (memcmp(buffer_check, buffer, 10) != 0) {
-        log_debug("Readed bytes are different from the one written\n");
         return MEMORY_FLUSH_ERROR;
     }
     buffer_full = 0;

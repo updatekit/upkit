@@ -3,6 +3,7 @@
 #include "memory/manifest.h"
 #include <string.h>
 #include <stdio.h>
+#include <stdbool.h>
 
 // if not newest, then is oldest
 pull_error get_ordered_firmware(obj_id* obj, version_t* version, mem_object* obj_t, bool newest) {
