@@ -22,7 +22,9 @@ enum verifier_states {
 /* The memory object should be already opened */
 pull_error verify_object(mem_object* obj, digest_func digest, const uint8_t* x, const uint8_t* y,
         ecc_func_t ef, uint8_t* buffer, size_t buffer_len) {
-    PULL_ASSERT(obj == NULL || x == NULL || y == NULL || buffer == NULL || buffer_len == 0);
+    if (obj == NULL || x == NULL || y == NULL || buffer == NULL || buffer_len == 0) {
+        return INVALID_ARGUMENTS_ERROR;
+    }
     pull_error err;
     enum verifier_states state;
     /************* GET_OBJECT_MANIFEST ***************/

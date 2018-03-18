@@ -26,7 +26,7 @@ enum memory_objects_enum {
 void override_memory_object(obj_id id, char* path, int start, int end);
 /***** End Testing functions *****/
 
-pull_error memory_open_impl(mem_object* ctx, obj_id obj);
+pull_error memory_open_impl(mem_object* ctx, obj_id obj, mem_mode_t mode);
 
 int memory_read_impl(mem_object* ctx, void* memory_buffer, uint16_t size, uint32_t offset);
 

@@ -178,7 +178,7 @@ PROCESS_THREAD(update_process, ev, data) {
             log_debug("Error receving firmware...restarting\n");
             continue;
         }
-        memory_close(&new_firmware);
+        memory_close(&new_firmware); // This flashes the buffer.
         memory_open(&new_firmware, id, READ_ONLY);
         watchdog_stop();
         uint8_t buffer[BUFFER_LEN];

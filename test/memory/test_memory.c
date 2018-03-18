@@ -21,7 +21,7 @@ const char content[12] = {'m', 'e', 'm', 'o', 'r', 'y', '_', 't', 'e', 's', 't',
 #define REP 64
 
 void setUp(void) {
-    TEST_ASSERT(memory_open(&object, TEST_MEMORY_FILE) == PULL_SUCCESS);
+    TEST_ASSERT(memory_open(&object, TEST_MEMORY_FILE, WRITE_ALL) == PULL_SUCCESS);
 }
 
 void tearDown(void) {
@@ -69,8 +69,8 @@ void test_memory_write_random(void) {
 
 void test_memory_invalid_object(void) {
     mem_object invalid_object;
-    pull_error err = memory_open(&invalid_object, -1);
+    pull_error err = memory_open(&invalid_object, -1, WRITE_ALL);
     TEST_ASSERT_EQUAL(MEMORY_MAPPING_ERROR, err);
-    err = memory_open(&invalid_object, 120);
+    err = memory_open(&invalid_object, 120, WRITE_ALL);
     TEST_ASSERT_EQUAL(MEMORY_MAPPING_ERROR, err);
 }

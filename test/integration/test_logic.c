@@ -98,7 +98,7 @@ void logic(conn_type type, void* conn_data) {
         err = txp_init(&rtxp, "localhost", 0, type, conn_data);
         TEST_ASSERT_TRUE(!err);
         // open destination object
-        err = memory_open(&new_obj, id);
+        err = memory_open(&new_obj, id, WRITE_ALL);
         TEST_ASSERT_TRUE(!err);
         err = receiver_open(&rctx, &rtxp, identity_g, "firmware", &new_obj);
         TEST_ASSERT_TRUE(!err);

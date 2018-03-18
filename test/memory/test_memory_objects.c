@@ -27,9 +27,9 @@ mem_object obj_2;
 mem_object obj_t; // This is a temporary object used by the functions
 
 void setUp(void) {
-    TEST_ASSERT(memory_open(&obj_run, OBJ_RUN) == PULL_SUCCESS);
-    TEST_ASSERT(memory_open(&obj_1, OBJ_1) == PULL_SUCCESS);
-    TEST_ASSERT(memory_open(&obj_2, OBJ_2) == PULL_SUCCESS);
+    TEST_ASSERT(memory_open(&obj_run, OBJ_RUN, WRITE_ALL) == PULL_SUCCESS);
+    TEST_ASSERT(memory_open(&obj_1, OBJ_1, WRITE_ALL) == PULL_SUCCESS);
+    TEST_ASSERT(memory_open(&obj_2, OBJ_2, WRITE_ALL) == PULL_SUCCESS);
 }
 
 void tearDown(void) {

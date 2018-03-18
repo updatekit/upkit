@@ -9,7 +9,6 @@
 #include <errno.h>
 #include <string.h>
 #include <unistd.h>
-#include <assert.h>
 
 const int8_t memory_objects[] = { OBJ_1, OBJ_2, OBJ_END};
 
@@ -53,12 +52,13 @@ pull_error resource_mapper(mem_object* ctx, obj_id obj) {
     return PULL_SUCCESS;
 }
 
-pull_error memory_open_impl(mem_object* ctx, obj_id obj) {
+pull_error memory_open_impl(mem_object* ctx, obj_id obj, mem_mode_t mode) {
     bzero(ctx, sizeof(mem_object));
     if (resource_mapper(ctx, obj) != PULL_SUCCESS) {
         log_error(MEMORY_MAPPING_ERROR, "Error mapping the resource\n");
         return MEMORY_MAPPING_ERROR;
     }
+    // TODO analyze how to map the memory mode
     ctx->fp = open(ctx->path, O_RDWR);
     if (ctx->fp < 0) {
         log_error(MEMORY_OPEN_ERROR, "Impossible to open the file %s\n", ctx->path);
@@ -68,8 +68,8 @@ pull_error memory_open_impl(mem_object* ctx, obj_id obj) {
 }
 
 int memory_read_impl(mem_object* ctx, void* memory_buffer, uint16_t size, uint32_t offset) {
-    assert(ctx != NULL);
-    assert(ctx->fp >= 0);
+    PULL_ASSERT(ctx != NULL);
+    PULL_ASSERT(ctx->fp >= 0);
     if (ctx->start_offset+offset+size > ctx->end_offset) {
         log_error(INVALID_ACCESS_ERROR, "Invalid access\n");
         return -1;
@@ -83,8 +83,8 @@ int memory_read_impl(mem_object* ctx, void* memory_buffer, uint16_t size, uint32
 }
 
 int memory_write_impl(mem_object* ctx, const void* memory_buffer, uint16_t size, uint32_t offset) {
-    assert(ctx != NULL);
-    assert(ctx->fp > 0);
+    PULL_ASSERT(ctx != NULL);
+    PULL_ASSERT(ctx->fp > 0);
     if (ctx->start_offset+offset+size > ctx->end_offset) {
         log_error(INVALID_ACCESS_ERROR, "Invalid access\n");
         return -1;

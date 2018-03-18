@@ -97,7 +97,7 @@ pull_error write_firmware_manifest(mem_object* obj, const manifest_t* mt) {
 }
 
 pull_error invalidate_object(obj_id id, mem_object* obj) {
-    pull_error err = memory_open(obj, id, WRITE_ALL) != PULL_SUCCESS;
+    pull_error err = memory_open(obj, id, WRITE_CHUNK) != PULL_SUCCESS;
     if (err) {
         log_error(err, "Failure opening firmware\n");
         return WRITE_MANIFEST_ERROR;

@@ -31,7 +31,7 @@ TEST_RUNNER();
 mem_object obj;
 
 void setUp(void) {
-    TEST_ASSERT_TRUE(memory_open(&obj, OBJ_2) == PULL_SUCCESS);
+    TEST_ASSERT_TRUE(memory_open(&obj, OBJ_2, WRITE_ALL) == PULL_SUCCESS);
 }
 
 void tearDown(void) {

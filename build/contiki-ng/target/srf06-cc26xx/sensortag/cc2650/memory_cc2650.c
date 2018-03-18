@@ -10,7 +10,7 @@
 #include "memory_cc2650.h"
 
 #define FLASH_PAGE_SIZE PAGE_SIZE // Defined in Manifest.conf
-#define BUFFER_SIZE 0x1000
+#define BUFFER_SIZE 0x100
 
 static address_t buffer_offset = 0; // it is signed
 static address_t buffer_full = 0;
