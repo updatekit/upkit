@@ -28,10 +28,10 @@ void subscriber_cb(pull_error err, const char* data, int len, void* more) {
         return;
     }
     uint16_t provisioning_version = *((uint16_t*)data);
-    log_info("Latest_version: %4x Provisioning version %4x\n",
+    log_debug("Latest_version: %4x Provisioning version %4x\n",
             ctx->current_version, provisioning_version);
     if (provisioning_version > ctx->current_version) {
-        log_info("An update is available\n");
+        log_debug("An update is available\n");
         ctx->has_updates = 1;
     }
 }

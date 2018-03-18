@@ -1,13 +1,13 @@
 #include "memory/memory.h"
 
-pull_error memory_open_impl(mem_object* ctx, obj_id obj);
+pull_error memory_open_impl(mem_object* ctx, obj_id obj, mem_mode_t mode);
 uint16_t memory_read_impl(mem_object* ctx, void* memory_buffer, uint16_t size, uint32_t offset);
 uint16_t memory_write_impl(mem_object* ctx, const void* memory_buffer, uint16_t size, uint32_t offset);
 pull_error memory_flush_impl(mem_object* ctx);
 pull_error memory_close_impl(mem_object* ctx);
 
-inline pull_error memory_open(mem_object* ctx, obj_id obj) {
-    return memory_open_impl(ctx, obj);
+inline pull_error memory_open(mem_object* ctx, obj_id obj, mem_mode_t mode) {
+    return memory_open_impl(ctx, obj, mode);
 }
 
 inline int memory_read(mem_object* ctx, void* memory_buffer, uint16_t size, uint32_t offset) {

@@ -105,14 +105,14 @@ void pull_bootloader() {
     specialize_crypto_functions();
     /************ OPEN INTERNAL IMAGE **********/
     state = OPEN_INTERNAL_IMAGE;
-    pull_error err = memory_open(&internal_object, OBJ_RUN);
+    pull_error err = memory_open(&internal_object, OBJ_RUN, READ_ONLY);
     if (err) {
         goto error;
     }
     /************ READ_BOOTLOADER_CTX **********/
     state = READ_BOOTLOADER_CTX;
     log_debug("Loading bootloader context\n");
-    err = memory_open(&bootloader_object, BOOTLOADER_CTX);
+    err = memory_open(&bootloader_object, BOOTLOADER_CTX, WRITE_CHUNK);
     if (err) {
         goto error;
     }
@@ -134,7 +134,7 @@ void pull_bootloader() {
         state = STORE_RECOVERY_IMAGE;
         log_debug("Storing Recovery Image\n");
         // Open OBJ_GOLD
-        err = memory_open(&obj_gold, OBJ_GOLD);
+        err = memory_open(&obj_gold, OBJ_GOLD, WRITE_ALL);
         if (err) {
             goto err;
         }
@@ -170,7 +170,7 @@ void pull_bootloader() {
     log_debug("Newest firmware: slot %u with version %x\n", id, version);
     if (version > get_version(&mt)) {
         /*********** OPEN NEW IMAGE *********/
-        err = memory_open(&new_firmware, id);
+        err = memory_open(&new_firmware, id, READ_ONLY);
         if (err) {
             goto error;
         }
@@ -182,14 +182,13 @@ void pull_bootloader() {
         }
         /*********** UPDATE_FIRMWARE **********/
         state = UPDATE_FIRMWARE;
-        int page = 0;
-        for (page=IMAGE_START_PAGE; page<=IMAGE_END_PAGE; page++) {
-            if (FlashSectorErase(FLASH_PAGE_SIZE*page) != FAPI_STATUS_SUCCESS) {
-                log_info("Error erasing page %d\n", page);
-                goto error;
-            }
+        mem_object internal_object_write; // not hielding, so it's safe!
+        err = memory_open(&internal_object_write, OBJ_RUN, WRITE_ALL);
+        if (err) {
+            goto error;
         }
-        err = copy_firmware(&new_firmware, &internal_object, buffer, BUFFER_SIZE);
+        err = copy_firmware(&new_firmware, &internal_object_write, buffer, BUFFER_SIZE);
+        memory_close(&internal_object_write);
         if (err) {
             goto error;
         }

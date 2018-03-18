@@ -1,0 +1,47 @@
+From 7308c68515b2973c45d5dc66fbcfa0a0ff7da05a Mon Sep 17 00:00:00 2001
+From: Antonio Langiu <antonio.langiu@studenti.polito.it>
+Date: Sun, 18 Mar 2018 12:50:40 +0100
+Subject: [PATCH] Fix the name of a define
+
+---
+ os/net/app-layer/coap/coap-dtls.c | 8 ++++----
+ 1 file changed, 4 insertions(+), 4 deletions(-)
+
+diff --git a/os/net/app-layer/coap/coap-dtls.c b/os/net/app-layer/coap/coap-dtls.c
+index 69a759eea..e5a26004f 100644
+--- a/os/net/app-layer/coap/coap-dtls.c
++++ b/os/net/app-layer/coap/coap-dtls.c
+@@ -21,7 +21,7 @@ read_from_peer(struct dtls_context_t *ctx,
+                session_t *session, uint8 *data, size_t len);
+ 
+ /*-----------------------------------------------------------------------------------*/
+-#ifdef DTLS_PSK
++#ifdef CONN_DTLS_PSK
+ static dtls_psk_data_t* dtls_psk_data;
+ void coap_set_psk_data(dtls_psk_data_t* data) {
+     dtls_psk_data = data;
+@@ -58,7 +58,7 @@ get_psk_info(struct dtls_context_t *ctx, const session_t *session,
+ }
+ #endif
+ /*-----------------------------------------------------------------------------------*/
+-#ifdef DTLS_ECC_CONN
++#ifdef CONN_DTLS_ECDSA
+ static dtls_ecdsa_data_t* dtls_ecdsa_data;
+ static dtls_ecdsa_key_t ecdsa_key;
+ void coap_set_ecdsa_data(dtls_ecdsa_data_t* data) {
+@@ -91,10 +91,10 @@ coap_init_communication_layer(uint16_t port)
+     .write = send_to_peer,
+     .read  = read_from_peer,
+     .event = NULL,
+-#ifdef DTLS_PSK
++#ifdef CONN_DTLS_PSK
+     .get_psk_info = get_psk_info,
+ #endif
+-#ifdef DTLS_ECC_CONN
++#ifdef CONN_DTLS_ECDSA
+     .get_ecdsa_key = get_ecdsa_key,
+     .verify_ecdsa_key = verify_ecdsa_key,
+ #endif
+-- 
+2.13.1
+

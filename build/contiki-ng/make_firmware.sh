@@ -77,7 +77,6 @@ generate_flashable_firmware() {
                 $BOOTLOADER_CTX -binary -offset $BOOTLOADER_CTX_START_OFFSET -crop \
                         $BOOTLOADER_CTX_START_OFFSET $BOOTLOADER_CTX_END_OFFSET"
 
-    echo $cmd
     $cmd -o firmware.hex -intel
     $cmd -o firmware.bin -binary
     echo "Adding the bootloader to the firmware...done"

@@ -4,12 +4,13 @@
 #include <string.h>
 #include <stdio.h>
 
-pull_error get_newest_firmware(obj_id* obj, version_t* version, mem_object* obj_t) {
+// if not newest, then is oldest
+pull_error get_ordered_firmware(obj_id* obj, version_t* version, mem_object* obj_t, bool newest) {
     manifest_t mt;
     pull_error err;
-    uint8_t i;
+    obj_id i;
     for (i=0; memory_objects[i] > 0; i++) {
-        err = memory_open(obj_t, memory_objects[i]);
+        err = memory_open(obj_t, memory_objects[i], READ_ONLY);
         if (err) {
             log_error(err, "Failure opening firmware id %d\n", memory_objects[i]);
             return GET_NEWEST_ERROR;
@@ -23,41 +24,29 @@ pull_error get_newest_firmware(obj_id* obj, version_t* version, mem_object* obj_
         if (i == 0) {
             *version = mt.vendor.version;
             *obj = memory_objects[i];
-        } else if (mt.vendor.version > *version) {
-            *version = mt.vendor.version;
-            *obj = memory_objects[i];
+        } else {
+            if (newest == true) {
+                if (mt.vendor.version > *version) {
+                    *version = mt.vendor.version;
+                    *obj = memory_objects[i];
+                }
+            } else {
+                if (mt.vendor.version < *version) {
+                *version= mt.vendor.version;
+                *obj = memory_objects[i];
+                }
+            }
         }
     }
     return PULL_SUCCESS;
 }
 
+pull_error get_newest_firmware(obj_id* obj, version_t* version, mem_object* obj_t) {
+    return get_ordered_firmware(obj, version, obj_t, true);
+}
+
 pull_error get_oldest_firmware(obj_id* obj, version_t* version, mem_object* obj_t) {
-    manifest_t mt;
-    pull_error err;
-    uint8_t i;
-    for (i=0; memory_objects[i] > 0; i++) {
-        err = memory_open(obj_t, memory_objects[i]);
-        // XXX here i return without closing the object 
-        if (err) {
-            log_error(err, "Failure opening firmware id %d\n", memory_objects[i]);
-            return GET_NEWEST_ERROR;
-        }
-        err = read_firmware_manifest(obj_t, &mt);
-        if (err != PULL_SUCCESS) {
-            log_error(err, "Failure reading firmware manifest for obj %d\n", memory_objects[i]);
-            return GET_OLDEST_ERROR;
-        }
-        memory_close(obj_t);
-        if (i == 0) {
-            *version = mt.vendor.version;
-            *obj = memory_objects[i];
-        } else if (mt.vendor.version < *version) {
-            *version= mt.vendor.version;
-            log_debug("Oldest version is %x\n", mt.vendor.version);
-            *obj = memory_objects[i];
-        }
-    }
-    return PULL_SUCCESS;
+    return get_ordered_firmware(obj, version, obj_t, false);
 }
 
 pull_error copy_firmware(mem_object* src, mem_object* dst, uint8_t* buffer, size_t buffer_size) {
@@ -107,7 +96,7 @@ pull_error write_firmware_manifest(mem_object* obj, const manifest_t* mt) {
 }
 
 pull_error invalidate_object(obj_id id, mem_object* obj) {
-    pull_error err = memory_open(obj, id) != PULL_SUCCESS;
+    pull_error err = memory_open(obj, id, WRITE_ALL) != PULL_SUCCESS;
     if (err) {
         log_error(err, "Failure opening firmware\n");
         return WRITE_MANIFEST_ERROR;

@@ -82,14 +82,14 @@ pull_error verify_object(mem_object* obj, digest_func digest, const uint8_t* x, 
     if (err) {
         return VERIFICATION_FAILED_ERROR;
     }
-    log_info("Vendor Signature Valid\n");
+    log_debug("Vendor Signature Valid\n");
     /********** VERIFY_SERVER_SIGNATURE ***********/
     state = VERIFY_SERVER_SIGNATURE;
     err = verify_manifest_server(&mt, digest, x, y, ef);
     if (err) {
         return VERIFICATION_FAILED_ERROR;
     }
-    log_info("Server Signature Valid\n");
+    log_debug("Server Signature Valid\n");
     return PULL_SUCCESS;
 error:
     log_error(err, "Error in the verification process in phase %d\n", state);

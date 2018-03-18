@@ -27,6 +27,12 @@ extern "C" {
 typedef struct mem_object_ mem_object;
 typedef uint8_t obj_id;
 
+typedef enum {
+    READ_ONLY = 0,
+    WRITE_CHUNK = 1, // In this mode the memory will not be completely rewritten.
+    WRITE_ALL = 2 // In this mode the memory object will be completely erased before.
+} mem_mode_t;
+
 // TODO This should be refactored to support dinamic memory. This means that this
 // function should receive a mem_object** ctx, in this way it is able to
 // set the pointer value if it allocates the memory
@@ -41,10 +47,11 @@ typedef uint8_t obj_id;
  * \param ctx An unitialized memory object
  * \param id The id of the memory object. The obj_id enum must be defined
  * when implementing this interface.
+ * \param mode The mode used to open the memory_object (i.e. READ, WRITE, etc)
  * \returns PULL_SUCCESS if the memory was correctly open or the specific
  * erro 
  */
-pull_error memory_open(mem_object* ctx, obj_id id);
+pull_error memory_open(mem_object* ctx, obj_id id, mem_mode_t mode);
 
 /** 
  * \brief Read bytes from a memory object.

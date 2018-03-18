@@ -75,7 +75,7 @@ PROCESS_THREAD(main_process, ev, data) {
         }
         i--;
     }
-    printf("\nMemory is %s\n", i==0? "blocked": "not blocked");
+    log_info("\nMemory is %s\n", i==0? "blocked": "not blocked");
 #endif
     do {
         leds_toggle(LEDS_RED);
@@ -140,7 +140,7 @@ PROCESS_THREAD(update_process, ev, data) {
             continue;
         }
         // open the oldest slot
-        err = memory_open(&new_firmware, id);
+        err = memory_open(&new_firmware, id, WRITE_ALL);
         if (err) {
             log_error(err, "Error opening the object for storing\n");
             continue;
@@ -175,7 +175,7 @@ PROCESS_THREAD(update_process, ev, data) {
             continue;
         }
         if (!rctx.firmware_received) {
-            log_info("Error receving firmware...restarting\n");
+            log_debug("Error receving firmware...restarting\n");
             continue;
         }
         watchdog_stop();
@@ -193,7 +193,7 @@ PROCESS_THREAD(update_process, ev, data) {
         }
  #endif
         if (err) {
-            log_warn("Verification failed\n");
+            log_info("Verification failed\n");
             err = invalidate_object(id, &obj_t);
             if (err) {
                 log_error(err, "Error invalidating object");

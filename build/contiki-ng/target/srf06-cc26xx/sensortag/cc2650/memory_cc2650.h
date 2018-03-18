@@ -12,7 +12,9 @@ enum memory_type {
 
 struct mem_object_ {
     enum memory_type type;
-    uint32_t start_offset;
+    address_t start_offset;
+    address_t end_offset;
+    mem_mode_t mode;
 };
 
 enum memory_objects_enum {
@@ -25,7 +27,7 @@ enum memory_objects_enum {
     OBJ_LAST
 };
 
-pull_error memory_open_impl(mem_object* ctx, obj_id id);
+pull_error memory_open_impl(mem_object* ctx, obj_id id, mem_mode_t mode);
 
 int memory_read_impl(mem_object* ctx, void* memory_buffer, uint16_t size, uint32_t offset);
 

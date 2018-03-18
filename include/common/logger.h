@@ -49,9 +49,14 @@ extern uint8_t verbosity_level;
     if (verbosity <= verbosity_level) { \
         log_output(args);}
 
-#define log_err(error, args...) {\
-    log_output("ERROR: %s: ",err_as_str(error)); \
-    log_output(args);}
+#if LOGGER_VERBOSITY >= VERBOSITY_DEBUG
+    #define log_err(error, args...) \
+        log_output("%s:", err_as_str(error)); \
+        log_output(args);
+#else 
+    #define log_err(error, args...) \
+        log_output("%s\n", err_as_str(error));
+#endif
 
 #else /* LOGGER_VERBOSITY */
 #define log_impl(...)

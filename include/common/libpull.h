@@ -18,5 +18,6 @@
 #include "common/callback.h"
 #include "common/logger.h"
 #include "common/identity.h"
+#include "common/assert.h"
 
 #endif /* LIBPULL_H_ */
