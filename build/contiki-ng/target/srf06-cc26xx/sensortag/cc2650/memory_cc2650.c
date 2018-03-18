@@ -10,7 +10,7 @@
 #include "memory_cc2650.h"
 
 #define FLASH_PAGE_SIZE PAGE_SIZE // Defined in Manifest.conf
-#define BUFFER_SIZE 0x100
+#define BUFFER_SIZE 0x1000
 
 static address_t buffer_offset = 0; // it is signed
 static address_t buffer_full = 0;
@@ -52,21 +52,31 @@ pull_error memory_open_impl(mem_object* ctx, obj_id obj, mem_mode_t mode) {
     PULL_ASSERT(ctx->type == EXTERNAL || ctx->type == INTERNAL);
     ctx->mode = mode;
     address_t offset;
-    if (ctx->type == EXTERNAL && external_memory_open == 0 && ext_flash_open()) {
-        external_memory_open = 1;
-    } else {
-        log_debug("Cannot open external flash\n");
-        return MEMORY_OPEN_ERROR;
-    }
-    external_memory_open++;
-    if (ctx->type == EXTERNAL && ctx->mode == WRITE_ALL) {
-        for (offset = ctx->end_offset; offset < ctx->end_offset; offset += FLASH_PAGE_SIZE) {
-            if (!ext_flash_erase(offset, FLASH_PAGE_SIZE)) {
-                log_debug("Error ereasing page %d\n", offset/FLASH_PAGE_SIZE);
+    if (ctx->type == EXTERNAL) {
+        if (external_memory_open == 0) {
+            if (ext_flash_open()) {
+                external_memory_open = 1;
+            } else {
+                log_debug("Cannot open external flash\n");
+                ext_flash_close();
                 return MEMORY_OPEN_ERROR;
             }
+        } else {
+            external_memory_open++;
         }
-    } else if (ctx->type == INTERNAL && ctx->mode == WRITE_ALL) {
+        if (ctx->mode == WRITE_ALL) {
+            for (offset = ctx->end_offset; offset < ctx->end_offset; offset += FLASH_PAGE_SIZE) {
+                if (!ext_flash_erase(offset, FLASH_PAGE_SIZE)) {
+                    log_debug("Error ereasing page %d\n", offset/FLASH_PAGE_SIZE);
+                    return MEMORY_OPEN_ERROR;
+                }
+            }
+            log_debug("pages erased correctly\n");
+        }
+        return PULL_SUCCESS;
+    }
+    // Internal Memory
+    if (ctx->mode == WRITE_ALL) {
         for (offset = ctx->end_offset; offset < ctx->end_offset; offset += FLASH_PAGE_SIZE) {
             if (FlashSectorErase(offset) != FAPI_STATUS_SUCCESS) {
                 log_debug("Error erasing page %d\n", offset/FLASH_PAGE_SIZE);
@@ -103,11 +113,24 @@ pull_error memory_flush_impl(mem_object* ctx) {
         // The internal memory is not buffered
         return PULL_SUCCESS;
     }
+    if (buffer_full == 0) {
+        return PULL_SUCCESS;
+    }
+    log_debug("\nFlushing buffer of size %d\n", buffer_full);
     if (!ext_flash_write(buffer_offset, buffer_full, buffer)) {
         log_debug("Error writing into external flash\n");
         return MEMORY_FLUSH_ERROR;
     }
-    log_debug("\nFlushing buffer of size %d\n", buffer_full);
+    // Check the written bytes
+    uint8_t buffer_check[10];
+    if (!ext_flash_read(buffer_offset, 10, buffer_check)) {
+        log_debug("Error checking the written bytes\n");
+        return MEMORY_FLUSH_ERROR;
+    }
+    if (memcmp(buffer_check, buffer, 10) != 0) {
+        log_debug("Readed bytes are different from the one written\n");
+        return MEMORY_FLUSH_ERROR;
+    }
     buffer_full = 0;
     buffer_offset = 0;
     return PULL_SUCCESS;
@@ -138,7 +161,7 @@ int memory_write_impl(mem_object* ctx, const void* memory_buffer, uint16_t size,
         // update the buffer_offset
         pull_error err = memory_flush_impl(ctx);
         if (err) {
-            log_debug("Error writing the buffer\n");
+            log_debug("Error flushing the buffer\n");
             return -1;
         }
         buffer_offset = ctx->start_offset+offset;
@@ -151,13 +174,13 @@ int memory_write_impl(mem_object* ctx, const void* memory_buffer, uint16_t size,
     uint8_t try = 3;
     while (try--) {
         if (FlashProgram((uint8_t*) memory_buffer, memory_offset, size) == FAPI_STATUS_SUCCESS) {
-            log_debug("Correcly written into internal memory %u bytes\n", size);
+            log_debug("Correctly written %u bytes\n", size);
             break;
         }
-        log_debug("Try again to write into internal memory\n");
+        log_warn("Retry write internal memory\n");
     }
     if (try == 0) {
-        log_debug("Error writing into internal memory\n");
+        log_debug("Error writing internal memory\n");
         return -1;
     }
     return size;
