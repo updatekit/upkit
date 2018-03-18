@@ -10,14 +10,16 @@ all: ota
 #               Configurable Parameters             #
 #####################################################
 # Accepted values: 0 1 2 3
-LOGGER_VERBOSITY ?= 4
+LOGGER_VERBOSITY ?= 0
 # Accepted values: TINYDTLS, CRYPTOAUTHLIB, TINYCRYPT
-SEC_LIB ?= TINYDTLS
+SEC_LIB ?= CRYPTOAUTHLIB
 # Accepted values: CONN_UDP, CONN_DTLS_PSK, CONN_DTLS_ECDSA
-CONN_TYPE ?= CONN_UDP
+CONN_TYPE ?= CONN_DTLS_ECDSA
 #####################################################
 #              End Configurable Parameters          #
 #####################################################
+
+WERROR=0
 
 # Contiki Size optimizations
 SMALL = 1

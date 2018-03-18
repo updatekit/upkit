@@ -8,4 +8,6 @@
 // Reduce the number of connections
 #define UIP_CONF_UDP_CONNS 4
 
+#define LOG_CONF_LEVEL_MAIN LOG_LEVEL_NONE
+
 #endif // _PROJECT_CONF_H
