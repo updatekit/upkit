@@ -3,6 +3,9 @@
 #include <string.h>
 #include <stdint.h>
 
+#include "contiki.h"
+#include "contiki-lib.h"
+
 #include "driverlib/flash.h"
 #include "driverlib/vims.h"
 #include "dev/watchdog.h"
@@ -17,6 +20,7 @@
 #include "bootloader.h"
 #include "../memory_headers.h"
 #include "../default_configs.h"
+#include "../evaluator.h"
 
 #define BUFFER_SIZE PAGE_SIZE // Defined in Makefile.conf
 #define FLASH_PAGE_SIZE PAGE_SIZE // Defined in Makefile.conf
@@ -66,6 +70,8 @@ static mem_object new_firmware;
 static digest_func df;
 static ecc_func_t ef;
 
+static uint8_t already_validated_flag = 0;
+
 void specialize_crypto_functions() {
 #if WITH_CRYPTOAUTHLIB
     df = cryptoauthlib_digest_sha256;
@@ -91,16 +97,16 @@ void flash_write_protect() {
     }
 }
 
-#ifdef EVALUATE_TIME
-static uint16_t test_id = 0;
-static rtimer_clock_t timer;
-#endif
 
+INIT_TEST(0x0);
+DEFINE_EVALUATOR(local);
+DEFINE_EVALUATOR(global);
 
 void pull_bootloader() {
-#ifdef EVALUATE_TIME
-    test_id = RTIMER_NOW();
-    timer = RTIMER_NOW();
+#if EVALUATE_TIME == 1
+    printf("== BOOTLOADER == SEC_LIB=" SEC_LIB_STR "\n");
+    START_EVALUATOR(local);
+    START_EVALUATOR(global);
 #endif
     specialize_crypto_functions();
     /************ OPEN INTERNAL IMAGE **********/
@@ -121,6 +127,7 @@ void pull_bootloader() {
         goto error;
     }
     if ((ctx.startup_flags & FIRST_BOOT) == FIRST_BOOT) {
+        START_EVALUATOR(local);
         state = ERASE_SLOTS;
         log_debug("Erasing slots\n");
         obj_id i;
@@ -151,6 +158,7 @@ void pull_bootloader() {
             goto error;
         };
         log_debug("Bootstrap Success\n");
+        EVALUATE(first_boot, local);
     }
     memory_close(&bootloader_object); // close bootloader context
     /************ READ_RUNNING_MANIFEST ************/
@@ -170,15 +178,24 @@ void pull_bootloader() {
     }
     log_debug("Newest firmware: slot %u with version %x\n", id, version);
     if (version > get_version(&mt)) {
+        START_EVALUATOR(local);
         /*********** OPEN NEW IMAGE *********/
         err = memory_open(&new_firmware, id, READ_ONLY);
         if (err) {
             goto error;
         }
         /*********** VALIDATE_EXTERNAL_IMAGE *********/
+        // I'm performing the validation before the copy, since if the object
+        // is invalid it does not make sense to copy it into the internal
+        // memory. Moreover, first copying and then validating the image would
+        // require to invalidate the CPU cache that contains part of the
+        // internal memory.
         state = VALIDATE_EXTERNAL_IMAGE;
+        watchdog_stop();
         err = verify_object(&new_firmware, df, x, y, ef, buffer, BUFFER_SIZE);
+        watchdog_start();
         if (err) {
+            invalidate_object(id, &obj_t);
             goto error;    
         }
         /*********** UPDATE_FIRMWARE **********/
@@ -193,6 +210,8 @@ void pull_bootloader() {
         if (err) {
             goto error;
         }
+        already_validated_flag = 1;
+        EVALUATE(upgrade, local);
     }
     goto boot;
 error:
@@ -200,6 +219,7 @@ error:
 boot:
     log_info("Booting\n");
     /************ VALIDATING_IMAGE *********/
+    START_EVALUATOR(local);
 #ifdef WITH_CRYPTOAUTHLIB
     ATCA_STATUS status = atcab_init(&cfg_ateccx08a_i2c_default);
     if (status != ATCA_SUCCESS) {
@@ -208,7 +228,9 @@ boot:
     }
 #endif
     watchdog_stop();
-    err = verify_object(&internal_object, df, x, y, ef, buffer, BUFFER_SIZE);
+    if (!already_validated_flag) {
+        err = verify_object(&internal_object, df, x, y, ef, buffer, BUFFER_SIZE);
+    }
     watchdog_start();
     if (err) {
         if (RECOVERY_IMAGE == 0 || restore_recovery_image() != PULL_SUCCESS) {
@@ -218,13 +240,11 @@ boot:
 #ifdef WITH_CRYPTOAUTHLIB
     atcab_release();
 #endif
+    EVALUATE(internal_image_verification, local);
     state = BOOT;
     flash_write_protect();
-#ifdef EVALUATE_TIME
-    timer = (RTIMER_NOW() - timer);
-    log_info("BOOTLOADER_TIME %u,%u,%u,%u\n", test_id, get_version(&mt), timer, RTIMER_SECOND);
-#endif
     log_info("Loading object\n");
+    EVALUATE(booting_process, global);
     load_object(OBJ_RUN, &mt); // refactor this function
 fatal_error:
     /* If you arrive here, you should reboot and try again */

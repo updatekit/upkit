@@ -51,6 +51,10 @@ int init_resources(server_ctx_t* server_ctx, coap_context_t* context) {
     DEFINE_RESOURCE(resource, "firmware/invalid_signature", "Get the latest firmware");
     REGISTER_HANDLER(resource, COAP_REQUEST_GET, resource_firmware_invalid_signature, 0);
     REGISTER_RESOURCE(context, resource);
+    /* RESOURCE Next Version */
+    DEFINE_RESOURCE(resource, "next_version", "Update the firmware to the next version");
+    REGISTER_HANDLER(resource, COAP_REQUEST_GET, resource_next_version, 0);
+    REGISTER_RESOURCE(context, resource);
 #endif //WITH_TESTING_RESOURCES
     return 1;
 }

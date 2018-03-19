@@ -67,7 +67,7 @@ pull_error memory_open_impl(mem_object* ctx, obj_id obj, mem_mode_t mode) {
         if (ctx->mode == WRITE_ALL) {
             for (offset = ctx->start_offset; offset < ctx->end_offset; offset += FLASH_PAGE_SIZE) {
                 if (!ext_flash_erase(offset, FLASH_PAGE_SIZE)) {
-                    log_debug("Error ereasing page %d\n", offset/FLASH_PAGE_SIZE);
+                    log_debug("Error ereasing page %lu\n", offset/FLASH_PAGE_SIZE);
                     return MEMORY_OPEN_ERROR;
                 }
             }
@@ -79,7 +79,7 @@ pull_error memory_open_impl(mem_object* ctx, obj_id obj, mem_mode_t mode) {
     if (ctx->mode == WRITE_ALL) {
         for (offset = ctx->end_offset; offset < ctx->end_offset; offset += FLASH_PAGE_SIZE) {
             if (FlashSectorErase(offset) != FAPI_STATUS_SUCCESS) {
-                log_debug("Error erasing page %d\n", offset/FLASH_PAGE_SIZE);
+                log_debug("Error erasing page %lu\n", offset/FLASH_PAGE_SIZE);
                 return MEMORY_OPEN_ERROR;
             }
         }
@@ -116,7 +116,6 @@ pull_error memory_flush_impl(mem_object* ctx) {
     if (buffer_full == 0) {
         return PULL_SUCCESS;
     }
-    log_debug("\nFlushing buffer of size %d\n", buffer_full);
     if (!ext_flash_write(buffer_offset, buffer_full, buffer)) {
         log_debug("Error writing into external flash\n");
         return MEMORY_FLUSH_ERROR;
@@ -130,16 +129,19 @@ int memory_write_impl(mem_object* ctx, const void* memory_buffer, uint16_t size,
     PULL_ASSERT(ctx->type == EXTERNAL || ctx->type == INTERNAL);
     // TODO implement a check for the end offset
     if (ctx->type == EXTERNAL) {
+        // Check if we are writing on the same page
         if ((address_t) ctx->start_offset+offset < buffer_offset+BUFFER_SIZE && 
                 (address_t) ctx->start_offset+offset > buffer_offset) {
+            // Check if the received data have place in the buffer
             if (buffer_full+size <= BUFFER_SIZE) {
                 memcpy(&buffer[buffer_full], memory_buffer, size); /// XXX Check for errors
-                buffer_full+=size; // Questo è un errore, perchè magari stavo sovrascrivendo qualcosa
+                buffer_full+=size;
             } else {
+                // if not, flush the buffer and start filling it again
                 uint16_t chunk_size = BUFFER_SIZE-buffer_full;
                 memcpy(&buffer[buffer_full], memory_buffer, chunk_size); /// XXX Check for errors
                 if (memory_flush_impl(ctx) != PULL_SUCCESS) {
-                    log_debug("Error while writing the buffer\n");
+                    log_debug("Error flushing the buffer\n");
                     return -1;
                 }
                 buffer_offset = ctx->start_offset+offset+chunk_size;

@@ -27,26 +27,17 @@ static int server_exit = 0;
 static server_ctx_t server_ctx = {
     .addr_str = "::",
     .log_level = LOG_WARNING,
-    .assets_dir = ".",
+    .firmware_name = "firmware.bin",
     .mapped_file = NULL,
     .mapped_file_len = 0
 };
 
 void update_server_context(server_ctx_t* ctx) {
     int fwd = -1;
-    char firmware[MAX_PATH_LEN];
-    firmware[0] = '\0';
-    strncat(firmware, ctx->assets_dir, MAX_PATH_LEN);
-    strncat(firmware, "/", MAX_PATH_LEN);
-    strncat(firmware, DEFAULT_FIRMWARE_NAME, MAX_PATH_LEN);
-    if ((fwd = open(firmware, O_RDONLY)) < 0) {
+    if ((fwd = open(ctx->firmware_name, O_RDONLY)) < 0) {
         fprintf(stderr, "Impossible to open the firmware file\n");
         exit(EXIT_FAILURE);
     };
-    if (read(fwd, &ctx->mt, sizeof(manifest_t)) != sizeof(manifest_t)) {
-        fprintf(stderr, "Error reading firmware manifest\n");
-        exit(EXIT_FAILURE);
-    }
     if (ctx->mapped_file) {
         munmap((void*) ctx->mapped_file, ctx->mapped_file_len);
         ctx->mapped_file = NULL;
@@ -81,15 +72,15 @@ int main(int argc, char** argv) {
 
     int opt;
     // (0) Parse parameters
-    while ((opt = getopt(argc, argv, "A:v:l:a:")) != -1) {
+    while ((opt = getopt(argc, argv, "A:v:l:f:")) != -1) {
      switch (opt) {
      case 'A':
        strncpy(server_ctx.addr_str, optarg, MAX_ADDR_LEN-1);
        server_ctx.addr_str[MAX_ADDR_LEN-1] = '\0';
        break;
-    case 'a':
-       strncpy(server_ctx.assets_dir, optarg, MAX_PATH_LEN-1);
-       server_ctx.assets_dir[MAX_PATH_LEN-1] = '\0';
+    case 'f':
+       strncpy(server_ctx.firmware_name, optarg, MAX_PATH_LEN-1);
+       server_ctx.firmware_name[MAX_PATH_LEN-1] = '\0';
        break;
      case 'v':
        server_ctx.log_level = strtol(optarg, NULL, 10);
@@ -140,7 +131,7 @@ int main(int argc, char** argv) {
 }
 
 void usage(const char* progname) {
-    printf("usage: %s [-A host] [-v verbosity] [-l packet_loss]\n", progname);
+    printf("usage: %s [-A host] [-v verbosity] [-l packet_loss] [ -f file]\n", progname);
     printf("The server has been built with the following parameters:\n");
     printf("\tCOAP_DEFAULT_PORT:\t%d", COAP_DEFAULT_PORT);
     printf("\tCOAPS_DEFAULT_PORT:\t%d", COAPS_DEFAULT_PORT);

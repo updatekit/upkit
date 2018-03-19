@@ -13,6 +13,8 @@
 #define UIP_CONF_TCP 0
 #define UIP_CONF_UDP 0
 
+#if LOGGER_VERBOSITY == 0
 #define LOG_CONF_LEVEL_MAIN LOG_LEVEL_NONE
+#endif
 
 #endif /* PROJECT_CONF_H_ */

@@ -10,11 +10,13 @@ all: ota
 #               Configurable Parameters             #
 #####################################################
 # Accepted values: 0 1 2 3
-LOGGER_VERBOSITY ?= 4
+LOGGER_VERBOSITY ?= 0
 # Accepted values: TINYDTLS, CRYPTOAUTHLIB, TINYCRYPT
-SEC_LIB ?= TINYDTLS
+SEC_LIB ?= TINYCRYPT
 # Accepted values: CONN_UDP, CONN_DTLS_PSK, CONN_DTLS_ECDSA
 CONN_TYPE ?= CONN_UDP
+# Evaluate Time
+EVALUATE_TIME ?= 1
 #####################################################
 #              End Configurable Parameters          #
 #####################################################
@@ -100,6 +102,12 @@ CFLAGS += -DMANIFEST_SIZE=$(MANIFEST_SIZE)
 CFLAGS += -DBOOTLOADER_CTX_START_OFFSET=$(BOOTLOADER_CTX_START_OFFSET)
 CFLAGS += -DBOOTLOADER_CTX_END_OFFSET=$(BOOTLOADER_CTX_END_OFFSET)
 CFLAGS += -DRECOVERY_IMAGE=$(RECOVERY_IMAGE)
+
+CFLAGS += -DEVALUATE_TIME=$(EVALUATE_TIME)
+CFLAGS += -DCONN_TYPE=$(CONN_TYPE)
+CFLAGS += -DSEC_LIB=$(SEC_LIB)
+CFLAGS += -DCONN_TYPE_STR="\"$(CONN_TYPE)\""
+CFLAGS += -DSEC_LIB_STR="\"$(SEC_LIB)\""
 
 OTA_OFFSET="($(IMAGE_START_PAGE)*$(PAGE_SIZE))+$(MANIFEST_SIZE)"
 OTA_LENGTH="(($(IMAGE_END_PAGE)-$(IMAGE_START_PAGE))*$(PAGE_SIZE)-$(MANIFEST_SIZE))"

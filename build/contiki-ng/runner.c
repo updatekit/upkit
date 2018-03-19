@@ -15,6 +15,8 @@
 #include "transport/transport_ercoap.h"
 #include "memory_headers.h"
 
+#include "evaluator.h"
+
 #if TARGET == srf06-cc26xx
 #include "driverlib/flash.h"
 #endif
@@ -111,12 +113,63 @@ void specialize_conn_functions() {
 #endif
 }
 
+#if EVALUATE_TIME == 1
+#define TOSTR(token) #token
+INIT_TEST(0x0);
+DEFINE_EVALUATOR(local);
+DEFINE_EVALUATOR(global);
+
+uint8_t coap_server_working = 0;
+uint8_t version_updated = 0;
+void coap_server_working_handler(pull_error err, const char*data, int len, void* more) {
+    if (!err && len == sizeof(version_t) && data != NULL) {
+        // The test id is equal to the version provisioned by the server
+        test_id = *((version_t*)data);
+        coap_server_working = 1;
+    }
+}
+void next_version_handler(pull_error err, const char* data, int len, void* more) {
+    if (!err && len == sizeof(version_t) && data != NULL) {
+        version_updated = 1;
+    }
+}
+#endif
+
 PROCESS_THREAD(update_process, ev, data) {
     PROCESS_BEGIN();
     specialize_crypto_functions();
     specialize_conn_functions();
-
     txp_init(&txp, "", COAPS_DEFAULT_PORT, type, conn_data);
+#if EVALUATE_TIME == 1
+    // To perform the test I need an ID. I receive it from the
+    // server. Each time this resource is called it updates the
+    // version of the firmware on the server and returns it
+    // as a test id. In this way is also possible to make sure
+    // the RPL network is working before starting evaluating
+    // the time of each phase;
+    etimer_set(&et, (CLOCK_SECOND*5));
+    PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
+
+    // This is required to give consistency to the 
+    txp_on_data(&txp, coap_server_working_handler, NULL);
+    txp_request(&txp, GET, "version", NULL, 0);
+    do {
+        COAP_SEND(txp);
+        etimer_set(&et, (CLOCK_SECOND*1));
+        PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
+    } while (!coap_server_working);
+    
+    txp_on_data(&txp, next_version_handler, NULL);
+    txp_request(&txp, GET, "next_version", NULL, 0);
+    do {
+        COAP_SEND(txp);
+        etimer_set(&et, (CLOCK_SECOND*1));
+        PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
+    } while (!version_updated);
+
+    START_TEST;
+    START_EVALUATOR(global);
+#endif
     log_info("Subscribing to the server\n");
     pull_error err = subscribe(&sctx, &txp, "/version", &obj_t);
     if (err) {
@@ -126,12 +179,14 @@ PROCESS_THREAD(update_process, ev, data) {
     while(1) {
         // Check if there are updates
         log_info("Checking for updates\n");
+        START_EVALUATOR(local);
         while (!sctx.has_updates) {
             check_updates(&sctx, subscriber_cb); // check for errors
             COAP_SEND(txp);
-            etimer_set(&et, (CLOCK_SECOND*3));
+            etimer_set(&et, (CLOCK_SECOND*1));
             PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
         }
+        EVALUATE_AND_RESTART(subscribe, local);
         // get the oldest slot
         uint16_t version;
         err = get_oldest_firmware(&id, &version, &obj_t);
@@ -163,12 +218,12 @@ PROCESS_THREAD(update_process, ev, data) {
             COAP_SEND(txp);
             if (!rctx.firmware_received) {
                 log_debug("Setting the timer for 10 seconds\n");
-                etimer_set(&et, (CLOCK_SECOND*20));
+                etimer_set(&et, (CLOCK_SECOND*1));
                 PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
             }
         }
         log_info("Firmware received\n");
-
+        EVALUATE(receive, local);
         err = receiver_close(&rctx);
         if (err) {
             log_error(err, "Error closing the reciver\n");
@@ -188,10 +243,12 @@ PROCESS_THREAD(update_process, ev, data) {
             log_error(GENERIC_ERROR, "Failure initializing ATECC508A\n");
         }
 #endif
+        START_EVALUATOR(local);
         err = verify_object(&new_firmware, df, x, y, ef, buffer, BUFFER_LEN);
+        EVALUATE(verify, local);
 #ifdef WITH_CRYPTOAUTHLIB
         atcab_release();
- #endif
+#endif
         if (err) {
             log_info("Verification failed\n");
             err = invalidate_object(id, &obj_t);
@@ -206,6 +263,7 @@ PROCESS_THREAD(update_process, ev, data) {
     }
     unsubscribe(&sctx);
     txp_end(&txp);
+    EVALUATE(global, global);
     watchdog_reboot();
     PROCESS_END();
 }

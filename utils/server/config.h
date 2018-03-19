@@ -12,8 +12,6 @@
 #define MAX_ADDR_LEN 32
 #define MAX_PATH_LEN 128
 
-#define DEFAULT_FIRMWARE_NAME "fake_firmware_dead"
-
 #ifndef WITH_TESTING_RESOURCES
 #define WITH_TESTING_RESOURCES 1
 #endif

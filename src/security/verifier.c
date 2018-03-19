@@ -19,6 +19,13 @@ enum verifier_states {
     VERIFY_SERVER_SIGNATURE = 4
 };
 
+#if EVALUATE_TIME == 1
+#include "contiki.h"
+#include "evaluator.h"
+DEFINE_EVALUATOR(local);
+INIT_TEST(0x0);
+#endif
+
 /* The memory object should be already opened */
 pull_error verify_object(mem_object* obj, digest_func digest, const uint8_t* x, const uint8_t* y,
         ecc_func_t ef, uint8_t* buffer, size_t buffer_len) {
@@ -36,6 +43,9 @@ pull_error verify_object(mem_object* obj, digest_func digest, const uint8_t* x, 
         goto error;
     }
     /************* CALCULATING DIGEST ****************/
+#if EVALUATE_TIME == 1
+    START_EVALUATOR(local);
+#endif
     state = CALCULATING_DIGEST;
     digest_ctx ctx;
     if ((err = digest.init(&ctx)) != PULL_SUCCESS) {
@@ -75,13 +85,20 @@ pull_error verify_object(mem_object* obj, digest_func digest, const uint8_t* x, 
         log_debug("Invalid hash\n");
         goto error;
     }
-
+#if EVALUATE_TIME == 1
+    EVALUATE(digest, local);
+    START_EVALUATOR(local); 
+#endif
     /********** VERIFY_VENDOR_SIGNATURE ***********/
     state = VERIFY_VENDOR_SIGNATURE;
     err = verify_manifest_vendor(&mt, digest, x, y, ef);
     if (err) {
         goto error;
     }
+#if EVALUATE_TIME == 1
+    EVALUATE(vendor_signature, local);
+    START_EVALUATOR(local); 
+#endif
     log_debug("Vendor Signature Valid\n");
     /********** VERIFY_SERVER_SIGNATURE ***********/
     state = VERIFY_SERVER_SIGNATURE;
@@ -89,6 +106,9 @@ pull_error verify_object(mem_object* obj, digest_func digest, const uint8_t* x, 
     if (err) {
         goto error;
     }
+#if EVALUATE_TIME == 1
+    EVALUATE(vendor_signature, local);
+#endif
     log_debug("Server Signature Valid\n");
     return PULL_SUCCESS;
 error:

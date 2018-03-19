@@ -12,7 +12,9 @@ all: ota
 # Accepted values: 0 1 2 3 
 LOGGER_VERBOSITY ?= 0
 # Accepted values: TINYDTLS, CRYPTOAUTHLIB, TINYCRYPT
-SEC_LIB ?= TINYDTLS
+SEC_LIB ?= TINYCRYPT
+# Evaluate Time
+EVALUATE_TIME=1
 #####################################################
 #   		   End Configurable Parameters          #
 #####################################################
@@ -24,7 +26,7 @@ ROOTDIR=../../..
 LIBPULL = $(ROOTDIR)/src/common $(ROOTDIR)/src/memory $(ROOTDIR)/src/security
 LIBPULL += $(BOARDDIR) $(BOARDDIR)/bootloader
 LIBPULL_SOURCEFILES = $(notdir $(shell find $(LIBPULL) -maxdepth 1 \( -name '*.c' ! -name 'linker_script.c' \) ))
-LIBPULL_INCLUDES = -I$(ROOTDIR)/include
+LIBPULL_INCLUDES = -I$(ROOTDIR)/include -I..
 CFLAGS += -DSIMPLE_MANIFEST -DLOGGER_VERBOSITY=$(LOGGER_VERBOSITY)
 
 # Include libpull sources
@@ -82,6 +84,11 @@ CFLAGS += -DMANIFEST_SIZE=$(MANIFEST_SIZE)
 CFLAGS += -DBOOTLOADER_CTX_START_OFFSET=$(BOOTLOADER_CTX_START_OFFSET)
 CFLAGS += -DBOOTLOADER_CTX_END_OFFSET=$(BOOTLOADER_CTX_END_OFFSET)
 CFLAGS += -DRECOVERY_IMAGE=$(RECOVERY_IMAGE)
+
+
+CFLAGS += -DEVALUATE_TIME=$(EVALUATE_TIME)
+CFLAGS += -DSEC_LIB=$(SEC_LIB)
+CFLAGS += -DSEC_LIB_STR="\"$(SEC_LIB)\""
 
 OTA_OFFSET="$(BOOTLOADER_START_PAGE)*$(PAGE_SIZE)"
 OTA_LENGTH="($(BOOTLOADER_END_PAGE)-$(BOOTLOADER_START_PAGE))*$(PAGE_SIZE)"

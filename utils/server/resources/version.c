@@ -26,7 +26,7 @@ extern void resource_version(coap_context_t *ctx,
     coap_add_option(response,
             COAP_OPTION_MAXAGE,
             coap_encode_var_bytes(buf, VERSION_MAX_AGE), buf);
-    version_t version = get_version(&server_ctx->mt);
+    version_t version = get_version(server_ctx->mapped_file_manifest);
     printf("Sending version %x\n", version);
     coap_add_data(response, sizeof(version_t), (const uint8_t*) &version);
 }
