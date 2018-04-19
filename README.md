@@ -1,25 +1,28 @@
-# libpull: The Portable Updates Lightweight Library
+![Libpull logo](https://github.com/AntonioLangiu/libpull/raw/master/libpull.png)
 
-[![Build Status](https://travis-ci.com/AntonioLangiu/libpull.svg?token=wmyzpNgdG2qdqyV8yUxq&branch=master)](https://travis-ci.com/AntonioLangiu/libpull)
+ # The Portable Updates Lightweight Library
 
-libpull is a C library to implement secure and portable updates on IoT devices.
-It targets [Class 1](https://tools.ietf.org/html/rfc7228#section-3)
-constrained devices, characterized by ~10 kB of RAM and ~100 kB of ROM. 
-However, its lightweight and modular approach can be beneficial also for bigger devices.
+ [![Build Status](https://travis-ci.com/AntonioLangiu/libpull.svg?token=wmyzpNgdG2qdqyV8yUxq&branch=master)](https://  travis-ci.com/AntonioLangiu/libpull)
 
-The library can be included into MCU firmware to perform
-Over The Air updates. It is composed of many high-level
-modules that interact with the low-level interfaces, implemented
-for the specific platform. This is needed since
-accessing the memory and the network on embedded systems
-is a complex task and each platform and architecture uses its
-own primitive.
 
-The goal of the library is to be a portable and secure solution
-to reduce the costs of securing IoT devices, allowing an easy
-device update and management also for very
-constrained applications.
+ libpull is a C library to implement secure and portable updates on IoT devices.
+ It targets [Class 1](https://tools.ietf.org/html/rfc7228#section-3)
+ constrained devices, characterized by ~10 kB of RAM and ~100 kB of ROM.
+ However, its lightweight and modular approach can be beneficial also for bigger devices.
 
- * **Documentation**: [https://github.com/AntonioLangiu/Pull-IoT/wiki](https://github.com/AntonioLangiu/Pull-IoT/wiki)
- * **Repository**: [https://github.com/AntonioLangiu/Pull-IoT](https://github.com/AntonioLangiu/Pull-IoT)
- * **Licence**: [GPL-3.0](https://github.com/AntonioLangiu/Pull-IoT/blob/master/LICENSE)
+ The library can be included into MCU firmware to perform
+ Over The Air updates. It is composed of many high-level
+ modules that interact with the low-level interfaces, implemented
+ for the specific platform. This is needed since
+ accessing the memory and the network on embedded systems
+ is a complex task and each platform and architecture uses its
+ own primitive.
+
+ The goal of the library is to be a portable and secure solution
+ to reduce the costs of securing IoT devices, allowing an easy
+ device update and management also for very
+ constrained applications.
+
+
+ ⚠  **Version: 0.0.1 - The API and the modules can change at any point until we
+ reach a stable version.**
