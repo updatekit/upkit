@@ -1,0 +1,25 @@
+From aa2819b20c90a83a9bfa5ec856624a4f9b022b9d Mon Sep 17 00:00:00 2001
+From: Antonio Langiu <antonio.langiu@studenti.polito.it>
+Date: Sat, 13 Jan 2018 15:00:37 +0100
+Subject: [PATCH 2/3] Define size_t type
+
+---
+ lib/atca_command.h | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/lib/atca_command.h b/lib/atca_command.h
+index 805b605..58b1c28 100644
+--- a/lib/atca_command.h
++++ b/lib/atca_command.h
+@@ -41,7 +41,7 @@
+ #include "atca_compiler.h"
+ #include "atca_status.h"
+ #include "atca_devtypes.h"
+-#ifdef __linux__
++#if defined(__linux__) || defined(CONTIKI)
+ #include <stddef.h>
+ #endif
+ 
+-- 
+2.13.1
+

@@ -26,10 +26,10 @@ pull_error cryptoauthlib_hw_sha256_update(digest_ctx* ctx, void* data, size_t da
 }
 
 void* cryptoauthlib_hw_sha256_final(digest_ctx* ctx) {
-    if (atcab_hw_sha2_256_finish(&ctx->sha256_cryptoauthlib_hw.ctx, (uint8_t*) &ctx->sha256_cryptoauthlib.result) != ATCA_SUCCESS) {
+    if (atcab_hw_sha2_256_finish(&ctx->sha256_cryptoauthlib_hw.ctx, (uint8_t*) &ctx->sha256_cryptoauthlib_hw.result) != ATCA_SUCCESS) {
         return NULL;
     }
-    return &ctx->sha256_cryptoauthlib.result;
+    return &ctx->sha256_cryptoauthlib_hw.result;
 }
 
 /* Software */

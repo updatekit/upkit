@@ -12,11 +12,12 @@ all: ota
 # Accepted values: 0 1 2 3
 LOGGER_VERBOSITY ?= 0
 # Accepted values: TINYDTLS, CRYPTOAUTHLIB, TINYCRYPT
-SEC_LIB ?= TINYCRYPT
+SEC_LIB ?= CRYPTOAUTHLIB
 # Accepted values: CONN_UDP, CONN_DTLS_PSK, CONN_DTLS_ECDSA
 CONN_TYPE ?= CONN_UDP
-# Evaluate Time
+# Evaluator
 EVALUATE_TIME ?= 1
+EVALUATE_ENERGY ?= 1
 #####################################################
 #              End Configurable Parameters          #
 #####################################################
@@ -48,11 +49,12 @@ ifeq ($(SEC_LIB),TINYDTLS)
 	CFLAGS += -DWITH_TINYDTLS=1
 else ifeq ($(SEC_LIB),CRYPTOAUTHLIB)
 	CFLAGS += -DWITH_CRYPTOAUTHLIB
-	CAUTHLIB_DIR = $(EXT)/cryptoauthlib/lib/
+	CAUTHLIB_DIR = $(EXT)/cryptoauthlib/cryptoauthlib/lib/
 	PROJECTDIRS += $(CAUTHLIB_DIR) $(CAUTHLIB_DIR)/basic $(CAUTHLIB_DIR)/host
 	PROJECTDIRS += $(CAUTHLIB_DIR)/hal $(CAUTHLIB_DIR)/crypto $(CAUTHLIB_DIR)/crypto/hashes
 	PROJECT_SOURCEFILES += $(notdir $(wildcard $(CAUTHLIB_DIR)/*.c $(CAUTHLIB_DIR)/basic/*.c $(CAUTHLIB_DIR)/host/*.  c $(CAUTHLIB_DIR)/crypto/hashes/*.c))
-	PROJECT_SOURCEFILES += hal_cc2650_i2c.c atca_hal.c atca_crypto_sw_sha2.c
+	PROJECTDIRS += $(EXT)/cryptoauthlib/hal
+	PROJECT_SOURCEFILES += hal_cc2650_i2c.c atca_hal.c atca_crypto_sw_sha2.c hal_cc2650_timer_contiki.c
 	CFLAGS+= -I$(CAUTHLIB_DIR) -I$(CAUTHLIB_DIR)/basic
 	CFLAGS+= -I$(CAUTHLIB_DIR)/host -I$(CAUTHLIB_DIR)/hal -I$(CAUTHLIB_DIR)/crypto
 	CFLAGS+=-DATCA_HAL_I2C
@@ -69,12 +71,12 @@ PROJECT_SOURCEFILES += dtls.c crypto.c hmac.c rijndael.c sha2.c
 PROJECT_SOURCEFILES += ccm.c netq.c dtls_time.c peer.c session.c ecc.c
 CFLAGS += -Iext/tinydtls -Iext/tinydtls/aes -Iext/tinydtls/sha2 -Iext/tinydtls/ecc
 CFLAGS += -DDTLS_CONF_ECC=1 -DWITH_SHA256 -DSHA2_USE_INTTYPES_H
-TINYDTLS_NDEBUG ?= 1
-CFLAGS += -DDTLS_CONF_NDEBUG=$(TINYDTLS_NDEBUG)
-ifeq ($(TINYDTLS_NDEBUG),0)
+TINYDTLS_NDEBUG ?= 0
+CFLAGS += -DDTLS_CONF_NDEBUG=$(TINYDTLS_NDEBUG) -DDEBUG_TINYDTLS=1
+ifeq ($(TINYDTLS_NDEBUG),1)
 	TINYDTLS_SOURCEFILES += dtls_debug.c
 else
-	CFLAGS += -DNDEBUG=0
+	CFLAGS += -DNDEBUG=1
 endif
 
 # Configure the connection type
@@ -83,7 +85,7 @@ ifeq ($(CONN_TYPE),CONN_UDP)
 	# I do not need to set any parameter
 else ifeq ($(CONN_TYPE),CONN_DTLS_ECDSA)
 	CFLAGS += -DWITH_DTLS_COAP=1
-	CFLAGS += -DDTLS_MAX_BUF=250
+	#CFLAGS += -DDTLS_MAX_BUF=250
 else ifeq ($(CONN_TYPE),CONN_DTLS_PSK)
 	CFLAGS += -DWITH_DTLS_COAP=1
 	CFLAGS += -DDTLS_CONF_PSK=1
@@ -104,6 +106,7 @@ CFLAGS += -DBOOTLOADER_CTX_END_OFFSET=$(BOOTLOADER_CTX_END_OFFSET)
 CFLAGS += -DRECOVERY_IMAGE=$(RECOVERY_IMAGE)
 
 CFLAGS += -DEVALUATE_TIME=$(EVALUATE_TIME)
+CFLAGS += -DEVALUATE_ENERGY=$(EVALUATE_ENERGY)
 CFLAGS += -DCONN_TYPE=$(CONN_TYPE)
 CFLAGS += -DSEC_LIB=$(SEC_LIB)
 CFLAGS += -DCONN_TYPE_STR="\"$(CONN_TYPE)\""

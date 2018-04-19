@@ -34,7 +34,7 @@ pull_error txp_init(txp_ctx* ctx, const char* addr, uint16_t port, conn_type typ
             return TRANSPORT_INIT_ERROR;
     }
     coap_init_engine();
-    HARDCODED_PROV_SERVER();
+    HARDCODED_PROV_SERVER(&ctx->server_ipaddr);
     return PULL_SUCCESS;
 }
 

@@ -97,8 +97,7 @@ void flash_write_protect() {
     }
 }
 
-
-INIT_TEST(0x0);
+version_t test_id = 0x0;
 DEFINE_EVALUATOR(local);
 DEFINE_EVALUATOR(global);
 
@@ -158,7 +157,8 @@ void pull_bootloader() {
             goto error;
         };
         log_debug("Bootstrap Success\n");
-        EVALUATE(first_boot, local);
+        STOP_EVALUATOR(local);
+        PRINT_EVALUATOR(first_boot, local);
     }
     memory_close(&bootloader_object); // close bootloader context
     /************ READ_RUNNING_MANIFEST ************/
@@ -211,7 +211,8 @@ void pull_bootloader() {
             goto error;
         }
         already_validated_flag = 1;
-        EVALUATE(upgrade, local);
+        STOP_EVALUATOR(local);
+        PRINT_EVALUATOR(upgrade, local);
     }
     goto boot;
 error:
@@ -240,11 +241,13 @@ boot:
 #ifdef WITH_CRYPTOAUTHLIB
     atcab_release();
 #endif
-    EVALUATE(internal_image_verification, local);
+    STOP_EVALUATOR(local);
+    PRINT_EVALUATOR(internal_image_verification, local);
     state = BOOT;
     flash_write_protect();
     log_info("Loading object\n");
-    EVALUATE(booting_process, global);
+    STOP_EVALUATOR(global);
+    PRINT_EVALUATOR(booting_process, global);
     load_object(OBJ_RUN, &mt); // refactor this function
 fatal_error:
     /* If you arrive here, you should reboot and try again */

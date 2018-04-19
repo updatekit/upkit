@@ -1,0 +1,33 @@
+From 82b0630f7ce5da812fca79ad4d77b4a6419df7b7 Mon Sep 17 00:00:00 2001
+From: Antonio Langiu <antonio.langiu@studenti.polito.it>
+Date: Sat, 24 Mar 2018 02:14:36 +0100
+Subject: [PATCH] do not call dtls_set_log_level if DEBUG_TINYDTLS is not true
+
+---
+ arch/cpu/cc26xx-cc13xx/lib/cc26xxware | 2 +-
+ os/net/app-layer/coap/coap-dtls.c     | 2 +-
+ 2 files changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/arch/cpu/cc26xx-cc13xx/lib/cc26xxware b/arch/cpu/cc26xx-cc13xx/lib/cc26xxware
+index 40916ad11..289424cb1 160000
+--- a/arch/cpu/cc26xx-cc13xx/lib/cc26xxware
++++ b/arch/cpu/cc26xx-cc13xx/lib/cc26xxware
+@@ -1 +1 @@
+-Subproject commit 40916ad11efdcac76775b9b18cebc8d0c37c48f2
++Subproject commit 289424cb164c0adc53937b7ba06fbae54ccbba5c
+diff --git a/os/net/app-layer/coap/coap-dtls.c b/os/net/app-layer/coap/coap-dtls.c
+index e5a26004f..c3200ccb4 100644
+--- a/os/net/app-layer/coap/coap-dtls.c
++++ b/os/net/app-layer/coap/coap-dtls.c
+@@ -103,7 +103,7 @@ coap_init_communication_layer(uint16_t port)
+ 
+   struct uip_udp_conn *server_conn = udp_new(NULL, 0, NULL);
+   udp_bind(server_conn, port);
+-#if NDEBUG
++#if NDEBUG == 0 && DEBUG_TINYDTLS == 1
+   dtls_set_log_level(DTLS_LOG_DEBUG);
+ #endif
+ 
+-- 
+2.13.1
+

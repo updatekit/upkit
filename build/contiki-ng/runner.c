@@ -1,6 +1,7 @@
 #include "contiki.h"
 #include "contiki-lib.h"
 #include "dev/watchdog.h"
+#include "button-sensor.h"
 #include "leds.h"
 
 #include "common/libpull.h"
@@ -24,7 +25,6 @@
 #define BUFFER_LEN PAGE_SIZE
 
 #ifdef WITH_CRYPTOAUTHLIB
-#include <cryptoauthlib.h>
 DIGEST_FUNC(cryptoauthlib);
 #elif WITH_TINYDTLS
 DIGEST_FUNC(tinydtls);
@@ -88,7 +88,7 @@ PROCESS_THREAD(main_process, ev, data) {
 }
 
 void specialize_crypto_functions() {
-#if WITH_CRYPTOAUTHLIB
+#ifdef WITH_CRYPTOAUTHLIB
     df = cryptoauthlib_digest_sha256;
     ef = cryptoauthlib_ecc;
 #elif WITH_TINYDTLS
@@ -113,65 +113,44 @@ void specialize_conn_functions() {
 #endif
 }
 
-#if EVALUATE_TIME == 1
+#if EVALUATE_TIME == 1 || EVALUATE_ENERGY == 1
 #define TOSTR(token) #token
-INIT_TEST(0x0);
+version_t test_id = 0x0;
 DEFINE_EVALUATOR(local);
 DEFINE_EVALUATOR(global);
 
-uint8_t coap_server_working = 0;
-uint8_t version_updated = 0;
-void coap_server_working_handler(pull_error err, const char*data, int len, void* more) {
-    if (!err && len == sizeof(version_t) && data != NULL) {
-        // The test id is equal to the version provisioned by the server
-        test_id = *((version_t*)data);
-        coap_server_working = 1;
-    }
-}
-void next_version_handler(pull_error err, const char* data, int len, void* more) {
-    if (!err && len == sizeof(version_t) && data != NULL) {
-        version_updated = 1;
-    }
+#include "net/ipv6/uip-icmp6.h"
+static uip_ipaddr_t server_addr;
+static struct uip_icmp6_echo_reply_notification echo_reply_notification;
+static uint8_t echo_reply = 0;
+
+static void echo_reply_handler(uip_ipaddr_t *source, uint8_t ttl, uint8_t *data, uint16_t datalen) {
+    echo_reply++;
 }
 #endif
 
 PROCESS_THREAD(update_process, ev, data) {
     PROCESS_BEGIN();
+#if EVALUATE_TIME == 1 || EVALUATE_ENERGY == 1
+    NETSTACK_RADIO.set_value(RADIO_PARAM_TXPOWER, 5);
+    etimer_set(&et, (CLOCK_SECOND*15));
+    PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
+    uip_icmp6_echo_reply_callback_add(&echo_reply_notification, echo_reply_handler);
+    HARDCODED_PROV_SERVER(&server_addr);
+    do {
+        uip_icmp6_send(&server_addr, ICMP6_ECHO_REQUEST, 0, UIP_ICMP6_ECHO_REQUEST_LEN);
+        etimer_set(&et, (CLOCK_SECOND/2 * (echo_reply == 0? 10:1)));
+        PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
+    } while(echo_reply <= 10);
+    printf("== TEST %d == SECLIB=" SEC_LIB_STR " CONN_TYPE=" CONN_TYPE_STR " ==\n", test_id);
+#endif
+    START_EVALUATOR(global);
     specialize_crypto_functions();
     specialize_conn_functions();
+    START_EVALUATOR(local);
     txp_init(&txp, "", COAPS_DEFAULT_PORT, type, conn_data);
-#if EVALUATE_TIME == 1
-    // To perform the test I need an ID. I receive it from the
-    // server. Each time this resource is called it updates the
-    // version of the firmware on the server and returns it
-    // as a test id. In this way is also possible to make sure
-    // the RPL network is working before starting evaluating
-    // the time of each phase;
-    etimer_set(&et, (CLOCK_SECOND*5));
-    PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
-
-    // This is required to give consistency to the 
-    txp_on_data(&txp, coap_server_working_handler, NULL);
-    txp_request(&txp, GET, "version", NULL, 0);
-    do {
-        COAP_SEND(txp);
-        etimer_set(&et, (CLOCK_SECOND*1));
-        PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
-    } while (!coap_server_working);
-    
-    txp_on_data(&txp, next_version_handler, NULL);
-    txp_request(&txp, GET, "next_version", NULL, 0);
-    do {
-        COAP_SEND(txp);
-        etimer_set(&et, (CLOCK_SECOND*1));
-        PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
-    } while (!version_updated);
-
-    START_TEST;
-    START_EVALUATOR(global);
-#endif
     log_info("Subscribing to the server\n");
-    pull_error err = subscribe(&sctx, &txp, "/version", &obj_t);
+    pull_error err = subscribe(&sctx, &txp, "/next_version", &obj_t);
     if (err) {
         log_error(err,"Error subscribing to the provisioning server\n");
         return EXIT_FAILURE;
@@ -179,12 +158,13 @@ PROCESS_THREAD(update_process, ev, data) {
     while(1) {
         // Check if there are updates
         log_info("Checking for updates\n");
-        START_EVALUATOR(local);
         while (!sctx.has_updates) {
             check_updates(&sctx, subscriber_cb); // check for errors
             COAP_SEND(txp);
-            etimer_set(&et, (CLOCK_SECOND*1));
-            PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
+            if (!sctx.has_updates) {
+                etimer_set(&et, (CLOCK_SECOND/1));
+                PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
+            }
         }
         EVALUATE_AND_RESTART(subscribe, local);
         // get the oldest slot
@@ -223,7 +203,8 @@ PROCESS_THREAD(update_process, ev, data) {
             }
         }
         log_info("Firmware received\n");
-        EVALUATE(receive, local);
+        STOP_EVALUATOR(local);
+        PRINT_EVALUATOR(receive, local);
         err = receiver_close(&rctx);
         if (err) {
             log_error(err, "Error closing the reciver\n");
@@ -235,7 +216,7 @@ PROCESS_THREAD(update_process, ev, data) {
         }
         memory_close(&new_firmware); // This flashes the buffer.
         memory_open(&new_firmware, id, READ_ONLY);
-        watchdog_stop();
+
         uint8_t buffer[BUFFER_LEN];
 #ifdef WITH_CRYPTOAUTHLIB
         ATCA_STATUS status = atcab_init(&cfg_ateccx08a_i2c_default);
@@ -244,8 +225,11 @@ PROCESS_THREAD(update_process, ev, data) {
         }
 #endif
         START_EVALUATOR(local);
+        watchdog_stop();
         err = verify_object(&new_firmware, df, x, y, ef, buffer, BUFFER_LEN);
-        EVALUATE(verify, local);
+        watchdog_start();
+        STOP_EVALUATOR(local);
+        PRINT_EVALUATOR(total_verify, local);
 #ifdef WITH_CRYPTOAUTHLIB
         atcab_release();
 #endif
@@ -257,13 +241,16 @@ PROCESS_THREAD(update_process, ev, data) {
             }
             continue;
         }
-        watchdog_start();
         log_info("Received image is valid\n");
+        STOP_EVALUATOR(global)
+        PRINT_EVALUATOR(total_update_process, global);
+#if EVALUATE_TIME == 1 || EVALUATE_ENERGY == 1
+        invalidate_object(id, &obj_t);
+#endif
         break;
     }
     unsubscribe(&sctx);
     txp_end(&txp);
-    EVALUATE(global, global);
     watchdog_reboot();
     PROCESS_END();
 }

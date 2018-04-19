@@ -17,4 +17,8 @@
 #define LOG_CONF_LEVEL_MAIN LOG_LEVEL_NONE
 #endif
 
+#if EVALUATE_ENERGY == 1
+#define ENERGEST_CONF_ON 1
+#endif
+
 #endif /* PROJECT_CONF_H_ */

@@ -1,0 +1,28 @@
+From 61fe8f4fc062894e3602655476ac851025447a45 Mon Sep 17 00:00:00 2001
+From: Antonio Langiu <antonio.langiu@studenti.polito.it>
+Date: Sat, 24 Mar 2018 02:16:25 +0100
+Subject: [PATCH] disable TinyDTLS debug for Contiki
+
+---
+ dtls_debug.h | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/dtls_debug.h b/dtls_debug.h
+index f8fc64a..9a0ec38 100644
+--- a/dtls_debug.h
++++ b/dtls_debug.h
+@@ -76,7 +76,11 @@ void dtls_set_log_level(log_t level);
+ #ifdef HAVE_VPRINTF
+ void dsrv_log(log_t level, char *format, ...);
+ #else
++#if DEBUG_TINYDTLS == 1
+ #define dsrv_log(level, format, ...) PRINTF(format, ##__VA_ARGS__)
++#else /* DEBUG_TINYDTLS == 1 */
++#define dsrv_log(level, format, ...)
++#endif /* DEBUG_TINYDTLS == 1 */
+ #endif
+ 
+ #ifndef NDEBUG
+-- 
+2.13.1
+

@@ -25,8 +25,8 @@ echo "Cloning tinydtls...done"
 
 # Clone CryptoAuthlib
 echo "Cloning cryptoauthlib..."
-git clone --quiet --progress \
-    --single-branch --depth 2 https://github.com/AntonioLangiu/cryptoauthlib.git \
+git clone --quiet --progress --recursive \
+    git@github.com:libpull/cryptoauthlib-hal.git \
     ext/cryptoauthlib
 echo "Cloning cryptoauthlib...done"
 
@@ -44,7 +44,7 @@ for dir in $(cd $PATCHDIR && find * -type d -print); do
         patch=$PWD/$f
         echo "Applying patch: $patch"
         (cd ext/$dir/
-        git am $patch
+        git am --ignore-whitespace $patch
         )
     done
 done

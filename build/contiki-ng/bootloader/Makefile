@@ -14,7 +14,8 @@ LOGGER_VERBOSITY ?= 0
 # Accepted values: TINYDTLS, CRYPTOAUTHLIB, TINYCRYPT
 SEC_LIB ?= TINYCRYPT
 # Evaluate Time
-EVALUATE_TIME=1
+EVALUATE_TIME ?= 0
+EVALUATE_ENERGY ?= 0 
 #####################################################
 #   		   End Configurable Parameters          #
 #####################################################
@@ -87,6 +88,7 @@ CFLAGS += -DRECOVERY_IMAGE=$(RECOVERY_IMAGE)
 
 
 CFLAGS += -DEVALUATE_TIME=$(EVALUATE_TIME)
+CFLAGS += -DEVALUATE_ENERGY=$(EVALUATE_ENERGY)
 CFLAGS += -DSEC_LIB=$(SEC_LIB)
 CFLAGS += -DSEC_LIB_STR="\"$(SEC_LIB)\""
 
