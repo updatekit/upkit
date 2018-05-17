@@ -10,9 +10,9 @@ all: ota
 # 				Configurable Parameters             #
 #####################################################
 # Accepted values: 0 1 2 3 
-LOGGER_VERBOSITY ?= 0
+LOGGER_VERBOSITY ?= 3
 # Accepted values: TINYDTLS, CRYPTOAUTHLIB, TINYCRYPT
-SEC_LIB ?= TINYCRYPT
+SEC_LIB ?= TINYDTLS
 # Evaluate Time
 EVALUATE_TIME ?= 0
 EVALUATE_ENERGY ?= 0 

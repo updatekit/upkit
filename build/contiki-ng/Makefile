@@ -10,14 +10,14 @@ all: ota
 #               Configurable Parameters             #
 #####################################################
 # Accepted values: 0 1 2 3
-LOGGER_VERBOSITY ?= 0
+LOGGER_VERBOSITY ?= 3
 # Accepted values: TINYDTLS, CRYPTOAUTHLIB, TINYCRYPT
-SEC_LIB ?= CRYPTOAUTHLIB
+SEC_LIB ?= TINYDTLS
 # Accepted values: CONN_UDP, CONN_DTLS_PSK, CONN_DTLS_ECDSA
 CONN_TYPE ?= CONN_UDP
 # Evaluator
-EVALUATE_TIME ?= 1
-EVALUATE_ENERGY ?= 1
+EVALUATE_TIME ?= 0
+EVALUATE_ENERGY ?= 0
 #####################################################
 #              End Configurable Parameters          #
 #####################################################
