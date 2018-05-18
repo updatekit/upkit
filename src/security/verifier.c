@@ -91,7 +91,9 @@ pull_error verify_object(mem_object* obj, digest_func digest, const uint8_t* x, 
     log_debug("Server Signature Valid\n");
     return PULL_SUCCESS;
 error:
+    if (state != VERIFY_SERVER_SIGNATURE) {
     log_error(err, "Error in the verification process in phase %d: %s\n", state, err_as_str(err));
+    }
     return err;
 }
 
