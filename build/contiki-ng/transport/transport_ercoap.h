@@ -12,13 +12,10 @@
 #define COAP_DEFAULT_PORT 5683
 #define COAPS_DEFAULT_PORT 5684
 
-#define HARDCODED_PROV_SERVER(addr) uip_ip6addr(addr,0xfd00,0x0,0x0,0x0,0x0,0x0,0x0,0x1)
-
 struct txp_ctx_ {
     callback cb;
     void* more;
-    coap_endpoint_t endpoint; // I need to fill this
-    uip_ipaddr_t server_ipaddr;
+    coap_endpoint_t endpoint;
     coap_message_t request;
     coap_request_state_t request_state;
     uint16_t port;

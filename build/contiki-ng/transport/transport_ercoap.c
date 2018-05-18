@@ -34,7 +34,10 @@ pull_error txp_init(txp_ctx* ctx, const char* addr, uint16_t port, conn_type typ
             return TRANSPORT_INIT_ERROR;
     }
     coap_engine_init();
-    HARDCODED_PROV_SERVER(&ctx->server_ipaddr);
+    if (!coap_endpoint_parse(addr, strlen(addr), &ctx->endpoint)) {
+        log_error(TRANSPORT_INIT_ERROR, "Error parsing the endpoint\n");
+        return TRANSPORT_INIT_ERROR;
+    }
     return PULL_SUCCESS;
 }
 
