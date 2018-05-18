@@ -145,7 +145,7 @@ pull_board_init()
   //buzzer_init();
 
   /* Make sure the external flash is in the lower power mode */
-  ext_flash_init();
+  ext_flash_init(NULL);
 
   //lpm_register_module(&sensortag_module);
 

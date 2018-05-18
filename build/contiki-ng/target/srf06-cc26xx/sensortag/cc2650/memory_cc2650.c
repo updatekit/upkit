@@ -54,11 +54,11 @@ pull_error memory_open_impl(mem_object* ctx, obj_id obj, mem_mode_t mode) {
     address_t offset;
     if (ctx->type == EXTERNAL) {
         if (external_memory_open == 0) {
-            if (ext_flash_open()) {
+            if (ext_flash_open(NULL)) {
                 external_memory_open = 1;
             } else {
                 log_debug("Cannot open external flash\n");
-                ext_flash_close();
+                ext_flash_close(NULL);
                 return MEMORY_OPEN_ERROR;
             }
         } else {
@@ -66,7 +66,7 @@ pull_error memory_open_impl(mem_object* ctx, obj_id obj, mem_mode_t mode) {
         }
         if (ctx->mode == WRITE_ALL) {
             for (offset = ctx->start_offset; offset < ctx->end_offset; offset += FLASH_PAGE_SIZE) {
-                if (!ext_flash_erase(offset, FLASH_PAGE_SIZE)) {
+                if (!ext_flash_erase(NULL, offset, FLASH_PAGE_SIZE)) {
                     log_debug("Error ereasing page %lu\n", offset/FLASH_PAGE_SIZE);
                     return MEMORY_OPEN_ERROR;
                 }
@@ -91,7 +91,7 @@ int memory_read_impl(mem_object* ctx, void* memory_buffer, uint16_t size, uint32
     PULL_ASSERT(ctx->mode == READ_ONLY);
     // TODO implement a check for the end offset
     if (ctx->type == EXTERNAL) {
-        if (!ext_flash_read(ctx->start_offset+offset, size, memory_buffer)) {
+        if (!ext_flash_read(NULL, ctx->start_offset+offset, size, memory_buffer)) {
             log_debug("Error reading external memory\n");
             return -1;
         }
@@ -116,7 +116,7 @@ pull_error memory_flush_impl(mem_object* ctx) {
     if (buffer_full == 0) {
         return PULL_SUCCESS;
     }
-    if (!ext_flash_write(buffer_offset, buffer_full, buffer)) {
+    if (!ext_flash_write(NULL, buffer_offset, buffer_full, buffer)) {
         log_debug("Error writing into external flash\n");
         return MEMORY_FLUSH_ERROR;
     }
@@ -185,7 +185,7 @@ pull_error memory_close_impl(mem_object* ctx) {
             return MEMORY_CLOSE_ERROR;
         }
         if (--external_memory_open == 0) {
-            ext_flash_close(); //XXX I need to check how safe is to close the memory
+            ext_flash_close(NULL); //XXX I need to check how safe is to close the memory
         }
         return PULL_SUCCESS;
     }

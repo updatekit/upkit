@@ -35,20 +35,18 @@ ENTRY(ResetISR)
 
 MEMORY
 {
-    /* Flash Size 4 KB */
+    /* Flash Size 128 KB minus the CCA area below (88 bytes) */
     FLASH (RX) : ORIGIN = (OTA_OFFSET), LENGTH = (OTA_LENGTH)
 
     /*
      * Customer Configuration Area and Bootloader Backdoor configuration
      * in flash, up to 88 bytes
      */
-#ifndef CCFG_DISABLE
     FLASH_CCFG (RX) : ORIGIN = 0x0001FFA8, LENGTH = 88
-#endif
 
-    /* RAM Size 16KB */
+    /* RAM Size 20KB */
     SRAM (RWX) : ORIGIN = 0x20000000, LENGTH = 0x00005000
-
+    
     /* Application can use GPRAM region as RAM if cache is disabled in CCFG */
     GPRAM (RWX) : ORIGIN = 0x11000000, LENGTH = 0x00002000
 }
@@ -58,7 +56,7 @@ _estack = ORIGIN(SRAM) + LENGTH(SRAM); /* End of SRAM */
 
 /*. Generate a link error if heap and stack don’t fit into RAM .*/
 _Min_Heap_Size = 0;
-_Min_Stack_Size = 0x100;
+_Min_Stack_Size = 0x400;
 
 SECTIONS
 {
@@ -91,12 +89,17 @@ SECTIONS
         *(COMMON)
         _ebss = .;
     } > SRAM
-#ifndef CCFG_DISABLE
+
+    _end = .;  /* End of the .bss segment. */
+
+    /* These symbols are used by the stack check library. */
+    _stack = .;
+    _stack_origin = ORIGIN(SRAM) + LENGTH(SRAM);
+
     .ccfg :
     {
         KEEP(*(.ccfg))
     } > FLASH_CCFG
-#endif
 
     /* User_heap_stack section, used to check that there is enough RAM left */
     ._user_heap_stack :
@@ -106,9 +109,9 @@ SECTIONS
       . = . + _Min_Stack_Size;
       . = ALIGN(4);
     } > SRAM
-
+    
     .gpram :
-    {
+    { 
     } > GPRAM
-
+    
 }
