@@ -22,7 +22,7 @@
 #include "../default_configs.h"
 #include "../evaluator.h"
 
-#define BUFFER_SIZE PAGE_SIZE // Defined in Makefile.conf
+#define BUFFER_SIZE 0x100 // Defined in Makefile.conf
 #define FLASH_PAGE_SIZE PAGE_SIZE // Defined in Makefile.conf
 
 #ifdef WITH_CRYPTOAUTHLIB
@@ -233,11 +233,11 @@ boot:
         err = verify_object(&internal_object, df, x, y, ef, buffer, BUFFER_SIZE);
     }
     watchdog_start();
-    if (err) {
+/*    if (err) {
         if (RECOVERY_IMAGE == 0 || restore_recovery_image() != PULL_SUCCESS) {
             goto fatal_error;
         }
-    }
+    }*/
 #ifdef WITH_CRYPTOAUTHLIB
     atcab_release();
 #endif
