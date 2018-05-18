@@ -1,16 +1,16 @@
-From 6b57f53c4ec3af52061350e1a70be253a30acdb3 Mon Sep 17 00:00:00 2001
+From 1d2ab416e875912b2d63cf29a8bff2269346aea0 Mon Sep 17 00:00:00 2001
 From: Antonio Langiu <antonio.langiu@studenti.polito.it>
-Date: Mon, 6 Nov 2017 17:42:59 +0100
+Date: Thu, 17 May 2018 18:15:31 +0200
 Subject: [PATCH] Allow to define the main in the application
 
 ---
- Makefile.include                     | 8 ++++++--
+ Makefile.include                     | 5 ++++-
  os/{ => core}/contiki-default-conf.h | 0
  os/{ => core}/contiki-lib.h          | 0
  os/{ => core}/contiki-net.h          | 0
  os/{ => core}/contiki.h              | 0
  os/{ => main}/contiki-main.c         | 0
- 6 files changed, 6 insertions(+), 2 deletions(-)
+ 6 files changed, 4 insertions(+), 1 deletion(-)
  rename os/{ => core}/contiki-default-conf.h (100%)
  rename os/{ => core}/contiki-lib.h (100%)
  rename os/{ => core}/contiki-net.h (100%)
@@ -18,11 +18,11 @@ Subject: [PATCH] Allow to define the main in the application
  rename os/{ => main}/contiki-main.c (100%)
 
 diff --git a/Makefile.include b/Makefile.include
-index 3b8c41605..0d071efc6 100644
+index de0606ad4..436bef38a 100644
 --- a/Makefile.include
 +++ b/Makefile.include
-@@ -45,14 +45,18 @@ TARGET_BOARD_UPPERCASE := ${strip ${shell echo $(BOARD) | sed y!$(LOWERCASE)!$(U
- CFLAGS += -DCONTIKI_BOARD_$(TARGET_BOARD_UPPERCASE)=1
+@@ -57,7 +57,7 @@ ifeq ($(WERROR),1)
+  LDFLAGS += $(LDFLAGS_WERROR)
  endif
  
 -MODULES += os os/sys os/dev os/lib os/services
@@ -30,18 +30,16 @@ index 3b8c41605..0d071efc6 100644
  
  # Automatically include project-conf.h if found
  ifneq ("$(wildcard project-conf.h)","")
- CFLAGS += -DPROJECT_CONF_PATH=\"project-conf.h\"
+@@ -65,6 +65,9 @@ CFLAGS += -DPROJECT_CONF_PATH=\"project-conf.h\"
  endif
  
--MODULES += os os/net os/net/mac os/storage
-+MODULES += os os/core os/net os/net/mac os/storage
-+
+ MODULES += os os/net os/net/mac os/net/mac/framer os/net/routing os/storage
 +ifneq ($(DISABLE_MAIN),1)
-+	MODULES += os/main
++   MODULES += os/main
 +endif
  
- oname = ${patsubst %.c,%.o,${patsubst %.S,%.o,$(1)}}
- 
+ define oname
+ ${patsubst %.c,%.o, \
 diff --git a/os/contiki-default-conf.h b/os/core/contiki-default-conf.h
 similarity index 100%
 rename from os/contiki-default-conf.h

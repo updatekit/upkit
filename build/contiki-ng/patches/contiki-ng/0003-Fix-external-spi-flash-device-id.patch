@@ -1,0 +1,27 @@
+From c0df4b1642589c1642ea0c171e55c8724bb060d6 Mon Sep 17 00:00:00 2001
+From: Antonio Langiu <antonio.langiu@studenti.polito.it>
+Date: Fri, 18 May 2018 11:13:04 +0200
+Subject: [PATCH] Fix external spi flash device id
+
+---
+ arch/platform/srf06-cc26xx/sensortag/cc2650/board.h | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/arch/platform/srf06-cc26xx/sensortag/cc2650/board.h b/arch/platform/srf06-cc26xx/sensortag/cc2650/board.h
+index 7da0e9458..7e07d66d7 100644
+--- a/arch/platform/srf06-cc26xx/sensortag/cc2650/board.h
++++ b/arch/platform/srf06-cc26xx/sensortag/cc2650/board.h
+@@ -149,8 +149,8 @@
+ #define EXT_FLASH_SPI_PIN_MISO      18
+ #define EXT_FLASH_SPI_PIN_CS        14
+ 
+-#define EXT_FLASH_DEVICE_ID         0x14
+-#define EXT_FLASH_MID               0xC2
++#define EXT_FLASH_DEVICE_ID         0x12
++#define EXT_FLASH_MID               0xEF
+ 
+ #define EXT_FLASH_PROGRAM_PAGE_SIZE 256
+ #define EXT_FLASH_ERASE_SECTOR_SIZE 4096
+-- 
+2.13.1
+
