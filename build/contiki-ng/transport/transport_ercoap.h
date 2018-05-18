@@ -7,6 +7,7 @@
 #include "contiki.h"
 #include "contiki-net.h"
 #include "coap-engine.h"
+#include "coap-blocking-api.h"
 
 #define COAP_DEFAULT_PORT 5683
 #define COAPS_DEFAULT_PORT 5684
@@ -16,14 +17,14 @@
 struct txp_ctx_ {
     callback cb;
     void* more;
-    // Used by 
+    coap_endpoint_t endpoint; // I need to fill this
     uip_ipaddr_t server_ipaddr;
-    coap_packet_t request;
-    struct request_state_t request_state;
+    coap_message_t request;
+    coap_request_state_t request_state;
     uint16_t port;
 };
 
-void ercoap_handler(void* response);
+void ercoap_handler(coap_message_t* response);
 
 // This macro takes a txp_ctx and sets the correct values to send a message
 // with er-coap. The need of rewriting this macro is because I moved the
@@ -31,11 +32,10 @@ void ercoap_handler(void* response);
 // in case of an error is detected in the callback
 #define COAP_SEND(_ctx_) \
     {\
-    static struct request_state_t request_state; \
-    PT_SPAWN(process_pt, &request_state.pt, \
+    PT_SPAWN(process_pt, &(_ctx_.request_state.pt), \
             coap_blocking_request(&_ctx_.request_state, ev, \
-                coap_default_context, &(_ctx_.server_ipaddr), UIP_HTONS(_ctx_.port), \
-                &(_ctx_.request), ercoap_handler)); \
+                                            &_ctx_.endpoint, \
+                        &(_ctx_.request), ercoap_handler)); \
     };
 
 typedef enum conn_type {

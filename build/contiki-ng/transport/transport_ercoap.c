@@ -33,7 +33,7 @@ pull_error txp_init(txp_ctx* ctx, const char* addr, uint16_t port, conn_type typ
         default:
             return TRANSPORT_INIT_ERROR;
     }
-    coap_init_engine();
+    coap_engine_init();
     HARDCODED_PROV_SERVER(&ctx->server_ipaddr);
     return PULL_SUCCESS;
 }
@@ -65,7 +65,7 @@ void break_loop(txp_ctx* ctx) {
     process_post(ctx->request_state.process, PROCESS_EVENT_POLL, NULL);
 }
 
-void ercoap_handler(void* response) {
+void ercoap_handler(coap_message_t* response) {
     const unsigned char* chunk;
     int len = coap_get_payload(response, &chunk);
     shared_ctx->cb(PULL_SUCCESS, (const char*) chunk, len, shared_ctx->more);
