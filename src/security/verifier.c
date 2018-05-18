@@ -29,6 +29,7 @@ pull_error verify_object(mem_object* obj, digest_func digest, const uint8_t* x, 
     enum verifier_states state;
     /************* GET_OBJECT_MANIFEST ***************/
     state = GET_OBJECT_MANIFEST;
+    log_info("Start phase GET_OBJECT_MANIFEST\n");
     manifest_t mt;
     err = read_firmware_manifest(obj, &mt);
     if (err) {
@@ -37,6 +38,7 @@ pull_error verify_object(mem_object* obj, digest_func digest, const uint8_t* x, 
     }
     /************* CALCULATING DIGEST ****************/
     state = CALCULATING_DIGEST;
+    log_info("Start phase CALCULATING_DIGEST\n");
     digest_ctx ctx;
     if ((err = digest.init(&ctx)) != PULL_SUCCESS) {
         goto error;
@@ -44,7 +46,7 @@ pull_error verify_object(mem_object* obj, digest_func digest, const uint8_t* x, 
     address_t offset = get_offset(&mt);
     address_t final_offset = offset + get_size(&mt);
     address_t step = buffer_len;
-    log_debug("Digest: initial offset %lu final offset %lu\n", offset, final_offset);
+    log_debug("Digest: initial offset %lu final offset %lu size %lu\n", offset, final_offset, get_size(&mt));
     if (offset == final_offset) {
         err = MEMORY_READ_ERROR;
         goto error;
@@ -63,6 +65,7 @@ pull_error verify_object(mem_object* obj, digest_func digest, const uint8_t* x, 
     }
     uint8_t* result = digest.finalize(&ctx);
     /***************** VERIFY DIGEST *************/
+    log_info("Start phase VERIFY_DIGEST\n");
     state = VERIFY_DIGEST;
     log_debug("Verifying digest\n");
     uint8_t* hash = get_digest(&mt);
@@ -73,9 +76,12 @@ pull_error verify_object(mem_object* obj, digest_func digest, const uint8_t* x, 
     if (memcmp(result, hash, digest.size) != 0) {
         err = VERIFICATION_FAILED_ERROR;
         log_debug("Invalid hash\n");
+        log_debug("Calculated: %02x %02x %02x %02x\n", result[0], result[1], result[2], result[3]);
+        log_debug("Expected: %02x %02x %02x %02x\n", hash[0], hash[1], hash[2], hash[3]);
         goto error;
     }
     /********** VERIFY_VENDOR_SIGNATURE ***********/
+    log_info("Start phase VERIFY_VENDOR_SIGNATURE\n");
     state = VERIFY_VENDOR_SIGNATURE;
     err = verify_manifest_vendor(&mt, digest, x, y, ef);
     if (err) {
