@@ -32,9 +32,9 @@ int memory_object_start[] = {
 };
 
 int memory_object_end[] = {
-     [BOOTLOADER_CTX] = BOOTLOADER_CTX_END_OFFSET,
+     [BOOTLOADER_CTX] = BOOTLOADER_CTX_END_OFFSET, // Defined in Makefile.conf
      [OBJ_GOLD] = 0x34000,
-     [OBJ_RUN] = IMAGE_END_PAGE*FLASH_PAGE_SIZE,
+     [OBJ_RUN] = IMAGE_END_PAGE*FLASH_PAGE_SIZE, // Defined in Makefile.conf
      [OBJ_1] = 0x4E000,
      [OBJ_2] = 0x68000
 };
@@ -82,7 +82,7 @@ pull_error memory_open_impl(mem_object* ctx, obj_id obj, mem_mode_t mode) {
     return PULL_SUCCESS;
 }
 
-int memory_read_impl(mem_object* ctx, void* memory_buffer, uint16_t size, uint32_t offset) {
+int memory_read_impl(mem_object* ctx, void* memory_buffer, address_t size, address_t offset) {
     PULL_ASSERT(ctx->mode == READ_ONLY);
     // TODO implement a check for the end offset
     if (ctx->type == EXTERNAL) {
