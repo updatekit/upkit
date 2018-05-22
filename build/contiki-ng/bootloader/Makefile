@@ -23,7 +23,7 @@ ROOTDIR=../../..
 LIBPULL = $(ROOTDIR)/src/common $(ROOTDIR)/src/memory $(ROOTDIR)/src/security
 LIBPULL += $(BOARDDIR) $(BOARDDIR)/bootloader
 LIBPULL_SOURCEFILES = $(notdir $(shell find $(LIBPULL) -maxdepth 1 \( -name '*.c' ! -name 'linker_script.c' \) ))
-LIBPULL_INCLUDES = -I$(ROOTDIR)/include -I..
+LIBPULL_INCLUDES = -I$(ROOTDIR)/include
 CFLAGS += -DSIMPLE_MANIFEST -DLOGGER_VERBOSITY=$(LOGGER_VERBOSITY)
 
 # Include libpull sources
@@ -35,6 +35,7 @@ CFLAGS += $(LIBPULL_INCLUDES)
 SMALL = 1
 MAKE_MAC = MAKE_MAC_NULLMAC
 MAKE_NET = MAKE_NET_NULLNET
+CFLAGS += -DDISABLE_RADIO=1 -DDISABLE_ALL_OUTPUT=1
 
 # Security Configurations
 ext= ../ext

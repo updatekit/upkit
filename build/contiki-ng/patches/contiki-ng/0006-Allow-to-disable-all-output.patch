@@ -1,0 +1,55 @@
+From d850ae8ae7121703548702598743228d032f372c Mon Sep 17 00:00:00 2001
+From: Antonio Langiu <antonio.langiu@studenti.polito.it>
+Date: Tue, 22 May 2018 19:17:49 +0200
+Subject: [PATCH 3/3] Allow to disable all output
+
+---
+ arch/cpu/cc26xx-cc13xx/rf-core/rf-core.c | 2 +-
+ os/lib/assert.c                          | 2 ++
+ os/net/net-debug.h                       | 2 ++
+ 3 files changed, 5 insertions(+), 1 deletion(-)
+
+diff --git a/arch/cpu/cc26xx-cc13xx/rf-core/rf-core.c b/arch/cpu/cc26xx-cc13xx/rf-core/rf-core.c
+index 2baa883ad..c8d5d495a 100644
+--- a/arch/cpu/cc26xx-cc13xx/rf-core/rf-core.c
++++ b/arch/cpu/cc26xx-cc13xx/rf-core/rf-core.c
+@@ -583,7 +583,7 @@ void
+ cc26xx_rf_cpe0_isr(void)
+ {
+   if(!rf_core_is_accessible()) {
+-    printf("RF ISR called but RF not ready... PANIC!!\n");
++    PRINTF("RF ISR called but RF not ready... PANIC!!\n");
+     if(rf_core_power_up() != RF_CORE_CMD_OK) {
+       PRINTF("rf_core_power_up() failed\n");
+       return;
+diff --git a/os/lib/assert.c b/os/lib/assert.c
+index 8268f15e1..031470042 100644
+--- a/os/lib/assert.c
++++ b/os/lib/assert.c
+@@ -33,7 +33,9 @@
+ void
+ _xassert(const char *file, int lineno)
+ {
++#ifndef DISABLE_ALL_OUTPUT
+   printf("Assertion failed: file %s, line %d.\n", file, lineno);
++#endif
+   /*
+    * loop for a while;
+    * call _reset_vector__();
+diff --git a/os/net/net-debug.h b/os/net/net-debug.h
+index e724df195..48131624a 100644
+--- a/os/net/net-debug.h
++++ b/os/net/net-debug.h
+@@ -54,7 +54,9 @@ void net_debug_lladdr_print(const uip_lladdr_t *addr);
+ #define DEBUG_FULL      DEBUG_ANNOTATE | DEBUG_PRINT
+ 
+ /* PRINTA will always print if the debug routines are called directly */
++#ifndef DISABLE_ALL_OUTPUT
+ #define PRINTA(...) printf(__VA_ARGS__)
++#endif
+ 
+ #if (DEBUG) & DEBUG_ANNOTATE
+ #define ANNOTATE(...) printf(__VA_ARGS__)
+-- 
+2.13.1
+

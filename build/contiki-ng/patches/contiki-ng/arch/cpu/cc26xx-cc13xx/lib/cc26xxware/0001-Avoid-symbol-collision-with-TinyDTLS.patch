@@ -1,0 +1,37 @@
+From c6f925ebeccf07dd3bf8169f9d3111d3e0535c06 Mon Sep 17 00:00:00 2001
+From: Antonio Langiu <antonio.langiu@studenti.polito.it>
+Date: Tue, 22 May 2018 19:21:52 +0200
+Subject: [PATCH] Avoid symbol collision with TinyDTLS
+
+---
+ driverlib/rom_crypto.c | 8 ++++----
+ 1 file changed, 4 insertions(+), 4 deletions(-)
+
+diff --git a/driverlib/rom_crypto.c b/driverlib/rom_crypto.c
+index bf50cc1..39627d0 100644
+--- a/driverlib/rom_crypto.c
++++ b/driverlib/rom_crypto.c
+@@ -195,16 +195,16 @@ ECC_initialize(uint32_t *pWorkzone)
+ }
+ 
+ typedef uint8_t(*ecc_keygen_t)(uint32_t *, uint32_t *,uint32_t *, uint32_t *);
+-ecc_keygen_t ecc_generatekey = (ecc_keygen_t)(0x10017dbd);
++static ecc_keygen_t ecc_generatekey = (ecc_keygen_t)(0x10017dbd);
+ 
+ typedef uint8_t(*ecdsa_sign_t)(uint32_t *, uint32_t *,uint32_t *, uint32_t *, uint32_t *);
+-ecdsa_sign_t ecc_ecdsa_sign = (ecdsa_sign_t)(0x10017969);
++static ecdsa_sign_t ecc_ecdsa_sign = (ecdsa_sign_t)(0x10017969);
+ 
+ typedef uint8_t(*ecdsa_verify_t)(uint32_t *, uint32_t *,uint32_t *, uint32_t *, uint32_t *);
+-ecdsa_verify_t ecc_ecdsa_verify = (ecdsa_verify_t)(0x10017b01);
++static ecdsa_verify_t ecc_ecdsa_verify = (ecdsa_verify_t)(0x10017b01);
+ 
+ typedef uint8_t(*ecdh_computeSharedSecret_t)(uint32_t *, uint32_t *,uint32_t *, uint32_t *, uint32_t *);
+-ecdh_computeSharedSecret_t ecdh_computeSharedSecret = (ecdh_computeSharedSecret_t)(0x10017ded);
++static ecdh_computeSharedSecret_t ecdh_computeSharedSecret = (ecdh_computeSharedSecret_t)(0x10017ded);
+ 
+ //*****************************************************************************
+ // ECC_generateKey
+-- 
+2.13.1
+
