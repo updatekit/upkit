@@ -29,7 +29,7 @@ enum memory_objects_enum {
 
 pull_error memory_open_impl(mem_object* ctx, obj_id id, mem_mode_t mode);
 
-int memory_read_impl(mem_object* ctx, void* memory_buffer, uint16_t size, uint32_t offset);
+int memory_read_impl(mem_object* ctx, void* memory_buffer, address_t size, address_t offset);
 
 int memory_write_impl(mem_object* ctx, const void* memory_buffer, uint16_t size, uint32_t offset);
 
