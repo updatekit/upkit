@@ -52,8 +52,12 @@ pull_error verify_object(mem_object* obj, digest_func digest, const uint8_t* x, 
         goto error;
     }
     int readed = 0;
-    while (offset < final_offset &&
-            (readed = memory_read(obj, buffer, step, offset)) > 0) {
+    while (offset < final_offset) {
+        if ((readed = memory_read(obj, buffer, step, offset)) != step) {
+            log_error(MEMORY_READ_ERROR, "Error reading memory to calculate digest\n");
+            err = MEMORY_READ_ERROR;
+            goto error;
+        }
         err = digest.update(&ctx, buffer, readed);
         if (err) {
             goto error;
