@@ -2,11 +2,10 @@
 #define _PROJECT_CONF_H
 
 // Define the RF Core channel
-#undef RF_CHANNEL
-#define RF_CHANNEL 25
+#undef IEEE802154_CONF_DEFAULT_CHANNEL
+#define IEEE802154_CONF_DEFAULT_CHANNEL 26
 
-#if EVALUATE_ENERGY == 1
-#define ENERGEST_CONF_ON 1
-#endif
+#define COAP_DTLS_PSK_DEFAULT_IDENTITY "ThisIsMyIdentity"
+#define COAP_DTLS_PSK_DEFAULT_KEY      "ThisIsOurSecret1"
 
 #endif // _PROJECT_CONF_H
