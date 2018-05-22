@@ -70,9 +70,8 @@ static void echo_reply_handler(uip_ipaddr_t *source, uint8_t ttl, uint8_t *data,
     echo_reply++;
 }
 
-static struct etimer et_led;
-PROCESS_THREAD(main_process, ev, data) {
-    PROCESS_BEGIN();
+
+void test_memory() {
     /* This is a test to ensure that the image can not write the internal
      * flash memory */
 #ifdef DEBUG
@@ -88,7 +87,12 @@ PROCESS_THREAD(main_process, ev, data) {
     }
     log_info("\nMemory is %s\n", i==0? "blocked": "not blocked");
 #endif
-    etimer_set(&et, (CLOCK_SECOND*15));
+}
+
+static struct etimer et_led;
+PROCESS_THREAD(main_process, ev, data) {
+    PROCESS_BEGIN();
+    etimer_set(&et, (CLOCK_SECOND*5));
     PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
     uip_icmp6_echo_reply_callback_add(&echo_reply_notification, echo_reply_handler);
     HARDCODED_PROV_SERVER(&server_addr);
@@ -124,22 +128,18 @@ void specialize_conn_functions() {
 #ifdef CONN_UDP
     type = TXP_UDP;
     conn_data = NULL;
-#elif CONN_DTLS_ECDSA
-    type = TXP_DTLS_ECDSA;
-    conn_data = &dtls_ecdsa_data;
 #elif CONN_DTLS_PSK
     type = TXP_DTLS_PSK;
-    conn_data = &dtls_psk_data;
+    conn_data = NULL;
 #endif
 }
-
 
 
 PROCESS_THREAD(update_process, ev, data) {
     PROCESS_BEGIN();
     specialize_crypto_functions();
     specialize_conn_functions();
-    txp_init(&txp, "coap://[fd00::1]", COAP_DEFAULT_PORT, type, conn_data);
+    txp_init(&txp, "coaps://[fd00::1]", COAP_DEFAULT_PORT, type, conn_data);
     // XXX Check this error
     log_info("Subscribing to the server\n");
     pull_error err = subscribe(&sctx, &txp, "/next_version", &obj_t);
