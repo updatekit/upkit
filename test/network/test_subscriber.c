@@ -18,8 +18,8 @@
 
 #define FOREACH_TEST(DO) \
     DO(update_polling,0)
-TEST_RUNNER();
 
+TEST_RUNNER();
 
 #define PROV_SERVER "localhost"
 

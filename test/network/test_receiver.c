@@ -21,9 +21,9 @@
 
 #define FOREACH_TEST(DO) \
     DO(get_firmware, 0) \
-    DO(get_firmware_dtls, 0) \
     DO(receiver_chunk_invalid_transport, 0) \
     DO(get_firmware_invalid_resource, 0)
+//    DO(get_firmware_dtls, 0)
 TEST_RUNNER();
 
 #define PROV_SERVER "localhost"
@@ -80,7 +80,6 @@ void test_get_firmware_dtls(void) {
     TEST_ASSERT_TRUE(!err);
     txp_end(&txp);
 }
-
 
 void test_receiver_chunk_invalid_transport(void) {
     txp_ctx txp;

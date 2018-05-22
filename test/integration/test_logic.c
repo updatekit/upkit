@@ -26,8 +26,8 @@
 #include <unistd.h>
 
 #define FOREACH_TEST(DO) \
-    DO(logic_dtls,0) \
     DO(logic_udp, 0)
+//    DO(logic_dtls,0)
 TEST_RUNNER();
 
 #define POLLING_FREQUENCY 1
