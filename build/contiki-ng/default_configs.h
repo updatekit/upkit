@@ -13,10 +13,10 @@ static uint8_t y[32] = {
 };
 
 #if defined(CONN_DTLS_ECDSA) || defined(CONN_DTLS_PSK)
-#include "coap-dtls.h"
 
 #ifdef CONN_DTLS_ECDSA
 #define SERVER_KEY_SIZE 32
+/// XXX This is no more supported since it is not supported by Contiki-NG
 static const uint8_t dtls_server_x_g[32] = {
     0xcf,0x9c,0xf2,0xf8,0x44,0x8b,0xe2,0x7f,0xff,0xc9,0xe1,0x69,0xdb,0x84,0x7c,0xdf,
     0xe6,0xd6,0xa9,0xd3,0x5b,0xbf,0xe9,0x99,0xc9,0x48,0x47,0xe9,0x5a,0x21,0x58,0xdb
@@ -56,17 +56,7 @@ static dtls_ecdsa_data_t dtls_ecdsa_data = {
 };
 
 #endif /* CONN_DTLS_ECDSA */
-
-#ifdef CONN_DTLS_PSK
-static dtls_psk_data_t dtls_psk_data = {
-    .hint = "CoAP",
-    .hint_len = 4,
-    .key = "ThisIsOurSecret1",
-    .key_len = 16
-};
-#endif /* CONN_DTLS_PSK */
-
-#endif
+#endif /* defined(CONN_DTLS_ECDSA) || defined(CONN_DTLS_PSK) */
 
 #endif /* DEFAULT_CONFIGS_H_ */
 

@@ -11,7 +11,7 @@ echo "Cloning the Contiki-NG repository..."
 git clone --quiet --progress \
     https://github.com/contiki-ng/contiki-ng.git ext/contiki-ng
 (cd ext/contiki-ng
-git checkout  51f5073
+git checkout  d889b8f364
 git submodule update --init --recursive
 )
 echo "Cloning the Contiki-NG repository...done"

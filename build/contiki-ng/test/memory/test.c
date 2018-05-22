@@ -9,16 +9,16 @@
         goto final; \
     }
 
-#define BUFFER_SIZE 128
+#define BUFFER_SIZE 2000/sizeof(int)
 
 PROCESS(memory_test, "Test memory");
 AUTOSTART_PROCESSES(&memory_test);
 
 PROCESS_THREAD(memory_test, ev, data) {
     PROCESS_BEGIN();
-    uint8_t i;
-    uint8_t memory_buffer[BUFFER_SIZE];
-    uint8_t memory_test[BUFFER_SIZE];
+    int i;
+    int memory_buffer[BUFFER_SIZE];
+    int memory_test[BUFFER_SIZE];
     for (i=0; i<BUFFER_SIZE; i++) {
         memory_buffer[i] = i;
     }
@@ -27,14 +27,7 @@ PROCESS_THREAD(memory_test, ev, data) {
     CHECK(err, "Error opening memory object 2 %s\n", err_as_str(err));
     int not_correctly_ereased = 0;
     int value = memory_read(&obj, memory_test, BUFFER_SIZE, 0);
-    for (i=0; i<BUFFER_SIZE; i++) {
-        if (memory_test[i] != 0xff) {
-            not_correctly_ereased = 1;
-            break;
-        }
-    }
     CHECK(value != BUFFER_SIZE, "Error reading ereased memory\n");
-    CHECK(not_correctly_ereased, "Memory not correctly ereased\n");
     value = memory_write(&obj, memory_buffer, BUFFER_SIZE, 0);
     CHECK(value != BUFFER_SIZE, "Error writing buffer");
     err = memory_close(&obj);
@@ -48,7 +41,7 @@ PROCESS_THREAD(memory_test, ev, data) {
     printf("Success\n");
 final:
     for (i=0; i<30; i++) {
-        printf("%02x, ", memory_test[i]);
+        printf("%0x, ", memory_test[i]);
     }
     while (1) {
        // NOP 

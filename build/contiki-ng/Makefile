@@ -9,15 +9,12 @@ all: ota
 #####################################################
 #               Configurable Parameters             #
 #####################################################
-# Accepted values: 0 1 2 3
-LOGGER_VERBOSITY ?= 0
-# Accepted values: TINYDTLS, CRYPTOAUTHLIB, TINYCRYPT
-SEC_LIB ?= CRYPTOAUTHLIB
+# Accepted values: 0 1 2 3 4
+LOGGER_VERBOSITY ?= 4
+# Accepted values: NULL, TINYDTLS, CRYPTOAUTHLIB, TINYCRYPT
+SEC_LIB ?= TINYDTLS
 # Accepted values: CONN_UDP, CONN_DTLS_PSK, CONN_DTLS_ECDSA
-CONN_TYPE ?= CONN_UDP
-# Evaluator
-EVALUATE_TIME ?= 1
-EVALUATE_ENERGY ?= 1
+CONN_TYPE ?= CONN_DTLS_PSK
 #####################################################
 #              End Configurable Parameters          #
 #####################################################
@@ -42,10 +39,21 @@ CFLAGS += $(LIBPULL_INCLUDES)
 
 # Include CryptoAuthLib for performing verification
 EXT=ext
-ifeq ($(SEC_LIB),TINYDTLS)
-	# TinyDTLS is included in any case since it may be needed for the DTLS
-	# connection. However, if is not used the compiler is enough smart to
-	# remove the symbols
+ifeq ($(SEC_LIB), TINYDTLS)
+	ifneq ($(CONN_TYPE),CONN_DTLS_PSK)
+		PROJECTDIRS += ext/tinydtls ext/tinydtls/aes ext/tinydtls/sha2 ext/tinydtls/ecc
+		PROJECT_SOURCEFILES += dtls.c crypto.c hmac.c rijndael.c sha2.c
+		PROJECT_SOURCEFILES += ccm.c netq.c dtls_time.c peer.c session.c ecc.c
+		CFLAGS += -Iext/tinydtls -Iext/tinydtls/aes -Iext/tinydtls/sha2 -Iext/tinydtls/ecc
+		CFLAGS += -DDTLS_CONF_ECC=1 -DWITH_SHA256 -DSHA2_USE_INTTYPES_H
+		TINYDTLS_NDEBUG ?= 0
+		CFLAGS += -DDTLS_CONF_NDEBUG=$(TINYDTLS_NDEBUG) -DDEBUG_TINYDTLS=1
+		ifeq ($(TINYDTLS_NDEBUG),1)
+			TINYDTLS_SOURCEFILES += dtls_debug.c
+		else
+			CFLAGS += -DNDEBUG=1
+		endif
+	endif
 	CFLAGS += -DWITH_TINYDTLS=1
 else ifeq ($(SEC_LIB),CRYPTOAUTHLIB)
 	CFLAGS += -DWITH_CRYPTOAUTHLIB
@@ -65,30 +73,14 @@ else ifeq ($(SEC_LIB),TINYCRYPT)
 	PROJECT_SOURCEFILES += ecc_dsa.c sha256.c utils.c ecc.c
 endif
 
-# Include Tinydtls sources
-PROJECTDIRS += ext/tinydtls ext/tinydtls/aes ext/tinydtls/sha2 ext/tinydtls/ecc
-PROJECT_SOURCEFILES += dtls.c crypto.c hmac.c rijndael.c sha2.c
-PROJECT_SOURCEFILES += ccm.c netq.c dtls_time.c peer.c session.c ecc.c
-CFLAGS += -Iext/tinydtls -Iext/tinydtls/aes -Iext/tinydtls/sha2 -Iext/tinydtls/ecc
-CFLAGS += -DDTLS_CONF_ECC=1 -DWITH_SHA256 -DSHA2_USE_INTTYPES_H
-TINYDTLS_NDEBUG ?= 0
-CFLAGS += -DDTLS_CONF_NDEBUG=$(TINYDTLS_NDEBUG) -DDEBUG_TINYDTLS=1
-ifeq ($(TINYDTLS_NDEBUG),1)
-	TINYDTLS_SOURCEFILES += dtls_debug.c
-else
-	CFLAGS += -DNDEBUG=1
-endif
-
 # Configure the connection type
 CFLAGS += -D$(CONN_TYPE)=1
 ifeq ($(CONN_TYPE),CONN_UDP)
 	# I do not need to set any parameter
-else ifeq ($(CONN_TYPE),CONN_DTLS_ECDSA)
-	CFLAGS += -DWITH_DTLS_COAP=1
-	#CFLAGS += -DDTLS_MAX_BUF=250
 else ifeq ($(CONN_TYPE),CONN_DTLS_PSK)
-	CFLAGS += -DWITH_DTLS_COAP=1
-	CFLAGS += -DDTLS_CONF_PSK=1
+	MAKE_WITH_DTLS=1
+	MAKE_COAP_DTLS_KEYSTORE=MAKE_COAP_DTLS_KEYSTORE_SIMPLE
+	CFLAGS+= -DSHA2_USE_INTTYPES_H=1 -DWITH_SHA256=1
 endif
 
 # Coap Modules
@@ -105,12 +97,8 @@ CFLAGS += -DBOOTLOADER_CTX_START_OFFSET=$(BOOTLOADER_CTX_START_OFFSET)
 CFLAGS += -DBOOTLOADER_CTX_END_OFFSET=$(BOOTLOADER_CTX_END_OFFSET)
 CFLAGS += -DRECOVERY_IMAGE=$(RECOVERY_IMAGE)
 
-CFLAGS += -DEVALUATE_TIME=$(EVALUATE_TIME)
-CFLAGS += -DEVALUATE_ENERGY=$(EVALUATE_ENERGY)
 CFLAGS += -DCONN_TYPE=$(CONN_TYPE)
 CFLAGS += -DSEC_LIB=$(SEC_LIB)
-CFLAGS += -DCONN_TYPE_STR="\"$(CONN_TYPE)\""
-CFLAGS += -DSEC_LIB_STR="\"$(SEC_LIB)\""
 
 OTA_OFFSET="($(IMAGE_START_PAGE)*$(PAGE_SIZE))+$(MANIFEST_SIZE)"
 OTA_LENGTH="(($(IMAGE_END_PAGE)-$(IMAGE_START_PAGE))*$(PAGE_SIZE)-$(MANIFEST_SIZE))"

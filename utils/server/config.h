@@ -23,7 +23,7 @@ typedef struct psk_key_t {
 } psk_key_t;
 
 static const psk_key_t psk_key = {
-    .identity = "CoAP",
+    .identity = "ThisIsMyIdentity",
     .key = (unsigned char*) "ThisIsOurSecret1",
     .len = 16
 };

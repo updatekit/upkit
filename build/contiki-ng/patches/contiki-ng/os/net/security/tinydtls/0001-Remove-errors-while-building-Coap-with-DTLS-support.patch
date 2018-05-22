@@ -1,0 +1,36 @@
+From 0e33bc57f7da1bc3e53f8619a2521edac78832f0 Mon Sep 17 00:00:00 2001
+From: Antonio Langiu <antonio.langiu@studenti.polito.it>
+Date: Tue, 22 May 2018 19:19:48 +0200
+Subject: [PATCH] Remove errors while building Coap with DTLS support
+
+---
+ sha2/sha2.h | 1 +
+ tinydtls.h  | 2 --
+ 2 files changed, 1 insertion(+), 2 deletions(-)
+
+diff --git a/sha2/sha2.h b/sha2/sha2.h
+index 838d18d..956438e 100644
+--- a/sha2/sha2.h
++++ b/sha2/sha2.h
+@@ -40,6 +40,7 @@ extern "C" {
+ #endif
+ 
+ #include <inttypes.h>
++#include <stddef.h>
+ 
+ /*** SHA-256/384/512 Various Length Definitions ***********************/
+ #define DTLS_SHA256_BLOCK_LENGTH		64
+diff --git a/tinydtls.h b/tinydtls.h
+index 06b3896..7315212 100644
+--- a/tinydtls.h
++++ b/tinydtls.h
+@@ -145,6 +145,4 @@ dtls_fls(unsigned int i) {
+ }
+ #endif /* HAVE_FLS */
+ 
+-#include "dtls-support.h"
+-
+ #endif /* _DTLS_TINYDTLS_H_ */
+-- 
+2.13.1
+

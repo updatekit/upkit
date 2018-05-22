@@ -44,42 +44,44 @@
  * - The TI CC1350 LaunchPad
  * @{
  */
-#include "ti-lib.h"
-#include "contiki.h"
-#include "contiki-net.h"
-#include "leds.h"
-#include "lpm.h"
-#include "gpio-interrupt.h"
-#include "dev/oscillators.h"
-#include "ieee-addr.h"
-#include "vims.h"
-#include "board-peripherals.h"
-#include "board-i2c.h"
-#include "dev/cc26xx-uart.h"
-#include "dev/soc-rtc.h"
-#include "rf-core/rf-core.h"
-#include "sys_ctrl.h"
-#include "uart.h"
-#include "sys/clock.h"
-#include "sys/rtimer.h"
-#include "sys/node-id.h"
-#include "sys/platform.h"
-#include "lib/random.h"
-#include "lib/sensors.h"
-#include "button-sensor.h"
-#include "dev/serial-line.h"
-#include "net/mac/framer/frame802154.h"
+ #include "ti-lib.h"
+ #include "contiki.h"
+ #include "contiki-net.h"
+ #include "lpm.h"
+ #include "dev/leds.h"
+ #include "dev/gpio-hal.h"
+ #include "dev/oscillators.h"
+ #include "ieee-addr.h"
+ #include "ble-addr.h"
+ #include "vims.h"
+ #include "dev/cc26xx-uart.h"
+ #include "dev/soc-rtc.h"
+ #include "dev/serial-line.h"
+ #include "rf-core/rf-core.h"
+ #include "sys_ctrl.h"
+ #include "uart.h"
+ #include "sys/clock.h"
+ #include "sys/rtimer.h"
+ #include "sys/node-id.h"
+ #include "sys/platform.h"
+ #include "lib/random.h"
+ #include "lib/sensors.h"
+ #include "button-sensor.h"
+ #include "dev/serial-line.h"
+ #include "dev/button-hal.h"
+ #include "net/mac/framer/frame802154.h"
+ #include "board-peripherals.h"
 
-#include "driverlib/driverlib_release.h"
+ #include "driverlib/driverlib_release.h"
 
-#include <stdio.h>
+ #include <stdio.h>
 /*---------------------------------------------------------------------------*/
 /* Log configuration */
 #include "sys/log.h"
 #define LOG_MODULE "CC26xx/CC13xx"
 #define LOG_LEVEL LOG_LEVEL_MAIN
 /*---------------------------------------------------------------------------*/
-unsigned short node_id = 0;
+//unsigned short node_id = 0;
 /*---------------------------------------------------------------------------*/
 /** \brief Board specific iniatialisation */
 void board_init(void);
@@ -140,7 +142,7 @@ pull_platform_init_stage_one()
 
   pull_board_init();
 
-  gpio_interrupt_init();
+  gpio_hal_init();
 
   //leds_init();
   //fade(LEDS_RED);
@@ -153,6 +155,7 @@ pull_platform_init_stage_one()
    */
   //ti_lib_pwr_ctrl_io_freeze_disable();
 
+  ti_lib_rom_int_enable(INT_AON_GPIO_EDGE);
   ti_lib_int_master_enable();
 
   soc_rtc_init();
@@ -203,7 +206,7 @@ pull_platform_init_stage_three()
 }
 *---------------------------------------------------------------------------*/
 void
-platform_idle()
+pull_platform_idle()
 {
   /* Drop to some low power mode */
   lpm_drop();

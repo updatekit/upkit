@@ -16,7 +16,7 @@
 #include "transport/transport_ercoap.h"
 #include "memory_headers.h"
 
-#include "evaluator.h"
+#define HARDCODED_PROV_SERVER(addr) uip_ip6addr(addr,0xfd00,0x0,0x0,0x0,0x0,0x0,0x0,0x1)
 
 #if TARGET == srf06-cc26xx
 #include "driverlib/flash.h"
@@ -39,7 +39,7 @@ int default_CSPRNG(uint8_t *dest, unsigned int size) {
 
 PROCESS(update_process, "OTA Update process");
 PROCESS(main_process, "Main process");
-AUTOSTART_PROCESSES(&update_process, &main_process);
+AUTOSTART_PROCESSES(&main_process);
 
 static txp_ctx txp;
 static subscriber_ctx sctx;
@@ -61,12 +61,20 @@ static identity_t identity_g = {
     .random = 0x5678
 };
 
-static struct etimer et_led;
-PROCESS_THREAD(main_process, ev, data) {
-    PROCESS_BEGIN();
-#ifdef DEBUG
+#include "net/ipv6/uip-icmp6.h"
+static uip_ipaddr_t server_addr;
+static struct uip_icmp6_echo_reply_notification echo_reply_notification;
+static uint8_t echo_reply = 0;
+
+static void echo_reply_handler(uip_ipaddr_t *source, uint8_t ttl, uint8_t *data, uint16_t datalen) {
+    echo_reply++;
+}
+
+
+void test_memory() {
     /* This is a test to ensure that the image can not write the internal
      * flash memory */
+#ifdef DEBUG
     log_info("Trying to write internal memory");
     uint8_t buff[32];
     uint8_t i = 0xff;
@@ -79,6 +87,22 @@ PROCESS_THREAD(main_process, ev, data) {
     }
     log_info("\nMemory is %s\n", i==0? "blocked": "not blocked");
 #endif
+}
+
+static struct etimer et_led;
+PROCESS_THREAD(main_process, ev, data) {
+    PROCESS_BEGIN();
+    etimer_set(&et, (CLOCK_SECOND*5));
+    PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
+    uip_icmp6_echo_reply_callback_add(&echo_reply_notification, echo_reply_handler);
+    HARDCODED_PROV_SERVER(&server_addr);
+    do {
+        uip_icmp6_send(&server_addr, ICMP6_ECHO_REQUEST, 0, UIP_ICMP6_ECHO_REQUEST_LEN);
+        etimer_set(&et, (CLOCK_SECOND/2 * (echo_reply == 0? 10:1)));
+        PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
+    } while(!echo_reply);
+    process_start(&update_process, NULL);
+
     do {
         leds_toggle(LEDS_RED);
         etimer_set(&et_led, (CLOCK_SECOND*1));
@@ -104,51 +128,19 @@ void specialize_conn_functions() {
 #ifdef CONN_UDP
     type = TXP_UDP;
     conn_data = NULL;
-#elif CONN_DTLS_ECDSA
-    type = TXP_DTLS_ECDSA;
-    conn_data = &dtls_ecdsa_data;
 #elif CONN_DTLS_PSK
     type = TXP_DTLS_PSK;
-    conn_data = &dtls_psk_data;
+    conn_data = NULL;
 #endif
 }
 
-#if EVALUATE_TIME == 1 || EVALUATE_ENERGY == 1
-#define TOSTR(token) #token
-version_t test_id = 0x0;
-DEFINE_EVALUATOR(local);
-DEFINE_EVALUATOR(global);
-
-#include "net/ipv6/uip-icmp6.h"
-static uip_ipaddr_t server_addr;
-static struct uip_icmp6_echo_reply_notification echo_reply_notification;
-static uint8_t echo_reply = 0;
-
-static void echo_reply_handler(uip_ipaddr_t *source, uint8_t ttl, uint8_t *data, uint16_t datalen) {
-    echo_reply++;
-}
-#endif
 
 PROCESS_THREAD(update_process, ev, data) {
     PROCESS_BEGIN();
-#if EVALUATE_TIME == 1 || EVALUATE_ENERGY == 1
-    NETSTACK_RADIO.set_value(RADIO_PARAM_TXPOWER, 5);
-    etimer_set(&et, (CLOCK_SECOND*15));
-    PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
-    uip_icmp6_echo_reply_callback_add(&echo_reply_notification, echo_reply_handler);
-    HARDCODED_PROV_SERVER(&server_addr);
-    do {
-        uip_icmp6_send(&server_addr, ICMP6_ECHO_REQUEST, 0, UIP_ICMP6_ECHO_REQUEST_LEN);
-        etimer_set(&et, (CLOCK_SECOND/2 * (echo_reply == 0? 10:1)));
-        PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
-    } while(echo_reply <= 10);
-    printf("== TEST %d == SECLIB=" SEC_LIB_STR " CONN_TYPE=" CONN_TYPE_STR " ==\n", test_id);
-#endif
-    START_EVALUATOR(global);
     specialize_crypto_functions();
     specialize_conn_functions();
-    START_EVALUATOR(local);
-    txp_init(&txp, "", COAPS_DEFAULT_PORT, type, conn_data);
+    txp_init(&txp, "coaps://[fd00::1]", COAP_DEFAULT_PORT, type, conn_data);
+    // XXX Check this error
     log_info("Subscribing to the server\n");
     pull_error err = subscribe(&sctx, &txp, "/next_version", &obj_t);
     if (err) {
@@ -166,7 +158,6 @@ PROCESS_THREAD(update_process, ev, data) {
                 PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
             }
         }
-        EVALUATE_AND_RESTART(subscribe, local);
         // get the oldest slot
         uint16_t version;
         err = get_oldest_firmware(&id, &version, &obj_t);
@@ -203,8 +194,6 @@ PROCESS_THREAD(update_process, ev, data) {
             }
         }
         log_info("Firmware received\n");
-        STOP_EVALUATOR(local);
-        PRINT_EVALUATOR(receive, local);
         err = receiver_close(&rctx);
         if (err) {
             log_error(err, "Error closing the reciver\n");
@@ -214,7 +203,7 @@ PROCESS_THREAD(update_process, ev, data) {
             log_debug("Error receving firmware...restarting\n");
             continue;
         }
-        memory_close(&new_firmware); // This flashes the buffer.
+        memory_close(&new_firmware);
         memory_open(&new_firmware, id, READ_ONLY);
 
         uint8_t buffer[BUFFER_LEN];
@@ -224,12 +213,10 @@ PROCESS_THREAD(update_process, ev, data) {
             log_error(GENERIC_ERROR, "Failure initializing ATECC508A\n");
         }
 #endif
-        START_EVALUATOR(local);
         watchdog_stop();
+        log_info("Start verification\n");
         err = verify_object(&new_firmware, df, x, y, ef, buffer, BUFFER_LEN);
         watchdog_start();
-        STOP_EVALUATOR(local);
-        PRINT_EVALUATOR(total_verify, local);
 #ifdef WITH_CRYPTOAUTHLIB
         atcab_release();
 #endif
@@ -242,11 +229,6 @@ PROCESS_THREAD(update_process, ev, data) {
             continue;
         }
         log_info("Received image is valid\n");
-        STOP_EVALUATOR(global)
-        PRINT_EVALUATOR(total_update_process, global);
-#if EVALUATE_TIME == 1 || EVALUATE_ENERGY == 1
-        invalidate_object(id, &obj_t);
-#endif
         break;
     }
     unsubscribe(&sctx);
