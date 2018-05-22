@@ -20,7 +20,6 @@
 #include "bootloader.h"
 #include "../memory_headers.h"
 #include "../default_configs.h"
-#include "../evaluator.h"
 
 #define BUFFER_SIZE 0x100 // Defined in Makefile.conf
 #define FLASH_PAGE_SIZE PAGE_SIZE // Defined in Makefile.conf
@@ -98,15 +97,8 @@ void flash_write_protect() {
 }
 
 version_t test_id = 0x0;
-DEFINE_EVALUATOR(local);
-DEFINE_EVALUATOR(global);
 
 void pull_bootloader() {
-#if EVALUATE_TIME == 1
-    printf("== BOOTLOADER == SEC_LIB=" SEC_LIB_STR "\n");
-    START_EVALUATOR(local);
-    START_EVALUATOR(global);
-#endif
     specialize_crypto_functions();
     /************ OPEN INTERNAL IMAGE **********/
     state = OPEN_INTERNAL_IMAGE;
@@ -126,7 +118,6 @@ void pull_bootloader() {
         goto error;
     }
     if ((ctx.startup_flags & FIRST_BOOT) == FIRST_BOOT) {
-        START_EVALUATOR(local);
         state = ERASE_SLOTS;
         log_debug("Erasing slots\n");
         obj_id i;
@@ -157,8 +148,6 @@ void pull_bootloader() {
             goto error;
         };
         log_debug("Bootstrap Success\n");
-        STOP_EVALUATOR(local);
-        PRINT_EVALUATOR(first_boot, local);
     }
     memory_close(&bootloader_object); // close bootloader context
     /************ READ_RUNNING_MANIFEST ************/
@@ -178,7 +167,6 @@ void pull_bootloader() {
     }
     log_debug("Newest firmware: slot %u with version %x\n", id, version);
     if (version > get_version(&mt)) {
-        START_EVALUATOR(local);
         /*********** OPEN NEW IMAGE *********/
         err = memory_open(&new_firmware, id, READ_ONLY);
         if (err) {
@@ -211,8 +199,6 @@ void pull_bootloader() {
             goto error;
         }
         already_validated_flag = 1;
-        STOP_EVALUATOR(local);
-        PRINT_EVALUATOR(upgrade, local);
     }
     goto boot;
 error:
@@ -220,7 +206,6 @@ error:
 boot:
     log_info("Booting\n");
     /************ VALIDATING_IMAGE *********/
-    START_EVALUATOR(local);
 #ifdef WITH_CRYPTOAUTHLIB
     ATCA_STATUS status = atcab_init(&cfg_ateccx08a_i2c_default);
     if (status != ATCA_SUCCESS) {
@@ -241,13 +226,9 @@ boot:
 #ifdef WITH_CRYPTOAUTHLIB
     atcab_release();
 #endif
-    STOP_EVALUATOR(local);
-    PRINT_EVALUATOR(internal_image_verification, local);
     state = BOOT;
     flash_write_protect();
     log_info("Loading object\n");
-    STOP_EVALUATOR(global);
-    PRINT_EVALUATOR(booting_process, global);
     load_object(OBJ_RUN, &mt); // refactor this function
 fatal_error:
     /* If you arrive here, you should reboot and try again */

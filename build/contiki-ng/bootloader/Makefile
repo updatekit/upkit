@@ -10,12 +10,9 @@ all: ota
 # 				Configurable Parameters             #
 #####################################################
 # Accepted values: 0 1 2 3 4
-LOGGER_VERBOSITY ?= 4
+LOGGER_VERBOSITY ?= 0
 # Accepted values: NULL, TINYDTLS, CRYPTOAUTHLIB, TINYCRYPT
-SEC_LIB ?= TINYCRYPT
-# Evaluate Time
-EVALUATE_TIME ?= 0
-EVALUATE_ENERGY ?= 0 
+SEC_LIB ?= TINYDTLS
 #####################################################
 #   		   End Configurable Parameters          #
 #####################################################
@@ -52,7 +49,7 @@ ifeq ($(SEC_LIB),TINYDTLS)
 	ifeq ($(DTLS_DEBUG),1)
 		TINYDTLS_SOURCEFILES += dtls_debug.c
 	else
-		CFLAGS += -DNDEBUG=0
+		CFLAGS += -DNDEBUG=1
 	endif
 	# Tinydtls configurations
 	CFLAGS += -DDTLS_CONF_ECC=1
