@@ -1,7 +1,7 @@
-#ifndef _TRANSPORT_ERCOAP_H
-#define _TRANSPORT_ERCOAP_H
+#ifndef TRANSPORT_ERCOAP_H_
+#define TRANSPORT_ERCOAP_H_
 
-#include "common/callback.h"
+#include "common/libpull.h"
 #include "network/transport.h"
 
 #include "contiki.h"
@@ -18,7 +18,6 @@ struct txp_ctx_ {
     coap_endpoint_t endpoint;
     coap_message_t request;
     coap_request_state_t request_state;
-    uint16_t port;
 };
 
 void ercoap_handler(coap_message_t* response);
@@ -53,4 +52,4 @@ pull_error txp_observe(txp_ctx* ctx, const char* resource, const char* token, ui
 
 void txp_end(txp_ctx* ctx);
 
-#endif // _TRANSPORT_ERCOAP_H
+#endif // TRANSPORT_ERCOAP_H_

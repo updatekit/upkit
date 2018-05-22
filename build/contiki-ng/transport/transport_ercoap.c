@@ -5,39 +5,19 @@
 
 #include "pt.h"
 
-#if defined(CONN_DTLS_PSK) || defined(CONN_DTLS_ECDSA)
-#include "coap-dtls.h"
-#endif
-
 static txp_ctx* shared_ctx = NULL;
 
-// The received string will always be ignored by this implementation
 pull_error txp_init(txp_ctx* ctx, const char* addr, uint16_t port, conn_type type, void* data) {
-    switch (type) {
-#ifdef CONN_UDP
-        case TXP_UDP:
-            ctx->port = COAP_DEFAULT_PORT;
-            break;
-#elif CONN_DTLS_PSK
-        case TXP_DTLS_PSK:
-            ctx->port = COAPS_DEFAULT_PORT;
-            coap_set_psk_data((dtls_psk_data_t*) data);
-            break;
-#elif CONN_DTLS_ECDSA
-        case TXP_DTLS_ECDSA:
-            ctx->port = COAPS_DEFAULT_PORT;
-            coap_set_ecdsa_data((dtls_ecdsa_data_t*) data);
-            break;
-#endif
-
-        default:
-            return TRANSPORT_INIT_ERROR;
-    }
-    coap_engine_init();
+    // TODO validate input
     if (!coap_endpoint_parse(addr, strlen(addr), &ctx->endpoint)) {
         log_error(TRANSPORT_INIT_ERROR, "Error parsing the endpoint\n");
         return TRANSPORT_INIT_ERROR;
     }
+    if (!coap_endpoint_connect(&ctx->endpoint)) {
+        log_error(TRANSPORT_INIT_ERROR, "Error connecting to the endpoint\n");
+        return TRANSPORT_INIT_ERROR;
+    }
+
     return PULL_SUCCESS;
 }
 
