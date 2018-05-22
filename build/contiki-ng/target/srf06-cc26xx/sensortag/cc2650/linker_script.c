@@ -42,7 +42,9 @@ MEMORY
      * Customer Configuration Area and Bootloader Backdoor configuration
      * in flash, up to 88 bytes
      */
+#ifndef CCFG_DISABLE
     FLASH_CCFG (RX) : ORIGIN = 0x0001FFA8, LENGTH = 88
+#endif
 
     /* RAM Size 20KB */
     SRAM (RWX) : ORIGIN = 0x20000000, LENGTH = 0x00005000
@@ -96,10 +98,12 @@ SECTIONS
     _stack = .;
     _stack_origin = ORIGIN(SRAM) + LENGTH(SRAM);
 
+#ifndef CCFG_DISABLE
     .ccfg :
     {
         KEEP(*(.ccfg))
     } > FLASH_CCFG
+#endif
 
     /* User_heap_stack section, used to check that there is enough RAM left */
     ._user_heap_stack :
