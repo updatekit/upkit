@@ -180,7 +180,8 @@ void pull_bootloader() {
         // internal memory.
         state = VALIDATE_EXTERNAL_IMAGE;
         watchdog_stop();
-        err = verify_object(&new_firmware, df, x, y, ef, buffer, BUFFER_SIZE);
+        // XXX remove validation
+        //err = verify_object(&new_firmware, df, x, y, ef, buffer, BUFFER_SIZE);
         watchdog_start();
         if (err) {
             invalidate_object(id, &obj_t);
@@ -214,9 +215,10 @@ boot:
     }
 #endif
     watchdog_stop();
-    if (!already_validated_flag) {
+    /// XXX remove validation
+    /*if (!already_validated_flag) {
         err = verify_object(&internal_object, df, x, y, ef, buffer, BUFFER_SIZE);
-    }
+    }*/
     watchdog_start();
 /*    if (err) {
         if (RECOVERY_IMAGE == 0 || restore_recovery_image() != PULL_SUCCESS) {
