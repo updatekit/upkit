@@ -8,9 +8,14 @@ addons:
       - srecord
       - gcovr
 
+env:
+    global:
+        - CODECOV_TOKEN=:uuid-repo-token
+
+
 install:
   - ./autogen.sh
-  - ./configure
+  - ./configure --enable-gcov
 
 script: 
   - make
@@ -19,3 +24,6 @@ script:
   - make assets
   - ./utils/server/server -f assets/fake_firmware_dead >/dev/null 2>&1 &
   - make check
+
+after_success:
+  - bash <(curl -s https://codecov.io/bash)

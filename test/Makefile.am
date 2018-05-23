@@ -3,6 +3,15 @@ AM_CFLAGS = -Wall -I. -I../include -I../ext/tinycrypt/lib/include -I../ext/tinyd
 AM_CFLAGS += -I../build/posix -Isupport -I../ext/unity/src -I../ext/libcoap/include -Imocks
 AM_CFLAGS += -DHAVE_CONFIG_H
 
+if COND_GCOV
+  MAYBE_COVERAGE= -fprofile-arcs -ftest-coverage
+endif
+
+AM_CFLAGS += $(MAYBE_COVERAGE)
+
+MOSTLYCLEANFILES = idsgrep.aux idsgrep.log idsgrep.blg idsgrep.bbl idsgrep.toc \
+				   *.gcda *.gcno *.gcov
+
 LIBS = ../ext/libcoap/.libs/libcoap-1.a ../ext/tinydtls/libtinydtls.a
 LIBS += ../ext/tinycrypt/lib/libtinycrypt.a
 
