@@ -17,5 +17,6 @@ script:
   - make firmware_tool
   - make server
   - make assets
-  - ./utils/server/server -a assets >/dev/null 2>&1 &
+    #- ./utils/server/server -a assets >/dev/null 2>&1 &
+  - ./utils/server/server -a assets &
   - make check
