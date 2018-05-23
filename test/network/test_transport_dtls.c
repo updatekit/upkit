@@ -13,7 +13,7 @@
 
 #define FOREACH_TEST(DO) \
     DO(udp, 0) \
-//    DO(dtls_ecdsa, 0)
+    DO(dtls_ecdsa, 0)
 TEST_RUNNER();
 
 #define PROV_SERVER "localhost"
