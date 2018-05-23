@@ -97,6 +97,10 @@ obj_native/
 assets/
 build/ceedling/*/*
 
+# Coverage
+*.gcda
+*.gcno
+
 # Utils
 utils/fake_firmware_generator
 .vagrant

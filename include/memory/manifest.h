@@ -7,8 +7,8 @@
 #ifndef MANIFEST_H_
 #define MANIFEST_H_
 
-#include "common/libpull.h"
 #include "memory/simple_manifest.h"
+#include "common/libpull.h"
 #include "security/digest.h"
 #include "security/ecc.h"
 #include <stdint.h>

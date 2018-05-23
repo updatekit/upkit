@@ -10,12 +10,15 @@ addons:
 
 install:
   - ./autogen.sh
-  - ./configure
+  - ./configure --enable-gcov
 
 script: 
   - make
   - make firmware_tool
   - make server
   - make assets
-  - ./utils/server/server -a assets >/dev/null 2>&1 &
+  - ./utils/server/server -f assets/fake_firmware_dead >/dev/null 2>&1 &
   - make check
+
+after_success:
+  - bash <(curl -s https://codecov.io/bash)

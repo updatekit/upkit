@@ -61,6 +61,14 @@ AS_IF([test "x$verbosity" == "x"], [
     AC_DEFINE_UNQUOTED([LOGGER_VERBOSITY], [$verbosity],[Define logger verbosity.])
 ])
 
+
+AC_ARG_ENABLE([gcov],
+              [AS_HELP_STRING([--enable-gcov],
+                              [use Gcov to test the test suite])],
+                              [],
+                              [enable_gcov=no])
+AM_CONDITIONAL([COND_GCOV],[test '!' "$enable_gcov" = no])
+
 dnl Enable simple manifest type.
 AC_ARG_ENABLE([simple-manifest], AC_HELP_STRING([--disable-simple-manifest], 
               [Disable simple manifest @<:@default=yes@:>@]), [simple-manifest=yes])

@@ -1,8 +1,6 @@
-#include "common/logger.h"
-#include "common/error.h"
+#include "common/libpull.h"
 #include "network/receiver.h"
 #include "network/subscriber.h"
-#include "network/transport.h"
 #include "network/async.h"
 #include "security/ecc.h"
 #include "security/sha256.h"
@@ -10,15 +8,9 @@
 #include "memory/memory_objects.h"
 #include "memory/memory.h"
 #include "memory/manifest.h"
-#include "memory/simple_manifest.h"
 
 #include "memory_file_posix.h"
 #include "transport_libcoap.h"
-
-#ifdef WITH_CEEDLING
-#include "security/tinydtls.h"
-#include "async_libcoap.h"
-#endif
 
 #include "support/sample_data.h"
 #include "support/test_runner.h"
@@ -26,8 +18,9 @@
 #include <unistd.h>
 
 #define FOREACH_TEST(DO) \
-    DO(logic_dtls,0) \
-    DO(logic_udp, 0)
+    DO(logic_udp, 0) \
+    DO(logic_dtls,0)
+
 TEST_RUNNER();
 
 #define POLLING_FREQUENCY 1

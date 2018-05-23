@@ -1,19 +1,12 @@
-#include "common/error.h"
 #include "memory/manifest.h"
 #include "memory/memory.h"
-#include "memory/simple_manifest.h"
-#include "memory/simple_manifest.h"
-#include "security/digest.h"
 #include "security/sha256.h"
 #include "memory_file_posix.h" // Posix file
-
-#ifdef WITH_CEEDLING
-#include "security/tinycrypt.h"
-#endif
 
 #include "tinycrypt_default_cspring.h" // Test Support
 #include "invalid_digest.h" // Test Support
 #include "sample_data.h" // Test Support
+
 #include "unity.h"
 #include "test_runner.h"
 #include <string.h>

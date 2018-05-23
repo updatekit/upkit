@@ -1,11 +1,8 @@
-#include "common/error.h"
+#include "common/libpull.h"
 #include "network/transport.h"
-#include "transport_libcoap.h"
 #include "memory/manifest.h"
-#include "memory/simple_manifest.h"
 
-#include "tinydtls.h"
-#include <coap/coap.h>
+#include "transport_libcoap.h"
 
 #include "sample_data.h"
 #include "test_runner.h"
