@@ -1,17 +1,10 @@
-#include "common/error.h"
+#include "common/libpull.h"
 #include "network/subscriber.h"
-#include "network/transport.h"
 #include "network/async.h"
 #include "memory/memory_objects.h"
-#include "memory/memory.h"
-#include "memory/simple_manifest.h"
-#include "memory/manifest.h"
-#include "memory_file_posix.h"
-#include "tinydtls.h"
 
+#include "memory_file_posix.h"
 #include "transport_libcoap.h"
-#include "async_libcoap.h"
-#include <coap/coap.h>
 
 #include "test_runner.h"
 #include "unity.h"

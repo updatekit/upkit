@@ -1,17 +1,15 @@
-#include "unity.h"
-#include "receiver.h"
+#include "common/libpull.h"
+#include "network/receiver.h"
+#include "memory/manifest.h"
+#include "memory/memory_objects.h"
+
 #include "mock_memory.h"
-#include "manifest.h"
-#include "simple_manifest_impl.h"
-#include "memory_objects.h"
+
 #include "memory_file_posix.h"
-#include "transport.h"
-#include "async.h"
-#include "error.h"
-#include "async_libcoap.h"
-#include "tinydtls.h"
 #include "transport_libcoap.h"
+
 #include "sample_data.h"
+#include "unity.h"
 
 #define PROV_SERVER "localhost"
 

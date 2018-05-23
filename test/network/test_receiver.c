@@ -1,15 +1,9 @@
+#include "common/libpull.h"
 #include "network/receiver.h"
-#include "memory/memory.h"
 #include "memory/manifest.h"
-#include "memory/simple_manifest.h"
 #include "memory/memory_objects.h"
 #include "network/transport.h"
 #include "network/async.h"
-#include "common/error.h"
-
-#ifdef WITH_CEEDLING
-#include "security/tinydtls.h"
-#endif
 
 #include "memory_file_posix.h" // Posix
 #include "transport_libcoap.h"
@@ -17,7 +11,7 @@
 
 #include "test_runner.h" // Test Support
 #include "sample_data.h" // Test Support
-#include "unity.h"
+#include <unity.h>
 
 #define FOREACH_TEST(DO) \
     DO(get_firmware, 0) \

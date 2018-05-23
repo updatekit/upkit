@@ -1,14 +1,8 @@
+#include "common/libpull.h"
 #include "memory/memory_objects.h"
-#include "sample_data.h"
 #include "security/digest.h"
 #include "security/sha256.h"
 #include "security/ecc.h"
-#include "security/verifier.h"
-#include "common/error.h"
-#ifdef WITH_CEEDLING
-#include "security/tinycrypt.h"
-#include "tinycrypt_default_cspring.h"
-#endif
 
 #include "memory_mock.h" // Mock 
 #include "memory_file_posix.h" // Real Implmentation
@@ -16,10 +10,9 @@
 #include "manifest_mock.h" // Mock
 #include "memory/simple_manifest.h" // Real Implementation
 
-#include <string.h>
-
 #include "test_runner.h"
 #include "unity.h"
+#include <string.h>
 
 DIGEST_FUNC(tinycrypt);
 digest_func df;
