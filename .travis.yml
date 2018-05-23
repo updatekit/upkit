@@ -8,6 +8,9 @@ addons:
       - srecord
       - gcovr
 
+before_install:
+  - pip install --user cpp-coveralls
+
 install:
   - ./autogen.sh
   - ./configure --enable-gcov
@@ -18,7 +21,8 @@ script:
   - make server
   - make assets
   - ./utils/server/server -f assets/fake_firmware_dead >/dev/null 2>&1 &
+  - make clean # This is needed since the library has been build before without coverage support
   - make check
 
 after_success:
-  - bash <(curl -s https://codecov.io/bash) -f '!test'
+  - coveralls -e test -e ext -e /usr -e utils -e build -i src -b test -r . --gcov-options '\-lp'
