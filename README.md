@@ -3,6 +3,7 @@
  # The Portable Updates Lightweight Library
 
  [![Build Status](https://travis-ci.com/AntonioLangiu/libpull.svg?token=wmyzpNgdG2qdqyV8yUxq&branch=master)](https://travis-ci.com/AntonioLangiu/libpull)
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Flibpull%2Flibpull.svg?type=shield)](https://app.fossa.io/projects/git%2Bgithub.com%2Flibpull%2Flibpull?ref=badge_shield)
 
 
  libpull is a C library to implement secure and portable updates on IoT devices.
@@ -26,3 +27,7 @@
 
  ⚠  **Version: 0.0.1 - The API and the modules can change at any point until we
  reach a stable version.**
+
+
+## License
+[![FOSSA Status](https://app.fossa.io/api/projects/git%2Bgithub.com%2Flibpull%2Flibpull.svg?type=large)](https://app.fossa.io/projects/git%2Bgithub.com%2Flibpull%2Flibpull?ref=badge_large)
