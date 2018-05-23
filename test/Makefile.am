@@ -28,11 +28,12 @@ TINYCRYPT_SRC = ../src/security/tinycrypt.c ../ext/tinycrypt/lib/source/ecc_plat
 TINYDTLS_SRC = ../src/security/tinydtls.c
 
 memory_tests = test_memory test_memory_objects test_manifest
-integration_tests = test_logic
+#integration_tests = test_logic
 network_tests = test_receiver test_receiver_memory_invalid test_subscriber test_transport_dtls
 security_tests = test_tinycrypt test_tinydtls
 
-check_PROGRAMS = $(memory_tests)  $(integration_tests) test_receiver test_subscriber test_transport_dtls $(security_tests)
+#check_PROGRAMS = $(memory_tests)  $(integration_tests) test_receiver test_subscriber test_transport_dtls $(security_tests)
+check_PROGRAMS = $(memory_tests) test_receiver test_subscriber test_transport_dtls $(security_tests)
 TESTS = $(check_PROGRAMS)
 
 # Memory tests
@@ -51,4 +52,4 @@ test_tinycrypt_SOURCES = security/test_tinycrypt.c $(NO_MOCK_SRC) $(MOCK_MEMORY)
 test_tinydtls_SOURCES = security/test_tinydtls.c $(NO_MOCK_SRC) $(MOCK_MEMORY) $(MOCK_MANIFEST) $(TINYDTLS_SRC)
 
 # Integration tests
-test_logic_SOURCES = integration/test_logic.c $(ALL_SRC) $(TINYDTLS_SRC)
+#test_logic_SOURCES = integration/test_logic.c $(ALL_SRC) $(TINYDTLS_SRC)
