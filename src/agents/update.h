@@ -46,7 +46,7 @@ agent_t update_agent(update_agent_config* cfg) {
     }
 
     // (2) Subscribe to the server
-    PULL_CONTINUE(STATE_SUBSCRIBE, PULL_SUCCESS, CONTINUE);
+    PULL_CONTINUE(STATE_SUBSCRIBE);
     err = subscribe(&sctx, &stxp, cfg->resource, &obj_t);
     if (err) {
         log_error(err, "Error subscribing to the server\n");
@@ -54,21 +54,21 @@ agent_t update_agent(update_agent_config* cfg) {
     }
 
     // (3) Check if there are updates
-    PULL_CONTINUE(STATE_CHECKING_UPDATES, PULL_SUCCESS, CONTINUE);
+    PULL_CONTINUE(STATE_CHECKING_UPDATES);
     log_info("Checking for updates\n");
     while (!sctx.has_updates) {
         err = check_updates(&sctx, subscriber_cb);
         if (err) {
             log_error(err, "Error setting check udpates callback\n");
-            PULL_CONTINUE(STATE_CHECKING_UPDATES_FAILURE, err, FAILURE);
+            PULL_RECOVER(STATE_CHECKING_UPDATES_FAILURE, err);
         }
         //loop_once(&stxp, 1000);
-        PULL_CONTINUE(STATE_CHECKING_UPDATES_SEND, PULL_SUCCSS, TXP_SEND);
+        PULL_SEND(STATE_CHECKING_UPDATES_SEND);
     }
     log_info("An update is available\n");
 
     // (4) Searching slot
-    PULL_CONTINUE(STATE_SEARCHING_SLOT, PULL_SUCCESS, CONTINUE);
+    PULL_CONTINUE(STATE_SEARCHING_SLOT);
     uint16_t version;
     err = get_oldest_firmware(&id, &version, &obj_t);
     if (err) {
@@ -82,7 +82,7 @@ agent_t update_agent(update_agent_config* cfg) {
     }
 
     // (5) Connection to receiver server
-    PULL_CONTINUE(STATE_CONN_RECEIVER, PULL_SUCCESS, CONTINUE);
+    PULL_CONTINUE(STATE_CONN_RECEIVER);
     if (cfg->reuse_connection) {
         rtxp = stxp;
     } else { 
@@ -101,21 +101,21 @@ agent_t update_agent(update_agent_config* cfg) {
     }
 
     // (5) Receiving update
-    PULL_CONTINUE(STATE_RECEIVE, PULL_SUCESS, CONTINUE);
+    PULL_CONTINUE(STATE_RECEIVE);
     while (!rctx.firmware_received) {
         err = receiver_chunk(&rctx);
         if (err) {
             log_error(err, "Error receiving chunk\n");
-            PULL_CONTINUE(STATE_RECEIVE_FAILURE, err, FAILURE);
+            PULL_RECOVER(STATE_RECEIVE_FAILURE, err);
         }
         //loop(&rtxp, 1000);
-        PULL_CONTINUE(STATE_RECEIVE_SEND, PULL_SUCESS, SEND);
+        PULL_SEND(STATE_RECEIVE_SEND);
     }
     txp_end(&rtxp);
     err = receiver_close(&rctx); // Check this error
 
     // (6) Verify received firmware
-    PULL_CONTINUE(STATE_VERIFY, PULL_SUCCESS, CONTINUE);
+    PULL_CONTINUE(STATE_VERIFY);
     err = verify_object(&new_obj, cfg->df, vendor_x_g, vendor_y_g, cfg->ef, 
             cfg->buffer, cfg->buffer_size);
     if (err) {
@@ -124,10 +124,10 @@ agent_t update_agent(update_agent_config* cfg) {
     }
 
     // (7) Final
-    PULL_CONTINUE(STATE_FINAL, PULL_SUCCESS, CONTINUE);
+    PULL_CONTINUE(STATE_FINAL);
     err = memory_close(&new_obj);
     err = unsubscribe(&sctx);
     err = txp_end(&stxp);
-    PULL_FINISH();
+    PULL_FINISH(STATE_APPLY);
 }
 
