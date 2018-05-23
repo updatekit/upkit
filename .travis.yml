@@ -8,11 +8,6 @@ addons:
       - srecord
       - gcovr
 
-env:
-    global:
-        - CODECOV_TOKEN=:uuid-repo-token
-
-
 install:
   - ./autogen.sh
   - ./configure --enable-gcov
