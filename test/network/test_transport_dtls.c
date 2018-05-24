@@ -47,7 +47,7 @@ void tearDown(void) {
 
 void test_udp(void) {
     // Set up udp connection
-    pull_error error = txp_init(&ctx, PROV_SERVER, 0, CONN_UDP, NULL);
+    pull_error error = txp_init(&ctx, PROV_SERVER, 0, PULL_UDP, NULL);
     TEST_ASSERT_TRUE(!error);
     get();
     echo();
@@ -61,7 +61,7 @@ void test_dtls_ecdsa(void) {
         .pub_key_x = (uint8_t *) dtls_client_x_g,
         .pub_key_y = (uint8_t *) dtls_client_y_g
     };
-    pull_error error = txp_init(&ctx, PROV_SERVER, 0, CONN_DTLS_ECDH, &ecdh_data);
+    pull_error error = txp_init(&ctx, PROV_SERVER, 0, PULL_DTLS_ECDH, &ecdh_data);
     TEST_ASSERT_TRUE(!error);
     get();
     echo();

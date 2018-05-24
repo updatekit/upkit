@@ -42,11 +42,11 @@ pull_error txp_init(txp_ctx* ctx, const char* addr, uint16_t port, conn_type typ
     coap_proto_t proto;
     uint16_t final_port;
     switch (type) {
-        case CONN_UDP:
+        case PULL_UDP:
             proto = COAP_PROTO_UDP;
             final_port = !port? COAP_DEFAULT_PORT: port;
             break;
-        case CONN_DTLS_PSK:
+        case PULL_DTLS_PSK:
             proto = COAP_PROTO_DTLS;
             final_port = !port? COAPS_DEFAULT_PORT: port;
             dtls_psk_data_t* psk_data = (dtls_psk_data_t*) conn_data;
@@ -56,7 +56,7 @@ pull_error txp_init(txp_ctx* ctx, const char* addr, uint16_t port, conn_type typ
             coap_context_set_psk(ctx->coap_ctx, psk_data->hint, 
                     psk_data->key, psk_data->key_len);
             break;
-        case CONN_DTLS_ECDH:
+        case PULL_DTLS_ECDH:
             proto = COAP_PROTO_DTLS;
             final_port = !port? COAPS_DEFAULT_PORT: port;
             dtls_ecdh_data_t* ecdh_data = (dtls_ecdh_data_t*) conn_data;

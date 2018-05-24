@@ -13,8 +13,6 @@ TEST_RUNNER();
 #define POLLING_FREQUENCY 1
 #define BUFFER_SIZE 1024
 
-DIGEST_FUNC(tinydtls);
-
 static agent_t agent;
 static update_agent_config cfg;
 static update_agent_ctx_t ctx;
@@ -41,8 +39,8 @@ void tearDown(void) {
 }
 
 void test_update_success(void) {
-    conn_config(&cfg.subscriber, "localhost", 0, CONN_UDP, NULL, "version");
-    conn_config(&cfg.receiver, "localhost", 0, CONN_UDP, NULL, "firmware");
+    conn_config(&cfg.subscriber, "localhost", 0, PULL_UDP, NULL, "version");
+    conn_config(&cfg.receiver, "localhost", 0, PULL_UDP, NULL, "firmware");
     update_agent_reuse_connection(&cfg, 0);
     update_agent_set_identity(&cfg, identity_g);
     update_agent_vendor_keys(&cfg, vendor_x_g, vendor_y_g);
