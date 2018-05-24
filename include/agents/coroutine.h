@@ -1,20 +1,6 @@
 #ifndef AGENTS_COROUTINE_H_
 #define AGENTS_COROUTINE_H_
 
-typedef struct agent_t {
-    agent_state_t current_state;
-    pull_error current_error;
-    agent_action_t required_action;
-} agent_t;
-
-typedef enum agent_action_t {
-    SEND,
-    CONTINUE,
-    FAILURE,
-    RECOVER,
-    APPLY,
-} agent_action_t;
-
 #define PULL_BEGIN(state)  \
     static agent_t agent = { \
         .current_state = state, \

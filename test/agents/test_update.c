@@ -7,7 +7,8 @@
 #include <unistd.h>
 
 #define FOREACH_TEST(DO) \
-    DO(update_success, 0)
+    DO(update_success, 0) \
+    DO(update_success_dtls, 0)
 TEST_RUNNER();
 
 #define POLLING_FREQUENCY 1
@@ -38,9 +39,9 @@ void tearDown(void) {
     success = 0;
 }
 
-void test_update_success(void) {
-    conn_config(&cfg.subscriber, "localhost", 0, PULL_UDP, NULL, "version");
-    conn_config(&cfg.receiver, "localhost", 0, PULL_UDP, NULL, "firmware");
+void update_runner(conn_type type, void* data) {
+    conn_config(&cfg.subscriber, "localhost", 0, type, data, "version");
+    conn_config(&cfg.receiver, "localhost", 0, type, data, "firmware");
     update_agent_reuse_connection(&cfg, 0);
     update_agent_set_identity(&cfg, identity_g);
     update_agent_vendor_keys(&cfg, vendor_x_g, vendor_y_g);
@@ -75,4 +76,17 @@ void test_update_success(void) {
         }
     }
     TEST_ASSERT_TRUE_MESSAGE(success, "There was an error during the update phase\n");
+}
+
+void test_update_success(void) {
+    update_runner(PULL_UDP, NULL);
+}
+
+void test_update_success_dtls(void) {
+    static dtls_ecdh_data_t ecdh_data = {
+         .priv_key = (uint8_t*) dtls_client_priv_g,
+         .pub_key_x = (uint8_t*) dtls_client_x_g,
+        .pub_key_y = (uint8_t*) dtls_client_y_g
+     };
+    update_runner(PULL_DTLS_ECDH, &ecdh_data);
 }

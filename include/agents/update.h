@@ -45,6 +45,20 @@ typedef struct {
     size_t buffer_size;
 } update_agent_config;
 
+typedef enum agent_action_t {
+    SEND,
+    CONTINUE,
+    FAILURE,
+    RECOVER,
+    APPLY,
+} agent_action_t;
+
+typedef struct agent_t {
+    agent_state_t current_state;
+    pull_error current_error;
+    agent_action_t required_action;
+} agent_t;
+
 inline void update_agent_reuse_connection(update_agent_config* cfg, uint8_t reuse) {
     cfg->reuse_connection = reuse;
 }
