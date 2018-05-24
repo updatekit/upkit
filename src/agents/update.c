@@ -38,9 +38,9 @@ agent_t update_agent(update_agent_config* cfg, update_agent_ctx_t* ctx) {
         if (ctx->err) {
             log_error(ctx->err, "Error setting check udpates callback\n");
             PULL_RECOVER(STATE_CHECKING_UPDATES_FAILURE, ctx->err);
+            continue;
         }
-        loop_once(&ctx->stxp, 1000);
-        //PULL_SEND(STATE_CHECKING_UPDATES_SEND);
+        PULL_SEND(STATE_CHECKING_UPDATES_SEND);
     }
     log_info("An update is available\n");
 
@@ -68,7 +68,7 @@ agent_t update_agent(update_agent_config* cfg, update_agent_ctx_t* ctx) {
                     cfg->receiver.conn_data);
         if (ctx->err) {
             log_error(ctx->err, "Error while connecting to receiver server\n");
-            PULL_RECOVER(STATE_CONN_RECEIVER_FAILURE, ctx->err);
+            PULL_FAILURE(ctx->err);
         }
     }
     ctx->err = receiver_open(&ctx->rctx, &ctx->rtxp, cfg->identity, cfg->receiver.resource, &ctx->new_obj);
@@ -84,9 +84,9 @@ agent_t update_agent(update_agent_config* cfg, update_agent_ctx_t* ctx) {
         if (ctx->err) {
             log_error(ctx->err, "Error receiving chunk\n");
             PULL_RECOVER(STATE_RECEIVE_FAILURE, ctx->err);
+            continue;
         }
-        loop(&ctx->rtxp, 1000);
-        //PULL_SEND(STATE_RECEIVE_SEND); XXX find a way to solve this problem
+        PULL_SEND(STATE_RECEIVE_SEND);
     }
     txp_end(&ctx->rtxp);
     ctx->err = receiver_close(&ctx->rctx); // Check this ctx->error

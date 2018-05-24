@@ -53,8 +53,6 @@ void test_update_success(void) {
     update_agent_set_buffer(&cfg, buffer, BUFFER_SIZE);
 
     while (1) {
-        printf("CAlling the function\n");
-        sleep(1);
         agent = update_agent(&cfg, &ctx);
         if (agent.current_error) {
             if (agent.required_action == FAILURE) {
@@ -64,6 +62,14 @@ void test_update_success(void) {
                     continue;
                 } else {
                     break;
+                }
+            }
+        } else {
+            if (agent.required_action == SEND) {
+                if (agent.current_state == STATE_RECEIVE_SEND) {
+                    loop(&ctx.rtxp, 1000); 
+                } else if (agent.current_state == STATE_CHECKING_UPDATES_SEND) {
+                    loop_once(&ctx.stxp, 1000);
                 }
             }
         }

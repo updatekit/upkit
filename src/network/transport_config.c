@@ -1,6 +1,6 @@
 #include <network/transport_config.h>
 
-inline pull_error conn_config(conn_config_t* cfg, char* endpoint, uint16_t port,
+pull_error conn_config(conn_config_t* cfg, char* endpoint, uint16_t port,
                           conn_type type, void* conn_data, char* resource) {
       // TODO validate params
       cfg->endpoint = endpoint;

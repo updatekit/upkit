@@ -19,7 +19,7 @@ UNITY_SRC = ../ext/unity/src/unity.c
 COMMON_SRC = ../src/common/error.c ../src/common/identity.c
 MEMORY_SRC = ../src/memory/memory_objects.c 
 SECURITY_SRC = ../src/security/verifier.c
-NETWORK_SRC = ../src/network/receiver.c ../src/network/subscriber.c
+NETWORK_SRC = ../src/network/receiver.c ../src/network/subscriber.c ../src/network/transport_config.c
 AGENTS_SRC = ../src/agents/update.c
 
 NETWORK_IMPL = ../build/posix/transport_libcoap.c ../build/posix/async_libcoap.c
