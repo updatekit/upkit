@@ -63,6 +63,10 @@ inline void update_agent_reuse_connection(update_agent_config* cfg, uint8_t reus
     cfg->reuse_connection = reuse;
 }
 
+inline void update_agent_set_identity(update_agent_config* cfg, identity_t identity) {
+    cfg->identity = identity;
+}
+
 inline void update_agent_vendor_keys(update_agent_config* cfg, uint8_t* x, uint8_t* y) {
     cfg->vendor_x = x;
     cfg->vendor_y = y;

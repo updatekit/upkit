@@ -46,6 +46,7 @@ void test_update_success(void) {
     conn_config(&cfg.subscriber, "localhost", 0, CONN_UDP, NULL, "version");
     conn_config(&cfg.receiver, "localhost", 0, CONN_UDP, NULL, "firmware");
     update_agent_reuse_connection(&cfg, 0);
+    update_agent_set_identity(&cfg, identity_g);
     update_agent_vendor_keys(&cfg, vendor_x_g, vendor_y_g);
     update_agent_digest_func(&cfg, tinydtls_digest_sha256);
     update_agent_ecc_func(&cfg, tinydtls_secp256r1_ecc);
