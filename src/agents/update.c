@@ -93,8 +93,10 @@ agent_t update_agent(update_agent_config* cfg, update_agent_ctx_t* ctx) {
 
     // (6) Verify received firmware
     PULL_CONTINUE(STATE_VERIFY);
+    PULL_CONTINUE(STATE_VERIFY_BEFORE);
     ctx->err = verify_object(&ctx->new_obj, cfg->df, cfg->vendor_x, cfg->vendor_y, cfg->ef, 
             cfg->buffer, cfg->buffer_size);
+    PULL_CONTINUE(STATE_VERIFY_AFTER);
     if (ctx->err) {
         log_error(ctx->err, "Verification failed\n");
         PULL_FAILURE(ctx->err);

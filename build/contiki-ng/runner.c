@@ -159,9 +159,25 @@ PROCESS_THREAD(update_process, ev, data) {
             if (agent.required_action == SEND) {
                 if (agent.current_state == STATE_RECEIVE_SEND) {
                      COAP_SEND(ctx.rtxp);
+                     continue;
                  } else if (agent.current_state == STATE_CHECKING_UPDATES_SEND) {
                      COAP_SEND(ctx.stxp);
+                     continue;
                  }
+            }
+            if (agent.current_state == STATE_VERIFY_BEFORE) {
+                #ifdef WITH_CRYPTOAUTHLIB
+                ATCA_STATUS status = atcab_init(&cfg_ateccx08a_i2c_default);
+                if (status != ATCA_SUCCESS) {
+                    log_error(GENERIC_ERROR, "Failure initializing ATECC508A\n");
+                }
+                #endif
+                watchdog_stop();
+            } else if (agent.current_state == STATE_VERIFY_AFTER) {
+                watchdog_start();
+                #ifdef WITH_CRYPTOAUTHLIB
+                atcab_release();
+                #endif
             }
         }
         if (agent.current_state == STATE_APPLY) {
@@ -171,23 +187,8 @@ PROCESS_THREAD(update_process, ev, data) {
     }
 
 
-/*#ifdef WITH_CRYPTOAUTHLIB
-        ATCA_STATUS status = atcab_init(&cfg_ateccx08a_i2c_default);
-        if (status != ATCA_SUCCESS) {
-            log_error(GENERIC_ERROR, "Failure initializing ATECC508A\n");
-        }
-#endif
-
-        watchdog_stop();
-*/
-// HERE I SHOULD ADD A HOCK IN THE UPDATE PROCESS
-/*
-        watchdog_start();
-#ifdef WITH_CRYPTOAUTHLIB
-        atcab_release();
-#endif
-*/
 /*if (err) {
+ * TODO find a way to implement this concept (maybe using messages?)
     log_info("Verification failed\n");
     err = invalidate_object(id, &obj_t);
     if (err) {

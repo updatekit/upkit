@@ -27,6 +27,8 @@ typedef enum agent_state_t {
     STATE_RECEIVE_SEND,
     STATE_RECEIVE_FAILURE,
     STATE_VERIFY,
+    STATE_VERIFY_BEFORE,
+    STATE_VERIFY_AFTER,
     STATE_FINAL,
     STATE_APPLY
 } agent_state_t;
