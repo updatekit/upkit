@@ -59,28 +59,28 @@ typedef struct agent_t {
     agent_action_t required_action;
 } agent_t;
 
-inline void update_agent_reuse_connection(update_agent_config* cfg, uint8_t reuse) {
+static inline void update_agent_reuse_connection(update_agent_config* cfg, uint8_t reuse) {
     cfg->reuse_connection = reuse;
 }
 
-inline void update_agent_set_identity(update_agent_config* cfg, identity_t identity) {
+static inline void update_agent_set_identity(update_agent_config* cfg, identity_t identity) {
     cfg->identity = identity;
 }
 
-inline void update_agent_vendor_keys(update_agent_config* cfg, uint8_t* x, uint8_t* y) {
+static inline void update_agent_vendor_keys(update_agent_config* cfg, uint8_t* x, uint8_t* y) {
     cfg->vendor_x = x;
     cfg->vendor_y = y;
 }
 
-inline void update_agent_digest_func(update_agent_config* cfg, digest_func df) {
+static inline void update_agent_digest_func(update_agent_config* cfg, digest_func df) {
     cfg->df = df;
 }
 
-inline void update_agent_ecc_func(update_agent_config* cfg, ecc_func_t ef) {
+static inline void update_agent_ecc_func(update_agent_config* cfg, ecc_func_t ef) {
     cfg->ef = ef;
 }
 
-inline void update_agent_set_buffer(update_agent_config* cfg, char* buffer, size_t buffer_size) {
+static inline void update_agent_set_buffer(update_agent_config* cfg, char* buffer, size_t buffer_size) {
     cfg->buffer = buffer;
     cfg->buffer_size = buffer_size;
 }
