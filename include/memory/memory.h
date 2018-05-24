@@ -25,17 +25,17 @@ extern "C" {
 #endif /* __cplusplus */
 
 typedef struct mem_object_ mem_object;
-typedef uint8_t obj_id;
+
+typedef struct memory_object {
+    memory_id id;
+    bool bootable;
+} memory_object;
 
 typedef enum {
     READ_ONLY = 0,
     WRITE_CHUNK = 1, // In this mode the memory will not be completely rewritten.
     WRITE_ALL = 2 // In this mode the memory object will be completely erased before.
 } mem_mode_t;
-
-// TODO This should be refactored to support dinamic memory. This means that this
-// function should receive a mem_object** ctx, in this way it is able to
-// set the pointer value if it allocates the memory
 
 /** 
  * \brief Open a memory object.
@@ -51,7 +51,7 @@ typedef enum {
  * \returns PULL_SUCCESS if the memory was correctly open or the specific
  * erro 
  */
-pull_error memory_open(mem_object* ctx, obj_id id, mem_mode_t mode);
+pull_error memory_open(mem_object* ctx, memory_object id, mem_mode_t mode);
 
 /** 
  * \brief Read bytes from a memory object.
@@ -64,7 +64,7 @@ pull_error memory_open(mem_object* ctx, obj_id id, mem_mode_t mode);
  * \param offset The offset in the memory object from where to start reading.
  * \returns The number of readed bytes or a negative number in case of error.
  */
-int memory_read(mem_object* ctx, void* memory_buffer, uint16_t size, uint32_t offset);
+int memory_read(mem_object* ctx, void* memory_buffer, size_t size, address_t offset);
 
 /** 
  * \brief Write bytes into a memory object.
@@ -77,14 +77,14 @@ int memory_read(mem_object* ctx, void* memory_buffer, uint16_t size, uint32_t of
  * \param offset The offset into the memory object.
  * \returns The number of written bytes or a negative number in case of error.
  */
-int memory_write(mem_object* ctx, const void* memory_buffer, uint16_t size, uint32_t offset);
+int memory_write(mem_object* ctx, const void* memory_buffer, size_t size, address_t offset);
 
 /** 
  * \brief Flush the memory object. (Not mandatory)
  * 
  * This function must not always be implemented. In fact it should be
  * implemented only if the underlying implementation includes some
- * buffer I/O. In that case could be useful to flush the buffer.
+ * buffered I/O. In that case could be useful to flush the buffer.
  * The flush function is not direcly used by the library but may
  * be useful in some situations.
  * \param ctx The memory object containing the buffer to be flushed.

@@ -67,7 +67,7 @@ pull_error memory_open_impl(mem_object* ctx, obj_id obj, mem_mode_t mode) {
     return PULL_SUCCESS;
 }
 
-int memory_read_impl(mem_object* ctx, void* memory_buffer, uint16_t size, uint32_t offset) {
+int memory_read_impl(mem_object* ctx, void* memory_buffer, size_t size, address_t offset) {
     PULL_ASSERT(ctx != NULL);
     PULL_ASSERT(ctx->fp >= 0);
     if (ctx->start_offset+offset+size > ctx->end_offset) {
@@ -82,7 +82,7 @@ int memory_read_impl(mem_object* ctx, void* memory_buffer, uint16_t size, uint32
 
 }
 
-int memory_write_impl(mem_object* ctx, const void* memory_buffer, uint16_t size, uint32_t offset) {
+int memory_write_impl(mem_object* ctx, const void* memory_buffer, size_t size, address_t offset) {
     PULL_ASSERT(ctx != NULL);
     PULL_ASSERT(ctx->fp > 0);
     if (ctx->start_offset+offset+size > ctx->end_offset) {

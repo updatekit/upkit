@@ -19,6 +19,13 @@ typedef uint16_t version_t;
 typedef uint16_t platform_t;
 /** Address type to be used across the library */
 typedef uint32_t address_t;
+/** Identifier for the memory objects. It supports at most 255 objects */
+typedef uint8_t memory_id;
+
+typedef enum {
+    true,
+    false
+} bool;
 
 #ifdef __cplusplus
 }
