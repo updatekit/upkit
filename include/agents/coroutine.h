@@ -2,8 +2,11 @@
 #define AGENTS_COROUTINE_H_
 
 #define PULL_BEGIN(state)  \
-    static agent_t agent = {};\
-    agent.current_state = state; \
+    static agent_t agent = { \
+        .current_state = state, \
+        .current_error = PULL_SUCCESS, \
+        .required_action = CONTINUE, \
+    };\
     switch(agent.current_state) { case 0:
 
 #define PULL_CONTINUE(state) \

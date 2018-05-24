@@ -17,13 +17,13 @@ typedef enum agent_state_t {
     STATE_SUBSCRIBE,
     STATE_CHECKING_UPDATES,
     STATE_CHECKING_UPDATES_FAILURE,
-    STATE_CHECKING_UPDATES_SEND,
+    //STATE_CHECKING_UPDATES_SEND,
     STATE_SEARCHING_SLOT,
-    STATE_SEARCHING_SLOT_FAILURE,
+    //STATE_SEARCHING_SLOT_FAILURE,
     STATE_CONN_RECEIVER,
     STATE_CONN_RECEIVER_FAILURE,
     STATE_RECEIVE,
-    STATE_RECEIVE_SEND,
+    //STATE_RECEIVE_SEND,
     STATE_RECEIVE_FAILURE,
     STATE_VERIFY,
     STATE_FINAL,
@@ -50,20 +50,54 @@ typedef struct {
     conn_type connection_type;
     void* conn_data;
     char* resource;
-} conn_config;
+} conn_config_t;
+
+inline pull_error conn_config(conn_config_t* cfg, char* endpoint, uint16_t port,
+                        conn_type type, void* conn_data, char* resource) {
+    // TODO validate params
+    cfg->endpoint = endpoint;
+    cfg->port = port;
+    cfg->connection_type = type;
+    cfg->conn_data = conn_data;
+    cfg->resource = resource;
+    return PULL_SUCCESS;
+}
 
 typedef struct {
-    conn_config subscriber;
-    conn_config receiver;
+    conn_config_t subscriber;
+    conn_config_t receiver;
     uint8_t reuse_connection;
     identity_t identity;
-    uint8_t vendor_x[32];
-    uint8_t vendor_y[32];
+    uint8_t* vendor_x;
+    uint8_t* vendor_y;
     digest_func df;
     ecc_func_t ef;
     char* buffer;
     size_t buffer_size;
 } update_agent_config;
+
+
+inline void update_agent_reuse_connection(update_agent_config* cfg, uint8_t reuse) {
+    cfg->reuse_connection = reuse;
+}
+
+inline void update_agent_vendor_keys(update_agent_config* cfg, uint8_t* x, uint8_t* y) {
+    cfg->vendor_x = x;
+    cfg->vendor_y = y;
+}
+
+inline void update_agent_digest_func(update_agent_config* cfg, digest_func df) {
+    cfg->df = df;
+}
+
+inline void update_agent_ecc_func(update_agent_config* cfg, ecc_func_t ef) {
+    cfg->ef = ef;
+}
+
+inline void update_agent_set_buffer(update_agent_config* cfg, char* buffer, size_t buffer_size) {
+    cfg->buffer = buffer;
+    cfg->buffer_size = buffer_size;
+}
 
 typedef struct update_agent_ctx_t {
     txp_ctx stxp;
