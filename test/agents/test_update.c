@@ -1,6 +1,4 @@
 #include "agents/update.h"
-#include "memory_file_posix.h"
-#include "transport_libcoap.h"
 #include "security/sha256.h"
 
 #include "support/sample_data.h"

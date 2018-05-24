@@ -43,11 +43,12 @@ typedef enum rest_method {
   * defined here you can find some predefined structs in
   * security/secure_transport.h. */
  typedef enum conn_type {
-     CONN_TCP,
-     CONN_UDP,
-     CONN_DTLS_PSK,
-     CONN_DTLS_ECDH
+     PULL_TCP,
+     PULL_UDP,
+     PULL_DTLS_PSK,
+     PULL_DTLS_ECDH
  } conn_type;
+
 typedef struct txp_ctx_ txp_ctx;
 
 /** 

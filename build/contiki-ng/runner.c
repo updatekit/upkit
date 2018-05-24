@@ -4,12 +4,7 @@
 #include "button-sensor.h"
 #include "leds.h"
 
-#include "common/libpull.h"
-#include "memory/memory_objects.h"
-#include "memory/manifest.h"
-#include "network/receiver.h"
-#include "network/subscriber.h"
-#include "security/verifier.h"
+#include "agents/update.h"
 #include "security/sha256.h"
 
 #include "default_configs.h"
@@ -41,20 +36,12 @@ PROCESS(update_process, "OTA Update process");
 PROCESS(main_process, "Main process");
 AUTOSTART_PROCESSES(&main_process);
 
-static txp_ctx txp;
-static subscriber_ctx sctx;
-static receiver_ctx rctx;
 
-static obj_id id;
-static mem_object obj_t;
-static mem_object new_firmware;
 static struct etimer et;
-
-static void* conn_data;
-static conn_type type;
-
 static digest_func df;
 static ecc_func_t ef;
+static void* conn_data;
+static conn_type type;
 
 static identity_t identity_g = {
     .udid = 0x1234,
@@ -126,113 +113,88 @@ void specialize_crypto_functions() {
 
 void specialize_conn_functions() {
 #ifdef CONN_UDP
-    type = TXP_UDP;
+    type = PULL_UDP;
     conn_data = NULL;
 #elif CONN_DTLS_PSK
-    type = TXP_DTLS_PSK;
+    type = PULL_DTLS_PSK;
     conn_data = NULL;
 #endif
 }
 
+#define BUFFER_SIZE 1024
+
+static agent_t agent;
+static update_agent_config cfg;
+static update_agent_ctx_t ctx;
+static int8_t retries = 3;
+static uint8_t success = 0;
+static uint8_t buffer[BUFFER_SIZE];
 
 PROCESS_THREAD(update_process, ev, data) {
     PROCESS_BEGIN();
     specialize_crypto_functions();
     specialize_conn_functions();
-    txp_init(&txp, "coaps://[fd00::1]", COAP_DEFAULT_PORT, type, conn_data);
-    // XXX Check this error
-    log_info("Subscribing to the server\n");
-    pull_error err = subscribe(&sctx, &txp, "/next_version", &obj_t);
-    if (err) {
-        log_error(err,"Error subscribing to the provisioning server\n");
-        return EXIT_FAILURE;
-    }
-    while(1) {
-        // Check if there are updates
-        log_info("Checking for updates\n");
-        while (!sctx.has_updates) {
-            check_updates(&sctx, subscriber_cb); // check for errors
-            COAP_SEND(txp);
-            if (!sctx.has_updates) {
-                etimer_set(&et, (CLOCK_SECOND/1));
-                PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
-            }
-        }
-        // get the oldest slot
-        uint16_t version;
-        err = get_oldest_firmware(&id, &version, &obj_t);
-        if (err) {
-            log_error(err, "Error getting the oldest slot\n");
-            continue;
-        }
-        // open the oldest slot
-        err = memory_open(&new_firmware, id, WRITE_ALL);
-        if (err) {
-            log_error(err, "Error opening the object for storing\n");
-            continue;
-        }
-        // download the image to the oldest slot
-        // XXX refactor the code to close the opened firmware at each failure
-        err = receiver_open(&rctx, &txp, identity_g, "firmware", &new_firmware);
-        if (err) {
-            log_error(err, "Error opening the receiver\n");
-            receiver_close(&rctx);
-            continue;
-        }
-        log_info("Receiving firmware chunks\n");
-        while (!rctx.firmware_received) {
-            err = receiver_chunk(&rctx);
-            if (err) {
-                log_error(err, "Error receiving firmware chunk\n");
-                break;
-            };
-            COAP_SEND(txp);
-            if (!rctx.firmware_received) {
-                log_debug("Setting the timer for 10 seconds\n");
-                etimer_set(&et, (CLOCK_SECOND*1));
-                PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
-            }
-        }
-        log_info("Firmware received\n");
-        err = receiver_close(&rctx);
-        if (err) {
-            log_error(err, "Error closing the reciver\n");
-            continue;
-        }
-        if (!rctx.firmware_received) {
-            log_debug("Error receving firmware...restarting\n");
-            continue;
-        }
-        memory_close(&new_firmware);
-        memory_open(&new_firmware, id, READ_ONLY);
+    conn_config(&cfg.subscriber, "coap://[fd00::1]", COAP_DEFAULT_PORT, PULL_UDP, NULL, "version");
+    conn_config(&cfg.receiver, "coap://[fd00::1]", 0, COAP_DEFAULT_PORT, NULL, "firmware");
+    update_agent_reuse_connection(&cfg, 0);
+    update_agent_set_identity(&cfg, identity_g);
+    update_agent_vendor_keys(&cfg, x, y);
+    update_agent_digest_func(&cfg, df);
+    update_agent_ecc_func(&cfg, ef);
+    update_agent_set_buffer(&cfg, buffer, BUFFER_SIZE);
 
-        uint8_t buffer[BUFFER_LEN];
-#ifdef WITH_CRYPTOAUTHLIB
+    while (1) {
+        agent = update_agent(&cfg, &ctx);
+        if (agent.current_error) {
+            if (agent.required_action == FAILURE) {
+                break;
+            } else if (agent.required_action == RECOVER) {
+                if (retries-- <= 0) {
+                    continue;
+                } else {
+                    break;
+                }
+            }
+        } else {
+            if (agent.required_action == SEND) {
+                if (agent.current_state == STATE_RECEIVE_SEND) {
+                     COAP_SEND(ctx.rtxp);
+                 } else if (agent.current_state == STATE_CHECKING_UPDATES_SEND) {
+                     COAP_SEND(ctx.stxp);
+                 }
+            }
+        }
+        if (agent.current_state == STATE_APPLY) {
+            success = 1;
+            break;
+        }
+    }
+
+
+/*#ifdef WITH_CRYPTOAUTHLIB
         ATCA_STATUS status = atcab_init(&cfg_ateccx08a_i2c_default);
         if (status != ATCA_SUCCESS) {
             log_error(GENERIC_ERROR, "Failure initializing ATECC508A\n");
         }
 #endif
+
         watchdog_stop();
-        log_info("Start verification\n");
-        err = verify_object(&new_firmware, df, x, y, ef, buffer, BUFFER_LEN);
+*/
+// HERE I SHOULD ADD A HOCK IN THE UPDATE PROCESS
+/*
         watchdog_start();
 #ifdef WITH_CRYPTOAUTHLIB
         atcab_release();
 #endif
-        if (err) {
-            log_info("Verification failed\n");
-            err = invalidate_object(id, &obj_t);
-            if (err) {
-                log_error(err, "Error invalidating object");
-            }
-            continue;
-        }
-        log_info("Received image is valid\n");
-        break;
+*/
+/*if (err) {
+    log_info("Verification failed\n");
+    err = invalidate_object(id, &obj_t);
+    if (err) {
+        log_error(err, "Error invalidating object");
     }
-    unsubscribe(&sctx);
-    txp_end(&txp);
-    watchdog_reboot();
+    continue;
+}
+*/
     PROCESS_END();
 }
