@@ -2,7 +2,14 @@
 #define AGENTS_UPDATE_H_
 
 #include <common/libpull.h>
-#include <agents/coroutines.h>
+#include <agents/coroutine.h>
+#include <network/transport.h>
+#include <security/digest.h>
+#include <security/ecc.h>
+#include <network/receiver.h>
+#include <network/subscriber.h>
+
+#include "platform_headers.h"
 
 /* This states will be used by the update agent coroutines */
 typedef enum agent_state_t {
@@ -13,20 +20,21 @@ typedef enum agent_state_t {
     STATE_CHECKING_UPDATES_SEND,
     STATE_SEARCHING_SLOT,
     STATE_SEARCHING_SLOT_FAILURE,
-    STATE_SEARCHING_SLOT,
     STATE_CONN_RECEIVER,
     STATE_CONN_RECEIVER_FAILURE,
     STATE_RECEIVE,
     STATE_RECEIVE_SEND,
     STATE_RECEIVE_FAILURE,
     STATE_VERIFY,
+    STATE_FINAL,
     STATE_APPLY
 } agent_state_t;
 
 typedef enum agent_action_t {
     SEND,
     CONTINUE,
-    FAILURE
+    FAILURE,
+    RECOVER,
     APPLY,
 } agent_action_t;
 
@@ -47,14 +55,28 @@ typedef struct {
 typedef struct {
     conn_config subscriber;
     conn_config receiver;
-    bool reuse_connection;
-    digest_function df;
-    ecc_function ef;
+    uint8_t reuse_connection;
+    identity_t identity;
+    uint8_t vendor_x[32];
+    uint8_t vendor_y[32];
+    digest_func df;
+    ecc_func_t ef;
     char* buffer;
     size_t buffer_size;
 } update_agent_config;
 
+typedef struct update_agent_ctx_t {
+    txp_ctx stxp;
+    subscriber_ctx sctx;
+    receiver_ctx rctx;
+    txp_ctx rtxp;
+    obj_id id;
+    mem_object new_obj;
+    mem_object obj_t;
+    pull_error err;
+} update_agent_ctx_t;
+
 /* This function is not thread safe */
-agent_t update_agent(update_agent_config cfg);
+agent_t update_agent(update_agent_config* cfg, update_agent_ctx_t* ctx);
 
 #endif /* AGENTS_UPDATE_H_ */
