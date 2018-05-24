@@ -24,20 +24,6 @@
 #define BUFFER_SIZE PAGE_SIZE // Defined in Makefile.conf
 #define FLASH_PAGE_SIZE PAGE_SIZE // Defined in Makefile.conf
 
-#ifdef WITH_CRYPTOAUTHLIB
-#include <cryptoauthlib.h>
-DIGEST_FUNC(cryptoauthlib);
-#elif WITH_TINYDTLS
-DIGEST_FUNC(tinydtls);
-#elif WITH_TINYCRYPT
-DIGEST_FUNC(tinycrypt);
-// To perform the verification I do not need any rng. Define e dummy
-// function to make tinycrypt happy.
-int default_CSPRNG(uint8_t *dest, unsigned int size) {
-    return 0;
-}
-#endif
-
 /**** TODO update the states */
 enum bootloader_states {
     OPEN_INTERNAL_IMAGE = 0,

@@ -7,8 +7,6 @@
 #include "memory/manifest.h"
 #include "security/sha256.h"
 
-DIGEST_FUNC(tinycrypt);
-
 /* The vendor private key MUST never been in the server.
  * However, this is a testing server that requires to
  * generate and sign a new firmware at request. For this
