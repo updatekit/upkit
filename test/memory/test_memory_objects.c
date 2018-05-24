@@ -19,10 +19,10 @@ TEST_RUNNER();
 
 #define BUFFER_SIZE 1024
 
-mem_object obj_run;
-mem_object obj_1;
-mem_object obj_2;
-mem_object obj_t; // This is a temporary object used by the functions
+mem_object_t obj_run;
+mem_object_t obj_1;
+mem_object_t obj_2;
+mem_object_t obj_t; // This is a temporary object used by the functions
 
 void setUp(void) {
     TEST_ASSERT(memory_open(&obj_run, OBJ_RUN, WRITE_ALL) == PULL_SUCCESS);
@@ -37,16 +37,16 @@ void tearDown(void) {
 }
 
 void test_get_newest_firmware(void) {
-    obj_id newest = 0;
+    mem_id_t newest = 0;
     version_t version = 0;
     pull_error err = get_newest_firmware(&newest, &version, &obj_t);
     TEST_ASSERT_TRUE(!err);
     TEST_ASSERT_EQUAL_HEX16(version, 0xbeef);
-    TEST_ASSERT(newest == OBJ_1);
+    TEST_ASSERT(newest == OBJ_RUN);
 }
 
 void test_get_oldest_slot(void) {
-    obj_id oldest;
+    mem_id_t oldest;
     version_t version = 0;
     pull_error err = get_oldest_firmware(&oldest, &version, &obj_t);
     TEST_ASSERT_TRUE(!err);
@@ -64,7 +64,7 @@ void test_read_slot_manifest(void) {
 void test_write_slot_manifest(void) {
     manifest_t mt_old, mt_new;
     version_t version;
-    obj_id newest;
+    mem_id_t newest;
     pull_error err;
     err = read_firmware_manifest(&obj_2, &mt_old);
     TEST_ASSERT_TRUE(!err);

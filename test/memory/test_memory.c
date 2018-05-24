@@ -6,7 +6,7 @@
 #include "test_runner.h"
 #include "unity.h"
 
-mem_object object;
+mem_object_t object;
 
 #define FOREACH_TEST(DO) \
     DO(memory_read_sequential, 0) \
@@ -29,7 +29,7 @@ void tearDown(void) {
 }
 
 void test_memory_read_sequential(void) {
-    TEST_ASSERT_MESSAGE(object.fp > 0, "Invadlid File pointer");
+    TEST_ASSERT_MESSAGE(object.fp > 0, "Invalid File pointer");
     int i = 0;
     unsigned char buffer[SIZE*REP];
     TEST_ASSERT_EQUAL_INT(SIZE*REP, memory_read(&object, (unsigned char*) buffer, SIZE*REP, 0x0));
@@ -68,7 +68,7 @@ void test_memory_write_random(void) {
 }
 
 void test_memory_invalid_object(void) {
-    mem_object invalid_object;
+    mem_object_t invalid_object;
     pull_error err = memory_open(&invalid_object, -1, WRITE_ALL);
     TEST_ASSERT_EQUAL(MEMORY_MAPPING_ERROR, err);
     err = memory_open(&invalid_object, 120, WRITE_ALL);

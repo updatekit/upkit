@@ -73,7 +73,7 @@ static void handler(pull_error txp_err, const char* data, int len, void* more) {
 }
 
 pull_error receiver_open(receiver_ctx* ctx, txp_ctx* txp, identity_t identity,
-        const char* resource, mem_object* obj) {
+        const char* resource, mem_object_t* obj) {
     memset(ctx, 0, sizeof(receiver_ctx));
     ctx->txp = txp;
     ctx->err = PULL_SUCCESS;

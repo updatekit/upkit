@@ -36,7 +36,7 @@ void test_update_polling(void) {
     subscriber_ctx ctx;
     txp_ctx txp;
     txp_init(&txp, PROV_SERVER, 0, PULL_UDP, NULL);
-    mem_object obj_t;
+    mem_object_t obj_t;
     pull_error err = subscribe(&ctx, &txp, "version", &obj_t);
     TEST_ASSERT_TRUE(!err);
     err = check_updates(&ctx, check_update_cb);
