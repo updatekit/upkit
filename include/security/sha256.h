@@ -35,22 +35,26 @@ extern "C" {
     SHA256_INIT(cryptoauthlib_hw);
     SHA256_UPDATE(cryptoauthlib_hw);
     SHA256_FINAL(cryptoauthlib_hw);
+    DIGEST_FUNC(cryptoauthlib_hw);
 
     SHA256_INIT(cryptoauthlib);
     SHA256_UPDATE(cryptoauthlib);
     SHA256_FINAL(cryptoauthlib);
+    DIGEST_FUNC(cryptoauthlib);
 #endif
 
 #ifdef WITH_TINYDTLS
     SHA256_INIT(tinydtls);
     SHA256_UPDATE(tinydtls);
     SHA256_FINAL(tinydtls);
+    DIGEST_FUNC(tinydtls);
 #endif
 
 #ifdef WITH_TINYCRYPT
     SHA256_INIT(tinycrypt);
     SHA256_UPDATE(tinycrypt);
     SHA256_FINAL(tinycrypt);
+    DIGEST_FUNC(tinycrypt);
 #endif
 
 #ifdef __cplusplus

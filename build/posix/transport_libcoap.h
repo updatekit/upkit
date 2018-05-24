@@ -21,17 +21,6 @@ typedef struct {
     uint16_t length;
 } blockwise_ctx_t;
 
-/* Supported connection types. You can however define your own
- * connection type and pass it to the txp_init function, with
- * its own data. If you are implementing a connection type
- * defined here you can find some predefined structs in
- * security/secure_transport.h. */
-typedef enum conn_type {
-    CONN_UDP, // No connection data
-    CONN_DTLS_PSK,
-    CONN_DTLS_ECDH
-} conn_type;
-
 typedef struct dtls_psk_data_t {
     char* hint;
     uint8_t* key;

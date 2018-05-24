@@ -37,7 +37,18 @@ typedef enum rest_method {
     GET_BLOCKWISE2 /** CoAP specific method */
 } rest_method;
 
-typedef enum conn_type conn_type;
+/* Supported connection types. You can however define your own
+  * connection type and pass it to the txp_init function, with
+  * its own data. If you are implementing a connection type
+  * defined here you can find some predefined structs in
+  * security/secure_transport.h. */
+ typedef enum conn_type {
+     PULL_TCP,
+     PULL_UDP,
+     PULL_DTLS_PSK,
+     PULL_DTLS_ECDH
+ } conn_type;
+
 typedef struct txp_ctx_ txp_ctx;
 
 /** 

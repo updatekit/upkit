@@ -14,7 +14,6 @@
 #include "unity.h"
 #include <string.h>
 
-DIGEST_FUNC(tinydtls);
 digest_func df;
 ecc_func_t ef;
 mem_object obj_1;

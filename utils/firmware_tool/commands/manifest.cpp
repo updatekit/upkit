@@ -14,7 +14,6 @@
 
 /** XXX the next lines should be removed in a refactoring */
 #define BUFFER_LEN 0x1000
-DIGEST_FUNC(tinycrypt);
 
 IMPLEMENT(manifest)
 

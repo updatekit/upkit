@@ -29,7 +29,6 @@
 TEST_RUNNER();
 
 #define BUFFER_LEN 1024
-DIGEST_FUNC(tinycrypt);
 
 /* Default parameters used for the test */
 version_t version_g = 0xdead;

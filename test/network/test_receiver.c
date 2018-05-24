@@ -39,7 +39,7 @@ void tearDown(void) {
 void test_get_firmware(void) {
     txp_ctx txp;
     receiver_ctx rcv;
-    pull_error err = txp_init(&txp, PROV_SERVER, 0, CONN_UDP, NULL);
+    pull_error err = txp_init(&txp, PROV_SERVER, 0, PULL_UDP, NULL);
     TEST_ASSERT_TRUE(!err);
     err = receiver_open(&rcv, &txp, identity_g, "firmware", &obj);
     while (!rcv.firmware_received) {
@@ -60,7 +60,7 @@ void test_get_firmware_dtls(void) {
         .pub_key_x = (uint8_t *) dtls_client_x_g,
         .pub_key_y = (uint8_t *) dtls_client_y_g
     };
-    pull_error err = txp_init(&txp, PROV_SERVER, 0, CONN_DTLS_ECDH, &ecdh_data);
+    pull_error err = txp_init(&txp, PROV_SERVER, 0, PULL_DTLS_ECDH, &ecdh_data);
     TEST_ASSERT_TRUE(!err);
     err = receiver_open(&rcv, &txp, identity_g, "firmware", &obj);
     printf("Starting receiving the firmware\n");
@@ -78,7 +78,7 @@ void test_get_firmware_dtls(void) {
 void test_receiver_chunk_invalid_transport(void) {
     txp_ctx txp;
     receiver_ctx rcv;
-    pull_error err = txp_init(&txp, PROV_SERVER, 0, CONN_UDP, NULL);
+    pull_error err = txp_init(&txp, PROV_SERVER, 0, PULL_UDP, NULL);
     TEST_ASSERT_TRUE(!err);
     err = receiver_open(&rcv, &txp, identity_g, "firmware", &obj);
     TEST_ASSERT_TRUE(!err);
@@ -90,7 +90,7 @@ void test_receiver_chunk_invalid_transport(void) {
 void test_get_firmware_invalid_resource(void) {
     txp_ctx txp;
     receiver_ctx rcv;
-    pull_error err = txp_init(&txp, PROV_SERVER, 0, CONN_UDP, NULL);
+    pull_error err = txp_init(&txp, PROV_SERVER, 0, PULL_UDP, NULL);
     TEST_ASSERT_TRUE(!err);
     err = receiver_open(&rcv, &txp, identity_g, "antani", &obj);
     TEST_ASSERT_TRUE(!err);
@@ -107,7 +107,7 @@ void test_get_firmware_invalid_resource(void) {
 void test_get_firmware_invalid_size(void) {
     txp_ctx txp;
     receiver_ctx rcv;
-    pull_error err = txp_init(&txp, PROV_SERVER, 0, CONN_UDP, NULL);
+    pull_error err = txp_init(&txp, PROV_SERVER, 0, PULL_UDP, NULL);
     TEST_ASSERT_TRUE(!err);
     err = receiver_open(&rcv, &txp, identity_g, "firmware/invalid_size", &obj);
     TEST_ASSERT_TRUE(!err);

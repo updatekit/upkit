@@ -34,12 +34,6 @@ void ercoap_handler(coap_message_t* response);
                         &(_ctx_.request), ercoap_handler)); \
     };
 
-typedef enum conn_type {
-    TXP_UDP, // No connection data
-    TXP_DTLS_PSK,
-    TXP_DTLS_ECDSA
-} conn_type;
-
 pull_error txp_init(txp_ctx* ctx, const char* addr, uint16_t port, conn_type type, void* data);
 
 pull_error txp_on_data(txp_ctx* ctx, callback handler, void* more);

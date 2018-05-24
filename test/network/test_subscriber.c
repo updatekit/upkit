@@ -35,7 +35,7 @@ static void check_update_cb(pull_error err, const char* data, int len, void* mor
 void test_update_polling(void) {
     subscriber_ctx ctx;
     txp_ctx txp;
-    txp_init(&txp, PROV_SERVER, 0, CONN_UDP, NULL);
+    txp_init(&txp, PROV_SERVER, 0, PULL_UDP, NULL);
     mem_object obj_t;
     pull_error err = subscribe(&ctx, &txp, "version", &obj_t);
     TEST_ASSERT_TRUE(!err);

@@ -15,8 +15,6 @@ static const uint8_t priv_g[32] = {
     0xea,0x51,0x16,0x35,0xe9,0x2e,0x7c,0x8d,0xaf,0x0e,0x10,0xee,0x12,0xc0,0x10,0xfb
 };
 
-DIGEST_FUNC(tinycrypt);
-
 extern void resource_firmware(coap_context_t *ctx,
         struct coap_resource_t *resource, coap_session_t *session,
         coap_pdu_t *request, str *token, str *query, coap_pdu_t *response) {
