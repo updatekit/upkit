@@ -8,6 +8,7 @@
 #include <security/ecc.h>
 #include <network/receiver.h>
 #include <network/subscriber.h>
+#include <network/transport_config.h>
 
 #include "platform_headers.h"
 
@@ -43,25 +44,6 @@ typedef struct agent_t {
     pull_error current_error;
     agent_action_t required_action;
 } agent_t;
-
-typedef struct {
-    char* endpoint;
-    uint16_t port;
-    conn_type connection_type;
-    void* conn_data;
-    char* resource;
-} conn_config_t;
-
-inline pull_error conn_config(conn_config_t* cfg, char* endpoint, uint16_t port,
-                        conn_type type, void* conn_data, char* resource) {
-    // TODO validate params
-    cfg->endpoint = endpoint;
-    cfg->port = port;
-    cfg->connection_type = type;
-    cfg->conn_data = conn_data;
-    cfg->resource = resource;
-    return PULL_SUCCESS;
-}
 
 typedef struct {
     conn_config_t subscriber;
@@ -110,7 +92,6 @@ typedef struct update_agent_ctx_t {
     pull_error err;
 } update_agent_ctx_t;
 
-/* This function is not thread safe */
 agent_t update_agent(update_agent_config* cfg, update_agent_ctx_t* ctx);
 
 #endif /* AGENTS_UPDATE_H_ */
