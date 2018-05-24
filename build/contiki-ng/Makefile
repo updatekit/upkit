@@ -14,7 +14,7 @@ LOGGER_VERBOSITY ?= 4
 # Accepted values: NULL, TINYDTLS, CRYPTOAUTHLIB, TINYCRYPT
 SEC_LIB ?= TINYDTLS
 # Accepted values: CONN_UDP, CONN_DTLS_PSK, CONN_DTLS_ECDSA
-CONN_TYPE ?= CONN_DTLS_PSK
+CONN_TYPE ?= CONN_UDP
 #####################################################
 #              End Configurable Parameters          #
 #####################################################
@@ -36,6 +36,9 @@ CFLAGS += -DSIMPLE_MANIFEST -DLOGGER_VERBOSITY=$(LOGGER_VERBOSITY)
 PROJECTDIRS += $(LIBPULL)
 PROJECT_SOURCEFILES += $(LIBPULL_SOURCEFILES)
 CFLAGS += $(LIBPULL_INCLUDES)
+
+# Add the update process
+PROJECT_SOURCEFILES += update_process.c
 
 # Include CryptoAuthLib for performing verification
 EXT=ext
