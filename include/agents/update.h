@@ -90,9 +90,9 @@ typedef struct update_agent_ctx_t {
     subscriber_ctx sctx;
     receiver_ctx rctx;
     txp_ctx rtxp;
-    obj_id id;
-    mem_object new_obj;
-    mem_object obj_t;
+    mem_id_t id;
+    mem_object_t new_obj;
+    mem_object_t obj_t;
     pull_error err;
 } update_agent_ctx_t;
 

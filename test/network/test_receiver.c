@@ -22,7 +22,7 @@ TEST_RUNNER();
 
 #define PROV_SERVER "localhost"
 
-mem_object obj;
+mem_object_t obj;
 
 void setUp(void) {
     TEST_ASSERT_TRUE(memory_open(&obj, OBJ_2, WRITE_ALL) == PULL_SUCCESS);

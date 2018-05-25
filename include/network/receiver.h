@@ -33,7 +33,7 @@ typedef struct {
 typedef struct receiver_ctx_ {
     identity_t identity;
     const char* resource;
-    mem_object* obj;
+    mem_object_t* obj;
     manifest_t mt;
     int manifest_received;
     pull_error err;
@@ -66,7 +66,7 @@ typedef struct receiver_ctx_ {
  * the specific error otherwise.
  */
 pull_error receiver_open(receiver_ctx* ctx, txp_ctx* txp, identity_t identity,
-                        const char* resource, mem_object* obj);
+                        const char* resource, mem_object_t* obj);
 
 /** 
  * \brief Receive and store a chunk of the update into the memory object.

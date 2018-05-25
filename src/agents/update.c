@@ -47,7 +47,7 @@ agent_t update_agent(update_agent_config* cfg, update_agent_ctx_t* ctx) {
     // (4) Searching slot
     PULL_CONTINUE(STATE_SEARCHING_SLOT);
     uint16_t version;
-    ctx->err = get_oldest_firmware(&ctx->id, &version, &ctx->obj_t);
+    ctx->err = get_oldest_firmware(&ctx->id, &version, &ctx->obj_t, true, true);
     if (ctx->err) {
         log_error(ctx->err, "Error while getting the oldest slot\n");
         PULL_FAILURE(ctx->err);

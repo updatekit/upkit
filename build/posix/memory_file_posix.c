@@ -10,7 +10,24 @@
 #include <string.h>
 #include <unistd.h>
 
-const int8_t memory_objects[] = { OBJ_1, OBJ_2, OBJ_END};
+const mem_slot_t memory_slots[] = {
+    {
+        .id = OBJ_RUN,
+        .bootable = true,
+        .loaded = true
+    },
+    {
+        .id = OBJ_1,
+        .bootable = false,
+        .loaded = false
+    },
+    {
+        .id = OBJ_2,
+        .bootable = false,
+        .loaded = false
+    },
+    {OBJ_END}
+};
 
 char* memory_objects_mapper[] = {
     [OBJ_GOLD] = "antani",
@@ -19,6 +36,7 @@ char* memory_objects_mapper[] = {
     [OBJ_2] = "../assets/external_flash_simulator",
     [TEST_MEMORY_FILE] = "../assets/test_memory",
 };
+
 int memory_objects_start[] = {
     [OBJ_GOLD] = 0,
     [OBJ_RUN] = 0x7000,
@@ -35,26 +53,26 @@ int memory_objects_end[] = {
 };
 
 /******* Testing Function ******/
-void override_memory_object(obj_id id, char* path, int start, int end) {
+void override_memory_object(mem_id_t id, char* path, int start, int end) {
     memory_objects_mapper[id] = path;
     memory_objects_start[id] = start;
     memory_objects_end[id] = end;
 }
 /**** End Testing Function *****/
 
-pull_error resource_mapper(mem_object* ctx, obj_id obj) {
-    if (obj <= OBJ_FIRST || obj >= OBJ_LAST) {
+pull_error resource_mapper(mem_object_t* ctx, mem_id_t id) {
+    if (id <= OBJ_FIRST || id >= OBJ_LAST) {
         return INVALID_OBJECT_ERROR;
     }
-    ctx->path = memory_objects_mapper[obj];
-    ctx->start_offset = memory_objects_start[obj];
-    ctx->end_offset = memory_objects_end[obj];
+    ctx->path = memory_objects_mapper[id];
+    ctx->start_offset = memory_objects_start[id];
+    ctx->end_offset = memory_objects_end[id];
     return PULL_SUCCESS;
 }
 
-pull_error memory_open_impl(mem_object* ctx, obj_id obj, mem_mode_t mode) {
-    bzero(ctx, sizeof(mem_object));
-    if (resource_mapper(ctx, obj) != PULL_SUCCESS) {
+pull_error memory_open_impl(mem_object_t* ctx, mem_id_t id, mem_mode_t mode) {
+    bzero(ctx, sizeof(mem_object_t));
+    if (resource_mapper(ctx, id) != PULL_SUCCESS) {
         log_error(MEMORY_MAPPING_ERROR, "Error mapping the resource\n");
         return MEMORY_MAPPING_ERROR;
     }
@@ -67,7 +85,7 @@ pull_error memory_open_impl(mem_object* ctx, obj_id obj, mem_mode_t mode) {
     return PULL_SUCCESS;
 }
 
-int memory_read_impl(mem_object* ctx, void* memory_buffer, uint16_t size, uint32_t offset) {
+int memory_read_impl(mem_object_t* ctx, void* memory_buffer, size_t size, address_t offset) {
     PULL_ASSERT(ctx != NULL);
     PULL_ASSERT(ctx->fp >= 0);
     if (ctx->start_offset+offset+size > ctx->end_offset) {
@@ -82,7 +100,7 @@ int memory_read_impl(mem_object* ctx, void* memory_buffer, uint16_t size, uint32
 
 }
 
-int memory_write_impl(mem_object* ctx, const void* memory_buffer, uint16_t size, uint32_t offset) {
+int memory_write_impl(mem_object_t* ctx, const void* memory_buffer, size_t size, address_t offset) {
     PULL_ASSERT(ctx != NULL);
     PULL_ASSERT(ctx->fp > 0);
     if (ctx->start_offset+offset+size > ctx->end_offset) {
@@ -96,12 +114,12 @@ int memory_write_impl(mem_object* ctx, const void* memory_buffer, uint16_t size,
     return write(ctx->fp, memory_buffer, size);
 }
 
-pull_error memory_flush_impl(mem_object* ctx) {
+pull_error memory_flush_impl(mem_object_t* ctx) {
     // not implemented since there is no buffer
     return PULL_SUCCESS;
 }
 
-pull_error memory_close_impl(mem_object* ctx) {
+pull_error memory_close_impl(mem_object_t* ctx) {
     if (ctx == NULL) {
         return MEMORY_CLOSE_ERROR;
     }

@@ -12,12 +12,12 @@
 #include <common/libpull_config.h>
 #endif /* HAVE_CONFIG_H */
 
-#include "common/external.h"
 #include "common/types.h"
 #include "common/error.h"
 #include "common/callback.h"
 #include "common/logger.h"
 #include "common/identity.h"
 #include "common/pull_assert.h"
+#include "common/external.h"
 
 #endif /* LIBPULL_H_ */

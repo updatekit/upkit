@@ -11,31 +11,20 @@
 #define EXTERNAL_H_
 
 #include <stdint.h>
+#include <memory/memory.h>
 
- #ifdef __cplusplus
- extern "C" {
- #endif /* __cplusplus */
+#ifdef __cplusplus
+extern "C" {
+#endif /* __cplusplus */
 
-/** This array of integer identify the memory objects
- * with a valid manifest present in memory.
- * All the value of this array must be positive and
- * must match a valid memory object in the device memory.
- * The last element must be a negative value, or the
- * OBJ_END constant.
- *
- * Example: if you need to have two memory objects to store
- * the updates you can define the variable in this way:
- *
- *     const int8_t memory_objects[] = {OBJ_1, OBJ2, OBJ_END};
- *
- */
-extern const int8_t memory_objects[];
+extern const mem_slot_t memory_slots[];
+extern const version_t running_version;
 
 /** OBJ_END defines the final value used to stop the cicle on the
  * memory objects. */
 #define OBJ_END -1
 
 #ifdef __cplusplus
- }
+}
 #endif /* __cplusplus */
 #endif /* \} EXTERNAL_H_ */

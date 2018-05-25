@@ -16,7 +16,7 @@
 
 digest_func df;
 ecc_func_t ef;
-mem_object obj_1;
+mem_object_t obj_1;
 
 #include "test_verifier.h"
 

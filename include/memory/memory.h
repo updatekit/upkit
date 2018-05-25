@@ -4,7 +4,7 @@
  * The implementation is mandatory as it is used by the library to
  * interact with the memory of the device.
  * 
- * The mem_object type is not defined in the library and must
+ * The mem_object_t type is not defined in the library and must
  * be defined by the memory implementation used to the library.
  * For this reason every time a function that requires to work
  * with memory is called, it must be also passed to it a
@@ -17,25 +17,29 @@
 #ifndef MEMORY_H_
 #define MEMORY_H_
 
-#include <common/libpull.h>
+#include <common/error.h>
+#include <common/types.h>
 #include <stdint.h>
+#include <stddef.h>
+#include <stdbool.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
 
-typedef struct mem_object_ mem_object;
-typedef uint8_t obj_id;
+typedef struct mem_object_t mem_object_t;
+
+typedef struct mem_slot_t {
+    mem_id_t id;
+    bool bootable;
+    bool loaded;
+} mem_slot_t;
 
 typedef enum {
     READ_ONLY = 0,
     WRITE_CHUNK = 1, // In this mode the memory will not be completely rewritten.
     WRITE_ALL = 2 // In this mode the memory object will be completely erased before.
 } mem_mode_t;
-
-// TODO This should be refactored to support dinamic memory. This means that this
-// function should receive a mem_object** ctx, in this way it is able to
-// set the pointer value if it allocates the memory
 
 /** 
  * \brief Open a memory object.
@@ -51,7 +55,7 @@ typedef enum {
  * \returns PULL_SUCCESS if the memory was correctly open or the specific
  * erro 
  */
-pull_error memory_open(mem_object* ctx, obj_id id, mem_mode_t mode);
+pull_error memory_open(mem_object_t* ctx, mem_id_t id, mem_mode_t mode);
 
 /** 
  * \brief Read bytes from a memory object.
@@ -64,7 +68,7 @@ pull_error memory_open(mem_object* ctx, obj_id id, mem_mode_t mode);
  * \param offset The offset in the memory object from where to start reading.
  * \returns The number of readed bytes or a negative number in case of error.
  */
-int memory_read(mem_object* ctx, void* memory_buffer, uint16_t size, uint32_t offset);
+int memory_read(mem_object_t* ctx, void* memory_buffer, size_t size, address_t offset);
 
 /** 
  * \brief Write bytes into a memory object.
@@ -77,21 +81,21 @@ int memory_read(mem_object* ctx, void* memory_buffer, uint16_t size, uint32_t of
  * \param offset The offset into the memory object.
  * \returns The number of written bytes or a negative number in case of error.
  */
-int memory_write(mem_object* ctx, const void* memory_buffer, uint16_t size, uint32_t offset);
+int memory_write(mem_object_t* ctx, const void* memory_buffer, size_t size, address_t offset);
 
 /** 
  * \brief Flush the memory object. (Not mandatory)
  * 
  * This function must not always be implemented. In fact it should be
  * implemented only if the underlying implementation includes some
- * buffer I/O. In that case could be useful to flush the buffer.
+ * buffered I/O. In that case could be useful to flush the buffer.
  * The flush function is not direcly used by the library but may
  * be useful in some situations.
  * \param ctx The memory object containing the buffer to be flushed.
  * \returns PULL_SUCCESS if the buffer was correcly flushed or the
  * specific error otherwise.
  */
-pull_error memory_flush(mem_object* ctx);
+pull_error memory_flush(mem_object_t* ctx);
 
 /** 
  * \brief Close the memory object.
@@ -100,7 +104,7 @@ pull_error memory_flush(mem_object* ctx);
  * \param ctx The memory object.
  * \returns PULL_SUCCESS on success or a specific error otherwise.
  */
-pull_error memory_close(mem_object* ctx);
+pull_error memory_close(mem_object_t* ctx);
 
 #ifdef __cplusplus
 }

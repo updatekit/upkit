@@ -4,13 +4,13 @@
 #include "common/libpull.h"
 #include "network/async.h"
 
-pull_error subscribe(subscriber_ctx* ctx, txp_ctx* txp, const char* resource, mem_object* obj_t) {
+pull_error subscribe(subscriber_ctx* ctx, txp_ctx* txp, const char* resource, mem_object_t* obj_t) {
     pull_error err;
     ctx->txp = txp;
     ctx->resource = resource;
-    obj_id id;
+    mem_id_t id;
     log_debug("Getting the newest firmware from memory\n");
-    err = get_newest_firmware(&id, &ctx->current_version, obj_t);
+    err = get_newest_firmware(&id, &ctx->current_version, obj_t, false, false);
     if (err) {
         log_error(err, "Impossible to get newest firmware\n");
         return SUBSCRIBE_ERROR;

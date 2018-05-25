@@ -50,7 +50,7 @@ void subscriber_cb(pull_error err, const char* data, int len, void* more);
  * 
  * \returns PULL_SUCCESS on success or the specific error otherwise.
  */
-pull_error subscribe(subscriber_ctx* ctx, txp_ctx* txp, const char* resource, mem_object* obj_t);
+pull_error subscribe(subscriber_ctx* ctx, txp_ctx* txp, const char* resource, mem_object_t* obj_t);
 
 /** 
  * \brief Check the presence of an update.

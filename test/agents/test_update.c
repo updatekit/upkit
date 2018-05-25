@@ -27,7 +27,7 @@ void setUp(void) {
     override_memory_object(OBJ_1, "../assets/external_flash_simulator_updated", 0x19000, 0x32000);
     override_memory_object(OBJ_2, "../assets/external_flash_simulator_updated", 0x32000, 0x4B000);
     override_memory_object(OBJ_RUN, "../assets/internal_flash_simulator_updated", 0x7000, 0x20000);
-    mem_object obj_t;
+    mem_object_t obj_t;
     TEST_ASSERT_TRUE(invalidate_object(OBJ_2, &obj_t) == PULL_SUCCESS);
 }
 
