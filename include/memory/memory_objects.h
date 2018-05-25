@@ -31,7 +31,8 @@ extern "C" {
  * \param[in] obj_t A temporary mem_object_t used by the function.
  * \returns PULL_SUCCESS on success or a specific error otherwise.
  */
-pull_error get_newest_firmware(mem_id_t *id, version_t *version, mem_object_t *obj_t);
+pull_error get_newest_firmware(mem_id_t *id, version_t *version, mem_object_t *obj_t,
+        bool disable_running, bool prefer_bootable);
 
 /**
  * \brief Get the id of the memory object containing the oldest firmware.
@@ -41,7 +42,8 @@ pull_error get_newest_firmware(mem_id_t *id, version_t *version, mem_object_t *o
  * \param[in] obj_t A temporary mem_object_t used by the function.
  * \returns PULL_SUCCESS on success or a specific error otherwise.
  */
-pull_error get_oldest_firmware(mem_id_t *obj, version_t *version, mem_object_t *obj_t);
+pull_error get_oldest_firmware(mem_id_t *obj, version_t *version, mem_object_t *obj_t,
+        bool disable_running, bool prefer_bootable);
 
 /**
  * \brief Copy the firmware s into the firmware d.

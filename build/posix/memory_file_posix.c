@@ -10,22 +10,6 @@
 #include <string.h>
 #include <unistd.h>
 
-const mem_slot_t memory_slots[] = {
-    {
-        .id = OBJ_RUN,
-        .bootable = true
-    },
-    {
-        .id = OBJ_1,
-        .bootable = false
-    },
-    {
-        .id = OBJ_2,
-        .bootable = false
-    },
-    {OBJ_END}
-};
-
 char* memory_objects_mapper[] = {
     [OBJ_GOLD] = "antani",
     [OBJ_RUN] = "../assets/internal_flash_simulator",
