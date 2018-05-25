@@ -39,7 +39,7 @@ void tearDown(void) {
 void test_get_newest_firmware(void) {
     mem_id_t newest = 0;
     version_t version = 0;
-    pull_error err = get_newest_firmware(&newest, &version, &obj_t);
+    pull_error err = get_newest_firmware(&newest, &version, &obj_t, false, false);
     TEST_ASSERT_TRUE(!err);
     TEST_ASSERT_EQUAL_HEX16(version, 0xbeef);
     TEST_ASSERT(newest == OBJ_RUN);
@@ -48,7 +48,7 @@ void test_get_newest_firmware(void) {
 void test_get_oldest_slot(void) {
     mem_id_t oldest;
     version_t version = 0;
-    pull_error err = get_oldest_firmware(&oldest, &version, &obj_t);
+    pull_error err = get_oldest_firmware(&oldest, &version, &obj_t, false, false);
     TEST_ASSERT_TRUE(!err);
     TEST_ASSERT_EQUAL_HEX16(0x0, version);
     TEST_ASSERT_EQUAL_INT(OBJ_2, oldest);
@@ -71,7 +71,7 @@ void test_write_slot_manifest(void) {
     mt_new.vendor.version = 0xffff;
     err = write_firmware_manifest(&obj_2, &mt_new);
     TEST_ASSERT_TRUE(!err);
-    get_newest_firmware(&newest, &version, &obj_t);
+    get_newest_firmware(&newest, &version, &obj_t, false, false);
     TEST_ASSERT_EQUAL_INT8(OBJ_2, newest);
     err = write_firmware_manifest(&obj_2, &mt_old);
     TEST_ASSERT_TRUE(!err);

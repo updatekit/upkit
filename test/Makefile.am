@@ -21,27 +21,28 @@ MEMORY_SRC = ../src/memory/memory_objects.c
 SECURITY_SRC = ../src/security/verifier.c
 NETWORK_SRC = ../src/network/receiver.c ../src/network/subscriber.c ../src/network/transport_config.c
 AGENTS_SRC = ../src/agents/update.c
+SUPPORT_SRC = support/external_variables.c
 
 NETWORK_IMPL = ../build/posix/transport_libcoap.c ../build/posix/async_libcoap.c
 MEMORY_IMPL = ../src/memory/memory.c ../build/posix/memory_file_posix.c
 MANIFEST_IMPL = ../src/memory/manifest.c ../src/memory/simple_manifest.c
 
 ALL_SRC = $(UNITY_SRC) $(COMMON_SRC) $(MEMORY_SRC) $(SECURITY_SRC) $(MANIFEST_IMPL) $(NETWORK_SRC) $(AGENTS_SRC)
-ALL_SRC += $(NETWORK_IMPL) $(MEMORY_IMPL)
+ALL_SRC += $(NETWORK_IMPL) $(MEMORY_IMPL) $(SUPPORT_SRC)
 
 MOCK_MEMORY = mocks/memory_mock.c ../build/posix/memory_file_posix.c
 MOCK_MANIFEST = mocks/manifest_mock.c ../src/memory/simple_manifest.c
-NO_MOCK_SRC = $(UNITY_SRC) $(COMMON_SRC) $(SECURITY_SRC) $(NETWORK_SRC) $(NETWORK_IMPL) $(MEMORY_SRC)
+NO_MOCK_SRC = $(UNITY_SRC) $(COMMON_SRC) $(SECURITY_SRC) $(NETWORK_SRC) $(NETWORK_IMPL) $(MEMORY_SRC) $(SUPPORT_SRC)
 
 TINYCRYPT_SRC = ../src/security/tinycrypt.c ../ext/tinycrypt/lib/source/ecc_platform_specific.c
 TINYDTLS_SRC = ../src/security/tinydtls.c
 
 memory_tests = test_memory test_memory_objects test_manifest
 agents_tests = test_update
-network_tests = test_receiver test_receiver_memory_invalid test_subscriber test_transport_dtls
+network_tests = test_receiver test_subscriber test_transport_dtls #test_receiver_memory_invalid
 security_tests = test_tinycrypt test_tinydtls
 
-check_PROGRAMS = $(memory_tests)  $(agents_tests) test_receiver test_subscriber test_transport_dtls $(security_tests)
+check_PROGRAMS = $(memory_tests)  $(agents_tests) $(network_tests) $(security_tests)
 TESTS = $(check_PROGRAMS)
 
 # Memory tests
