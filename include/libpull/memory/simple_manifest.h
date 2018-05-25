@@ -4,10 +4,10 @@
  * \defgroup Memory
  * \{
  */
-#ifndef SIMPLE_MANIFEST_H_
-#define SIMPLE_MANIFEST_H_
+#ifndef LIBPULL_MEMORY_SIMPLE_MANIFEST_H_
+#define LIBPULL_MEMORY_SIMPLE_MANIFEST_H_
 
-#include <common/libpull.h>
+#include <libpull/common.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -47,4 +47,4 @@ typedef struct {
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
-#endif /* \} SIMPLE_MANIFEST_H_ */
+#endif /* \} LIBPULL_MEMORY_SIMPLE_MANIFEST_H_ */

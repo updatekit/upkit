@@ -10,12 +10,12 @@
  * on the memory interface implemented by the developer using the library.
  * \{
  */
-#ifndef MEMORY_OBJECTS_H_
-#define MEMORY_OBJECTS_H_
+#ifndef LIBPULL_MEMORY_OBJECTS_H_
+#define LIBPULL_MEMORY_OBJECTS_H_
 
-#include <common/libpull.h>
-#include <memory/memory.h>
-#include <memory/manifest.h>
+#include <libpull/common/libpull.h>
+#include <libpull/memory/memory.h>
+#include <libpull/memory/manifest.h>
 #include <stdint.h>
 #include <stdio.h>
 
@@ -99,4 +99,4 @@ pull_error invalidate_object(mem_id_t id, mem_object_t* obj_t);
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
-#endif /* \} MEMORY_OBJECTS_H_ */
+#endif /* \} LIBPULL_MEMORY_OBJECTS_H_ */

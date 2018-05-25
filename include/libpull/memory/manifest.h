@@ -4,13 +4,13 @@
  * \defgroup Memory
  * \{
  */
-#ifndef MANIFEST_H_
-#define MANIFEST_H_
+#ifndef LIBPULL_MEMORY_MANIFEST_H_
+#define LIBPULL_MEMORY_MANIFEST_H_
 
-#include "memory/simple_manifest.h"
-#include "common/libpull.h"
-#include "security/digest.h"
-#include "security/ecc.h"
+#include <libpull/common.h>
+#include <libpull/memory/simple_manifest.h>
+#include <libpull/security/digest.h>
+#include <libpull/security/ecc.h>
 #include <stdint.h>
 #include <stddef.h>
 
@@ -80,4 +80,4 @@ pull_error sign_manifest_server(manifest_t* mt, digest_func df, const uint8_t *p
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
-#endif /* \} MANIFEST_H_ */
+#endif /* \} LIBPULL_MEMORY_MANIFEST_H_ */

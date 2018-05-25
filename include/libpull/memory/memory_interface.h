@@ -14,11 +14,11 @@
  * \defgroup Memory
  * \{
  */
-#ifndef MEMORY_H_
-#define MEMORY_H_
+#ifndef LIBPULL_MEMORY_MEMORY_INTERFACE_H_
+#define LIBPULL_MEMORY_MEMORY_INTERFACE_H_
 
-#include <common/error.h>
-#include <common/types.h>
+#include <libpull/common/error.h>
+#include <libpull/common/types.h>
 #include <stdint.h>
 #include <stddef.h>
 #include <stdbool.h>
@@ -109,4 +109,4 @@ pull_error memory_close(mem_object_t* ctx);
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
-#endif /* \} MEMORY_H_ */
+#endif /* \} LIBPULL_MEMORY_MEMORY_INTERFACE_H_ */
