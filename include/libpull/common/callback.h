@@ -5,10 +5,10 @@
   * \defgroup Common
   * \{
   */
-#ifndef CALLBACK_H_
-#define CALLBACK_H_
+#ifndef LIBPULL_COMMON_CALLBACK_H_
+#define LIBPULL_COMMON_CALLBACK_H_
 
-#include "common/libpull.h"
+#include <libpull/common/error.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -26,4 +26,4 @@ typedef void (* callback)(pull_error err, const char* data, int len, void* more)
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
-#endif /* \} CALLBACK_H_ */
+#endif /* \} LIBPULL_COMMON_CALLBACK_H_ */

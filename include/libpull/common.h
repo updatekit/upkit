@@ -9,15 +9,15 @@
  * defining a config.h file (manually or using the configure script)
  * and including its directory in the header directory */
 #ifdef HAVE_CONFIG_H
-#include <common/libpull_config.h>
+#include "libpull_config.h"
 #endif /* HAVE_CONFIG_H */
 
-#include "common/types.h"
-#include "common/error.h"
-#include "common/callback.h"
-#include "common/logger.h"
-#include "common/identity.h"
-#include "common/pull_assert.h"
-#include "common/external.h"
+#include <libpull/common/types.h>
+#include <libpull/common/common/error.h>
+#include <libpull/common/callback.h>
+#include <libpull/common/logger.h>
+#include <libpull/common/identity.h>
+#include <libpull/common/pull_assert.h>
+#include <libpull/common/external.h>
 
 #endif /* LIBPULL_COMMON_H_ */

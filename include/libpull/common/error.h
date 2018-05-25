@@ -13,8 +13,8 @@
  * by the developer.
  * \{
  */
-#ifndef ERROR_H_
-#define ERROR_H_
+#ifndef LIBPULL_COMMON_ERROR_H_
+#define LIBPULL_COMMON_ERROR_H_
 
 #ifdef __cplusplus
 extern "C" {
@@ -94,4 +94,4 @@ const char* err_as_str(pull_error err);
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
-#endif /* \} ERROR_H_ */
+#endif /* \} LIBPULL_COMMON_ERROR_H_ */

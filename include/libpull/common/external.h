@@ -7,11 +7,11 @@
  * \defgroup Common
  * \{
  */
-#ifndef EXTERNAL_H_
-#define EXTERNAL_H_
+#ifndef LIBPULL_COMMON_EXTERNAL_H_
+#define LIBPULL_COMMON_EXTERNAL_H_
 
+#include <libpull/memory/memory.h>
 #include <stdint.h>
-#include <memory/memory.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -27,4 +27,4 @@ extern const version_t running_version;
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
-#endif /* \} EXTERNAL_H_ */
+#endif /* \} LIBPULL_COMMON_EXTERNAL_H_ */

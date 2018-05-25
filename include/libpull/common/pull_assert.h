@@ -1,5 +1,5 @@
-#ifndef PULL_ASSERT_H_
-#define PULL_ASSERT_H_
+#ifndef LIBPULL_COMMON_ASSERT_H_
+#define LIBPULL_COMMON_ASSERT_H_
 
 #if ENABLE_ASSERT == 1
 #include <assert.h>
@@ -10,4 +10,4 @@
 
 #endif /* ENABLE_ASSERT == 1 */
 
-#endif /* PULL_ASSERT_H_ */
+#endif /* LIBPULL_COMMON_ASSERT_H_ */

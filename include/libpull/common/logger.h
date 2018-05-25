@@ -11,10 +11,10 @@
  * \defgroup Common
  * \{
  */
-#ifndef LOGGER_H_
-#define LOGGER_H_
+#ifndef LIBPULL_COMMON_LOGGER_H_
+#define LIBPULL_COMMON_LOGGER_H_
 
-#include "common/error.h"
+#include <libpull/common/error.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -71,4 +71,4 @@ extern uint8_t verbosity_level;
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
-#endif /* \} LOGGER_H_ */
+#endif /* \} LIBPULL_COMMON_LOGGER_H_ */

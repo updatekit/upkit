@@ -4,8 +4,8 @@
  * \defgroup Common
  * \{
  */
-#ifndef TYPES_H_
-#define TYPES_H_
+#ifndef LIBPULL_COMMON_TYPES_H_
+#define LIBPULL_COMMON_TYPES_H_
 
 #ifdef __cplusplus
 extern "C" {
@@ -27,4 +27,4 @@ typedef int8_t mem_id_t;
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
-#endif /* \} TYPES_H_ */
+#endif /* \} LIBPULL_COMMON_TYPES_H_ */
