@@ -1,5 +1,5 @@
-#ifndef LIBPULL_H_
-#define LIBPULL_H_
+#ifndef LIBPULL_COMMON_H_
+#define LIBPULL_COMMON_H_
 
 /** This file is used to include all the common header
  * needed by every module of the library */
@@ -20,4 +20,4 @@
 #include "common/pull_assert.h"
 #include "common/external.h"
 
-#endif /* LIBPULL_H_ */
+#endif /* LIBPULL_COMMON_H_ */
