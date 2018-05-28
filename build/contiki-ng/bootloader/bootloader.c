@@ -46,5 +46,14 @@ static agent_msg_t agent_msg;
 void pull_bootloader() {
     while(1) {
         agent_msg bootloader_agent();
+        if (event == EVENT_STORE_RECOVERY_COPY_START) {
+            watchdog_stop();
+        } else if (event == EVENT_STORE_RECOVERY_COPY_STOP) {
+            watchdog_start();
+        } else if (event == EVENT_VALIDATE_NON_BOOTABLE_START) {
+            watchdog_stop();
+        } else if (event == EVENT_VALIDATE_NON_BOOTABLE_STOP) {
+            watchdog_start();
+        }
     }
 }

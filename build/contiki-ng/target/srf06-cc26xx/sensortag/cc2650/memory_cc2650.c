@@ -10,7 +10,24 @@
 
 #define FLASH_PAGE_SIZE PAGE_SIZE // Defined in Manifest.conf
 
-const int8_t memory_objects[] = { OBJ_1, OBJ_2, OBJ_END};
+const mem_slot_t memory_slots[] = { 
+    {
+        .id = OBJ_RUN,
+        .bootable = true,
+        .loaded = true
+    },
+    {
+        .id = OBJ_1,
+        .bootable = false,
+        .loaded = false
+    },
+    {
+        .id = OBJ_2,
+        .bootable = false,
+        .loaded = false
+    },
+    {OBJ_END}
+};
 
 static uint8_t external_memory_open = 0;
 
