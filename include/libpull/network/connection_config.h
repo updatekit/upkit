@@ -2,7 +2,7 @@
 #define LIBPULL_NETWORK_CONNECTION_CONFIG_H_
 
 #include <libpull/common.h>
-#include <libpull/network/transport.h>
+#include <libpull/network/connection_interface.h>
 
 typedef struct {
     char* endpoint;

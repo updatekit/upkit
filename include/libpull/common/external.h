@@ -10,7 +10,7 @@
 #ifndef LIBPULL_COMMON_EXTERNAL_H_
 #define LIBPULL_COMMON_EXTERNAL_H_
 
-#include <libpull/memory/memory.h>
+#include <libpull/memory/memory_interface.h>
 #include <stdint.h>
 
 #ifdef __cplusplus

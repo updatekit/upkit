@@ -39,7 +39,7 @@ pull_error verify_object(mem_object_t* obj, digest_func digest, const uint8_t* x
     address_t offset = get_offset(&mt);
     address_t final_offset = offset + get_size(&mt);
     address_t step = buffer_len;
-    log_debug("Digest: initial offset %lu final offset %lu size %lu\n", offset, final_offset, get_size(&mt));
+    log_debug("Digest: initial offset %uu final offset %u size %u\n", offset, final_offset, get_size(&mt));
     if (offset == final_offset) {
         err = MEMORY_READ_ERROR;
         goto error;

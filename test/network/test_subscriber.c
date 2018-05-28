@@ -1,11 +1,10 @@
-#include "common/libpull.h"
-#include "network/subscriber.h"
-#include "network/async.h"
-#include "memory/memory_objects.h"
+#include <libpull/common.h>
+#include <libpull/network/subscriber.h>
+#include <libpull/network/async_interface.h>
+#include <libpull/memory/memory_objects.h>
 
-#include "memory_file_posix.h"
-#include "transport_libcoap.h"
-
+#include "memory_posix.h"
+#include "platform_headers.h"
 #include "test_runner.h"
 #include "unity.h"
 

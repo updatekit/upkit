@@ -1,14 +1,4 @@
-#include "common/libpull.h"
-#include "network/receiver.h"
-#include "network/subscriber.h"
-#include "network/async.h"
-#include "security/ecc.h"
-#include "security/sha256.h"
-#include "security/verifier.h"
-#include "memory/memory_objects.h"
-#include "memory/memory.h"
-#include "memory/manifest.h"
-#include "agents/update.h"
+#include <libpull_agents/update.h>
 
 #include "platform_headers.h"
 

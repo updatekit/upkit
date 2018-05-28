@@ -1,4 +1,4 @@
-/** \file async.h
+/** \file async_interface.h
  * \brief Interface to interact with the event loop.
  *
  * The library requires the developer to implement the transport
@@ -9,11 +9,11 @@
  * \defgroup Common
  * \{
  */
-#ifndef LIBPULL_NETWORK_ASYNC_H_
-#define LIBPULL_NETWORK_ASYNC_H_
+#ifndef LIBPULL_NETWORK_ASYNC_INTERFACE_H_
+#define LIBPULL_NETWORK_ASYNC_INTERFACE_H_
 
 #include <libpull/common.h>
-#include <libpull/network/transport.h>
+#include <libpull/network/connection_interface.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -43,4 +43,4 @@ void break_loop(txp_ctx* ctx);
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
-#endif /* \} LIBPULL_NETWORK_ASYNC_H_ */
+#endif /* \} LIBPULL_NETWORK_ASYNC_INTERFACE_H_ */

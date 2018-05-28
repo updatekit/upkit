@@ -13,7 +13,7 @@
 #endif /* HAVE_CONFIG_H */
 
 #include <libpull/common/types.h>
-#include <libpull/common/common/error.h>
+#include <libpull/common/error.h>
 #include <libpull/common/callback.h>
 #include <libpull/common/logger.h>
 #include <libpull/common/identity.h>

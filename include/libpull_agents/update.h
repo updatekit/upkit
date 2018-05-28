@@ -1,14 +1,12 @@
 #ifndef AGENTS_UPDATE_H_
 #define AGENTS_UPDATE_H_
 
-#include <common/libpull.h>
-#include <agents/coroutine.h>
-#include <network/transport.h>
-#include <security/digest.h>
-#include <security/ecc.h>
-#include <network/receiver.h>
-#include <network/subscriber.h>
-#include <network/transport_config.h>
+#include <libpull/common.h>
+#include <libpull/network.h>
+#include <libpull/memory.h>
+#include <libpull/security.h>
+
+#include <libpull_agents/coroutine.h>
 
 #include "platform_headers.h"
 

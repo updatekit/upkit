@@ -1,10 +1,10 @@
-#include "common/libpull.h"
-#include "memory/memory_objects.h"
-#include "memory/manifest.h"
-#include "memory_file_posix.h"
+#include <libpull/common.h>
+#include <libpull/memory.h>
 
+#include "support/platform_headers.h"
 #include "test_runner.h"
 #include "unity.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 

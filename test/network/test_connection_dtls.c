@@ -1,8 +1,8 @@
-#include "common/libpull.h"
-#include "network/transport.h"
-#include "memory/manifest.h"
+#include <libpull/common.h>
+#include <libpull/network.h>
+#include <libpull/memory.h>
 
-#include "transport_libcoap.h"
+#include "platform_headers.h"
 
 #include "sample_data.h"
 #include "test_runner.h"

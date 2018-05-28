@@ -21,7 +21,7 @@
 #include "config.h"
 #include "server.h"
 
-#include "memory/manifest.h"
+#include <libpull/memory/manifest.h>
 
 static int server_exit = 0;
 static server_ctx_t server_ctx = {

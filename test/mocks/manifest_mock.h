@@ -1,9 +1,9 @@
 #ifndef MANIFEST_MOCK_H_
 #define MANIFEST_MOCK_H_
 
-#include "common/error.h"
-#include "memory/manifest.h"
-#include "memory/simple_manifest.h"
+#include <libpull/common/error.h>
+#include <libpull/memory/manifest.h>
+#include <libpull/memory/simple_manifest.h>
 
 #define DEFINE_GETTER(type, name) \
 	type get_##name##_impl(const manifest_t* mt);

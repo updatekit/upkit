@@ -13,8 +13,8 @@
 #ifndef LIBPULL_MEMORY_OBJECTS_H_
 #define LIBPULL_MEMORY_OBJECTS_H_
 
-#include <libpull/common/libpull.h>
-#include <libpull/memory/memory.h>
+#include <libpull/common.h>
+#include <libpull/memory/memory_interface.h>
 #include <libpull/memory/manifest.h>
 #include <stdint.h>
 #include <stdio.h>

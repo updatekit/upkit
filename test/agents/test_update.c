@@ -1,6 +1,6 @@
-#include "agents/update.h"
-#include "security/sha256.h"
+#include <libpull/security/sha256.h>
 
+#include "libpull_agents/update.h"
 #include "support/sample_data.h"
 #include "support/test_runner.h"
 #include "unity.h"

@@ -1,4 +1,4 @@
-#include <memory/memory_interface.h>
+#include <libpull/memory/memory_interface.h>
 
 pull_error memory_open_impl(mem_object_t* ctx, mem_id_t id, mem_mode_t mode);
 uint16_t memory_read_impl(mem_object_t* ctx, void* memory_buffer, size_t size, address_t offset);

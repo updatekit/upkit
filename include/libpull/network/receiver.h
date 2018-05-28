@@ -13,7 +13,7 @@
 
 #include <libpull/common.h>
 #include <libpull/memory/memory_objects.h>
-#include <libpull/network/transport.h>
+#include <libpull/network/connection_interface.h>
 
 #ifdef __cplusplus
 extern "C" {

@@ -4,7 +4,6 @@
  * be obviously different
  */
 
-#include <common/libpull.h>
-#include <memory/memory.h>
+#include <libpull/common.h>
 
 const version_t running_version = 0x0001;

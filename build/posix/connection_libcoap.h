@@ -1,9 +1,9 @@
-#ifndef TRANSPORT_LIBCOAP_H_
-#define TRANSPORT_LIBCOAP_H_
-#include "network/transport.h"
-#include "common/error.h"
-#include "common/logger.h"
-#include "security/ecc.h"
+#ifndef CONNECTION_LIBCOAP_H_
+#define CONNECTION_LIBCOAP_H_
+
+#include <libpull/common.h>
+#include <libpull/network/connection_interface.h>
+#include <libpull/security/ecc.h>
 
 #include <coap/coap.h>
 
@@ -59,4 +59,4 @@ pull_error txp_observe(txp_ctx* ctx, const char* resource, const char* token, ui
 
 void txp_end(txp_ctx* ctx);
 
-#endif
+#endif /* CONNECTION_LIBCOAP_H_ */

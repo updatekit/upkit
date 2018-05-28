@@ -2,10 +2,10 @@
 #include <coap/coap_dtls.h>
 #include <stdio.h>
 
+#include <libpull/network/receiver.h>
+#include <libpull/memory/manifest.h>
+#include <libpull/security/sha256.h>
 #include "../server.h"
-#include "network/receiver.h"
-#include "memory/manifest.h"
-#include "security/sha256.h"
 
 /* The vendor private key MUST never been in the server.
  * However, this is a testing server that requires to

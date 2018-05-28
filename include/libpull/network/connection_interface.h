@@ -1,4 +1,4 @@
-/** \file transport.h
+/** \file connection_interface.h
  * \brief Interface to connect with the network.
  * \author Antonio Langiu
  * \defgroup Transport
@@ -15,8 +15,8 @@
  * of the Network module to check and download the available firmware.
  * \{
  */
-#ifndef LIBPULL_NETWORK_CONNECTION_H_
-#define LIBPULL_NETWORK_CONNECTION_H_
+#ifndef LIBPULL_NETWORK_CONNECTION_INTERFACE_H_
+#define LIBPULL_NETWORK_CONNECTION_INTERFACE_H_
 
 #include <libpull/common.h>
 #include <stdlib.h>
@@ -117,4 +117,4 @@ void txp_end(txp_ctx* ctx);
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
-#endif /* \} LIBPULL_NETWORK_CONNECTION_H_ */
+#endif /* \} LIBPULL_NETWORK_CONNECTION_INTERFACE_H_ */

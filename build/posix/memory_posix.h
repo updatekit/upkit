@@ -1,8 +1,8 @@
 #ifndef MEMORY_FILE_POSIX_H_
 #define MEMORY_FILE_POSIX_H_
 
-#include <common/libpull.h>
-#include <memory/memory.h>
+#include <libpull/common.h>
+#include <libpull/memory.h>
 
 struct mem_object_t {
     char* path;
@@ -26,4 +26,4 @@ enum memory_objects_enum {
 void override_memory_object(mem_id_t id, char* path, int start, int end);
 /***** End Testing functions *****/
 
-#endif // MEMORY_FILE_POSIX_H_
+#endif /* MEMORY_FILE_POSIX_H_ */

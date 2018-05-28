@@ -1,4 +1,4 @@
-#include "transport_libcoap.h"
+#include "connection_libcoap.h"
 
 #include <unistd.h>
 #include <sys/select.h>

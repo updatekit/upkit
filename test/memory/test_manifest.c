@@ -1,11 +1,10 @@
-#include "memory/manifest.h"
-#include "memory/memory.h"
-#include "security/sha256.h"
-#include "memory_file_posix.h" // Posix file
+#include <libpull/memory.h>
+#include <libpull/security/sha256.h>
 
 #include "tinycrypt_default_cspring.h" // Test Support
 #include "invalid_digest.h" // Test Support
 #include "sample_data.h" // Test Support
+#include "memory_posix.h" // Posix file
 
 #include "unity.h"
 #include "test_runner.h"

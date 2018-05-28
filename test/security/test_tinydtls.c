@@ -1,14 +1,12 @@
-#include "common/libpull.h"
-#include "memory/memory_objects.h"
-#include "security/digest.h"
-#include "security/sha256.h"
-#include "security/ecc.h"
+#include <libpull/common.h>
+#include <libpull/security.h>
+#include <libpull/memory/memory_objects.h>
 
 #include "memory_mock.h" // Mock
-#include "memory_file_posix.h" // Real Implmentation
+#include "memory_posix.h" // Real Implmentation
 
 #include "manifest_mock.h" // Mock
-#include "memory/simple_manifest.h" // Real Implementation
+#include <libpull/memory/simple_manifest.h> // Real Implementation
 
 #include "test_runner.h"
 #include "unity.h"
@@ -22,17 +20,17 @@ mem_object_t obj_1;
 
 #define FOREACH_TEST(DO) \
     DO(ecc_verify, 0)\
-    DO(ecc_verify_invalid_signature, 0)\
-    DO(sha256, 0)\
-    DO(sha256_invalid_init, 0)\
-    DO(sha256_invalid_update, 0)\
-    DO(sha256_invalid_final, 0)\
-    DO(verify_object_valid,0)\
-    DO(verify_object_invalid_object,0)\
-    DO(verify_object_invalid_read,0)\
-    DO(verify_object_invalid_digest_init,0)\
-    DO(verify_object_invalid_digest_update,0)\
-    DO(verify_object_invalid_key,0)
+DO(ecc_verify_invalid_signature, 0)\
+DO(sha256, 0)\
+DO(sha256_invalid_init, 0)\
+DO(sha256_invalid_update, 0)\
+DO(sha256_invalid_final, 0)\
+DO(verify_object_valid,0)\
+DO(verify_object_invalid_object,0)\
+DO(verify_object_invalid_read,0)\
+DO(verify_object_invalid_digest_init,0)\
+DO(verify_object_invalid_digest_update,0)\
+DO(verify_object_invalid_key,0)
 // DO(sign,0) I need to fix the code
 TEST_RUNNER();
 
