@@ -1,14 +1,12 @@
-#include "common/libpull.h"
-#include "memory/memory_objects.h"
-#include "security/digest.h"
-#include "security/sha256.h"
-#include "security/ecc.h"
+#include <libpull/common.h>
+#include <libpull/security.h>
+#include <libpull/memory/memory_objects.h>
 
 #include "memory_mock.h" // Mock 
-#include "memory_file_posix.h" // Real Implmentation
+#include "memory_posix.h" // Real Implmentation
 
 #include "manifest_mock.h" // Mock
-#include "memory/simple_manifest.h" // Real Implementation
+#include <libpull/memory/simple_manifest.h> // Real Implementation
 
 #include "test_runner.h"
 #include "unity.h"

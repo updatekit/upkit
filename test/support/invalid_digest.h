@@ -1,8 +1,8 @@
 #ifndef INVALID_DIGEST_H_
 #define INVALID_DIGEST_H_
 
-#include "security/digest.h"
-#include "common/error.h"
+#include <libpull/security/digest.h>
+#include <libpull/common.h>
 
 pull_error invalid_init(digest_ctx* ctx) {
     return DIGEST_INIT_ERROR;

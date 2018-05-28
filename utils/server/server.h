@@ -2,7 +2,7 @@
 #define PULL_SERVER_H_
 
 #include "config.h"
-#include "memory/manifest.h"
+#include <libpull/memory/manifest.h>
 
 typedef struct server_ctx_t {
     char addr_str[MAX_ADDR_LEN];

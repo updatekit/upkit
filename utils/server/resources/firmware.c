@@ -3,9 +3,9 @@
 #include <coap/coap_dtls.h>
 
 #include "../server.h"
-#include "network/receiver.h"
-#include "memory/manifest.h"
-#include "security/sha256.h"
+#include <libpull/network.h>
+#include <libpull/memory/manifest.h>
+#include <libpull/security.h>
 
 #define VERSION_MAX_AGE 3600
 

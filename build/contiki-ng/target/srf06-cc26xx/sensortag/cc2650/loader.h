@@ -1,6 +1,6 @@
-#ifndef LOADER_H_
-#define LOADER_H_
+#ifndef CC2650_LOADER_H_
+#define CC2650_LOADER_H_
 
-void load_object(obj_id id, manifest_t* mt);
+void load_object(mem_id_t id, manifest_t* mt);
 
-#endif /* LOADER_H_ */
+#endif /* CC2650_LOADER_H_ */

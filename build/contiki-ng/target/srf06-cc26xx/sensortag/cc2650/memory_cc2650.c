@@ -1,13 +1,12 @@
-#include <string.h>
-
-#include "common/libpull.h"
-#include "memory_cc2650.h"
-
 #include "ti-lib.h"
 #include "contiki.h"
 #include "driverlib/flash.h"
 #include "board-peripherals.h"
+
+#include <libpull/common.h>
 #include "memory_cc2650.h"
+
+#include <string.h>
 
 #define FLASH_PAGE_SIZE PAGE_SIZE // Defined in Manifest.conf
 
@@ -39,7 +38,7 @@ int memory_object_end[] = {
      [OBJ_2] = 0x68000
 };
 
-pull_error memory_open_impl(mem_object* ctx, obj_id obj, mem_mode_t mode) {
+pull_error memory_open_impl(mem_object_t* ctx, mem_id_t obj, mem_mode_t mode) {
     ctx->type = memory_object_mapper[obj]; // XXX this can fail if the obj is invalid
     ctx->start_offset = memory_object_start[obj];
     ctx->end_offset = memory_object_end[obj];
@@ -82,7 +81,7 @@ pull_error memory_open_impl(mem_object* ctx, obj_id obj, mem_mode_t mode) {
     return PULL_SUCCESS;
 }
 
-int memory_read_impl(mem_object* ctx, void* memory_buffer, address_t size, address_t offset) {
+int memory_read_impl(mem_object_t* ctx, void* memory_buffer, address_t size, address_t offset) {
     PULL_ASSERT(ctx->mode == READ_ONLY);
     // TODO implement a check for the end offset
     if (ctx->type == EXTERNAL) {
@@ -102,11 +101,11 @@ int memory_read_impl(mem_object* ctx, void* memory_buffer, address_t size, addre
     return -1; 
 }
 
-pull_error memory_flush_impl(mem_object* ctx) {
+pull_error memory_flush_impl(mem_object_t* ctx) {
     return PULL_SUCCESS;
 }
 
-int memory_write_impl(mem_object* ctx, const void* memory_buffer, uint16_t size, address_t offset) {
+int memory_write_impl(mem_object_t* ctx, const void* memory_buffer, uint16_t size, address_t offset) {
     PULL_ASSERT(ctx->type == EXTERNAL || ctx->type == INTERNAL);
     if (ctx->type == EXTERNAL) {
         if (!ext_flash_write(NULL, ctx->start_offset+offset, size, memory_buffer)) {
@@ -123,7 +122,7 @@ int memory_write_impl(mem_object* ctx, const void* memory_buffer, uint16_t size,
     return -1;
 }
 
-pull_error memory_close_impl(mem_object* ctx) {
+pull_error memory_close_impl(mem_object_t* ctx) {
     PULL_ASSERT(ctx->type == EXTERNAL || ctx->type == INTERNAL);
     if (ctx->type == EXTERNAL) {
         //if (--external_memory_open == 0) {

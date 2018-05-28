@@ -1,7 +1,5 @@
-#include "memory/memory_objects.h"
-#include "memory/memory.h"
-#include "memory/manifest.h"
-#include "common/external.h"
+#include <libpull/memory.h>
+#include <libpull/common.h>
 #include <string.h>
 #include <stdio.h>
 #include <stdbool.h>

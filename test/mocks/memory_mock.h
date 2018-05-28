@@ -1,7 +1,7 @@
 #ifndef MEMORY_MOCK_H_
 #define MEMORY_MOCK_H_
 
-#include "memory/memory.h"
+#include <libpull/memory/memory_interface.h>
 
 typedef struct {
     pull_error (*memory_open_impl) (mem_object_t*, mem_id_t, mem_mode_t);

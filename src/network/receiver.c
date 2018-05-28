@@ -1,8 +1,8 @@
-#include "network/receiver.h"
-#include "network/async.h"
-#include "memory/memory_objects.h"
-#include "memory/memory.h"
-#include "common/libpull.h"
+#include <libpull/network/receiver.h>
+#include <libpull/network/async_interface.h>
+#include <libpull/memory/memory_objects.h>
+#include <libpull/memory/memory_interface.h>
+#include <libpull/common.h>
 #include <string.h>
 
 #define MAX_RECEIVER_ERRORS 10
@@ -58,7 +58,7 @@ static void handler(pull_error txp_err, const char* data, int len, void* more) {
     }
     ctx->received+=len;
     if (ctx->manifest_received) {
-        log_info("Received %lu bytes. Expected %lu bytes\r", ctx->received, ctx->expected);
+        log_info("Received %u bytes. Expected %u bytes\r", ctx->received, ctx->expected);
         if (ctx->received == ctx->expected) {
             ctx->firmware_received = 1;
             ctx->err = PULL_SUCCESS;

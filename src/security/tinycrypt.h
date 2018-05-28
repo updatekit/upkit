@@ -1,7 +1,7 @@
-#ifndef TINYCRYPT_H_
-#define TINYCRYPT_H_
+#ifndef SRC_TINYCRYPT_H_
+#define SRC_TINYCRYPT_H_
 
 #include <tinycrypt/sha256.h>
 #include <tinycrypt/ecc_dsa.h>
 
-#endif /* TINYCRYPT_H_ */
+#endif /* SRC_TINYCRYPT_H_ */

@@ -1,11 +1,10 @@
-#include "common/libpull.h"
-#include "network/receiver.h"
-#include "memory/manifest.h"
-#include "memory/memory_objects.h"
+#include <libpull/common.h>
+#include <libpull/network/receiver.h>
+#include <libpull/memory/memory_objects.h>
+#include <libpull/memory/manifest.h>
 
 #include "mock_memory.h"
-
-#include "memory_file_posix.h"
+#include "memory_posix.h"
 #include "transport_libcoap.h"
 
 #include "sample_data.h"

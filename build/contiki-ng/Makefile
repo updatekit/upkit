@@ -27,9 +27,9 @@ SMALL = 1
 # Include libpull sources
 ROOTDIR=../..
 LIBPULL += $(ROOTDIR)/src/network $(ROOTDIR)/src/common $(ROOTDIR)/src/memory 
-LIBPULL += $(ROOTDIR)/src/security transport $(ROOTDIR)/src/agents $(BOARDDIR)
+LIBPULL += $(ROOTDIR)/src/security connection $(ROOTDIR)/agents $(BOARDDIR)
 LIBPULL_SOURCEFILES = $(notdir $(shell find $(LIBPULL) -maxdepth 1 \( -name '*.c' ! -name 'linker_script.c' \) ))
-LIBPULL_INCLUDES = -I$(ROOTDIR)/include -Itransport
+LIBPULL_INCLUDES = -I$(ROOTDIR)/include -Iconnection
 CFLAGS += -DSIMPLE_MANIFEST -DLOGGER_VERBOSITY=$(LOGGER_VERBOSITY)
 
 # Add libpull to the build

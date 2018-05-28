@@ -10,12 +10,9 @@
 #include "driverlib/vims.h"
 #include "dev/watchdog.h"
 
-#include "common/libpull.h"
-#include "memory/manifest.h"
-#include "memory/memory_objects.h"
-#include "memory/memory.h"
-#include "security/verifier.h"
-#include "security/sha256.h"
+#include <libpull/common.h>
+#include <libpull/memory.h>
+#include <libpull/security.h>
 
 #include "bootloader.h"
 #include "../memory_headers.h"
@@ -43,14 +40,14 @@ static enum bootloader_states state;
 
 static manifest_t mt;
 static bootloader_ctx ctx;
-static obj_id id;
+static mem_id_t id;
 
 uint8_t buffer[BUFFER_SIZE];
 
-static mem_object bootloader_object;
-static mem_object obj_t;
-static mem_object internal_object;
-static mem_object new_firmware;
+static mem_object_t bootloader_object;
+static mem_object_t obj_t;
+static mem_object_t internal_object;
+static mem_object_t new_firmware;
 
 static digest_func df;
 static ecc_func_t ef;
@@ -106,7 +103,7 @@ void pull_bootloader() {
     if ((ctx.startup_flags & FIRST_BOOT) == FIRST_BOOT) {
         state = ERASE_SLOTS;
         log_debug("Erasing slots\n");
-        obj_id i;
+        mem_id_t i;
         for (i = 0; memory_objects[i] >= 0; i++) {
             err = invalidate_object(memory_objects[i], &obj_t);
             if (err) {
@@ -147,7 +144,7 @@ void pull_bootloader() {
     uint16_t version = 0; 
     /************ GET_NEWEST_FIRMWARE *************/
     state = GET_NEWEST_FIRMWARE;
-    err = get_newest_firmware(&id, &version, &obj_t);
+    err = get_newest_firmware(&id, &version, &obj_t, true, false);
     if (err) {
         goto error;
     }
@@ -174,7 +171,7 @@ void pull_bootloader() {
         }
         /*********** UPDATE_FIRMWARE **********/
         state = UPDATE_FIRMWARE;
-        mem_object internal_object_write; // not hielding, so it's safe!
+        mem_object_t internal_object_write; // not hielding, so it's safe!
         err = memory_open(&internal_object_write, OBJ_RUN, WRITE_ALL);
         if (err) {
             goto error;

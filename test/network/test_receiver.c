@@ -1,12 +1,9 @@
-#include "common/libpull.h"
-#include "network/receiver.h"
-#include "memory/manifest.h"
-#include "memory/memory_objects.h"
-#include "network/transport.h"
-#include "network/async.h"
+#include <libpull/common.h>
+#include <libpull/network.h>
+#include <libpull/memory.h>
 
-#include "memory_file_posix.h" // Posix
-#include "transport_libcoap.h"
+#include "memory_posix.h"
+#include "connection_libcoap.h"
 #include "async_libcoap.h"
 
 #include "test_runner.h" // Test Support

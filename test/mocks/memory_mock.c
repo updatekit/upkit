@@ -1,5 +1,6 @@
-#include "common/error.h"
-#include "memory/memory.h"
+#include <libpull/common/error.h>
+#include <libpull/memory/memory_interface.h>
+
 #include "memory_mock.h"
 
 pull_error memory_open_impl(mem_object_t* ctx, mem_id_t obj, mem_mode_t);

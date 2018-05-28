@@ -1,4 +1,4 @@
-#include "common/libpull.h"
+#include <libpull/common.h>
 #include <string.h>
 
 pull_error update_random(identity_t* identity) {

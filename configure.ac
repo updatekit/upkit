@@ -10,7 +10,7 @@ dnl modifies the API of the library. It does not modify the functions
 dnl but it specifies the implementation of some struct and unions and
 dnl thus when the library is compiled in this way it relies on these
 dnl structures.
-AC_CONFIG_HEADERS([default_config.h:default_config.h.in include/common/libpull_config.h:libpull_config.h.in])
+AC_CONFIG_HEADERS([default_config.h:default_config.h.in include/libpull/common/libpull_config.h:libpull_config.h.in])
 
 dnl Checks for programs.
 AC_PROG_CC

@@ -2,7 +2,7 @@
 #include <coap/coap.h>
 #include <coap/coap_dtls.h>
 
-#include "memory/manifest.h"
+#include <libpull/memory/manifest.h>
 #include "../server.h"
 
 manifest_t invalid_manifest = {

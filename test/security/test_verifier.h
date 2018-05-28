@@ -1,10 +1,6 @@
-#include "common/libpull.h"
-#include "security/digest.h"
-#include "security/ecc.h"
-#include "security/verifier.h"
-#include "memory/memory_objects.h"
-#include "memory/manifest.h"
-#include "memory/memory.h"
+#include <libpull/common.h>
+#include <libpull/security.h>
+#include <libpull/memory.h>
 
 #include "memory_mock.h"
 #include "manifest_mock.h"
