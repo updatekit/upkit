@@ -4,10 +4,10 @@
  * \defgroup Security
  * \{
  */
-#ifndef ECC_VERIFY_H_
-#define ECC_VERIFY_H_
+#ifndef LIBPULL_SECURITY_ECC_H_
+#define LIBPULL_SECURITY_ECC_H_
 
-#include <common/libpull.h>
+#include <libpull/common.h>
 #include <stdint.h>
 
 #ifdef __cplusplus
@@ -57,4 +57,4 @@ typedef struct {
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
-#endif /* \} ECC_VERIFY_H_ */
+#endif /* \} LIBPULL_SECURITY_ECC_H_ */

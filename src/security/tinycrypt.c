@@ -1,6 +1,6 @@
-#include "security/digest.h"
-#include "security/ecc.h"
-#include "common/error.h"
+#include <libpull/security/digest.h>
+#include <libpull/security/ecc.h>
+#include <libpull/common/error.h>
 #include <string.h>
 
 #ifdef WITH_TINYCRYPT

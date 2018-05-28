@@ -1,4 +1,4 @@
-#include <network/transport_config.h>
+#include <libpull/network/transport_config.h>
 
 pull_error conn_config(conn_config_t* cfg, char* endpoint, uint16_t port,
                           conn_type type, void* conn_data, char* resource) {

@@ -4,11 +4,11 @@
  * \defgroup Security
  * \{
  */
-#ifndef SHA_256_H_
-#define SHA_256_H_
+#ifndef LIBPULL_SECURITY_SHA256_H_
+#define LIBPULL_SECURITY_SHA256_H_
 
-#include <common/libpull.h>
-#include "security/digest.h"
+#include <libpull/common.h>
+#include <libpull/security/digest.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -60,4 +60,4 @@ extern "C" {
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
-#endif /* \} SHA_256_H_ */
+#endif /* \} LIBPULL_SECURITY_SHA256_H_ */

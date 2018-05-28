@@ -1,8 +1,8 @@
-#ifndef TRANSPORT_CONFIG_H_
-#define TRANSPORT_CONFIG_H_
+#ifndef LIBPULL_NETWORK_CONNECTION_CONFIG_H_
+#define LIBPULL_NETWORK_CONNECTION_CONFIG_H_
 
-#include <common/libpull.h>
-#include <network/transport.h>
+#include <libpull/common.h>
+#include <libpull/network/transport.h>
 
 typedef struct {
     char* endpoint;
@@ -15,4 +15,4 @@ typedef struct {
 pull_error conn_config(conn_config_t* cfg, char* endpoint, uint16_t port,
         conn_type type, void* conn_data, char* resource);
 
-#endif /* TRANSPORT_CONFIG_H_ */
+#endif /* LIBPULL_NETWORK_CONNECTION_CONFIG_H_ */

@@ -5,10 +5,10 @@
  * \defgroup Security
  * \{
  */
-#ifndef DIGEST_H_
-#define DIGEST_H_
+#ifndef LIBPULL_SECURITY_DIGEST_H_
+#define LIBPULL_SECURITY_DIGEST_H_
 
-#include <common/libpull.h>
+#include <libpull/common.h>
 #include <stddef.h>
 #include <stdint.h>
 
@@ -68,4 +68,4 @@ typedef struct {
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
-#endif /* \} DIGEST_H_ */
+#endif /* \} DLIBPULL_SECURITY_IGEST_H_ */

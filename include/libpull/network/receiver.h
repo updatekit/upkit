@@ -8,12 +8,12 @@
  * the developer using this library.
  * \{
  */
-#ifndef RECEIVER_H_
+#ifndef LIBPULL_NETWORK_RECEIVER_H_
 #define RECEIVER_H_
 
-#include <common/libpull.h>
-#include "memory/memory_objects.h"
-#include "network/transport.h"
+#include <libpull/common.h>
+#include <libpull/memory/memory_objects.h>
+#include <libpull/network/transport.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -91,4 +91,4 @@ pull_error receiver_close(receiver_ctx* ctx);
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
-#endif /* \} RECEIVER_H_ */
+#endif /* \} LIBPULL_NETWORK_RECEIVER_H_ */

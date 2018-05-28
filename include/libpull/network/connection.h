@@ -15,10 +15,10 @@
  * of the Network module to check and download the available firmware.
  * \{
  */
-#ifndef TRANSPORT_H_
-#define TRANSPORT_H_
+#ifndef LIBPULL_NETWORK_CONNECTION_H_
+#define LIBPULL_NETWORK_CONNECTION_H_
 
-#include "common/libpull.h"
+#include <libpull/common.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdint.h>
@@ -117,4 +117,4 @@ void txp_end(txp_ctx* ctx);
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
-#endif /* \} _TRANSPORT_H */
+#endif /* \} LIBPULL_NETWORK_CONNECTION_H_ */

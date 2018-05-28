@@ -9,13 +9,13 @@
  * runner to reach your application needs.
  * \{
  */
-#ifndef VERIFIER_H_
-#define VERIFIER_H_
+#ifndef LIBPULL_SECURITY_VERIFIER_H_
+#define LIBPULL_SECURITY_VERIFIER_H_
 
-#include <common/libpull.h>
-#include "memory/memory.h"
-#include "security/digest.h"
-#include "security/ecc.h"
+#include <libpull/common.h>
+#include <libpull/memory/memory_interface.h>
+#include <libpull/security/digest.h>
+#include <libpull/security/ecc.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -49,4 +49,4 @@ pull_error verify_object(const mem_object_t* obj, digest_func f, const uint8_t *
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
-#endif /* \} VERIFIER_H_ */
+#endif /* \} LIBPULL_SECURITY_VERIFIER_H_ */

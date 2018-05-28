@@ -9,11 +9,11 @@
  * \defgroup Common
  * \{
  */
-#ifndef ASYNC_H_
-#define ASYNC_H_
+#ifndef LIBPULL_NETWORK_ASYNC_H_
+#define LIBPULL_NETWORK_ASYNC_H_
 
-#include "common/libpull.h"
-#include "network/transport.h"
+#include <libpull/common.h>
+#include <libpull/network/transport.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -43,4 +43,4 @@ void break_loop(txp_ctx* ctx);
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
-#endif /* \} ASYNC_H_ */
+#endif /* \} LIBPULL_NETWORK_ASYNC_H_ */

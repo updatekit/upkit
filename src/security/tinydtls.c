@@ -1,5 +1,5 @@
-#include "security/digest.h"
-#include "security/ecc.h"
+#include <libpull/security/digest.h>
+#include <libpull/security/ecc.h>
 #include <string.h>
 
 #ifdef WITH_TINYDTLS

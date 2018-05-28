@@ -4,13 +4,13 @@
  * \defgroup Network
  * \{
  */
-#ifndef SUBSCRIBER_H_
-#define SUBSCRIBER_H_
+#ifndef LIBPULL_NETWORK_SUBSCRIBER_H_
+#define LIBPULL_NETWORK_SUBSCRIBER_H_
 
-#include <common/libpull.h>
-#include "network/transport.h"
-#include "memory/manifest.h"
-#include "memory/memory.h"
+#include <libpull/common.h>
+#include <libpull/network/transport.h>
+#include <libpull/memory/manifest.h>
+#include <libpull/memory/memory_interface.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -79,4 +79,4 @@ pull_error unsubscribe(subscriber_ctx* ctx);
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
-#endif /* \} SUBSCRIBER_H_ */
+#endif /* \} LIBPULL_NETWORK_SUBSCRIBER_H_ */

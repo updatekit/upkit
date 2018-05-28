@@ -1,13 +1,6 @@
-#ifndef VERIFIER_H_
-#define VERIFIER_H_
-
-#include "common/libpull.h"
-#include "memory/memory.h"
-#include "memory/memory_objects.h"
-#include "memory/manifest.h"
-#include "security/verifier.h"
-#include "security/digest.h"
-#include "security/ecc.h"
+#include <libpull/common.h>
+#include <libpull/memory.h>
+#include <libpull/security.h>
 #include <string.h>
 #include <stdio.h>
 
@@ -106,5 +99,3 @@ error:
     }
     return err;
 }
-
-#endif // VERIFIER_H_
