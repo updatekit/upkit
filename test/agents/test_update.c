@@ -64,7 +64,7 @@ void update_runner(conn_type type, void* data) {
                 break;
             }
         } else if (IS_SEND(agent_msg)) {
-            loop(agent_msg.event_data, 1000);
+            loop(GET_CONNECTION(agent_msg), 1000);
         }
     }
     TEST_ASSERT_TRUE_MESSAGE(success, "There was an error during the update phase\n");
