@@ -21,7 +21,7 @@ static ecc_func_t ef;
 static void* conn_data;
 static conn_type type;
 
-static agent_t agent;
+static agent_msg_t agent_msg;
 static update_agent_config cfg;
 static update_agent_ctx_t ctx;
 static uint8_t buffer[BUFFER_SIZE];
@@ -43,58 +43,33 @@ PROCESS_THREAD(update_process, ev, data) {
     update_agent_set_buffer(&cfg, buffer, BUFFER_SIZE);
 
     while (1) {
-        agent = update_agent(&cfg, &ctx);
-        if (agent.current_error) {
-            if (agent.required_action == FAILURE) {
-                break;
-            } else if (agent.required_action == RECOVER) {
-                if (retries-- <= 0) {
-                    continue;
-                } else {
-                    break;
-                }
-            }
-        } else {
-            if (agent.required_action == SEND) {
-                if (agent.current_state == STATE_RECEIVE_SEND) {
-                    COAP_SEND(ctx.rtxp);
-                    continue;
-                } else if (agent.current_state == STATE_CHECKING_UPDATES_SEND) {
-                    COAP_SEND(ctx.stxp);
-                    continue;
-                }
-            }
-            if (agent.current_state == STATE_VERIFY_BEFORE) {
+        agent_msg = update_agent(&cfg, &ctx);
+        if (IS_FAILURE(agent_msg)) {
+             break;
+         } else if (IS_CONTINUE(agent_msg)) {
+             if (agent_msg.event == EVENT_APPLY) {
+                 success = 1;
+                 break;
 #ifdef WITH_CRYPTOAUTHLIB
-                ATCA_STATUS status = atcab_init(&cfg_ateccx08a_i2c_default);
-                if (status != ATCA_SUCCESS) {
-                    log_error(GENERIC_ERROR, "Failure initializing ATECC508A\n");
-                }
+             } else if (agent_msg.event == EVENT_VERIFY_BEFORE) {
+                 ATCA_STATUS status = atcab_init(&cfg_ateccx08a_i2c_default);
+                 if (status != ATCA_SUCCESS) {
+                     log_error(GENERIC_ERROR, "Failure initializing ATECC508A\n");
+                 }
+             } else if (agent_msg.event == EVENT_VERIFY_AFTER) {
+                 atcab_release();
 #endif
-                watchdog_stop();
-            } else if (agent.current_state == STATE_VERIFY_AFTER) {
-                watchdog_start();
-#ifdef WITH_CRYPTOAUTHLIB
-                atcab_release();
-#endif
-            }
-        }
-        if (agent.current_state == STATE_APPLY) {
-            success = 1;
-            break;
-        }
-    }
-
-    /*if (err) {
-     * TODO find a way to implement this concept (maybe using messages?)
-     log_info("Verification failed\n");
-     err = invalidate_object(id, &obj_t);
-     if (err) {
-     log_error(err, "Error invalidating object");
-     }
-     continue;
-     }
-     */
+             }
+         } else if (IS_RECOVER(agent_msg)) {
+             if (retries-- <= 0) {
+                 continue;
+             } else {
+                 break;
+             }
+         } else if (IS_SEND(agent_msg)) {
+             COAP_SEND(GET_CONNECTION(agent_msg));
+         }
+    } 
     PROCESS_END();
 }
 

@@ -6,29 +6,61 @@
 #include <libpull/memory.h>
 #include <libpull/security.h>
 
-#include <libpull_agents/coroutine.h>
+#include <libpull_agents/coroutines.h>
 
 #include "platform_headers.h"
 
+#define IS_CONTINUE(agent_msg) (agent_msg.event > EVENT_CONTINUE_START_ && agent_msg.event < EVENT_CONTINUE_END_ )
+#define IS_SEND(agent_msg) (agent_msg.event > EVENT_SEND_START_ && agent_msg.event < EVENT_SEND_END_ )
+#define IS_RECOVER(agent_msg) (agent_msg.event > EVENT_RECOVER_START_ && agent_msg.event < EVENT_SEND_END_ )
+#define IS_FAILURE(agent_msg) (agent_msg.event > EVENT_FAILURE_START_ && agent_msg.event < EVENT_FAILURE_END_ )
+
+#define GET_CONNECTION(agent_msg) ((txp_ctx*) (agent_msg.event_data))
+#define GET_ERROR(agent_msg) ((pull_error) *(agent_msg.event_data))
+
 /* This states will be used by the update agent coroutines */
-typedef enum agent_state_t {
-    STATE_INIT = 0,
-    STATE_SUBSCRIBE,
-    STATE_CHECKING_UPDATES,
-    STATE_CHECKING_UPDATES_FAILURE,
-    STATE_CHECKING_UPDATES_SEND,
-    STATE_SEARCHING_SLOT,
-    STATE_CONN_RECEIVER,
-    STATE_CONN_RECEIVER_FAILURE,
-    STATE_RECEIVE,
-    STATE_RECEIVE_SEND,
-    STATE_RECEIVE_FAILURE,
-    STATE_VERIFY,
-    STATE_VERIFY_BEFORE,
-    STATE_VERIFY_AFTER,
-    STATE_FINAL,
-    STATE_APPLY
-} agent_state_t;
+typedef enum agent_event_t {
+    EVENT_INIT = 0,
+    // EVENT CONTINUE
+    EVENT_CONTINUE_START_,
+    EVENT_SUBSCRIBE,
+    EVENT_CHECKING_UPDATES,
+    EVENT_SEARCHING_SLOT,
+    EVENT_CONN_RECEIVER,
+    EVENT_RECEIVE,
+    EVENT_VERIFY,
+    EVENT_FINAL,
+    EVENT_VERIFY_BEFORE,
+    EVENT_VERIFY_AFTER,
+    EVENT_APPLY,
+    EVENT_CONTINUE_END_,
+    // EVENT SEND
+    EVENT_SEND_START_,
+    EVENT_CHECKING_UPDATES_SEND,
+    EVENT_RECEIVE_SEND,
+    EVENT_SEND_END_,
+    // EVENT RECOVER
+    EVENT_RECOVER_START_,
+    EVENT_CHECKING_UPDATES_RECOVER,
+    EVENT_RECEIVE_RECOVER,
+    EVENT_RECOVER_END_,
+    // EVENT FAILURE
+    EVENT_FAILURE_START_,
+    EVENT_INIT_FAILURE,
+    EVENT_SUBSCRIBE_FAILURE,
+    EVENT_SEARCHING_SLOT_FAILURE,
+    EVENT_SEARCHING_SLOT_FAILURE_2,
+    EVENT_CONN_RECEIVER_FAILURE,
+    EVENT_CONN_RECEIVER_FAILURE_2,
+    EVENT_VERIFY_FAILURE,
+    EVENT_INVALIDATE_OBJECT_FAILURE,
+    EVENT_FAILURE_END_
+} agent_event_t;
+
+typedef struct agent_msg_t {
+    agent_event_t event;
+    void * event_data;
+} agent_msg_t;
 
 typedef struct {
     conn_config_t subscriber;
@@ -42,20 +74,6 @@ typedef struct {
     char* buffer;
     size_t buffer_size;
 } update_agent_config;
-
-typedef enum agent_action_t {
-    SEND,
-    CONTINUE,
-    FAILURE,
-    RECOVER,
-    APPLY,
-} agent_action_t;
-
-typedef struct agent_t {
-    agent_state_t current_state;
-    pull_error current_error;
-    agent_action_t required_action;
-} agent_t;
 
 static inline void update_agent_reuse_connection(update_agent_config* cfg, uint8_t reuse) {
     cfg->reuse_connection = reuse;
@@ -94,6 +112,6 @@ typedef struct update_agent_ctx_t {
     pull_error err;
 } update_agent_ctx_t;
 
-agent_t update_agent(update_agent_config* cfg, update_agent_ctx_t* ctx);
+agent_msg_t update_agent(update_agent_config* cfg, update_agent_ctx_t* ctx);
 
 #endif /* AGENTS_UPDATE_H_ */

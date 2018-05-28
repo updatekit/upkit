@@ -7,6 +7,8 @@
 #define NETSTACK_CONF_MAC     nullmac_driver
 #define NETSTACK_CONF_RDC     nullrdc_driver
 
+#define NETSTACK_CONF_RADIO nullradio_driver
+
 // Reduce size removing process names
 #define PROCESS_CONF_NO_PROCESS_NAMES 1
 

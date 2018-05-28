@@ -14,7 +14,7 @@ TEST_RUNNER();
 #define POLLING_FREQUENCY 1
 #define BUFFER_SIZE 1024
 
-static agent_t agent;
+static agent_msg_t agent_msg;
 static update_agent_config cfg;
 static update_agent_ctx_t ctx;
 static int8_t retries = 3;
@@ -28,11 +28,10 @@ void setUp(void) {
     override_memory_object(OBJ_2, "../assets/external_flash_simulator_updated", 0x32000, 0x4B000);
     override_memory_object(OBJ_RUN, "../assets/internal_flash_simulator_updated", 0x7000, 0x20000);
     mem_object_t obj_t;
-    TEST_ASSERT_TRUE(invalidate_object(OBJ_2, &obj_t) == PULL_SUCCESS);
+    TEST_ASSERT_TRUE(invalidate_object(OBJ_RUN, &obj_t) == PULL_SUCCESS);
 }
 
 void tearDown(void) { 
-    bzero(&agent, sizeof(agent));
     bzero(&cfg, sizeof(cfg));
     bzero(&ctx, sizeof(ctx));
     retries = 3;
@@ -50,29 +49,22 @@ void update_runner(conn_type type, void* data) {
     update_agent_set_buffer(&cfg, buffer, BUFFER_SIZE);
 
     while (1) {
-        agent = update_agent(&cfg, &ctx);
-        if (agent.current_error) {
-            if (agent.required_action == FAILURE) {
-                break;
-            } else if (agent.required_action == RECOVER) {
-                if (retries-- <= 0) {
-                    continue;
-                } else {
-                    break;
-                }
-            }
-        } else {
-            if (agent.required_action == SEND) {
-                if (agent.current_state == STATE_RECEIVE_SEND) {
-                    loop(&ctx.rtxp, 1000); 
-                } else if (agent.current_state == STATE_CHECKING_UPDATES_SEND) {
-                    loop_once(&ctx.stxp, 1000);
-                }
-            }
-        }
-        if (agent.current_state == STATE_APPLY) {
-            success = 1;
+        agent_msg = update_agent(&cfg, &ctx);
+        if (IS_FAILURE(agent_msg)) {
             break;
+        } else if (IS_CONTINUE(agent_msg)) {
+            if (agent_msg.event == EVENT_APPLY) {
+                success = 1;
+                break;
+            }
+        } else if (IS_RECOVER(agent_msg)) {
+            if (retries-- <= 0) {
+                continue;
+            } else {
+                break;
+            }
+        } else if (IS_SEND(agent_msg)) {
+            loop(GET_CONNECTION(agent_msg), 1000);
         }
     }
     TEST_ASSERT_TRUE_MESSAGE(success, "There was an error during the update phase\n");
@@ -86,7 +78,7 @@ void test_update_success_dtls(void) {
     static dtls_ecdh_data_t ecdh_data = {
          .priv_key = (uint8_t*) dtls_client_priv_g,
          .pub_key_x = (uint8_t*) dtls_client_x_g,
-        .pub_key_y = (uint8_t*) dtls_client_y_g
-     };
+         .pub_key_y = (uint8_t*) dtls_client_y_g
+    };
     update_runner(PULL_DTLS_ECDH, &ecdh_data);
 }

@@ -25,7 +25,8 @@ void subscriber_cb(pull_error err, const char* data, int len, void* more) {
     subscriber_ctx* ctx = (subscriber_ctx*) more;
     log_debug("subsriber_cb: message received\n");
     if (data == NULL || len != sizeof(uint16_t)) {
-        log_error(SUBSCRIBE_ERROR, "Received data invalid\n");
+        log_error(SUBSCRIBE_ERROR, "Received invalid data\n");
+        break_loop(ctx->txp);
         return;
     }
     uint16_t provisioning_version = *((uint16_t*)data);
@@ -34,6 +35,8 @@ void subscriber_cb(pull_error err, const char* data, int len, void* more) {
     if (provisioning_version > ctx->current_version) {
         log_debug("An update is available\n");
         ctx->has_updates = 1;
+        break_loop(ctx->txp);
+        return;
     }
 }
 
