@@ -27,8 +27,8 @@ LIBPULL_INCLUDES = -I$(ROOTDIR)/include
 CFLAGS += -DSIMPLE_MANIFEST -DLOGGER_VERBOSITY=$(LOGGER_VERBOSITY)
 
 # Include libpull sources
-PROJECTDIRS = $(LIBPULL)
-PROJECT_SOURCEFILES = $(LIBPULL_SOURCEFILES)
+PROJECTDIRS = $(LIBPULL) $(ROOTDIR)/agents
+PROJECT_SOURCEFILES = $(LIBPULL_SOURCEFILES) bootloader_agent.c
 CFLAGS += $(LIBPULL_INCLUDES)
 
 # Contiki-NG Size optimizations
@@ -91,7 +91,7 @@ LINKER_DEFINES=-DOTA_OFFSET=$(OTA_OFFSET) -DOTA_LENGTH=$(OTA_LENGTH)
 
 # The bootloader_ctx must be compiled for x86, so use direcly gcc
 ctx:
-	gcc -Wall bootloader_ctx.c -o bootloader_ctx
+	gcc -Wall bootloader_ctx.c -I$(ROOTDIR)/include -o bootloader_ctx
 	./bootloader_ctx bootloader_ctx.bin && echo "Bootloader ctx generated"
 
 ota:

@@ -10,8 +10,9 @@
 #include "driverlib/vims.h"
 #include "dev/watchdog.h"
 
-#include "bootloader.h"
-#include "../memory_headers.h"
+#include <libpull_agents/bootloader_agent.h>
+
+#include "platform_headers.h"
 #include "../default_configs.h"
 
 #define BUFFER_SIZE PAGE_SIZE // Defined in Makefile.conf
@@ -43,17 +44,31 @@ void flash_write_protect() {
 
 static agent_msg_t agent_msg;
 
+/// XXX this needs to be fixed
+const version_t running_version = 0x0;
+
 void pull_bootloader() {
+    bootloader_agent_config cfg = {
+        .bootloader_ctx_id = BOOTLOADER_CTX,
+        .recovery_id = OBJ_GOLD
+    };
     while(1) {
-        agent_msg bootloader_agent();
-        if (event == EVENT_STORE_RECOVERY_COPY_START) {
-            watchdog_stop();
-        } else if (event == EVENT_STORE_RECOVERY_COPY_STOP) {
-            watchdog_start();
-        } else if (event == EVENT_VALIDATE_NON_BOOTABLE_START) {
-            watchdog_stop();
-        } else if (event == EVENT_VALIDATE_NON_BOOTABLE_STOP) {
-            watchdog_start();
+        agent_msg = bootloader_agent(&cfg);
+        if (IS_FAILURE(agent_msg)) {
+            break;
+        } else if (IS_CONTINUE(agent_msg)) {
+            if (agent_msg.event == EVENT_STORE_RECOVERY_COPY_START) {
+                watchdog_stop();
+            } else if (agent_msg.event == EVENT_STORE_RECOVERY_COPY_STOP) {
+                watchdog_start();
+            } else if (agent_msg.event == EVENT_VALIDATE_NON_BOOTABLE_START) {
+                watchdog_stop();
+            } else if (agent_msg.event == EVENT_VALIDATE_NON_BOOTABLE_STOP) {
+                watchdog_start();
+            } else if (agent_msg.event == EVENT_BOOT) {
+                load_object(*((mem_id_t*) agent_msg.event_data));
+            }
+            continue;
         }
     }
 }

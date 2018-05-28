@@ -4,7 +4,9 @@
 #include <string.h>
 #include <fcntl.h>
 #include <sys/types.h>
-#include "bootloader.h"
+
+#include <libpull_agents/bootloader_ctx.h>
+
 
 int main(int argc, char**argv) {
     if (argc != 2) {
