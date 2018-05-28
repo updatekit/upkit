@@ -7,7 +7,7 @@
 
 #include "default_configs.h"
 #include "connection/connection_ercoap.h"
-#include "memory_headers.h"
+#include "platform_headers.h"
 
 PROCESS(update_process, "OTA Update process");
 
@@ -28,6 +28,8 @@ static uint8_t buffer[BUFFER_SIZE];
 
 static int8_t retries = 3;
 static uint8_t success = 0;
+
+const version_t running_version = 0x0; // this needs to be fixed
 
 PROCESS_THREAD(update_process, ev, data) {
     PROCESS_BEGIN();

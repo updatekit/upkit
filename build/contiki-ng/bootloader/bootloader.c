@@ -50,8 +50,14 @@ const version_t running_version = 0x0;
 void pull_bootloader() {
     bootloader_agent_config cfg = {
         .bootloader_ctx_id = BOOTLOADER_CTX,
-        .recovery_id = OBJ_GOLD
+        .recovery_id = OBJ_GOLD,
     };
+    specialize_crypto_functions();
+    update_agent_vendor_keys(&cfg, x, y);
+    update_agent_digest_func(&cfg, df);
+    update_agent_ecc_func(&cfg, ef);
+    update_agent_set_buffer(&cfg, buffer, BUFFER_SIZE);
+
     while(1) {
         agent_msg = bootloader_agent(&cfg);
         if (IS_FAILURE(agent_msg)) {
@@ -66,9 +72,10 @@ void pull_bootloader() {
             } else if (agent_msg.event == EVENT_VALIDATE_NON_BOOTABLE_STOP) {
                 watchdog_start();
             } else if (agent_msg.event == EVENT_BOOT) {
-                load_object(*((mem_id_t*) agent_msg.event_data));
+            break;
             }
             continue;
         }
     }
+    load_object(*((mem_id_t*) agent_msg.event_data));
 }

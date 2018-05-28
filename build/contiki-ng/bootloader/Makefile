@@ -9,7 +9,7 @@ all: ota
 # 				Configurable Parameters             #
 #####################################################
 # Accepted values: 0 1 2 3 4
-LOGGER_VERBOSITY ?= 0
+LOGGER_VERBOSITY ?= 3
 # Accepted values: NULL, TINYDTLS, CRYPTOAUTHLIB, TINYCRYPT
 SEC_LIB ?= TINYDTLS
 #####################################################
@@ -35,7 +35,8 @@ CFLAGS += $(LIBPULL_INCLUDES)
 SMALL = 1
 MAKE_MAC = MAKE_MAC_NULLMAC
 MAKE_NET = MAKE_NET_NULLNET
-CFLAGS += -DDISABLE_RADIO=1 -DDISABLE_ALL_OUTPUT=1
+
+CFLAGS += -DDISABLE_ALL_OUTPUT=1
 
 # Security Configurations
 ext= ../ext
