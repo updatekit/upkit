@@ -28,10 +28,10 @@ void ercoap_handler(coap_message_t* response);
 // in case of an error is detected in the callback
 #define COAP_SEND(_ctx_) \
     {\
-    PT_SPAWN(process_pt, &(_ctx_.request_state.pt), \
-            coap_blocking_request(&_ctx_.request_state, ev, \
-                                            &_ctx_.endpoint, \
-                        &(_ctx_.request), ercoap_handler)); \
+    PT_SPAWN(process_pt, &(_ctx_->request_state.pt), \
+            coap_blocking_request(&_ctx_->request_state, ev, \
+                                            &_ctx_->endpoint, \
+                        &(_ctx_->request), ercoap_handler)); \
     };
 
 pull_error txp_init(txp_ctx* ctx, const char* addr, uint16_t port, conn_type type, void* data);
