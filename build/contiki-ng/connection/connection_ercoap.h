@@ -1,8 +1,8 @@
-#ifndef TRANSPORT_ERCOAP_H_
-#define TRANSPORT_ERCOAP_H_
+#ifndef CONNECTION_ERCOAP_H_
+#define CONNECTION_ERCOAP_H_
 
-#include "common/libpull.h"
-#include "network/transport.h"
+#include <libpull/common.h>
+#include <libpull/network.h>
 
 #include "contiki.h"
 #include "contiki-net.h"
@@ -46,4 +46,4 @@ pull_error txp_observe(txp_ctx* ctx, const char* resource, const char* token, ui
 
 void txp_end(txp_ctx* ctx);
 
-#endif // TRANSPORT_ERCOAP_H_
+#endif /* CONNECTION_ERCOAP_H_ */

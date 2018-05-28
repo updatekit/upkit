@@ -1,6 +1,5 @@
-#include "common/libpull.h"
-#include "memory/manifest.h"
-#include "memory/memory.h"
+#include <libpull/common.h>
+#include <libpull/memory.h>
 
 #define OTA_RESET_VECTOR    0x4
 
@@ -12,7 +11,7 @@
 // Defined in Makefile.conf
 #define IMAGE_START_OFFSET IMAGE_START_PAGE*PAGE_SIZE
 
-void load_object(obj_id id, manifest_t* mt) {
+void load_object(mem_id_t id, manifest_t* mt) {
     uint32_t destination_address = IMAGE_START_OFFSET+get_offset(mt);
     log_debug("loading address %lx\n", destination_address);
 

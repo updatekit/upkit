@@ -1,6 +1,7 @@
-#include <common/libpull.h>
+#include <libpull/common.h>
 
 #include "driverlib/flash.h"
+#include <string.h>
 
 /* This is a test to ensure that the image can not write the internal
  * flash memory */

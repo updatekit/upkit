@@ -1,10 +1,12 @@
 #include "contiki.h"
 #include "contiki-lib.h"
 #include "dev/watchdog.h"
-#include "agents/update.h"
-#include "security/sha256.h"
+
+#include <libpull_agents/update.h>
+#include <libpull/security.h>
+
 #include "default_configs.h"
-#include "transport/transport_ercoap.h"
+#include "connection/connection_ercoap.h"
 #include "memory_headers.h"
 
 PROCESS(update_process, "OTA Update process");
