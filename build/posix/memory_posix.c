@@ -41,6 +41,7 @@ char* memory_objects_mapper[] = {
 /******* Testing Function ******/
 #ifndef DISABLE_TESTING
 static char* memory_object_pristine[] = {
+    [BOOTLOADER_CTX] = "../assets/bootctx.pristine",
     [OBJ_A] = "../assets/slot_a.pristine",
     [OBJ_B] = "../assets/slot_b.pristine",
     [OBJ_C] = "../assets/slot_c.pristine",
@@ -69,6 +70,7 @@ void restore_assets() {
         id = memory_slots[index].id;
         copy_asset(memory_object_pristine[id], memory_objects_mapper[id]);
     }
+    copy_asset(memory_object_pristine[BOOTLOADER_CTX], memory_objects_mapper[BOOTLOADER_CTX]);
 }
 #endif /* DISABLE_TESTING */
 /**** End Testing Function *****/

@@ -51,3 +51,4 @@ echo "Generate slots...done"
 
 # Generate the bootloader context
 $FIRMWAREDIR/firmware_tool bootctx generate -f $ASSETSDIR/bootctx
+$FIRMWAREDIR/firmware_tool bootctx generate -f $ASSETSDIR/bootctx.pristine

@@ -62,7 +62,7 @@ agent_msg_t bootloader_agent(bootloader_agent_config* cfg) {
         // (2.1) Erase slots
         PULL_CONTINUE(EVENT_FIRST_BOOT, NULL);
         for (i = 0; memory_slots[i].id != OBJ_END; i++) {
-            if (!memory_slots[i].loaded) {
+            if (memory_slots[i].id != id_newest_bootable) {
                 err = invalidate_object(memory_slots[i].id, &obj_t);
                 if (err) {
                     PULL_CONTINUE(EVENT_FIRST_BOOT_FAILURE, &err);
@@ -101,7 +101,7 @@ agent_msg_t bootloader_agent(bootloader_agent_config* cfg) {
     if (err) {
         PULL_CONTINUE(EVENT_GET_NEWEST_NON_BOOTABLE_FAILURE, &err);
     }
-
+    log_debug("bootable %x - non bootable %x\n", version_bootable, version_non_bootable);
     // (4) Compare them and upgrade if necessary
     if (version_bootable < version_non_bootable) {
         // (4.1) Validate the newest non bootable slot

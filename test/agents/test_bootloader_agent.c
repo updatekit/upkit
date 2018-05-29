@@ -48,7 +48,7 @@ void test_bootloader_success(void) {
         } else if (IS_CONTINUE(agent_msg)) {
             if (agent_msg.event == EVENT_BOOT) {
                 TEST_ASSERT_TRUE(agent_msg.event == EVENT_BOOT);
-                TEST_ASSERT_EQUAL_INT(OBJ_A, GET_BOOT_ID(agent_msg));
+                TEST_ASSERT_EQUAL_INT(OBJ_B, GET_BOOT_ID(agent_msg));
                 success = true;
                 break;
             }
