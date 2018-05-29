@@ -5,7 +5,8 @@
     COMMAND(keys, "manage cryptographic keys") \
     COMMAND(manifest, "interact with the manifest") \
     COMMAND(configs, "interact with the stored configuration") \
-    COMMAND(help, "list the commands and the parameters")
+    COMMAND(help, "list the commands and the parameters") \
+    COMMAND(bootctx, "interact with a bootloader ctx")
 
 #define FOREACH_keys_COMMAND(COMMAND) \
     COMMAND(keys, generate, "generate a key") \
@@ -21,6 +22,9 @@
     COMMAND(configs, print, "print the current configuration") \
     COMMAND(configs, validate, "validate the current configuration") \
     COMMAND(configs, help, "print a detailed help message for the configs command")
+
+#define FOREACH_bootctx_COMMAND(COMMAND) \
+    COMMAND(bootctx, generate, "generates a bootloader ctx")
 
 #define FOREACH_help_COMMAND(COMMAND)
 /* Still empty */
