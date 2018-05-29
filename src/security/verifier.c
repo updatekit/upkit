@@ -85,6 +85,7 @@ pull_error verify_object(mem_object_t* obj, digest_func digest, const uint8_t* x
     }
     log_debug("Vendor Signature Valid\n");
     /********** VERIFY_SERVER_SIGNATURE ***********/
+    log_info("Start phase VERIFY_SERVER_SIGNATURE\n");
     state = VERIFY_SERVER_SIGNATURE;
     err = verify_manifest_server(&mt, digest, x, y, ef);
     if (err) {

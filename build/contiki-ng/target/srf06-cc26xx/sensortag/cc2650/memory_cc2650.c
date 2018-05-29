@@ -133,10 +133,10 @@ int memory_write_impl(mem_object_t* ctx, const void* memory_buffer, uint16_t siz
     }
     // Internal Memory
     address_t memory_offset = ctx->start_offset+offset;
-    if (FlashProgram((uint8_t*) memory_buffer, memory_offset, size) == FAPI_STATUS_SUCCESS) {
-        return size;
+    if (FlashProgram((uint8_t*) memory_buffer, memory_offset, size) != FAPI_STATUS_SUCCESS) {
+        return -1
     }
-    return -1;
+    return size;
 }
 
 pull_error memory_close_impl(mem_object_t* ctx) {

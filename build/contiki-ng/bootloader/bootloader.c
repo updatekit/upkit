@@ -59,7 +59,7 @@ void pull_bootloader() {
         agent_msg = bootloader_agent(&cfg);
         if (IS_FAILURE(agent_msg)) {
             log_debug("Bootloader error: %s\n", err_as_str(GET_ERROR(agent_msg)));
-            break;
+            continue;
         } else if (IS_CONTINUE(agent_msg)) {
             if (agent_msg.event == EVENT_VALIDATE_NON_BOOTABLE_START) {
                 watchdog_stop();
@@ -67,7 +67,11 @@ void pull_bootloader() {
                 watchdog_start();
             } else if (agent_msg.event == EVENT_VALIDATE_BOOTABLE_START) {
                 watchdog_stop();
-            } else if (agent_msg.event == EVENT_VALIDATE_BOOTABLE_START) {
+            } else if (agent_msg.event == EVENT_VALIDATE_BOOTABLE_STOP) {
+                watchdog_start();
+            } else if (agent_msg.event == EVENT_UPGRADE_COPY_START) {
+                watchdog_stop();
+            } else if (agent_msg.event == EVENT_UPGRADE_COPY_STOP) {
                 watchdog_start();
 #if RECOVERY_IMAGE
             } else if (agent_msg.event == EVENT_STORE_RECOVERY_COPY_START) {
@@ -81,6 +85,6 @@ void pull_bootloader() {
             }
             continue;
         }
+        // XXX I still need to match the fatal errors
     }
-    log_debug("If you are here you are stucked\n");
 }

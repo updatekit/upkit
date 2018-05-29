@@ -9,11 +9,12 @@
 static pull_error err;
 static mem_object_t obj_t;
 
-static mem_object_t bootloader_object;
 static bootloader_ctx bctx;
 
 static version_t version_bootable;
 static version_t version_non_bootable;
+
+static mem_object_t bootloader_object;
 static mem_object_t source_slot;
 static mem_object_t destination_slot;
 static mem_object_t newest_bootable;
@@ -22,7 +23,7 @@ static mem_id_t id_newest_non_bootable;
 static mem_id_t id_newest_bootable;
 static mem_id_t id_oldest_bootable;
 static mem_id_t boot_id;
-static mem_id_t i = 0;
+static mem_id_t i;
 
 #define BUFFER_SIZE 1024
 
@@ -123,7 +124,7 @@ agent_msg_t bootloader_agent(bootloader_agent_config* cfg) {
 
         // (4.2) If valid, move it to the oldest bootable slot
         PULL_CONTINUE(EVENT_UPGRADE, NULL);
-        err = get_oldest_firmware(&id_oldest_bootable, &version_bootable, &obj_t, true, false);
+        err = get_oldest_firmware(&id_oldest_bootable, &version_bootable, &obj_t, false, true);
         if (err) {
             PULL_CONTINUE(EVENT_UPGRADE_FAILURE, &err);
         }
@@ -152,22 +153,19 @@ agent_msg_t bootloader_agent(bootloader_agent_config* cfg) {
             boot_id = id_newest_bootable;
         } else {
             PULL_CONTINUE(EVENT_VALIDATE_BOOTABLE_FAILURE, &err);
-
 #if RECOVERY_IMAGE
             // (5.1.1) Restore the recovery image if available
             PULL_CONTINUE(EVENT_RECOVERY_RESTORE, NULL);
-
-                PULL_CONTINUE(EVENT_RECOVERY_RESTORE_START, NULL);
-                err = restore_recovery_image(&id_newest_bootable);
-                PULL_CONTINUE(EVENT_RECOVERY_RESTORE_STOP, NULL);
-                if (!err) {
-                    boot_id = id_newest_bootable;
-                } else {
-                    PULL_CONTINUE(EVENT_FATAL_FAILURE, NULL);
-                }
-
+            PULL_CONTINUE(EVENT_RECOVERY_RESTORE_START, NULL);
+            err = restore_recovery_image(&id_newest_bootable);
+            PULL_CONTINUE(EVENT_RECOVERY_RESTORE_STOP, NULL);
+            if (!err) {
+                boot_id = id_newest_bootable;
+            } else {
+                PULL_CONTINUE(EVENT_FATAL_FAILURE, NULL);
+            }
 #else 
-        PULL_CONTINUE(EVENT_FATAL_FAILURE, NULL);
+            PULL_CONTINUE(EVENT_FATAL_FAILURE, NULL);
 #endif
         }
     }
