@@ -3,10 +3,7 @@
 #include <libpull/network/async_interface.h>
 #include <libpull/memory/memory_objects.h>
 
-#include "memory_posix.h"
-#include "platform_headers.h"
-#include "test_runner.h"
-#include "unity.h"
+#include "support/support.h"
 
 #define FOREACH_TEST(DO) \
     DO(update_polling,0)

@@ -1,14 +1,8 @@
 #include <libpull/memory.h>
 #include <libpull/security/sha256.h>
-
-#include "tinycrypt_default_cspring.h" // Test Support
-#include "invalid_digest.h" // Test Support
-#include "sample_data.h" // Test Support
-#include "memory_posix.h" // Posix file
-
-#include "unity.h"
-#include "test_runner.h"
 #include <string.h>
+
+#include "support/support.h"
 
 #define FOREACH_TEST(DO) \
     DO(manifest_version, 0) \

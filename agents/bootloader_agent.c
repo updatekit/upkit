@@ -60,7 +60,7 @@ agent_msg_t bootloader_agent(bootloader_agent_config* cfg) {
     if ((bctx.startup_flags & FIRST_BOOT) == FIRST_BOOT) {
         // (2.1) Erase slots
         PULL_CONTINUE(EVENT_FIRST_BOOT, NULL);
-        mem_id_t i;
+        mem_id_t i = 0;
         for (i = 0; memory_slots[i].id != OBJ_END; i++) {
             if (!memory_slots[i].loaded) {
                 err = invalidate_object(memory_slots[i].id, &obj_t);
@@ -69,7 +69,7 @@ agent_msg_t bootloader_agent(bootloader_agent_config* cfg) {
                 }
             }
         }
-#if RECOVERY_IMAGE == 1
+#if RECOVERY_IMAGE
         // (2.2) Store recovery image
         PULL_CONTINUE(EVENT_STORE_RECOVERY, NULL);
         log_debug("Storing Recovery Image\n");
@@ -153,9 +153,10 @@ agent_msg_t bootloader_agent(bootloader_agent_config* cfg) {
         } else {
             PULL_CONTINUE(EVENT_BOOTABLE_VALIDATE_FAILURE, &err);
 
+#if RECOVERY_IMAGE
             // (5.1.1) Restore the recovery image if available
             PULL_CONTINUE(EVENT_RECOVERY_RESTORE, NULL);
-            if (RECOVERY_IMAGE == 0) {
+
                 PULL_CONTINUE(EVENT_RECOVERY_RESTORE_START, NULL);
                 err = restore_recovery_image(&id_newest_bootable);
                 PULL_CONTINUE(EVENT_RECOVERY_RESTORE_STOP, NULL);
@@ -164,7 +165,10 @@ agent_msg_t bootloader_agent(bootloader_agent_config* cfg) {
                 } else {
                     PULL_CONTINUE(EVENT_FATAL_FAILURE, NULL);
                 }
-            }
+
+#else 
+        PULL_CONTINUE(EVENT_FATAL_FAILURE, NULL);
+#endif
         }
     }
     PULL_CONTINUE(EVENT_BOOT, &boot_id);

@@ -20,7 +20,7 @@ COMMON_SRC = ../src/common/error.c ../src/common/identity.c
 MEMORY_SRC = ../src/memory/memory_objects.c 
 SECURITY_SRC = ../src/security/verifier.c
 NETWORK_SRC = ../src/network/receiver.c ../src/network/subscriber.c ../src/network/connection_config.c
-SUPPORT_SRC = support/external_variables.c
+SUPPORT_SRC = support/external_variables.c support/utils.c
 
 AGENTS_SRC = ../agents/update.c ../agents/bootloader_agent.c
 

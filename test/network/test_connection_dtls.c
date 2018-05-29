@@ -2,11 +2,7 @@
 #include <libpull/network.h>
 #include <libpull/memory.h>
 
-#include "platform_headers.h"
-
-#include "sample_data.h"
-#include "test_runner.h"
-#include "unity.h"
+#include "support/support.h"
 
 #define FOREACH_TEST(DO) \
     DO(udp, 0) \

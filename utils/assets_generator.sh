@@ -45,7 +45,6 @@ for v in $versions; do
         -f $ASSETSDIR/metadata metadata
     srec_cat $ASSETSDIR/metadata -binary $slot.tmp -binary -offset 0x100 -o $slot.bin -binary
     cp $slot.bin $slot.pristine
-    chmod 0444 $slot.pristine
     rm $slot.tmp
 done
 echo "Generate slots...done"

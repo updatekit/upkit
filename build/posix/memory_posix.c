@@ -12,17 +12,17 @@
 
 const mem_slot_t memory_slots[] = {
     {
-        .id = OBJ_RUN,
+        .id = OBJ_A,
         .bootable = true,
         .loaded = true
     },
     {
-        .id = OBJ_1,
-        .bootable = false,
+        .id = OBJ_B,
+        .bootable = true,
         .loaded = false
     },
     {
-        .id = OBJ_2,
+        .id = OBJ_C,
         .bootable = false,
         .loaded = false
     },
@@ -32,36 +32,45 @@ const mem_slot_t memory_slots[] = {
 char* memory_objects_mapper[] = {
     [OBJ_GOLD] = "antani",
     [BOOTLOADER_CTX] = "../assets/bootctx",
-    [OBJ_RUN] = "../assets/internal_flash_simulator",
-    [OBJ_1] = "../assets/external_flash_simulator",
-    [OBJ_2] = "../assets/external_flash_simulator",
+    [OBJ_A] = "../assets/slot_a.bin",
+    [OBJ_B] = "../assets/slot_b.bin",
+    [OBJ_C] = "../assets/slot_c.bin",
     [TEST_MEMORY_FILE] = "../assets/test_memory",
 };
 
-int memory_objects_start[] = {
-    [OBJ_GOLD] = 0,
-    [BOOTLOADER_CTX] = 0,
-    [OBJ_RUN] = 0x7000,
-    [OBJ_1] = 0x19000,
-    [OBJ_2] = 0x32000,
-    [TEST_MEMORY_FILE] = 0
-};
-int memory_objects_end[] = {
-    [OBJ_GOLD] = 0,
-    [BOOTLOADER_CTX] = 0x100,
-    [OBJ_RUN] = 0x20000,
-    [OBJ_1] = 0x32000,
-    [OBJ_2] = 0x4B000,
-    [TEST_MEMORY_FILE] = 0x19000
-};
-
 /******* Testing Function ******/
-void override_memory_object(mem_id_t id, char* path, int start, int end) {
-    memory_objects_mapper[id] = path;
-    memory_objects_start[id] = start;
-    memory_objects_end[id] = end;
+#ifndef DISABLE_TESTING
+static char* memory_object_pristine[] = {
+    [OBJ_A] = "../assets/slot_a.pristine",
+    [OBJ_B] = "../assets/slot_b.pristine",
+    [OBJ_C] = "../assets/slot_c.pristine",
+};
 
+static void copy_file(char* src, char* dest) {
+    FILE *s, *d;
+    int ch;
+    s = fopen(src, "r");
+    d = fopen(dest, "w");
+    if (s == NULL || d == NULL) {
+        printf("Cannot open files %s %s\n", src, dest);
+        return;
+    }
+    while ( (ch = fgetc(s)) != 'EOF') {
+        fputc(d, ch);
+    }
+    fclose(s);
+    fclose(d);
 }
+
+void restore_assets() {
+    int index = 0;
+    mem_id_t id;
+    for (index = 0; memory_slots[index].id != OBJ_END; index++) {
+        id = memory_slots[index].id;
+        copy_file(memory_object_pristine[id], memory_objects_mapper[id]);
+    }
+}
+#endif /* DISABLE_TESTING */
 /**** End Testing Function *****/
 
 pull_error resource_mapper(mem_object_t* ctx, mem_id_t id) {
@@ -69,8 +78,6 @@ pull_error resource_mapper(mem_object_t* ctx, mem_id_t id) {
         return INVALID_OBJECT_ERROR;
     }
     ctx->path = memory_objects_mapper[id];
-    ctx->start_offset = memory_objects_start[id];
-    ctx->end_offset = memory_objects_end[id];
     return PULL_SUCCESS;
 }
 
@@ -92,11 +99,7 @@ pull_error memory_open_impl(mem_object_t* ctx, mem_id_t id, mem_mode_t mode) {
 int memory_read_impl(mem_object_t* ctx, void* memory_buffer, size_t size, address_t offset) {
     PULL_ASSERT(ctx != NULL);
     PULL_ASSERT(ctx->fp >= 0);
-    if (ctx->start_offset+offset+size > ctx->end_offset) {
-        log_error(INVALID_ACCESS_ERROR, "Invalid access\n");
-        return -1;
-    }
-    if (lseek(ctx->fp, ctx->start_offset+offset, SEEK_SET) < 0) {
+    if (lseek(ctx->fp, offset, SEEK_SET) < 0) {
         log_error(MEMORY_READ_ERROR, "Impossible to set the file position: %s\n", strerror(errno));
         return -1;
     }
@@ -106,11 +109,7 @@ int memory_read_impl(mem_object_t* ctx, void* memory_buffer, size_t size, addres
 int memory_write_impl(mem_object_t* ctx, const void* memory_buffer, size_t size, address_t offset) {
     PULL_ASSERT(ctx != NULL);
     PULL_ASSERT(ctx->fp > 0);
-    if (ctx->start_offset+offset+size > ctx->end_offset) {
-        log_error(INVALID_ACCESS_ERROR, "Invalid access\n");
-        return -1;
-    }
-    if (lseek(ctx->fp, ctx->start_offset+offset, SEEK_SET) < 0) {
+    if (lseek(ctx->fp, offset, SEEK_SET) < 0) {
         log_error(MEMORY_WRITE_ERROR, "Impossible to set the file position: %s\n", strerror(errno));
         return -1;
     }
