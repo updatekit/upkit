@@ -29,8 +29,6 @@ static uint8_t buffer[BUFFER_SIZE];
 static int8_t retries = 3;
 static uint8_t success = 0;
 
-const version_t running_version = 0x0; // this needs to be fixed
-
 PROCESS_THREAD(update_process, ev, data) {
     PROCESS_BEGIN();
     specialize_crypto_functions();
@@ -58,11 +56,15 @@ PROCESS_THREAD(update_process, ev, data) {
                  if (status != ATCA_SUCCESS) {
                      log_error(GENERIC_ERROR, "Failure initializing ATECC508A\n");
                  }
+#endif
+                 watchdog_stop();
              } else if (agent_msg.event == EVENT_VERIFY_AFTER) {
+#ifdef WITH_CRYPTOAUTHLIB
                  atcab_release();
 #endif
+                 watchdog_start();
              } else if (agent_msg.event == EVENT_CHECKING_UPDATES_TIMEOUT) {
-                
+               /// XXX manage timeout 
              }
          } else if (IS_RECOVER(agent_msg)) {
              if (retries-- <= 0) {
@@ -74,6 +76,9 @@ PROCESS_THREAD(update_process, ev, data) {
              COAP_SEND(GET_CONNECTION(agent_msg));
          }
     } 
+    if (retries <= 0) {
+        log_info("The update process failed\n");
+    }
     PROCESS_END();
 }
 

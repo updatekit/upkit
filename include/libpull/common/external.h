@@ -18,7 +18,6 @@ extern "C" {
 #endif /* __cplusplus */
 
 extern const mem_slot_t memory_slots[];
-extern const version_t running_version;
 
 /** OBJ_END defines the final value used to stop the cicle on the
  * memory objects. */

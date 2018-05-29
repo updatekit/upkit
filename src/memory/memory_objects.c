@@ -24,7 +24,7 @@ pull_error get_ordered_firmware(mem_id_t* id, version_t* version, mem_object_t* 
         }
         memory_close(obj_t);
         // Avoid overriding the slot with the running image
-        if (disable_running && get_version(&mt) == running_version) {
+        if (disable_running && memory_slots[i].loaded == true) {
             continue;
         }
         if (first) {

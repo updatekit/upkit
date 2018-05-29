@@ -44,9 +44,6 @@ void flash_write_protect() {
 
 static agent_msg_t agent_msg;
 
-/// XXX this needs to be fixed
-const version_t running_version = 0x0;
-
 void pull_bootloader() {
     bootloader_agent_config cfg = {
         .bootloader_ctx_id = BOOTLOADER_CTX,
@@ -64,11 +61,7 @@ void pull_bootloader() {
             log_debug("Bootloader error: %s\n", err_as_str(GET_ERROR(agent_msg)));
             break;
         } else if (IS_CONTINUE(agent_msg)) {
-            if (agent_msg.event == EVENT_STORE_RECOVERY_COPY_START) {
-                watchdog_stop();
-            } else if (agent_msg.event == EVENT_STORE_RECOVERY_COPY_STOP) {
-                watchdog_start();
-            } else if (agent_msg.event == EVENT_VALIDATE_NON_BOOTABLE_START) {
+            if (agent_msg.event == EVENT_VALIDATE_NON_BOOTABLE_START) {
                 watchdog_stop();
             } else if (agent_msg.event == EVENT_VALIDATE_NON_BOOTABLE_STOP) {
                 watchdog_start();
@@ -76,6 +69,12 @@ void pull_bootloader() {
                 watchdog_stop();
             } else if (agent_msg.event == EVENT_VALIDATE_BOOTABLE_START) {
                 watchdog_start();
+#if RECOVERY_IMAGE
+            } else if (agent_msg.event == EVENT_STORE_RECOVERY_COPY_START) {
+                watchdog_stop();
+            } else if (agent_msg.event == EVENT_STORE_RECOVERY_COPY_STOP) {
+                watchdog_start();
+#endif
             } else if (agent_msg.event == EVENT_BOOT) {
                 load_object(*((mem_id_t*) agent_msg.event_data));
             break;

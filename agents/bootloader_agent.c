@@ -39,7 +39,7 @@ agent_msg_t bootloader_agent(bootloader_agent_config* cfg) {
 
     // (1) Get the newest bootable firmware (XXX there must be at least one!!)
     PULL_CONTINUE(EVENT_GET_NEWEST_FIRMWARE, NULL);
-    err = get_newest_firmware(&id_newest_bootable, &version_bootable, &obj_t, true, true);
+    err = get_newest_firmware(&id_newest_bootable, &version_bootable, &obj_t, false, true);
     if (err) {
         PULL_CONTINUE(EVENT_GET_NEWEST_FIRMWARE_FAILURE, &err);
     }

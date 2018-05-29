@@ -64,7 +64,6 @@ pull_error verify_object(mem_object_t* obj, digest_func digest, const uint8_t* x
     /***************** VERIFY DIGEST *************/
     log_info("Start phase VERIFY_DIGEST\n");
     state = VERIFY_DIGEST;
-    log_debug("Verifying digest\n");
     uint8_t* hash = get_digest(&mt);
     if (hash == NULL) {
         err = INVALID_MANIFEST_ERROR;
