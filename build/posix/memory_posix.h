@@ -15,16 +15,16 @@ enum memory_objects_enum {
     OBJ_FIRST = 0,
     BOOTLOADER_CTX,
     OBJ_GOLD,
-    OBJ_RUN,
-    OBJ_1,
-    OBJ_2,
+    OBJ_A,
+    OBJ_B,
+    OBJ_C,
     /// Other files used for testing
     TEST_MEMORY_FILE,
     OBJ_LAST
 };
 
 /******* Testing functions *******/
-void override_memory_object(mem_id_t id, char* path, int start, int end);
+void override_memory_object(mem_id_t id, char* path);
 /***** End Testing functions *****/
 
 #endif /* MEMORY_FILE_POSIX_H_ */

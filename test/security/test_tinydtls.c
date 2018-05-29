@@ -14,7 +14,7 @@
 
 digest_func df;
 ecc_func_t ef;
-mem_object_t obj_1;
+mem_object_t obj_a;
 
 #include "test_verifier.h"
 
@@ -35,7 +35,7 @@ DO(verify_object_invalid_key,0)
 TEST_RUNNER();
 
 void setUp() {
-    TEST_ASSERT_TRUE(memory_open(&obj_1, OBJ_1, WRITE_ALL) == PULL_SUCCESS);
+    TEST_ASSERT_TRUE(memory_open(&obj_a, OBJ_A, WRITE_ALL) == PULL_SUCCESS);
     df = tinydtls_digest_sha256;
     ef = tinydtls_secp256r1_ecc;
     memory_mock_restore();

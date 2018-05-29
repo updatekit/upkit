@@ -21,21 +21,15 @@ static int8_t retries = 3;
 static uint8_t success = 0;
 static uint8_t buffer[BUFFER_SIZE];
 
-// The test logic should update the OBJ_2 with the firmware with version 0xdead
-// After the test is finished I invalidate the OBJ_2 to restore the status
 void setUp(void) {
-    override_memory_object(OBJ_1, "../assets/external_flash_simulator_updated", 0x19000, 0x32000);
-    override_memory_object(OBJ_2, "../assets/external_flash_simulator_updated", 0x32000, 0x4B000);
-    override_memory_object(OBJ_RUN, "../assets/internal_flash_simulator_updated", 0x7000, 0x20000);
-    mem_object_t obj_t;
-    TEST_ASSERT_TRUE(invalidate_object(OBJ_RUN, &obj_t) == PULL_SUCCESS);
-}
-
-void tearDown(void) { 
     bzero(&cfg, sizeof(cfg));
     bzero(&ctx, sizeof(ctx));
     retries = 3;
     success = 0;
+}
+
+void tearDown(void) { 
+    restore_assets();
 }
 
 void update_runner(conn_type type, void* data) {
