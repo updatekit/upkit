@@ -17,6 +17,12 @@
 #define GET_BOOT_ID(agent_msg) *((mem_id_t*) (agent_msg.event_data))
 #define GET_ERROR(agent_msg) *((pull_error*) (agent_msg.event_data))
 
+ #define FOREACH_IGNORED_EVENT(ACTION) \
+     ACTION(EVENT_CONTINUE_START_) \
+     ACTION(EVENT_CONTINUE_STOP_) \
+     ACTION(EVENT_FAILURE_START_) \
+     ACTION(EVENT_FAILURE_STOP_)
+
 typedef enum agent_event_t {
     EVENT_INIT = 0,
     // EVENT CONTINUE
@@ -28,13 +34,15 @@ typedef enum agent_event_t {
     EVENT_FIRST_BOOT,
     EVENT_GET_NEWEST_FIRMWARE,
     EVENT_GET_NEWEST_NON_BOOTABLE,
-    EVENT_RECOVERY_RESTORE,
-    EVENT_RECOVERY_RESTORE_START,
-    EVENT_RECOVERY_RESTORE_STOP,
-    EVENT_STORE_BOOTLAODER_CTX,
+#if RECOVERY_IMAGE
     EVENT_STORE_RECOVERY,
     EVENT_STORE_RECOVERY_COPY_START,
     EVENT_STORE_RECOVERY_COPY_STOP,
+    EVENT_RECOVERY_RESTORE,
+    EVENT_RECOVERY_RESTORE_START,
+    EVENT_RECOVERY_RESTORE_STOP,
+#endif
+    EVENT_STORE_BOOTLAODER_CTX,
     EVENT_UPGRADE,
     EVENT_UPGRADE_COPY_START,
     EVENT_UPGRADE_COPY_STOP,
@@ -54,8 +62,10 @@ typedef enum agent_event_t {
     EVENT_GET_NEWEST_FIRMWARE_FAILURE_2,
     EVENT_GET_NEWEST_NON_BOOTABLE_FAILURE,
     EVENT_STORE_BOOTLAODER_CTX_FAILURE,
+#if RECOVERY_IMAGE
     EVENT_STORE_RECOVERY_COPY_FAILURE,
     EVENT_STORE_RECOVER_FAILURE,
+#endif
     EVENT_UPGRADE_COPY_FAILURE,
     EVENT_UPGRADE_FAILURE,
     EVENT_UPGRADE_FAILURE_2,
@@ -78,7 +88,7 @@ typedef struct bootloader_agent_config {
     uint8_t* vendor_y;
     digest_func df;
     ecc_func_t ef;
-    char* buffer;
+    uint8_t* buffer;
     size_t buffer_size;
 } bootloader_agent_config;
 
@@ -96,7 +106,7 @@ static inline void bootloader_agent_ecc_func(bootloader_agent_config* cfg, ecc_f
     cfg->ef = ef;
 }
 
-static inline void bootloader_agent_set_buffer(bootloader_agent_config* cfg, char* buffer, size_t buffer_size) {
+static inline void bootloader_agent_set_buffer(bootloader_agent_config* cfg, uint8_t* buffer, size_t buffer_size) {
     cfg->buffer = buffer;
     cfg->buffer_size = buffer_size;
 }

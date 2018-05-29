@@ -24,7 +24,8 @@ enum memory_objects_enum {
 };
 
 /******* Testing functions *******/
-void override_memory_object(mem_id_t id, char* path);
+void copy_asset(char* src, char* dest);
+void restore_assets();
 /***** End Testing functions *****/
 
 #endif /* MEMORY_FILE_POSIX_H_ */

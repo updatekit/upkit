@@ -46,7 +46,7 @@ static char* memory_object_pristine[] = {
     [OBJ_C] = "../assets/slot_c.pristine",
 };
 
-static void copy_file(char* src, char* dest) {
+void copy_asset(char* src, char* dest) {
     FILE *s, *d;
     int ch;
     s = fopen(src, "r");
@@ -67,7 +67,7 @@ void restore_assets() {
     mem_id_t id;
     for (index = 0; memory_slots[index].id != OBJ_END; index++) {
         id = memory_slots[index].id;
-        copy_file(memory_object_pristine[id], memory_objects_mapper[id]);
+        copy_asset(memory_object_pristine[id], memory_objects_mapper[id]);
     }
 }
 #endif /* DISABLE_TESTING */

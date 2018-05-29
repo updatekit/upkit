@@ -33,7 +33,7 @@ void tearDown(void) {
 }
 
 void test_bootloader_success(void) {
-    bootloader_agent_vendor_keys(&cfg, vendor_x_g, vendor_y_g);
+    bootloader_agent_vendor_keys(&cfg, (uint8_t*) vendor_x_g, (uint8_t*) vendor_y_g);
     bootloader_agent_digest_func(&cfg, tinydtls_digest_sha256);
     bootloader_agent_ecc_func(&cfg, tinydtls_secp256r1_ecc);
     bootloader_agent_set_buffer(&cfg, buffer, BUFFER_SIZE);
@@ -42,7 +42,7 @@ void test_bootloader_success(void) {
     while(1) {
         agent_msg = bootloader_agent(&cfg);
         if (IS_FAILURE(agent_msg)) {
-            printf("error is:%s\n", (err_as_str(agent_msg.event_data)));
+            printf("error is:%s\n", (err_as_str(GET_ERROR(agent_msg))));
             success = false;
             break;
         } else if (IS_CONTINUE(agent_msg)) {

@@ -18,6 +18,17 @@
 #define GET_CONNECTION(agent_msg) ((txp_ctx*) (agent_msg.event_data))
 #define GET_ERROR(agent_msg) ((pull_error) *(agent_msg.event_data))
 
+#define FOREACH_IGNORED_EVENT(ACTION) \
+    ACTION(EVENT_CONTINUE_START_) \
+    ACTION(EVENT_CONTINUE_END_) \
+    ACTION(EVENT_SEND_START_) \
+    ACTION(EVENT_SEND_END_) \
+    ACTION(EVENT_RECOVER_START_) \
+    ACTION(EVENT_RECOVER_END_) \
+    ACTION(EVENT_FAILURE_START_) \
+    ACTION(EVENT_FAILURE_END_)
+
+
 /* This states will be used by the update agent coroutines */
 typedef enum agent_event_t {
     EVENT_INIT = 0,
@@ -31,9 +42,9 @@ typedef enum agent_event_t {
     EVENT_RECEIVE,
     EVENT_VERIFY,
     EVENT_FINAL,
+    EVENT_APPLY,
     EVENT_VERIFY_BEFORE,
     EVENT_VERIFY_AFTER,
-    EVENT_APPLY,
     EVENT_CONTINUE_END_,
     // EVENT SEND
     EVENT_SEND_START_,
@@ -72,7 +83,7 @@ typedef struct {
     uint8_t* vendor_y;
     digest_func df;
     ecc_func_t ef;
-    char* buffer;
+    uint8_t* buffer;
     size_t buffer_size;
 } update_agent_config;
 
@@ -97,7 +108,7 @@ static inline void update_agent_ecc_func(update_agent_config* cfg, ecc_func_t ef
     cfg->ef = ef;
 }
 
-static inline void update_agent_set_buffer(update_agent_config* cfg, char* buffer, size_t buffer_size) {
+static inline void update_agent_set_buffer(update_agent_config* cfg, uint8_t* buffer, size_t buffer_size) {
     cfg->buffer = buffer;
     cfg->buffer_size = buffer_size;
 }

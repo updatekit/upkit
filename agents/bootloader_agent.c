@@ -22,6 +22,7 @@ static mem_id_t id_newest_non_bootable;
 static mem_id_t id_newest_bootable;
 static mem_id_t id_oldest_bootable;
 static mem_id_t boot_id;
+static mem_id_t i = 0;
 
 #define BUFFER_SIZE 1024
 
@@ -60,7 +61,6 @@ agent_msg_t bootloader_agent(bootloader_agent_config* cfg) {
     if ((bctx.startup_flags & FIRST_BOOT) == FIRST_BOOT) {
         // (2.1) Erase slots
         PULL_CONTINUE(EVENT_FIRST_BOOT, NULL);
-        mem_id_t i = 0;
         for (i = 0; memory_slots[i].id != OBJ_END; i++) {
             if (!memory_slots[i].loaded) {
                 err = invalidate_object(memory_slots[i].id, &obj_t);

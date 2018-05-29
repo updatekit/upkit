@@ -4,7 +4,9 @@
 #define PULL_BEGIN(ev)  \
     static agent_event_t current_event = ev; \
     static agent_msg_t agent_msg; \
-    switch(current_event) { case ev:
+    switch(current_event) { \
+        FOREACH_IGNORED_EVENT(IGNORE_EVENT) \
+        case ev:
 
 #define PULL_CONTINUE(ev, ev_data) \
     do { \
@@ -16,9 +18,15 @@
     } while(0)
         
 #define PULL_FINISH(ev) \
+        case ev: \
+            agent_msg.event = ev; \
+            agent_msg.event_data = NULL; \
+            return agent_msg; \
     } \
-    agent_msg.event = ev; \
-    agent_msg.event_data = NULL; \
     return agent_msg;
+
+
+
+#define IGNORE_EVENT(event) case event:
 
 #endif /* AGENTS_COROUTINE_H_ */
