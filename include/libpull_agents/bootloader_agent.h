@@ -14,7 +14,8 @@
 #define IS_CONTINUE(agent_msg) (agent_msg.event > EVENT_CONTINUE_START_ && agent_msg.event < EVENT_CONTINUE_STOP_ )
 #define IS_FAILURE(agent_msg) (agent_msg.event > EVENT_FAILURE_START_ && agent_msg.event < EVENT_FAILURE_STOP_ )
 
-#define GET_ERROR(agent_msg) ((pull_error) *(agent_msg.event_data))
+#define GET_BOOT_ID(agent_msg) *((mem_id_t*) (agent_msg.event_data))
+#define GET_ERROR(agent_msg) *((pull_error*) (agent_msg.event_data))
 
 typedef enum agent_event_t {
     EVENT_INIT = 0,
