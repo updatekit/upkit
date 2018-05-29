@@ -22,14 +22,14 @@ static uint8_t success = 0;
 static uint8_t buffer[BUFFER_SIZE];
 
 void setUp(void) {
-}
-
-void tearDown(void) { 
-    //restore_assets();
     bzero(&cfg, sizeof(cfg));
     bzero(&ctx, sizeof(ctx));
     retries = 3;
     success = 0;
+}
+
+void tearDown(void) { 
+    restore_assets();
 }
 
 void update_runner(conn_type type, void* data) {

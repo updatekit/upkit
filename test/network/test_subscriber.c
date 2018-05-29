@@ -16,6 +16,7 @@ void setUp(void) {
 }
 
 void tearDown(void) {
+    restore_assets();
 }
 
 static void check_update_cb(pull_error err, const char* data, int len, void* more) {
@@ -24,7 +25,7 @@ static void check_update_cb(pull_error err, const char* data, int len, void* mor
     TEST_ASSERT_TRUE(len == 2);
     version_t version;
     memcpy(&version, data, sizeof(version_t));
-    TEST_ASSERT_EQUAL_HEX16(0xdead, version);
+    TEST_ASSERT_EQUAL_HEX(0xD, version);
     break_loop(ctx->txp);
 }
 

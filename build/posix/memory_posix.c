@@ -55,8 +55,8 @@ static void copy_file(char* src, char* dest) {
         printf("Cannot open files %s %s\n", src, dest);
         return;
     }
-    while ( (ch = fgetc(s)) != 'EOF') {
-        fputc(d, ch);
+    while ( (ch = fgetc(s)) != EOF) {
+        fputc(ch, d);
     }
     fclose(s);
     fclose(d);
