@@ -1,6 +1,15 @@
 #!/bin/bash
 set -e
 
+# The goal of this script is to generate the assets for the
+# testing framework. It needs to generate four slot with
+# different versions: 0xa 0xb 0xc 0xd that will be used
+# also as slots during the testing phase
+# The testing framework will be able to restore the assets after
+# each test, and for this reason each slot must be generated
+# two times: one time as a slot_X.bin and one time as
+# slot_X_pristine.bin
+
 ROOTDIR=$(cd $(dirname $0)/.. && pwd -P)
 UTILSDIR=$ROOTDIR/utils
 ASSETSDIR=$ROOTDIR/assets
@@ -20,52 +29,26 @@ for i in `seq 1 $max`; do
 done
 echo "Generate Test Memory file...done"
 
-# Generate Firmwares
-echo "Generate Firmwares..."
+# Generate slots
+echo "Generate slots..."
 APPLICATION=0x1001
-fake_firmware="$ASSETSDIR/fake_firmware_"
-# The first is the gold image
-versions="dead beef"
+slot_prefix="$ASSETSDIR/slot_"
+versions="a b c d"
 for v in $versions; do
-    f="$fake_firmware$v"
-    # Creating firmware of size 0x14000
-    dd if=/dev/zero bs=4096 count=20 > $f.tmp
-    $FIRMWAREDIR/firmware_tool manifest generate -y $FIRMWAREDIR/config.toml -vv -l $v -a $APPLICATION -b $f.tmp \
+    slot="$slot_prefix$v"
+    # Creating slot of size 0x14000
+    dd if=/dev/zero bs=4096 count=20 > $slot.tmp
+    $FIRMWAREDIR/firmware_tool manifest generate -y $FIRMWAREDIR/config.toml -vv \
         -p $FIRMWAREDIR/keys/vendor.priv -c $FIRMWAREDIR/keys/vendor.pub \
         -k $FIRMWAREDIR/keys/server.priv -m $FIRMWAREDIR/keys/server.pub \
+        -l $v -a $APPLICATION -b $slot.tmp \
         -f $ASSETSDIR/metadata metadata
-    hash=$(shasum -a 256 $f.tmp | cut -f 1 -d ' ')
-    echo $hash
-     srec_cat $ASSETSDIR/metadata -binary $f.tmp -binary -offset 0x100 -o $f -binary
-     #rm $f.tmp
+    srec_cat $ASSETSDIR/metadata -binary $slot.tmp -binary -offset 0x100 -o $slot.bin -binary
+    cp $slot.bin $slot.pristine
+    chmod 0444 $slot.pristine
+    rm $slot.tmp
 done
-echo "Generate Firmwares...done"
-firmware_a=$ASSETSDIR/fake_firmware_beef # Already generated
-firmware_b=$ASSETSDIR/fake_firmware_dead # Already generated
-firmware_gold=$ASSETSDIR/fake_firmware_gold # To generate
-cp $firmware_a $firmware_gold
+echo "Generate slots...done"
 
-# Generate External Flash files
-echo "Generate External Flash file..."
-external_flash_simulator=$ASSETSDIR/external_flash_simulator
-srec_cat $firmware_a -binary -offset 0x19000 \
-         $firmware_gold -binary -offset 0x4B000 \
-         -o $external_flash_simulator -binary
-cp $external_flash_simulator "$external_flash_simulator"_updated
-echo "Generate External Flash file...done"
-
-# Generate Internal Flash files
-echo "Generate Internal Flash file..."
-internal_flash_simulator=$ASSETSDIR/internal_flash_simulator
-expected_internal_flash_simulator=$ASSETSDIR/expected_internal_flash_simulator
-# 100 kB of user data + 100 kB of firmware_a + 100 kB of firmware_b
-srec_cat  $firmware_a -binary -offset 0x7000 \
-         -o $internal_flash_simulator -binary
-srec_cat  $firmware_a -binary -offset 0x7000 \
-         -o $expected_internal_flash_simulator -binary
-# Create another internal flash that will be updated
-cp $internal_flash_simulator "$internal_flash_simulator"_updated
-echo "Generate Internal Flash file...done"
-
-# Generate a bootloader context
-$FIRMWAREDIR/firmware_tool bootctx generate -y $FIRMWAREDIR/config.toml -f $ASSETSDIR/bootctx
+# Generate the bootloader context
+$FIRMWAREDIR/firmware_tool bootctx generate -f $ASSETSDIR/bootctx
