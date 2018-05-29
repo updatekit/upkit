@@ -31,6 +31,9 @@ agent_msg_t update_agent(update_agent_config* cfg, update_agent_ctx_t* ctx) {
             continue;
         }
         PULL_CONTINUE(EVENT_CHECKING_UPDATES_SEND, &(ctx->stxp));
+        if (!ctx->sctx.has_updates) {
+            PULL_CONTINUE(EVENT_CHECKING_UPDATES_TIMEOUT, NULL);
+        }
     }
     log_info("An update is available\n");
 

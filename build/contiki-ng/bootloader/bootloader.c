@@ -53,14 +53,15 @@ void pull_bootloader() {
         .recovery_id = OBJ_GOLD,
     };
     specialize_crypto_functions();
-    update_agent_vendor_keys(&cfg, x, y);
-    update_agent_digest_func(&cfg, df);
-    update_agent_ecc_func(&cfg, ef);
-    update_agent_set_buffer(&cfg, buffer, BUFFER_SIZE);
+    bootloader_agent_vendor_keys(&cfg, x, y);
+    bootloader_agent_digest_func(&cfg, df);
+    bootloader_agent_ecc_func(&cfg, ef);
+    bootloader_agent_set_buffer(&cfg, buffer, BUFFER_SIZE);
 
     while(1) {
         agent_msg = bootloader_agent(&cfg);
         if (IS_FAILURE(agent_msg)) {
+            log_debug("Bootloader error: %s\n", err_as_str(GET_ERROR(agent_msg)));
             break;
         } else if (IS_CONTINUE(agent_msg)) {
             if (agent_msg.event == EVENT_STORE_RECOVERY_COPY_START) {
@@ -71,11 +72,16 @@ void pull_bootloader() {
                 watchdog_stop();
             } else if (agent_msg.event == EVENT_VALIDATE_NON_BOOTABLE_STOP) {
                 watchdog_start();
+            } else if (agent_msg.event == EVENT_VALIDATE_BOOTABLE_START) {
+                watchdog_stop();
+            } else if (agent_msg.event == EVENT_VALIDATE_BOOTABLE_START) {
+                watchdog_start();
             } else if (agent_msg.event == EVENT_BOOT) {
+                load_object(*((mem_id_t*) agent_msg.event_data));
             break;
             }
             continue;
         }
     }
-    load_object(*((mem_id_t*) agent_msg.event_data));
+    log_debug("If you are here you are stucked\n");
 }

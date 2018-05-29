@@ -145,13 +145,13 @@ agent_msg_t bootloader_agent(bootloader_agent_config* cfg) {
     // (5) Check if the validation has been already performed during the upgrade
     if (!already_validated_flag) {
         // (5.1) Validate the newest_bootable
-        PULL_CONTINUE(EVENT_BOOTABLE_VALIDATE_START, NULL);
+        PULL_CONTINUE(EVENT_VALIDATE_BOOTABLE_START, NULL);
         err = verify_object(&newest_bootable, cfg->df, cfg->vendor_x, cfg->vendor_y, cfg->ef, cfg->buffer, cfg->buffer_size);
-        PULL_CONTINUE(EVENT_BOOTABLE_VALIDATE_STOP, NULL);
+        PULL_CONTINUE(EVENT_VALIDATE_BOOTABLE_STOP, NULL);
         if (!err) {
             boot_id = id_newest_bootable;
         } else {
-            PULL_CONTINUE(EVENT_BOOTABLE_VALIDATE_FAILURE, &err);
+            PULL_CONTINUE(EVENT_VALIDATE_BOOTABLE_FAILURE, &err);
 
 #if RECOVERY_IMAGE
             // (5.1.1) Restore the recovery image if available

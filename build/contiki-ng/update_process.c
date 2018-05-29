@@ -61,6 +61,8 @@ PROCESS_THREAD(update_process, ev, data) {
              } else if (agent_msg.event == EVENT_VERIFY_AFTER) {
                  atcab_release();
 #endif
+             } else if (agent_msg.event == EVENT_CHECKING_UPDATES_TIMEOUT) {
+                
              }
          } else if (IS_RECOVER(agent_msg)) {
              if (retries-- <= 0) {
