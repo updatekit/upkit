@@ -66,3 +66,6 @@ srec_cat  $firmware_a -binary -offset 0x7000 \
 # Create another internal flash that will be updated
 cp $internal_flash_simulator "$internal_flash_simulator"_updated
 echo "Generate Internal Flash file...done"
+
+# Generate a bootloader context
+$FIRMWAREDIR/firmware_tool bootctx generate -y $FIRMWAREDIR/config.toml -f $ASSETSDIR/bootctx

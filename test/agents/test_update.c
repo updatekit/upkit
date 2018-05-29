@@ -11,7 +11,7 @@
     DO(update_success_dtls, 0)
 TEST_RUNNER();
 
-#define POLLING_FREQUENCY 1
+#define TIMEOUT 1000
 #define BUFFER_SIZE 1024
 
 static agent_msg_t agent_msg;
@@ -64,7 +64,7 @@ void update_runner(conn_type type, void* data) {
                 break;
             }
         } else if (IS_SEND(agent_msg)) {
-            loop(GET_CONNECTION(agent_msg), 1000);
+            loop(GET_CONNECTION(agent_msg), TIMEOUT);
         }
     }
     TEST_ASSERT_TRUE_MESSAGE(success, "There was an error during the update phase\n");

@@ -104,7 +104,6 @@ agent_msg_t bootloader_agent(bootloader_agent_config* cfg) {
 
     // (4) Compare them and upgrade if necessary
     if (version_bootable < version_non_bootable) {
-
         // (4.1) Validate the newest non bootable slot
         PULL_CONTINUE(EVENT_VALIDATE_NON_BOOTABLE, NULL);
         err = memory_open(&source_slot, id_newest_non_bootable, READ_ONLY);
@@ -145,7 +144,6 @@ agent_msg_t bootloader_agent(bootloader_agent_config* cfg) {
     }
     // (5) Check if the validation has been already performed during the upgrade
     if (!already_validated_flag) {
-
         // (5.1) Validate the newest_bootable
         PULL_CONTINUE(EVENT_BOOTABLE_VALIDATE_START, NULL);
         err = verify_object(&newest_bootable, cfg->df, cfg->vendor_x, cfg->vendor_y, cfg->ef, cfg->buffer, cfg->buffer_size);

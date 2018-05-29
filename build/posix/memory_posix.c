@@ -31,6 +31,7 @@ const mem_slot_t memory_slots[] = {
 
 char* memory_objects_mapper[] = {
     [OBJ_GOLD] = "antani",
+    [BOOTLOADER_CTX] = "../assets/bootctx",
     [OBJ_RUN] = "../assets/internal_flash_simulator",
     [OBJ_1] = "../assets/external_flash_simulator",
     [OBJ_2] = "../assets/external_flash_simulator",
@@ -39,6 +40,7 @@ char* memory_objects_mapper[] = {
 
 int memory_objects_start[] = {
     [OBJ_GOLD] = 0,
+    [BOOTLOADER_CTX] = 0,
     [OBJ_RUN] = 0x7000,
     [OBJ_1] = 0x19000,
     [OBJ_2] = 0x32000,
@@ -46,6 +48,7 @@ int memory_objects_start[] = {
 };
 int memory_objects_end[] = {
     [OBJ_GOLD] = 0,
+    [BOOTLOADER_CTX] = 0x100,
     [OBJ_RUN] = 0x20000,
     [OBJ_1] = 0x32000,
     [OBJ_2] = 0x4B000,
@@ -57,6 +60,7 @@ void override_memory_object(mem_id_t id, char* path, int start, int end) {
     memory_objects_mapper[id] = path;
     memory_objects_start[id] = start;
     memory_objects_end[id] = end;
+
 }
 /**** End Testing Function *****/
 
@@ -77,7 +81,7 @@ pull_error memory_open_impl(mem_object_t* ctx, mem_id_t id, mem_mode_t mode) {
         return MEMORY_MAPPING_ERROR;
     }
     // TODO analyze how to map the memory mode
-    ctx->fp = open(ctx->path, O_RDWR);
+    ctx->fp = open(ctx->path, O_RDWR | O_CREAT, 0644);
     if (ctx->fp < 0) {
         log_error(MEMORY_OPEN_ERROR, "Impossible to open the file %s\n", ctx->path);
         return MEMORY_OPEN_ERROR;
@@ -97,7 +101,6 @@ int memory_read_impl(mem_object_t* ctx, void* memory_buffer, size_t size, addres
         return -1;
     }
     return read(ctx->fp, memory_buffer, size);
-
 }
 
 int memory_write_impl(mem_object_t* ctx, const void* memory_buffer, size_t size, address_t offset) {
