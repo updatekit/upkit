@@ -11,7 +11,7 @@
 
 PROCESS(update_process, "OTA Update process");
 
-#define BUFFER_SIZE PAGE_SIZE
+#define BUFFER_SIZE 512
 
 void specialize_crypto_functions(void);
 void specialize_conn_functions(void);
@@ -36,14 +36,14 @@ void verify_before() {
         log_error(GENERIC_ERROR, "Failure initializing ATECC508A\n");
     }
 #endif
-    watchdog_stop();
+    //XXX watchdog_stop();
 }
 
 void verify_after() {
 #ifdef WITH_CRYPTOAUTHLIB
     atcab_release();
 #endif
-    watchdog_start();
+    //XXX watchdog_start(); disable until I make an interface for them
 }
 
 PROCESS_THREAD(update_process, ev, data) {
