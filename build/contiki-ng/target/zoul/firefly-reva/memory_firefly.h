@@ -16,14 +16,13 @@ enum memory_objects_enum {
     OBJ_2,
 };
 
+uint32_t get_start_offset(mem_id_t id);
+uint32_t get_end_offset(mem_id_t id);
+
 pull_error memory_open_impl(mem_object_t* ctx, mem_id_t id, mem_mode_t mode);
-
 int memory_read_impl(mem_object_t* ctx, void* memory_buffer, size_t size, address_t offset);
-
 int memory_write_impl(mem_object_t* ctx, const void* memory_buffer, size_t size, address_t offset);
-
 pull_error memory_flush_impl(mem_object_t* ctx);
-
 pull_error memory_close_impl(mem_object_t* ctx);
 
 #endif /* MEMORY_FIREFLY_H_ */
