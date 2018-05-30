@@ -1,6 +1,7 @@
-#include <string.h>
+#ifndef TEST_SUPPORT_TEST_RUNNER_H_
+#define TEST_SUPPORT_TEST_RUNNER_H_
 
-#ifndef WITH_CEEDLING
+#include <string.h>
 
 #define __FILENAME__ (strrchr(__FILE__, '/') ? strrchr(__FILE__, '/') + 1 : __FILE__)
 
@@ -41,8 +42,4 @@ void resetTest(void) {
     FOREACH_TEST(DEFINE_RUNNER) \
     DEFINE_MAIN()
 
-#else /* WITH_CEEDLING */
-
-#define TEST_RUNNER() 
-
-#endif /* WITH_CEEDLING */
+#endif /* TEST_SUPPORT_TEST_RUNNER_H_ */

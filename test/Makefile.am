@@ -20,9 +20,9 @@ COMMON_SRC = ../src/common/error.c ../src/common/identity.c
 MEMORY_SRC = ../src/memory/memory_objects.c 
 SECURITY_SRC = ../src/security/verifier.c
 NETWORK_SRC = ../src/network/receiver.c ../src/network/subscriber.c ../src/network/connection_config.c
-SUPPORT_SRC = support/external_variables.c
+SUPPORT_SRC = support/external_variables.c support/utils.c
 
-AGENTS_SRC = ../agents/update.c
+AGENTS_SRC = ../agents/update.c ../agents/bootloader_agent.c
 
 NETWORK_IMPL = ../build/posix/connection_libcoap.c ../build/posix/async_libcoap.c
 MEMORY_IMPL = ../src/memory/memory.c ../build/posix/memory_posix.c
@@ -39,7 +39,7 @@ TINYCRYPT_SRC = ../src/security/tinycrypt.c ../ext/tinycrypt/lib/source/ecc_plat
 TINYDTLS_SRC = ../src/security/tinydtls.c
 
 memory_tests = test_memory test_memory_objects test_manifest
-agents_tests = test_update
+agents_tests = test_update test_bootloader_agent
 network_tests = test_receiver test_subscriber test_connection_dtls #test_receiver_memory_invalid
 security_tests = test_tinycrypt test_tinydtls
 
@@ -63,3 +63,6 @@ test_tinydtls_SOURCES = security/test_tinydtls.c $(NO_MOCK_SRC) $(MOCK_MEMORY) $
 
 # Agents tests
 test_update_SOURCES = agents/test_update.c $(ALL_SRC) $(AGENTS_SRC) $(TINYDTLS_SRC)
+test_bootloader_agent_SOURCES = agents/test_bootloader_agent.c $(ALL_SRC) $(AGENTS_SRC) $(TINYDTLS_SRC)
+
+test_bootloader_agent_CFLAGS = $(AM_CFLAGS) -DRECOVERY_IMAGE=0

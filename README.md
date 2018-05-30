@@ -7,6 +7,7 @@
 [![GitHub release](https://img.shields.io/github/release/libpull/libpull.svg)](https://github.com/libpull/libpull/releases)
 [![Build Status](https://travis-ci.org/libpull/libpull.svg?branch=master)](https://travis-ci.org/libpull/libpull)
 [![Coverage Status](https://coveralls.io/repos/github/libpull/libpull/badge.svg)](https://coveralls.io/github/libpull/libpull)
+[![CodeFactor](https://www.codefactor.io/repository/github/libpull/libpull/badge)](https://www.codefactor.io/repository/github/libpull/libpull)
 [![GitHub pull-requests](https://img.shields.io/github/issues-pr/libpull/libpull.svg)](https://github.com/libpull/libpull/pulls)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat)](https://github.com/libpull/libpull/pulls)
 

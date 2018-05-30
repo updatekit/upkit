@@ -9,3 +9,4 @@ test_tinydtls
 test_connection_dtls
 test_logic
 test_update
+test_bootloader_agent

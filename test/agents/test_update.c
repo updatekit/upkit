@@ -11,7 +11,7 @@
     DO(update_success_dtls, 0)
 TEST_RUNNER();
 
-#define POLLING_FREQUENCY 1
+#define TIMEOUT 1000
 #define BUFFER_SIZE 1024
 
 static agent_msg_t agent_msg;
@@ -21,21 +21,15 @@ static int8_t retries = 3;
 static uint8_t success = 0;
 static uint8_t buffer[BUFFER_SIZE];
 
-// The test logic should update the OBJ_2 with the firmware with version 0xdead
-// After the test is finished I invalidate the OBJ_2 to restore the status
 void setUp(void) {
-    override_memory_object(OBJ_1, "../assets/external_flash_simulator_updated", 0x19000, 0x32000);
-    override_memory_object(OBJ_2, "../assets/external_flash_simulator_updated", 0x32000, 0x4B000);
-    override_memory_object(OBJ_RUN, "../assets/internal_flash_simulator_updated", 0x7000, 0x20000);
-    mem_object_t obj_t;
-    TEST_ASSERT_TRUE(invalidate_object(OBJ_RUN, &obj_t) == PULL_SUCCESS);
-}
-
-void tearDown(void) { 
     bzero(&cfg, sizeof(cfg));
     bzero(&ctx, sizeof(ctx));
     retries = 3;
     success = 0;
+}
+
+void tearDown(void) { 
+    restore_assets();
 }
 
 void update_runner(conn_type type, void* data) {
@@ -43,7 +37,7 @@ void update_runner(conn_type type, void* data) {
     conn_config(&cfg.receiver, "localhost", 0, type, data, "firmware");
     update_agent_reuse_connection(&cfg, 0);
     update_agent_set_identity(&cfg, identity_g);
-    update_agent_vendor_keys(&cfg, vendor_x_g, vendor_y_g);
+    update_agent_vendor_keys(&cfg, (uint8_t*) vendor_x_g, (uint8_t*) vendor_y_g);
     update_agent_digest_func(&cfg, tinydtls_digest_sha256);
     update_agent_ecc_func(&cfg, tinydtls_secp256r1_ecc);
     update_agent_set_buffer(&cfg, buffer, BUFFER_SIZE);
@@ -64,7 +58,7 @@ void update_runner(conn_type type, void* data) {
                 break;
             }
         } else if (IS_SEND(agent_msg)) {
-            loop(GET_CONNECTION(agent_msg), 1000);
+            loop(GET_CONNECTION(agent_msg), TIMEOUT);
         }
     }
     TEST_ASSERT_TRUE_MESSAGE(success, "There was an error during the update phase\n");

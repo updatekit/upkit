@@ -1,9 +1,7 @@
 #include <libpull/common.h>
 #include <libpull/memory.h>
 
-#include "support/platform_headers.h"
-#include "test_runner.h"
-#include "unity.h"
+#include "support/support.h"
 
 #include <string.h>
 
@@ -15,6 +13,7 @@ mem_object_t object;
     DO(memory_write_sequential, 0) \
     DO(memory_write_random, 0) \
     DO(memory_invalid_object, 0)
+
 TEST_RUNNER();
 
 const char content[12] = {'m', 'e', 'm', 'o', 'r', 'y', '_', 't', 'e', 's', 't', '\n'};

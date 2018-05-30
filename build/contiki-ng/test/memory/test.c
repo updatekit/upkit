@@ -22,7 +22,7 @@ PROCESS_THREAD(memory_test, ev, data) {
     for (i=0; i<BUFFER_SIZE; i++) {
         memory_buffer[i] = i;
     }
-    mem_object obj;
+    mem_object_t obj;
     pull_error err = memory_open(&obj, OBJ_2, WRITE_ALL);
     CHECK(err, "Error opening memory object 2 %s\n", err_as_str(err));
     int not_correctly_ereased = 0;

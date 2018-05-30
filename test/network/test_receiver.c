@@ -2,13 +2,7 @@
 #include <libpull/network.h>
 #include <libpull/memory.h>
 
-#include "memory_posix.h"
-#include "connection_libcoap.h"
-#include "async_libcoap.h"
-
-#include "test_runner.h" // Test Support
-#include "sample_data.h" // Test Support
-#include <unity.h>
+#include "support/support.h"
 
 #define FOREACH_TEST(DO) \
     DO(get_firmware, 0) \
@@ -22,7 +16,7 @@ TEST_RUNNER();
 mem_object_t obj;
 
 void setUp(void) {
-    TEST_ASSERT_TRUE(memory_open(&obj, OBJ_2, WRITE_ALL) == PULL_SUCCESS);
+    TEST_ASSERT_TRUE(memory_open(&obj, OBJ_A, WRITE_ALL) == PULL_SUCCESS);
 }
 
 void tearDown(void) {

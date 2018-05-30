@@ -2,11 +2,7 @@
 #include <libpull/network.h>
 #include <libpull/memory.h>
 
-#include "platform_headers.h"
-
-#include "sample_data.h"
-#include "test_runner.h"
-#include "unity.h"
+#include "support/support.h"
 
 #define FOREACH_TEST(DO) \
     DO(udp, 0) \
@@ -118,7 +114,7 @@ void stress_echo(void) {
 
 void get(void) {
     cb_called = 0;
-    uint16_t expected = 0xdead;
+    uint16_t expected = 0xd;
     pull_error error = txp_on_data(&ctx, handler_cmp_memory, &expected);
     TEST_ASSERT_TRUE(!error);
     error = txp_request(&ctx, GET, "version", NULL, 0);

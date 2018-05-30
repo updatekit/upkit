@@ -10,7 +10,24 @@
 
 #define FLASH_PAGE_SIZE PAGE_SIZE // Defined in Manifest.conf
 
-const int8_t memory_objects[] = { OBJ_1, OBJ_2, OBJ_END};
+const mem_slot_t memory_slots[] = { 
+    {
+        .id = OBJ_RUN,
+        .bootable = true,
+        .loaded = true
+    },
+    {
+        .id = OBJ_1,
+        .bootable = false,
+        .loaded = false
+    },
+    {
+        .id = OBJ_2,
+        .bootable = false,
+        .loaded = false
+    },
+    {OBJ_END}
+};
 
 static uint8_t external_memory_open = 0;
 
@@ -71,7 +88,7 @@ pull_error memory_open_impl(mem_object_t* ctx, mem_id_t obj, mem_mode_t mode) {
     }
     // Internal Memory
     if (ctx->mode == WRITE_ALL) {
-        for (offset = ctx->end_offset; offset < ctx->end_offset; offset += FLASH_PAGE_SIZE) {
+        for (offset = ctx->start_offset; offset < ctx->end_offset; offset += FLASH_PAGE_SIZE) {
             if (FlashSectorErase(offset) != FAPI_STATUS_SUCCESS) {
                 log_debug("Error erasing page %lu\n", offset/FLASH_PAGE_SIZE);
                 return MEMORY_OPEN_ERROR;
@@ -116,10 +133,10 @@ int memory_write_impl(mem_object_t* ctx, const void* memory_buffer, uint16_t siz
     }
     // Internal Memory
     address_t memory_offset = ctx->start_offset+offset;
-    if (FlashProgram((uint8_t*) memory_buffer, memory_offset, size) == FAPI_STATUS_SUCCESS) {
-        return size;
+    if (FlashProgram((uint8_t*) memory_buffer, memory_offset, size) != FAPI_STATUS_SUCCESS) {
+        return -1;
     }
-    return -1;
+    return size;
 }
 
 pull_error memory_close_impl(mem_object_t* ctx) {

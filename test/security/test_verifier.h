@@ -77,7 +77,7 @@ void test_sign_invalid_hash_size(void) {
 }
 
 void test_verify_object_valid(void) {
-    pull_error err = verify_object(&obj_1, df, vendor_x_g, vendor_y_g, ef, buffer, BUFFER_LEN);
+    pull_error err = verify_object(&obj_a, df, vendor_x_g, vendor_y_g, ef, buffer, BUFFER_LEN);
     TEST_ASSERT_TRUE_MESSAGE(err == PULL_SUCCESS, err_as_str(err));
 }
 
@@ -91,25 +91,25 @@ void test_verify_object_invalid_read(void) {
     memory_mock.memory_read_impl = memory_read_invalid;
 
     pull_error err;
-    err = verify_object(&obj_1, df, vendor_x_g, vendor_y_g, ef, buffer, BUFFER_LEN);
+    err = verify_object(&obj_a, df, vendor_x_g, vendor_y_g, ef, buffer, BUFFER_LEN);
     TEST_ASSERT_EQUAL_MESSAGE(MEMORY_READ_ERROR, err, err_as_str(err));
 }
 
 void test_verify_object_invalid_digest_init(void) {
     pull_error err;
     df.init = invalid_init;
-    err = verify_object(&obj_1, df, vendor_x_g, vendor_y_g, ef, buffer, BUFFER_LEN);
+    err = verify_object(&obj_a, df, vendor_x_g, vendor_y_g, ef, buffer, BUFFER_LEN);
     TEST_ASSERT_TRUE_MESSAGE(err == DIGEST_INIT_ERROR, err_as_str(err));
 }
 
 void test_verify_object_invalid_digest_update(void) {
     pull_error err;
     df.update = invalid_update;
-    err = verify_object(&obj_1, df, vendor_x_g, vendor_y_g, ef, buffer, BUFFER_LEN);
+    err = verify_object(&obj_a, df, vendor_x_g, vendor_y_g, ef, buffer, BUFFER_LEN);
     TEST_ASSERT_TRUE_MESSAGE(err, err_as_str(err));
 }
 
 void test_verify_object_invalid_key(void) {
-    pull_error err = verify_object(&obj_1, df, vendor_y_g, vendor_y_g, ef, buffer, BUFFER_LEN);
+    pull_error err = verify_object(&obj_a, df, vendor_y_g, vendor_y_g, ef, buffer, BUFFER_LEN);
     TEST_ASSERT_TRUE_MESSAGE(err, err_as_str(err));
 }

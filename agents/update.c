@@ -31,6 +31,9 @@ agent_msg_t update_agent(update_agent_config* cfg, update_agent_ctx_t* ctx) {
             continue;
         }
         PULL_CONTINUE(EVENT_CHECKING_UPDATES_SEND, &(ctx->stxp));
+        if (!ctx->sctx.has_updates) {
+            PULL_CONTINUE(EVENT_CHECKING_UPDATES_TIMEOUT, NULL);
+        }
     }
     log_info("An update is available\n");
 
@@ -71,12 +74,12 @@ agent_msg_t update_agent(update_agent_config* cfg, update_agent_ctx_t* ctx) {
     PULL_CONTINUE(EVENT_RECEIVE, NULL);
     while (!ctx->rctx.firmware_received) {
         ctx->err = receiver_chunk(&ctx->rctx);
+        PULL_CONTINUE(EVENT_RECEIVE_SEND, &(ctx->rtxp));
         if (ctx->err) {
             log_error(ctx->err, "Error receiving chunk\n");
             PULL_CONTINUE(EVENT_RECEIVE_RECOVER, &ctx->err);
             continue;
         }
-        PULL_CONTINUE(EVENT_RECEIVE_SEND, &(ctx->rtxp));
     }
     txp_end(&ctx->rtxp);
     ctx->err = receiver_close(&ctx->rctx); // Check this ctx->error

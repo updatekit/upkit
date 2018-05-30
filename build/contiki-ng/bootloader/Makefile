@@ -9,7 +9,7 @@ all: ota
 # 				Configurable Parameters             #
 #####################################################
 # Accepted values: 0 1 2 3 4
-LOGGER_VERBOSITY ?= 0
+LOGGER_VERBOSITY ?= 4
 # Accepted values: NULL, TINYDTLS, CRYPTOAUTHLIB, TINYCRYPT
 SEC_LIB ?= TINYDTLS
 #####################################################
@@ -27,15 +27,16 @@ LIBPULL_INCLUDES = -I$(ROOTDIR)/include
 CFLAGS += -DSIMPLE_MANIFEST -DLOGGER_VERBOSITY=$(LOGGER_VERBOSITY)
 
 # Include libpull sources
-PROJECTDIRS = $(LIBPULL)
-PROJECT_SOURCEFILES = $(LIBPULL_SOURCEFILES)
+PROJECTDIRS = $(LIBPULL) $(ROOTDIR)/agents
+PROJECT_SOURCEFILES = $(LIBPULL_SOURCEFILES) bootloader_agent.c
 CFLAGS += $(LIBPULL_INCLUDES)
 
 # Contiki-NG Size optimizations
 SMALL = 1
 MAKE_MAC = MAKE_MAC_NULLMAC
 MAKE_NET = MAKE_NET_NULLNET
-CFLAGS += -DDISABLE_RADIO=1 -DDISABLE_ALL_OUTPUT=1
+
+CFLAGS += -DDISABLE_ALL_OUTPUT=1
 
 # Security Configurations
 ext= ../ext
@@ -91,7 +92,7 @@ LINKER_DEFINES=-DOTA_OFFSET=$(OTA_OFFSET) -DOTA_LENGTH=$(OTA_LENGTH)
 
 # The bootloader_ctx must be compiled for x86, so use direcly gcc
 ctx:
-	gcc -Wall bootloader_ctx.c -o bootloader_ctx
+	gcc -Wall bootloader_ctx.c -I$(ROOTDIR)/include -o bootloader_ctx
 	./bootloader_ctx bootloader_ctx.bin && echo "Bootloader ctx generated"
 
 ota:

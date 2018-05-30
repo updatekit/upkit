@@ -18,12 +18,12 @@ typedef struct mem_object_t {
 
 enum memory_objects_enum {
     OBJ_FIRST = 0,
-    BOOTLOADER_CTX,
-    OBJ_GOLD,
-    OBJ_RUN,
-    OBJ_1,
-    OBJ_2,
-    OBJ_LAST
+    BOOTLOADER_CTX, // 1
+    OBJ_GOLD,       // 2
+    OBJ_RUN,        // 3
+    OBJ_1,          // 4
+    OBJ_2,          // 5
+    OBJ_LAST        // 6
 };
 
 pull_error memory_open_impl(mem_object_t* ctx, mem_id_t id, mem_mode_t mode);

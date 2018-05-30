@@ -20,7 +20,7 @@ firmware_tool: libpull.a
 	$(MAKE) -C utils/firmware_tool
 
 run_server: server assets
-	./utils/server/server -f assets/fake_firmware_dead
+	./utils/server/server -f assets/slot_d.bin
 
 server: libpull.a
 	$(MAKE) -C utils/server

@@ -13,17 +13,19 @@ struct mem_object_t {
 
 enum memory_objects_enum {
     OBJ_FIRST = 0,
-    OBJ_GOLD = 1,
-    OBJ_RUN = 2,
-    OBJ_1 = 3,
-    OBJ_2 = 4,
+    BOOTLOADER_CTX,
+    OBJ_GOLD,
+    OBJ_A,
+    OBJ_B,
+    OBJ_C,
     /// Other files used for testing
-    TEST_MEMORY_FILE = 5,
-    OBJ_LAST = 6
+    TEST_MEMORY_FILE,
+    OBJ_LAST
 };
 
 /******* Testing functions *******/
-void override_memory_object(mem_id_t id, char* path, int start, int end);
+void copy_asset(char* src, char* dest);
+void restore_assets();
 /***** End Testing functions *****/
 
 #endif /* MEMORY_FILE_POSIX_H_ */

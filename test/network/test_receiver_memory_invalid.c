@@ -3,12 +3,7 @@
 #include <libpull/memory/memory_objects.h>
 #include <libpull/memory/manifest.h>
 
-#include "mock_memory.h"
-#include "memory_posix.h"
-#include "transport_libcoap.h"
-
-#include "sample_data.h"
-#include "unity.h"
+#include "support/support.h"
 
 #define PROV_SERVER "localhost"
 
@@ -23,7 +18,7 @@ void tearDown(void) {
     manifest_t invalid_mt;
     bzero(&invalid_mt, sizeof(manifest_t));
     mem_object obj_t;
-    pull_error err = write_firmware_manifest(OBJ_2, &invalid_mt, &obj_t);
+    pull_error err = write_firmware_manifest(OBJ_A, &invalid_mt, &obj_t);
     TEST_ASSERT_TRUE(!err);
 }
 
@@ -37,7 +32,7 @@ void test_get_firmware_invalid_memory_write(void) {
     pull_error err = txp_init(&txp, PROV_SERVER, 0, CONN_UDP, NULL);
     TEST_ASSERT_TRUE(!err);
     mem_object obj_t;
-    err = receiver_open(&rcv, &txp, "firmware", OBJ_2, &obj_t);
+    err = receiver_open(&rcv, &txp, "firmware", OBJ_A, &obj_t);
     TEST_ASSERT_TRUE(!err);
     while (!rcv.firmware_received && !err) {
         err = receiver_chunk(&rcv);
