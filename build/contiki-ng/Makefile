@@ -1,41 +1,30 @@
-# Makefile to build the OTA image
-include Makefile.conf
-
-BOARDDIR = target/$(TARGET)/$(BOARD)
-
-CONTIKI_PROJECT=runner
-all: ota
-
 #####################################################
 #               Configurable Parameters             #
 #####################################################
 # Accepted values: 0 1 2 3 4
-LOGGER_VERBOSITY ?= 4
+LOGGER_VERBOSITY ?= 3
 # Accepted values: NULL, TINYDTLS, CRYPTOAUTHLIB, TINYCRYPT
 SEC_LIB ?= TINYDTLS
-# Accepted values: CONN_UDP, CONN_DTLS_PSK, CONN_DTLS_ECDSA
+# Accepted values: CONN_UDP, CONN_DTLS_PSK
 CONN_TYPE ?= CONN_UDP
 #####################################################
 #              End Configurable Parameters          #
 #####################################################
+include Makefile.conf
 
-WERROR=0
+CONTIKI_PROJECT=runner
+all: ota
+
+WERROR = 0
 
 # Contiki Size optimizations
 SMALL = 1
 
-# Include libpull sources
+# Define dirs
 ROOTDIR=../..
-LIBPULL += $(ROOTDIR)/src/network $(ROOTDIR)/src/common $(ROOTDIR)/src/memory 
-LIBPULL += $(ROOTDIR)/src/security connection $(ROOTDIR)/agents $(BOARDDIR)
-LIBPULL_SOURCEFILES = $(notdir $(shell find $(LIBPULL) -maxdepth 1 \( -name '*.c' ! -name 'linker_script.c' \) ))
-LIBPULL_INCLUDES = -I$(ROOTDIR)/include -Iconnection
-CFLAGS += -DSIMPLE_MANIFEST -DLOGGER_VERBOSITY=$(LOGGER_VERBOSITY)
+BOARDDIR = target/$(TARGET)/$(BOARD)
 
-# Add libpull to the build
-PROJECTDIRS += $(LIBPULL)
-PROJECT_SOURCEFILES += $(LIBPULL_SOURCEFILES)
-CFLAGS += $(LIBPULL_INCLUDES)
+include Makefile.libpull
 
 # Add the update process
 PROJECT_SOURCEFILES += update_process.c
@@ -45,7 +34,7 @@ EXT=ext
 ifeq ($(SEC_LIB), TINYDTLS)
 	ifneq ($(CONN_TYPE),CONN_DTLS_PSK)
 		PROJECTDIRS += ext/tinydtls ext/tinydtls/aes ext/tinydtls/sha2 ext/tinydtls/ecc
-		PROJECT_SOURCEFILES += dtls.c crypto.c hmac.c rijndael.c sha2.c
+		PROJECT_SOURCEFILES += dtls.c tinydtls_crypto.c hmac.c rijndael.c sha2.c
 		PROJECT_SOURCEFILES += ccm.c netq.c dtls_time.c peer.c session.c ecc.c
 		CFLAGS += -Iext/tinydtls -Iext/tinydtls/aes -Iext/tinydtls/sha2 -Iext/tinydtls/ecc
 		CFLAGS += -DDTLS_CONF_ECC=1 -DWITH_SHA256 -DSHA2_USE_INTTYPES_H

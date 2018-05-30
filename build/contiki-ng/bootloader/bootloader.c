@@ -1,19 +1,14 @@
+#include <libpull_agents/bootloader_agent.h>
+#include "contiki.h"
+#include "contiki-lib.h"
+#include "dev/watchdog.h"
+#include "platform_headers.h"
+#include "../default_configs.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <stdint.h>
-
-#include "contiki.h"
-#include "contiki-lib.h"
-
-#include "driverlib/flash.h"
-#include "driverlib/vims.h"
-#include "dev/watchdog.h"
-
-#include <libpull_agents/bootloader_agent.h>
-
-#include "platform_headers.h"
-#include "../default_configs.h"
 
 #define BUFFER_SIZE PAGE_SIZE // Defined in Makefile.conf
 
@@ -33,13 +28,6 @@ void specialize_crypto_functions() {
     df = tinycrypt_digest_sha256;
     ef = tinycrypt_secp256r1_ecc;
 #endif
-}
-
-void flash_write_protect() {
-    uint32_t page = 0;
-    for (page=BOOTLOADER_START_PAGE; page<=IMAGE_END_PAGE; page++) {
-        FlashProtectionSet(page, FLASH_WRITE_PROTECT);
-    }
 }
 
 static agent_msg_t agent_msg;

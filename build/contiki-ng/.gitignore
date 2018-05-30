@@ -3,3 +3,12 @@ runner
 bootloader/bootloader_ctx
 firmware
 linker_script.ld
+
+# Zoul Target
+*.o
+*~
+*.d
+*.a
+obj_zoul
+*.zoul
+*.ld
