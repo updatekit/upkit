@@ -35,8 +35,7 @@
  */
 MEMORY
 {
-    FLASH_FW (rx) : ORIGIN = FLASH_FW_ADDR, LENGTH = FLASH_FW_SIZE
-    // FLASH_FW (rx) : ORIGIN = (OTA_OFFSET), LENGTH = (OTA_LENGTH)
+    FLASH_FW (rx) : ORIGIN = (OTA_OFFSET), LENGTH = (OTA_LENGTH)
     FLASH_CCA (RX) : ORIGIN = FLASH_CCA_ADDR, LENGTH = FLASH_CCA_SIZE
 
     /*
@@ -97,11 +96,18 @@ SECTIONS
         _ebss = .;
     } > FRSRAM
 
+    _end = .;  /* End of the .bss segment. */
+
+    /* This symbol is used by the stack check library. */
+    _stack = .;
+
     .stack (NOLOAD) :
     {
         *(.stack)
     } > FRSRAM
 
+    /* This symbol is used by the stack check library. */
+    _stack_origin = .;
     _heap = .;
     _eheap = ORIGIN(FRSRAM) + LENGTH(FRSRAM);
 
