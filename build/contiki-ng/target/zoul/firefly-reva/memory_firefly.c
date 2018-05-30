@@ -79,6 +79,8 @@ pull_error memory_flush_impl(mem_object_t* ctx) {
 }
 
 int memory_write_impl(mem_object_t* ctx, const void* memory_buffer, size_t size, address_t offset) {
+    printf("Input: size: %d, offset %d\n", size, offset);
+    printf("Calling function with offset: %x and size %d\n", ctx->start_offset+offset, size);
     // Using cc2538 ROM functions to interact with the flash
     // http://www.ti.com/lit/ug/swru333a/swru333a.pdf
     INTERRUPTS_DISABLE();
@@ -88,7 +90,7 @@ int memory_write_impl(mem_object_t* ctx, const void* memory_buffer, size_t size,
         log_error(MEMORY_WRITE_ERROR, "Error writing into flash\n");
         return -1;
     }
-    return ret;
+    return size;
 }
 
 pull_error memory_close_impl(mem_object_t* ctx) {
