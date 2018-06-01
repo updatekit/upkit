@@ -17,6 +17,12 @@ uint8_t buffer[BUFFER_SIZE];
 static digest_func df;
 static ecc_func_t ef;
 
+#if  WITH_TINYCRYPT
+int default_CSPRNG(uint8_t *dest, unsigned int size) {
+    return 0;
+}
+#endif
+
 void specialize_crypto_functions() {
 #if WITH_CRYPTOAUTHLIB
     df = cryptoauthlib_digest_sha256;
@@ -30,12 +36,15 @@ void specialize_crypto_functions() {
 #endif
 }
 
+PROCESS(bootloader, "bootloader process");
+AUTOSTART_PROCESSES(&bootloader);
+
 static agent_msg_t agent_msg;
 
-void pull_bootloader() {
+PROCESS_THREAD(bootloader, ev, data) {
+    PROCESS_BEGIN();
     bootloader_agent_config cfg = {
         .bootloader_ctx_id = BOOTLOADER_CTX,
-        .recovery_id = OBJ_GOLD,
     };
     specialize_crypto_functions();
     bootloader_agent_vendor_keys(&cfg, x, y);
@@ -43,29 +52,30 @@ void pull_bootloader() {
     bootloader_agent_ecc_func(&cfg, ef);
     bootloader_agent_set_buffer(&cfg, buffer, BUFFER_SIZE);
 
+    log_debug("Bootloader started\n");
     while(1) {
         agent_msg = bootloader_agent(&cfg);
         if (IS_FAILURE(agent_msg)) {
             log_debug("Bootloader error: %s\n", err_as_str(GET_ERROR(agent_msg)));
-            continue;
+            break;
         } else if (IS_CONTINUE(agent_msg)) {
             if (agent_msg.event == EVENT_VALIDATE_NON_BOOTABLE_START) {
-                watchdog_stop();
+                WATCHDOG_STOP();
             } else if (agent_msg.event == EVENT_VALIDATE_NON_BOOTABLE_STOP) {
-                watchdog_start();
+                WATCHDOG_START();
             } else if (agent_msg.event == EVENT_VALIDATE_BOOTABLE_START) {
-                watchdog_stop();
+                WATCHDOG_STOP();
             } else if (agent_msg.event == EVENT_VALIDATE_BOOTABLE_STOP) {
-                watchdog_start();
+                WATCHDOG_START();
             } else if (agent_msg.event == EVENT_UPGRADE_COPY_START) {
-                watchdog_stop();
+                WATCHDOG_STOP();
             } else if (agent_msg.event == EVENT_UPGRADE_COPY_STOP) {
-                watchdog_start();
+                WATCHDOG_START();
 #if RECOVERY_IMAGE
             } else if (agent_msg.event == EVENT_STORE_RECOVERY_COPY_START) {
-                watchdog_stop();
+                WATCHDOG_STOP();
             } else if (agent_msg.event == EVENT_STORE_RECOVERY_COPY_STOP) {
-                watchdog_start();
+                WATCHDOG_START();
 #endif
             } else if (agent_msg.event == EVENT_BOOT) {
                 load_object(*((mem_id_t*) agent_msg.event_data));
@@ -73,6 +83,7 @@ void pull_bootloader() {
             }
             continue;
         }
-        // XXX I still need to match the fatal errors
+        // XXX I still need to manage the fatal errors
     }
+    PROCESS_END();
 }
