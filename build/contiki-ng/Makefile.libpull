@@ -1,7 +1,0 @@
-# Include libpull sources
-LIBPULLDIRS += $(ROOTDIR)/src/network $(ROOTDIR)/src/common $(ROOTDIR)/src/memory
-LIBPULLDIRS += $(ROOTDIR)/src/security connection $(ROOTDIR)/agents $(BOARDDIR)
-PROJECT_SOURCEFILES = $(notdir $(shell find $(LIBPULLDIRS) -maxdepth 1 \( -name '*.c' ! -name 'linker_script.c' \) ))
-PROJECTDIRS += $(LIBPULLDIRS)
-CFLAGS = -I$(ROOTDIR)/include -Iconnection
-CFLAGS += -DSIMPLE_MANIFEST -DLOGGER_VERBOSITY=$(LOGGER_VERBOSITY)
