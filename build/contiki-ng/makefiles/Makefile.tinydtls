@@ -1,0 +1,16 @@
+# Add Tinydtls sources
+#
+PROJECTDIRS += $(ext)/tinydtls $(ext)/tinydtls/aes $(ext)/tinydtls/sha2 $(ext)/tinydtls/ecc
+PROJECT_SOURCEFILES += dtls.c crypto.c hmac.c rijndael.c sha2.c
+PROJECT_SOURCEFILES += ccm.c netq.c dtls_time.c peer.c session.c ecc.c
+CFLAGS += -I$(ext)/tinydtls -I$(ext)/tinydtls/aes -I$(ext)/tinydtls/sha2 -I$(ext)/tinydtls/ecc
+ifeq ($(DTLS_DEBUG),1)
+	TINYDTLS_SOURCEFILES += dtls_debug.c
+else
+	CFLAGS += -DNDEBUG=1
+endif
+# Tinydtls configurations
+CFLAGS += -DDTLS_CONF_ECC=1
+CFLAGS += -DWITH_SHA256 -DSHA2_USE_INTTYPES_H
+
+CFLAGS += -DWITH_TINYDTLS=1

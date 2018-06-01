@@ -29,6 +29,12 @@ static struct etimer et;
 
 static int8_t retries = 3;
 
+#if  WITH_TINYCRYPT
+int default_CSPRNG(uint8_t *dest, unsigned int size) {
+    return 0;
+}
+#endif
+
 void verify_before() {
 #ifdef WITH_CRYPTOAUTHLIB
     ATCA_STATUS status = atcab_init(&cfg_ateccx08a_i2c_default);
