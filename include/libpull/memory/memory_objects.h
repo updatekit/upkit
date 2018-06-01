@@ -64,6 +64,32 @@ pull_error get_oldest_firmware(mem_id_t *obj, version_t *version, mem_object_t *
  */
 pull_error copy_firmware(mem_object_t *src, mem_object_t *dst, uint8_t* buffer, size_t buffer_size);
 
+
+/**
+ * \brief Swap two slots using a swap memory_object.
+ *
+ * This function swaps two slots using a memory objects with id SWAP
+ * \param obj1 The fist memory object
+ * \param obj2 The second memory object
+ * \param obj_swap The memory object used for swapping
+ * \param swap_size The size of the swapping memory object
+ * \param buffer Buffer used to copy the object
+ * \param buffer_size The size of the buffer
+ * 
+ * \note The buffer will be used to read from object s and to write
+ * to obejct d. If you are working with flash and your memory implementation
+ * is not buffered you can pass a buffer with size equal to the size of a flash
+ * page.
+ *
+ * This functions assumes that the size of the SWAP memory object is
+ * is at least as big as the buffer_size and that the swap size is a multiple
+ * of the buffer size, such that swap_size % buffer_size == 0
+ *
+ * \returns PULL_SUCCESS on success or a specific error otherwise.
+ */
+pull_error swap_slots(mem_object_t* obj1, mem_object_t* obj2, mem_object_t* obj_swap,
+                         size_t swap_size, uint8_t* buffer, size_t buffer_size);
+
 /**
  * \brief Read the manifest of the memory object.
  *

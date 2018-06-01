@@ -11,7 +11,8 @@
     DO(get_oldest_slot, 0) \
     DO(read_slot_manifest, 0) \
     DO(write_slot_manifest, 0) \
-    DO(copy_firmware, 0)
+    DO(copy_firmware, 0) \
+    DO(swap_firmware, 0)
 
 TEST_RUNNER();
 
@@ -24,13 +25,16 @@ mem_object_t obj_d;
 mem_object_t obj_t; // This is a temporary object used by the functions
 
 void setUp(void) {
+    restore_assets();
     TEST_ASSERT(memory_open(&obj_a, OBJ_A, WRITE_ALL) == PULL_SUCCESS);
     TEST_ASSERT(memory_open(&obj_b, OBJ_B, WRITE_ALL) == PULL_SUCCESS);
+    TEST_ASSERT(memory_open(&obj_c, OBJ_C, WRITE_ALL) == PULL_SUCCESS);
 }
 
 void tearDown(void) {
     TEST_ASSERT(memory_close(&obj_a) == PULL_SUCCESS);
     TEST_ASSERT(memory_close(&obj_b) == PULL_SUCCESS);
+    TEST_ASSERT(memory_close(&obj_c) == PULL_SUCCESS);
 }
 
 void test_get_newest_firmware(void) {
@@ -81,4 +85,13 @@ void test_copy_firmware(void) {
 	TEST_ASSERT_TRUE_MESSAGE(!err, err_as_str(err));
 	TEST_ASSERT_TRUE(file_compare("../assets/slot_a.bin", 
     				"../assets/slot_b.bin") == 0);
+}
+
+void test_swap_firmware(void) {
+    uint8_t buffer[BUFFER_SIZE];
+    pull_error err = swap_slots(&obj_a, &obj_b, &obj_c, BUFFER_SIZE*4, buffer, BUFFER_SIZE); 
+    TEST_ASSERT_TRUE_MESSAGE(!err, err_as_str(err));
+    TEST_ASSERT_TRUE(file_compare("../assets/slot_a.bin", "../assets/slot_b.pristine") == 0);
+    TEST_ASSERT_TRUE(file_compare("../assets/slot_b.bin", "../assets/slot_a.pristine") == 0);
+    restore_assets();
 }
