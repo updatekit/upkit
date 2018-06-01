@@ -102,7 +102,8 @@ agent_msg_t bootloader_agent(bootloader_agent_config* cfg) {
     if (err) {
         PULL_CONTINUE(EVENT_GET_NEWEST_NON_BOOTABLE_FAILURE, &err);
     }
-    log_debug("bootable %x - non bootable %x\n", version_bootable, version_non_bootable);
+    log_debug("id: bootable %d - non bootable %d\n", id_newest_bootable, id_newest_non_bootable);
+    log_debug("version: bootable %x - non bootable %x\n", version_bootable, version_non_bootable);
     // (4) Compare them and upgrade if necessary
     if (version_bootable < version_non_bootable) {
         // (4.1) Validate the newest non bootable slot
