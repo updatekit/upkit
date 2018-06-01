@@ -5,17 +5,20 @@
 
 #include "contiki.h"
 #include "contiki-lib.h"
+#include "cpu.h"
+#include "dev/cc2538-dev.h"
+#include "dev/nvic.h"
 
-#define OTA_RESET_VECTOR    0x4
+#define RESET_VECTOR    0x4
 
-// Defined in Makefile.conf
-#define IMAGE_START_OFFSET IMAGE_START_PAGE*PAGE_SIZE
+typedef void (*load_addr_t)(void);
 
 void load_object(mem_id_t id) {
     mem_object_t obj;
     manifest_t mt;
     pull_error err;
 
+    // Get image offset
     err = memory_open(&obj, id, READ_ONLY);
     if (err) {
         log_error(err, "Error opening the memory slot, aborting boot\n");
@@ -27,18 +30,20 @@ void load_object(mem_id_t id) {
         return;
     }
     memory_close(&obj);
-    /* 
 
-    uint32_t destination_address = IMAGE_START_OFFSET+get_offset(&mt);
+    uint32_t destination_address = get_start_offset(id)+get_offset(&mt);
     log_debug("loading address %lx\n", destination_address);
 
-    ti_lib_int_master_disable();
-    HWREG(NVIC_VTABLE) = destination_address;
+    INTERRUPTS_DISABLE();
 
-    destination_address += OTA_RESET_VECTOR;
+    // Update vector table address
+    SCB->VTOR = destination_address;
 
-    __asm("LDR R0, [%[dest]]"::[dest]"r"(destination_address));
-    __asm("ORR R0, #1");
-    __asm("BX R0");
-    */
+    // Update stack
+    uint32_t stack = *(uint32_t *)(destination_address);
+    __set_MSP(stack);
+
+    // Jump to address
+    load_addr_t load_addr = (load_addr_t)(*(uint32_t *)(destination_address + RESET_VECTOR));
+    load_addr();
 }

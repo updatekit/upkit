@@ -36,7 +36,9 @@
 MEMORY
 {
     FLASH_FW (rx) : ORIGIN = (OTA_OFFSET), LENGTH = (OTA_LENGTH)
+#ifndef CCFG_DISABLE
     FLASH_CCA (RX) : ORIGIN = FLASH_CCA_ADDR, LENGTH = FLASH_CCA_SIZE
+#endif
 
     /*
      * If PM2 is enabled, then the PM2 SRAM limitations apply, i.e. the
@@ -57,7 +59,6 @@ MEMORY
     FRSRAM (RWX) : ORIGIN = CC2538_DEV_SRAM_ADDR, LENGTH = CC2538_DEV_SRAM_SIZE
 #endif
 }
-
 ENTRY(flash_cca_lock_page)
 SECTIONS
 {
@@ -117,9 +118,15 @@ SECTIONS
         *(.nrdata*)
         _enrdata = .;
     } > NRSRAM
-
+#ifndef CCFG_DISABLE
     .flashcca :
     {
         *(.flashcca)
     } > FLASH_CCA
+#else
+    /DISCARD/ :
+    {
+        *(.flashcca)
+    }
+#endif
 }

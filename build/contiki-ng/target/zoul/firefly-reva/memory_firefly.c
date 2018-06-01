@@ -21,24 +21,20 @@ const mem_slot_t memory_slots[] = {
     {OBJ_END}
 };
 
-#define PAGE_SIZE 2048 // 2048 according to 2538 datasheet
-//#define INITIAL_OFFSET 0x200000
-#define INITIAL_OFFSET CC2538_DEV_FLASH_ADDR
-#define BOOTLOADER_PAGES 0 // 19
-#define BOOTLOADER_CTX_PAGES 0 // 1
-#define IMAGE_PAGES 64
+#define BOOTLOADER_SIZE (BOOTLOADER_END_PAGE-BOOTLOADER_START_PAGE)*PAGE_SIZE
+#define IMAGE_SIZE (IMAGE_END_PAGE-IMAGE_START_PAGE)*PAGE_SIZE
 
-int memory_object_start[] = {
-    [BOOTLOADER] = INITIAL_OFFSET,
-    [BOOTLOADER_CTX] = INITIAL_OFFSET + (BOOTLOADER_PAGES * PAGE_SIZE),
-    [OBJ_1] = INITIAL_OFFSET + BOOTLOADER_PAGES*PAGE_SIZE + BOOTLOADER_CTX_PAGES*PAGE_SIZE,
-    [OBJ_2] = INITIAL_OFFSET + BOOTLOADER_PAGES*PAGE_SIZE + BOOTLOADER_CTX_PAGES*PAGE_SIZE + IMAGE_PAGES*PAGE_SIZE
+uint32_t memory_object_start[] = {
+    [BOOTLOADER] = INITIAL_MEMORY_OFFSET,
+    [BOOTLOADER_CTX] = INITIAL_MEMORY_OFFSET + BOOTLOADER_CTX_START_OFFSET,
+    [OBJ_1] = INITIAL_MEMORY_OFFSET + BOOTLOADER_SIZE,
+    [OBJ_2] = INITIAL_MEMORY_OFFSET + BOOTLOADER_SIZE + IMAGE_SIZE
 };
-int memory_object_end[] = {
-    [BOOTLOADER] = INITIAL_OFFSET + BOOTLOADER_PAGES*PAGE_SIZE,
-    [BOOTLOADER_CTX] = INITIAL_OFFSET + BOOTLOADER_PAGES*PAGE_SIZE + BOOTLOADER_CTX_PAGES*PAGE_SIZE,
-    [OBJ_1] = INITIAL_OFFSET + BOOTLOADER_PAGES*PAGE_SIZE + BOOTLOADER_CTX_PAGES*PAGE_SIZE + IMAGE_PAGES*PAGE_SIZE,
-    [OBJ_2] = INITIAL_OFFSET + BOOTLOADER_PAGES*PAGE_SIZE + BOOTLOADER_CTX_PAGES*PAGE_SIZE + 2*IMAGE_PAGES*PAGE_SIZE
+uint32_t memory_object_end[] = {
+    [BOOTLOADER] = INITIAL_MEMORY_OFFSET + BOOTLOADER_SIZE,
+    [BOOTLOADER_CTX] = INITIAL_MEMORY_OFFSET + BOOTLOADER_CTX_END_OFFSET,
+    [OBJ_1] = INITIAL_MEMORY_OFFSET + BOOTLOADER_SIZE + IMAGE_SIZE,
+    [OBJ_2] = INITIAL_MEMORY_OFFSET + BOOTLOADER_SIZE + 2*IMAGE_SIZE
 };
 
 uint32_t get_start_offset(mem_id_t id) {
@@ -66,7 +62,7 @@ pull_error memory_open_impl(mem_object_t* ctx, mem_id_t obj, mem_mode_t mode) {
 }
 
 int memory_read_impl(mem_object_t* ctx, void* memory_buffer, size_t size, address_t offset) {
-    uint32_t* address = (uint32_t*) ctx->start_offset+offset;
+    uint32_t* address = (uint32_t*) ((uint32_t)(ctx->start_offset+offset));
     if (memcpy(memory_buffer, address, size) != memory_buffer) {
         log_error(MEMORY_READ_ERROR, "Error reading internal memory\n");
         return -1;
@@ -79,8 +75,6 @@ pull_error memory_flush_impl(mem_object_t* ctx) {
 }
 
 int memory_write_impl(mem_object_t* ctx, const void* memory_buffer, size_t size, address_t offset) {
-    printf("Input: size: %d, offset %d\n", size, offset);
-    printf("Calling function with offset: %x and size %d\n", ctx->start_offset+offset, size);
     // Using cc2538 ROM functions to interact with the flash
     // http://www.ti.com/lit/ug/swru333a/swru333a.pdf
     INTERRUPTS_DISABLE();
