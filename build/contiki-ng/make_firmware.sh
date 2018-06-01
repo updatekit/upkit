@@ -14,7 +14,7 @@ FIRMWARE_TOOL="$FIRMWARE_TOOL_DIR/firmware_tool"
 FIRMWARE_DIR="$ROOTDIR/firmware"
 
 # Configurations
-BOOTLOADER="$ROOTDIR/bootloader/bootloader.hex"
+BOOTLOADER="$ROOTDIR/bootloader/bootloader.bin"
 BOOTLOADER_CTX="$ROOTDIR/bootloader/bootloader_ctx.bin"
 MANIFEST="$FIRMWARE_DIR/manifest.bin"
 IMAGE="$ROOTDIR/runner.bin"
@@ -69,14 +69,13 @@ generate_flashable_firmware() {
     let BOOTLOADER_END_OFFSET=$BOOTLOADER_END_PAGE*$PAGE_SIZE
     let IMAGE_START_OFFSET=$IMAGE_START_PAGE*$PAGE_SIZE
     let IMAGE_END_OFFSET=$IMAGE_END_PAGE*$PAGE_SIZE
-    cmd="srec_cat $BOOTLOADER -intel -crop \
+    cmd="srec_cat $BOOTLOADER -binary -crop \
                         $BOOTLOADER_START_OFFSET $BOOTLOADER_END_OFFSET \
                         $CCFG_START_OFFSET $CCFG_END_OFFSET \
                 $FIRMWARE -binary -offset $IMAGE_START_OFFSET -crop \
-                        $IMAGE_START_OFFSET $IMAGE_END_OFFSET \
+                        $IMAGE_START_OFFSET $IMAGE_END_OFFSET
                 $BOOTLOADER_CTX -binary -offset $BOOTLOADER_CTX_START_OFFSET -crop \
                         $BOOTLOADER_CTX_START_OFFSET $BOOTLOADER_CTX_END_OFFSET"
-
     $cmd -o firmware.hex -intel
     $cmd -o firmware.bin -binary
     echo "Adding the bootloader to the firmware...done"
