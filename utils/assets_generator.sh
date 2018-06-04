@@ -37,7 +37,7 @@ versions="a b c d"
 for v in $versions; do
     slot="$slot_prefix$v"
     # Creating slot of size 0x14000
-    dd if=/dev/zero bs=4096 count=20 > $slot.tmp
+    yes $v | awk '{ printf("%s", $0)}' | dd bs=4096 count=20 > $slot.tmp
     $FIRMWAREDIR/firmware_tool manifest generate -y $FIRMWAREDIR/config.toml -vv \
         -p $FIRMWAREDIR/keys/vendor.priv -c $FIRMWAREDIR/keys/vendor.pub \
         -k $FIRMWAREDIR/keys/server.priv -m $FIRMWAREDIR/keys/server.pub \

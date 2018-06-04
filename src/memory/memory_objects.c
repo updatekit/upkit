@@ -91,6 +91,84 @@ pull_error copy_firmware(mem_object_t* src, mem_object_t* dst, uint8_t* buffer, 
     return PULL_SUCCESS;
 }
 
+static pull_error swap_chunk(mem_object_t* src, mem_object_t* dst, address_t offset, address_t swap_size, uint8_t* buffer, size_t buffer_size, bool read_swap, bool write_swap) {
+    size_t step = buffer_size;
+    int swap_full = 0;
+    int done;
+    while (swap_full < swap_size) {
+        if (swap_full + step > swap_size) {
+            step = swap_size - swap_full;
+        }
+        done = memory_read(src, buffer, step, (read_swap)? swap_full: offset);
+        if (done != step) {
+            log_error(MEMORY_READ_ERROR, "Error reading from obj1\n");
+            return MEMORY_READ_ERROR;
+        }
+        done = memory_write(dst, buffer, step, (write_swap)? swap_full: offset);
+        if (done != step) {
+            log_error(MEMORY_WRITE_ERROR, "Error writing the swap object\n");
+            return MEMORY_WRITE_ERROR;
+        }
+        swap_full += step;
+        offset += step;
+    }
+    return PULL_SUCCESS;
+}
+
+pull_error swap_slots(mem_object_t* obj1, mem_object_t* obj2, mem_object_t* obj_swap,
+                        size_t swap_size, uint8_t* buffer, size_t buffer_size) {
+    // This function assumes that the size of the swap partition is a multiple
+    // of the buffer size
+    PULL_ASSERT(swap_size > buffer_size && swap_size % buffer_size == 0);
+    address_t size, size2;
+    manifest_t mt;
+    pull_error err;
+    // Get size1
+    err = read_firmware_manifest(obj1, &mt);
+    if (err) {
+        return err;
+    }
+    size = get_size(&mt) + get_offset(&mt);
+    // Get size2
+    err = read_firmware_manifest(obj2, &mt);
+    if (err) {
+        return err;
+    }
+    size2 = get_size(&mt) + get_offset(&mt);
+    // Compare size
+    if (size2 > size) {
+        size = size2;
+    }
+    // Start swapping object
+    int offset = 0;
+    while (offset < size) {
+        if (offset + swap_size > size) {
+            swap_size = size - offset;
+        }
+        // Read obj1 into obj_swap until you fill the swap_size
+        err = swap_chunk(obj1, obj_swap, offset, swap_size, buffer, buffer_size, false, true);
+        if (err) {
+            log_error(err, "Error reading obj1 into obj_swap\n");
+            return err;
+        }
+        // Move obj2 chunk into obj1
+        swap_chunk(obj2, obj1, offset, swap_size, buffer, buffer_size, false, false);
+        if (err) {
+            log_error(err, "Error reading obj2 into obj1\n");
+            return err;
+        }
+        // Move obj_swap chunk into obj2
+        swap_chunk(obj_swap, obj2, offset, swap_size, buffer, buffer_size, true, false);
+        if (err) {
+            log_error(err, "Error reading obj_swap into obj2\n");
+            return err;
+        }
+        // Incremente the offset
+        offset += swap_size;
+    }
+    return PULL_SUCCESS;
+}
+
 pull_error read_firmware_manifest(mem_object_t* obj, manifest_t* mt) {
     if (memory_read(obj, (uint8_t*) mt, sizeof(manifest_t), 0) != sizeof(manifest_t)) {
         log_error(MEMORY_READ_ERROR, "Failure reading object\n");
