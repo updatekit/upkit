@@ -25,7 +25,7 @@ SUPPORT_SRC = support/external_variables.c support/utils.c
 AGENTS_SRC = ../agents/update.c ../agents/bootloader_agent.c
 
 NETWORK_IMPL = ../build/posix/connection_libcoap.c ../build/posix/async_libcoap.c
-MEMORY_IMPL = ../src/memory/memory.c ../build/posix/memory_posix.c
+MEMORY_IMPL = ../src/memory/memory_impl.c ../build/posix/memory_posix.c
 MANIFEST_IMPL = ../src/memory/manifest.c ../src/memory/simple_manifest.c
 
 ALL_SRC = $(UNITY_SRC) $(COMMON_SRC) $(MEMORY_SRC) $(SECURITY_SRC) $(MANIFEST_IMPL) $(NETWORK_SRC)

@@ -63,7 +63,6 @@ void test_memory_write_sequential(void) {
 void test_memory_write_random(void) {
     TEST_ASSERT_MESSAGE(object.fp > 0, "Invadlid File pointer");
     TEST_ASSERT_EQUAL_INT(memory_write(&object, (const uint8_t*) content, SIZE, 0x0), SIZE);
-    memory_flush(&object);
     test_memory_read_sequential();
 }
 

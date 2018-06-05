@@ -1,6 +1,8 @@
 #include <libpull/memory.h>
 #include <string.h>
 
+#if MEMORY_FLASH_IMPL == 1
+
 pull_error memory_open_impl(mem_object_t* ctx, mem_id_t id, mem_mode_t mode) {
     PULL_ASSERT(ctx != NULL);
     memcpy(ctx, &flash_objects[id], sizeof(mem_object_t));
@@ -13,7 +15,7 @@ pull_error memory_open_impl(mem_object_t* ctx, mem_id_t id, mem_mode_t mode) {
     if (ctx->mode == WRITE_ALL) {
         for (offset = ctx->start; offset < ctx->end; offset += ctx->fdescr->page_size) {
             if (ctx->fdescr->rst != NULL) {
-                ctx->fdescr->rst();
+                ctx->fdrstt();
             }
             if (ctx->fdescr->erase(offset, ctx->fdescr->page_size) != 0) {
                 log_debug("Error ereasing page %lu\n", offset/ctx->fdescr->page_size);
@@ -56,4 +58,6 @@ pull_error memory_close_impl(mem_object_t* ctx) {
     }
     return PULL_SUCCESS;
 }
+
+#endif /* MEMORY_FLASH_IMPL == 1 */
 

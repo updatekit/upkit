@@ -3,6 +3,8 @@
 
 #include <libpull/common.h>
 
+#if MEMORY_FLASH_IMPL == 1
+
 // All these functions should return < 0 on error and >= 0 in case of success
 typedef int (*flash_open) (void);
 typedef int (*flash_erase) (address_t offset, size_t page_size);
@@ -32,5 +34,7 @@ typedef struct mem_object_t {
 } mem_object_t;
 
 extern mem_object_t flash_objects[];
+
+#endif /* MEMORY_FLASH_IMPL == 1 */
 
 #endif /* LIBPULL_MEMORY_FLASH_INTERFACE_H_ */
