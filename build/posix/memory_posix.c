@@ -118,11 +118,6 @@ int memory_write_impl(mem_object_t* ctx, const void* memory_buffer, size_t size,
     return write(ctx->fp, memory_buffer, size);
 }
 
-pull_error memory_flush_impl(mem_object_t* ctx) {
-    // not implemented since there is no buffer
-    return PULL_SUCCESS;
-}
-
 pull_error memory_close_impl(mem_object_t* ctx) {
     if (ctx == NULL) {
         return MEMORY_CLOSE_ERROR;

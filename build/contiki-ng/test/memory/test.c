@@ -7,9 +7,11 @@
     if (cond) { \
         printf(__VA_ARGS__); \
         goto final; \
+    } else { \
+        printf("pass: "__VA_ARGS__); \
     }
 
-#define BUFFER_SIZE 2000/sizeof(int)
+#define BUFFER_SIZE 200/sizeof(int)
 
 PROCESS(memory_test, "Test memory");
 AUTOSTART_PROCESSES(&memory_test);
