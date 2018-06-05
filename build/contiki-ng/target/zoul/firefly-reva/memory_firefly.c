@@ -24,11 +24,17 @@ const mem_slot_t memory_slots[] = {
 
 // O on success
 static int internal_flash_erase(address_t offset, size_t page_size) {
-    return rom_util_page_erase(offset, page_size);
+    INTERRUPTS_DISABLE();
+    int ret = rom_util_page_erase(offset, page_size);
+    INTERRUPTS_ENABLE();
+    return ret;
 }
 // 0 on success
 static int internal_flash_program(const uint8_t* buffer, address_t offset, size_t size) {
-    return rom_util_program_flash((uint32_t*) buffer, offset, size);
+    INTERRUPTS_DISABLE();
+    int ret = rom_util_program_flash((uint32_t*) buffer, offset, size);
+    INTERRUPTS_ENABLE();
+    return ret;
 }
 // 0 on success
 static int internal_flash_read(uint8_t* buffer, address_t offset, size_t size) {
@@ -44,7 +50,8 @@ static flash_descr_t internal_flash_descr = {
     .erase = internal_flash_erase,
     .program = internal_flash_program,
     .read = internal_flash_read,
-    .close = NULL /* not necessary */
+    .close = NULL, /* not necessary */
+    .rst = watchdog_periodic
 };
 
 // PAGE_SIZE is defined in Makefile.conf

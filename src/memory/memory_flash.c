@@ -12,6 +12,9 @@ pull_error memory_open_impl(mem_object_t* ctx, mem_id_t id, mem_mode_t mode) {
     address_t offset;
     if (ctx->mode == WRITE_ALL) {
         for (offset = ctx->start; offset < ctx->end; offset += ctx->fdescr->page_size) {
+            if (ctx->fdescr->rst != NULL) {
+                ctx->fdescr->rst();
+            }
             if (ctx->fdescr->erase(offset, ctx->fdescr->page_size) != 0) {
                 log_debug("Error ereasing page %lu\n", offset/ctx->fdescr->page_size);
                 return MEMORY_OPEN_ERROR;

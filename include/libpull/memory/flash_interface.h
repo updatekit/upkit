@@ -9,6 +9,7 @@ typedef int (*flash_erase) (address_t offset, size_t page_size);
 typedef int (*flash_program) (const uint8_t* buffer, address_t offset, size_t size);
 typedef int (*flash_read) (uint8_t* buffer, address_t offset, size_t size);
 typedef int (*flash_close) (void);
+typedef void (*watchdog_rst) (void);
 
 uint32_t get_start_offset(mem_id_t id);
 uint32_t get_end_offset(mem_id_t id);
@@ -20,6 +21,7 @@ typedef struct flash_descr_t {
     flash_program program;
     flash_read read;
     flash_close close;
+    watchdog_rst rst;
 } flash_descr_t;
 
 typedef struct mem_object_t {
