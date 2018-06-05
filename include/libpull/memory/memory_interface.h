@@ -87,20 +87,6 @@ int memory_read(mem_object_t* ctx, void* memory_buffer, size_t size, address_t o
 int memory_write(mem_object_t* ctx, const void* memory_buffer, size_t size, address_t offset);
 
 /** 
- * \brief Flush the memory object. (Not mandatory)
- * 
- * This function must not always be implemented. In fact it should be
- * implemented only if the underlying implementation includes some
- * buffered I/O. In that case could be useful to flush the buffer.
- * The flush function is not direcly used by the library but may
- * be useful in some situations.
- * \param ctx The memory object containing the buffer to be flushed.
- * \returns PULL_SUCCESS if the buffer was correcly flushed or the
- * specific error otherwise.
- */
-pull_error memory_flush(mem_object_t* ctx);
-
-/** 
  * \brief Close the memory object.
  * 
  * This should close and deallocate all the initialized resources.

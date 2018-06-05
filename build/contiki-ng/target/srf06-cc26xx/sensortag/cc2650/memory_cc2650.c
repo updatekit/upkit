@@ -29,123 +29,121 @@ const mem_slot_t memory_slots[] = {
     {OBJ_END}
 };
 
-static uint8_t external_memory_open = 0;
-
-int memory_object_mapper[] = {
-     [BOOTLOADER_CTX] = INTERNAL,
-     [OBJ_GOLD] = EXTERNAL,
-     [OBJ_RUN] = INTERNAL,
-     [OBJ_1] = EXTERNAL,
-     [OBJ_2] = EXTERNAL,
-};
-
-int memory_object_start[] = {
-     [BOOTLOADER_CTX] = BOOTLOADER_CTX_START_OFFSET, // Defined in Makefile.conf
-     [OBJ_GOLD] = 0x1A000,
-     [OBJ_RUN] = IMAGE_START_PAGE*FLASH_PAGE_SIZE, // Defined in Makefile.conf
-     [OBJ_1] = 0x34000,
-     [OBJ_2] = 0x4E000
-};
-
-int memory_object_end[] = {
-     [BOOTLOADER_CTX] = BOOTLOADER_CTX_END_OFFSET, // Defined in Makefile.conf
-     [OBJ_GOLD] = 0x34000,
-     [OBJ_RUN] = IMAGE_END_PAGE*FLASH_PAGE_SIZE, // Defined in Makefile.conf
-     [OBJ_1] = 0x4E000,
-     [OBJ_2] = 0x68000
-};
-
-pull_error memory_open_impl(mem_object_t* ctx, mem_id_t obj, mem_mode_t mode) {
-    ctx->type = memory_object_mapper[obj]; // XXX this can fail if the obj is invalid
-    ctx->start_offset = memory_object_start[obj];
-    ctx->end_offset = memory_object_end[obj];
-    PULL_ASSERT(mode > READ_ONLY && mode < WRITE_ALL);
-    PULL_ASSERT(ctx->type == EXTERNAL || ctx->type == INTERNAL);
-    ctx->mode = mode;
-    address_t offset;
-    if (ctx->type == EXTERNAL) {
-        if (external_memory_open == 0) {
-            if (ext_flash_open(NULL)) {
-                external_memory_open = 1;
-            } else {
-                log_debug("Cannot open external flash\n");
-                ext_flash_close(NULL);
-                return MEMORY_OPEN_ERROR;
-            }
-        } else {
-            external_memory_open++;
-        }
-        if (ctx->mode == WRITE_ALL) {
-            for (offset = ctx->start_offset; offset < ctx->end_offset; offset += FLASH_PAGE_SIZE) {
-                if (!ext_flash_erase(NULL, offset, FLASH_PAGE_SIZE)) {
-                    log_debug("Error ereasing page %lu\n", offset/FLASH_PAGE_SIZE);
-                    return MEMORY_OPEN_ERROR;
-                }
-            }
-            log_debug("pages erased correctly\n");
-        }
-        return PULL_SUCCESS;
-    }
-    // Internal Memory
-    if (ctx->mode == WRITE_ALL) {
-        for (offset = ctx->start_offset; offset < ctx->end_offset; offset += FLASH_PAGE_SIZE) {
-            if (FlashSectorErase(offset) != FAPI_STATUS_SUCCESS) {
-                log_debug("Error erasing page %lu\n", offset/FLASH_PAGE_SIZE);
-                return MEMORY_OPEN_ERROR;
-            }
-        }
-    }
-    return PULL_SUCCESS;
-}
-
-int memory_read_impl(mem_object_t* ctx, void* memory_buffer, address_t size, address_t offset) {
-    PULL_ASSERT(ctx->mode == READ_ONLY);
-    // TODO implement a check for the end offset
-    if (ctx->type == EXTERNAL) {
-        if (!ext_flash_read(NULL, ctx->start_offset+offset, size, memory_buffer)) {
-            log_debug("Error reading external memory\n");
-            return -1;
-        }
-        return size;
-    } else if (ctx->type == INTERNAL) {
-        uint8_t* memory_offset = (uint8_t*) (ctx->start_offset+offset);
-        if (memcpy(memory_buffer, memory_offset, size) != memory_buffer) {
-            log_debug("Error reading internal memory\n");
-            return -1;
-        }
-        return size;
-    }
-    return -1; 
-}
-
-pull_error memory_flush_impl(mem_object_t* ctx) {
-    return PULL_SUCCESS;
-}
-
-int memory_write_impl(mem_object_t* ctx, const void* memory_buffer, uint16_t size, address_t offset) {
-    PULL_ASSERT(ctx->type == EXTERNAL || ctx->type == INTERNAL);
-    if (ctx->type == EXTERNAL) {
-        if (!ext_flash_write(NULL, ctx->start_offset+offset, size, memory_buffer)) {
-            log_debug("Error writing into external flash\n");
-            return -1;
-        }
-        return size;
-    }
-    // Internal Memory
-    address_t memory_offset = ctx->start_offset+offset;
-    if (FlashProgram((uint8_t*) memory_buffer, memory_offset, size) != FAPI_STATUS_SUCCESS) {
+static int internal_flash_erase(address_t offset, size_t page_size) {
+    if (FlashSectorErase(offset) != FAPI_STATUS_SUCCESS) {
+        log_debug("Error erasing page %lu\n", offset/page_size);
         return -1;
     }
-    return size;
+    return 0;
+}
+static int internal_flash_program(const uint8_t* buffer, address_t offset, size_t size) {
+    if (FlashProgram((uint8_t*) buffer, offset, size) != FAPI_STATUS_SUCCESS) {
+        return -1;
+    }
+    return 0;
+
+}
+static int internal_flash_read(uint8_t* buffer, address_t offset, size_t size) {
+    if (memcpy(buffer, (char*) offset, size) != buffer) {
+        return -1;
+    }
+    return 0;
+}
+static flash_descr_t internal_flash_descr = {
+    .page_size = FLASH_PAGE_SIZE,
+    .open = NULL, /* not necessary */
+    .erase = internal_flash_erase,
+    .program = internal_flash_program,
+    .read = internal_flash_read,
+    .close = NULL, /* not necessary */
+    .rst = NULL, /* not necessary */
+};
+
+
+static uint8_t external_memory_open = 0;
+static int external_flash_open(void) {
+    if (external_memory_open == 0) {
+        if (ext_flash_open(NULL)) {
+            external_memory_open = 1;
+            return 0;
+        } else {
+            log_debug("Cannot open external flash\n");
+            ext_flash_close(NULL);
+            return -1;
+        }
+    }
+    external_memory_open++;
+    return 0;
 }
 
-pull_error memory_close_impl(mem_object_t* ctx) {
-    PULL_ASSERT(ctx->type == EXTERNAL || ctx->type == INTERNAL);
-    if (ctx->type == EXTERNAL) {
-        //if (--external_memory_open == 0) {
-        //ext_flash_close(NULL); //XXX I need to check how safe is to close the memory
-        //}
-        return PULL_SUCCESS;
+static int external_flash_erase(address_t offset, size_t page_size) {
+    if (!ext_flash_erase(NULL, offset, page_size)) {
+        log_debug("Error ereasing page %lu\n", offset/page_size);
+        return -1;
     }
-    return PULL_SUCCESS;
+    return 0;
 }
+static int external_flash_program(const uint8_t* buffer, address_t offset, size_t size) {
+    if (!ext_flash_write(NULL, offset, size, buffer)) {
+        log_debug("Error writing into external flash\n");
+        return -1;
+    }
+    return 0;
+}
+static int external_flash_read(uint8_t* buffer, address_t offset, size_t size) {
+    if (!ext_flash_read(NULL, offset, size, buffer)) {
+        return -1;
+    }
+    return 0;
+}
+int external_flash_close(void) {
+    if (external_memory_open == 1) {
+        ext_flash_close(NULL);
+    }
+    external_memory_open--;
+    return 0;
+}
+
+;
+
+static flash_descr_t external_flash_descr = {
+    .page_size = FLASH_PAGE_SIZE,
+    .open = external_flash_open,
+    .erase = external_flash_erase,
+    .program = external_flash_program,
+    .read = external_flash_read,
+    .close = external_flash_open,
+    .rst = NULL, /* not necessary */
+};
+
+// PAGE_SIZE is defined in Makefile.conf
+#define BOOTLOADER_SIZE (BOOTLOADER_END_PAGE-BOOTLOADER_START_PAGE)*PAGE_SIZE
+#define IMAGE_SIZE (IMAGE_END_PAGE-IMAGE_START_PAGE)*PAGE_SIZE
+
+mem_object_t flash_objects[] = {
+    [BOOTLOADER] = {
+        .start = INITIAL_MEMORY_OFFSET,
+        .end = INITIAL_MEMORY_OFFSET + BOOTLOADER_SIZE,
+        .fdescr = &internal_flash_descr
+    },
+    [BOOTLOADER_CTX] = {
+        .start = INITIAL_MEMORY_OFFSET + BOOTLOADER_CTX_START_OFFSET,
+        .end = INITIAL_MEMORY_OFFSET + BOOTLOADER_CTX_END_OFFSET,
+        .fdescr = &internal_flash_descr
+    },
+    [OBJ_RUN] = {
+        .start = INITIAL_MEMORY_OFFSET + BOOTLOADER_SIZE,
+        .end = INITIAL_MEMORY_OFFSET + BOOTLOADER_SIZE + IMAGE_SIZE,
+        .fdescr = &internal_flash_descr
+    },
+    [OBJ_1] = {
+        .start = 0x34000,
+        .end = 0x4E000,
+        .fdescr = &external_flash_descr
+    },
+    [OBJ_2] = {
+        .start = 0x4E000,
+        .end = 0x68000,
+        .fdescr = &external_flash_descr
+    }
+};
