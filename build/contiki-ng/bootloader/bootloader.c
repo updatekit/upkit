@@ -11,6 +11,7 @@
 #include <stdint.h>
 
 #define BUFFER_SIZE PAGE_SIZE // Defined in Makefile.conf
+#define SWAP_SIZE PAGE_SIZE
 
 uint8_t buffer[BUFFER_SIZE];
 
@@ -45,6 +46,8 @@ PROCESS_THREAD(bootloader, ev, data) {
     PROCESS_BEGIN();
     bootloader_agent_config cfg = {
         .bootloader_ctx_id = BOOTLOADER_CTX,
+        .swap_id = SWAP,
+        .swap_size = SWAP_SIZE
     };
     specialize_crypto_functions();
     bootloader_agent_vendor_keys(&cfg, x, y);

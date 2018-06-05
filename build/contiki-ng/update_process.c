@@ -42,14 +42,14 @@ void verify_before() {
         log_error(GENERIC_ERROR, "Failure initializing ATECC508A\n");
     }
 #endif
-    //XXX watchdog_stop();
+    WATCHDOG_STOP();
 }
 
 void verify_after() {
 #ifdef WITH_CRYPTOAUTHLIB
     atcab_release();
 #endif
-    //XXX watchdog_start(); disable until I make an interface for them
+    WATCHDOG_START();
 }
 
 PROCESS_THREAD(update_process, ev, data) {
@@ -68,28 +68,28 @@ PROCESS_THREAD(update_process, ev, data) {
     while (1) {
         agent_msg = update_agent(&cfg, &ctx);
         if (IS_FAILURE(agent_msg)) {
-             break;
-         } else if (IS_CONTINUE(agent_msg)) {
-             if (agent_msg.event == EVENT_APPLY) {
-                 watchdog_reboot();
-                 break;
-             } else if (agent_msg.event == EVENT_VERIFY_BEFORE) {
+            break;
+        } else if (IS_CONTINUE(agent_msg)) {
+            if (agent_msg.event == EVENT_APPLY) {
+                watchdog_reboot();
+                break;
+            } else if (agent_msg.event == EVENT_VERIFY_BEFORE) {
                 verify_before();
-             } else if (agent_msg.event == EVENT_VERIFY_AFTER) {
+            } else if (agent_msg.event == EVENT_VERIFY_AFTER) {
                 verify_after();
-             } else if (agent_msg.event == EVENT_CHECKING_UPDATES_TIMEOUT) {
-                 etimer_set(&et, (CLOCK_SECOND*5));
-                 PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
-             }
-         } else if (IS_RECOVER(agent_msg)) {
-             if (retries-- <= 0) {
-                 continue;
-             } else {
-                 break;
-             }
-         } else if (IS_SEND(agent_msg)) {
-             COAP_SEND(GET_CONNECTION(agent_msg));
-         }
+            } else if (agent_msg.event == EVENT_CHECKING_UPDATES_TIMEOUT) {
+                etimer_set(&et, (CLOCK_SECOND*5));
+                PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
+            }
+        } else if (IS_RECOVER(agent_msg)) {
+            if (retries-- <= 0) {
+                continue;
+            } else {
+                break;
+            }
+        } else if (IS_SEND(agent_msg)) {
+            COAP_SEND(GET_CONNECTION(agent_msg));
+        }
     } 
     if (retries <= 0) {
         log_info("The update process failed\n");

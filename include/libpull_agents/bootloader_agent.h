@@ -69,6 +69,8 @@ typedef enum agent_event_t {
     EVENT_UPGRADE_COPY_FAILURE,
     EVENT_UPGRADE_FAILURE,
     EVENT_UPGRADE_FAILURE_2,
+    EVENT_UPGRADE_FAILURE_3,
+    EVENT_UPGRADE_FAILURE_4,
     EVENT_VALIDATE_NON_BOOTABLE_INVALID,
     EVENT_VALIDATE_NON_BOOTABLE_FAILURE,
     EVENT_FAILURE_STOP_,
@@ -84,6 +86,8 @@ typedef struct agent_msg_t {
 typedef struct bootloader_agent_config {
     mem_id_t bootloader_ctx_id;
     mem_id_t recovery_id;
+    mem_id_t swap_id;
+    size_t swap_size;
     uint8_t* vendor_x;
     uint8_t* vendor_y;
     digest_func df;

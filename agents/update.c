@@ -45,6 +45,7 @@ agent_msg_t update_agent(update_agent_config* cfg, update_agent_ctx_t* ctx) {
         log_error(ctx->err, "Error while getting the oldest slot\n");
         PULL_CONTINUE(EVENT_SEARCHING_SLOT_FAILURE, &ctx->err);
     }
+
     ctx->err = memory_open(&ctx->new_obj, ctx->id, WRITE_ALL);
     if (ctx->err) {
         log_error(ctx->err, "Error opening the memory_object\n");

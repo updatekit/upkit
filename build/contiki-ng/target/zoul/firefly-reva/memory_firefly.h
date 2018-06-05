@@ -10,10 +10,11 @@ struct mem_object_t {
 };
 
 enum memory_objects_enum {
-    BOOTLOADER,
-    BOOTLOADER_CTX,
-    OBJ_1,
-    OBJ_2,
+    BOOTLOADER = 0, // 0
+    BOOTLOADER_CTX, // 1
+    OBJ_1,          // 2
+    OBJ_2,          // 3
+    SWAP            // 4
 };
 
 uint32_t get_start_offset(mem_id_t id);
