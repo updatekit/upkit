@@ -87,7 +87,6 @@ int memory_write_impl(mem_object_t* ctx, const void* memory_buffer, size_t size,
     INTERRUPTS_DISABLE();
     // Erase the page if we are in sequential write
     if (ctx->mode == SEQUENTIAL_REWRITE && ((ctx->start_offset + offset) % PAGE_SIZE) == 0) {
-        printf("Erasing page at offset %x\n", (ctx->start_offset + offset));
         int ret = rom_util_page_erase(ctx->start_offset + offset, PAGE_SIZE);
         if (ret != 0) {
             log_error(MEMORY_ERASE_ERROR, "Error erasing page\n");
