@@ -11,7 +11,7 @@
 
 PROCESS(update_process, "OTA Update process");
 
-#define BUFFER_SIZE PAGE_SIZE
+#define BUFFER_SIZE 512
 
 void specialize_crypto_functions(void);
 void specialize_conn_functions(void);
@@ -29,6 +29,12 @@ static struct etimer et;
 
 static int8_t retries = 3;
 
+#if  WITH_TINYCRYPT
+int default_CSPRNG(uint8_t *dest, unsigned int size) {
+    return 0;
+}
+#endif
+
 void verify_before() {
 #ifdef WITH_CRYPTOAUTHLIB
     ATCA_STATUS status = atcab_init(&cfg_ateccx08a_i2c_default);
@@ -36,14 +42,14 @@ void verify_before() {
         log_error(GENERIC_ERROR, "Failure initializing ATECC508A\n");
     }
 #endif
-    watchdog_stop();
+    WATCHDOG_STOP();
 }
 
 void verify_after() {
 #ifdef WITH_CRYPTOAUTHLIB
     atcab_release();
 #endif
-    watchdog_start();
+    WATCHDOG_START();
 }
 
 PROCESS_THREAD(update_process, ev, data) {
@@ -62,28 +68,28 @@ PROCESS_THREAD(update_process, ev, data) {
     while (1) {
         agent_msg = update_agent(&cfg, &ctx);
         if (IS_FAILURE(agent_msg)) {
-             break;
-         } else if (IS_CONTINUE(agent_msg)) {
-             if (agent_msg.event == EVENT_APPLY) {
-                 watchdog_reboot();
-                 break;
-             } else if (agent_msg.event == EVENT_VERIFY_BEFORE) {
+            break;
+        } else if (IS_CONTINUE(agent_msg)) {
+            if (agent_msg.event == EVENT_APPLY) {
+                watchdog_reboot();
+                break;
+            } else if (agent_msg.event == EVENT_VERIFY_BEFORE) {
                 verify_before();
-             } else if (agent_msg.event == EVENT_VERIFY_AFTER) {
+            } else if (agent_msg.event == EVENT_VERIFY_AFTER) {
                 verify_after();
-             } else if (agent_msg.event == EVENT_CHECKING_UPDATES_TIMEOUT) {
-                 etimer_set(&et, (CLOCK_SECOND*5));
-                 PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
-             }
-         } else if (IS_RECOVER(agent_msg)) {
-             if (retries-- <= 0) {
-                 continue;
-             } else {
-                 break;
-             }
-         } else if (IS_SEND(agent_msg)) {
-             COAP_SEND(GET_CONNECTION(agent_msg));
-         }
+            } else if (agent_msg.event == EVENT_CHECKING_UPDATES_TIMEOUT) {
+                etimer_set(&et, (CLOCK_SECOND*5));
+                PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
+            }
+        } else if (IS_RECOVER(agent_msg)) {
+            if (retries-- <= 0) {
+                continue;
+            } else {
+                break;
+            }
+        } else if (IS_SEND(agent_msg)) {
+            COAP_SEND(GET_CONNECTION(agent_msg));
+        }
     } 
     if (retries <= 0) {
         log_info("The update process failed\n");

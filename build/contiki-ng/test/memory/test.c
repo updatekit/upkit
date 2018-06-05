@@ -1,5 +1,5 @@
 #include "contiki.h"
-#include "memory_cc2650.h"
+#include "memory_firefly.h"
 #include <stdio.h>
 #include <string.h>
 

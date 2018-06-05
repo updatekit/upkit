@@ -1,0 +1,5 @@
+# Add tinycrypt scources
+CFLAGS += -DWITH_TINYCRYPT=1
+CFLAGS += -I$(ext)/tinycrypt/lib/include
+PROJECTDIRS += $(ext)/tinycrypt/lib/source
+PROJECT_SOURCEFILES += ecc_dsa.c sha256.c utils.c ecc.c

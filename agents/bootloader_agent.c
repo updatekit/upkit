@@ -18,6 +18,7 @@ static mem_object_t bootloader_object;
 static mem_object_t source_slot;
 static mem_object_t destination_slot;
 static mem_object_t newest_bootable;
+static mem_object_t swap_slot;
 
 static mem_id_t id_newest_non_bootable;
 static mem_id_t id_newest_bootable;
@@ -38,7 +39,7 @@ pull_error restore_recovery_image() {
 agent_msg_t bootloader_agent(bootloader_agent_config* cfg) {
     PULL_BEGIN(EVENT_INIT);
 
-    // (1) Get the newest bootable firmware (XXX there must be at least one!!)
+    // (1) Get the newest bootable firmware (there must be at least one!!)
     PULL_CONTINUE(EVENT_GET_NEWEST_FIRMWARE, NULL);
     err = get_newest_firmware(&id_newest_bootable, &version_bootable, &obj_t, false, true);
     if (err) {
@@ -102,7 +103,9 @@ agent_msg_t bootloader_agent(bootloader_agent_config* cfg) {
     if (err) {
         PULL_CONTINUE(EVENT_GET_NEWEST_NON_BOOTABLE_FAILURE, &err);
     }
-    log_debug("bootable %x - non bootable %x\n", version_bootable, version_non_bootable);
+    log_debug("id: bootable %d - non bootable %d\n", id_newest_bootable, id_newest_non_bootable);
+    log_debug("version: bootable %x - non bootable %x\n", version_bootable, version_non_bootable);
+
     // (4) Compare them and upgrade if necessary
     if (version_bootable < version_non_bootable) {
         // (4.1) Validate the newest non bootable slot
@@ -121,6 +124,7 @@ agent_msg_t bootloader_agent(bootloader_agent_config* cfg) {
             PULL_CONTINUE(EVENT_VALIDATE_NON_BOOTABLE_INVALID, &err);
            // XXX This error can be recovered
         }
+        memory_close(&source_slot);
 
         // (4.2) If valid, move it to the oldest bootable slot
         PULL_CONTINUE(EVENT_UPGRADE, NULL);
@@ -128,12 +132,23 @@ agent_msg_t bootloader_agent(bootloader_agent_config* cfg) {
         if (err) {
             PULL_CONTINUE(EVENT_UPGRADE_FAILURE, &err);
         }
-        err = memory_open(&destination_slot, id_oldest_bootable, WRITE_ALL);
+        err = memory_open(&destination_slot, id_oldest_bootable, SEQUENTIAL_REWRITE);
         if (err) {
             PULL_CONTINUE(EVENT_UPGRADE_FAILURE_2, &err);
         }
+        err = memory_open(&source_slot, id_newest_non_bootable, SEQUENTIAL_REWRITE);
+        if (err) {
+            PULL_CONTINUE(EVENT_UPGRADE_FAILURE_3, &err);
+
+        }
+        err = memory_open(&swap_slot, cfg->swap_id, SEQUENTIAL_REWRITE);
+        if (err) {
+            PULL_CONTINUE(EVENT_UPGRADE_FAILURE_4, &err);
+        }
+
         PULL_CONTINUE(EVENT_UPGRADE_COPY_START, NULL);
-        err = copy_firmware(&source_slot, &destination_slot, buffer, BUFFER_SIZE);
+        err = swap_slots(&source_slot, &destination_slot, &swap_slot, cfg->swap_size, buffer, BUFFER_SIZE);
+        //err = copy_firmware(&source_slot, &destination_slot, buffer, BUFFER_SIZE);
         PULL_CONTINUE(EVENT_UPGRADE_COPY_STOP, NULL);
         if (err) {
             PULL_CONTINUE(EVENT_UPGRADE_COPY_FAILURE, &err);

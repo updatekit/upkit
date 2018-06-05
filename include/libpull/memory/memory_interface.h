@@ -38,7 +38,10 @@ typedef struct mem_slot_t {
 typedef enum {
     READ_ONLY = 0,
     WRITE_CHUNK = 1, // In this mode the memory will not be completely rewritten.
-    WRITE_ALL = 2 // In this mode the memory object will be completely erased before.
+    WRITE_ALL = 2, // In this mode the memory object will be completely erased before.
+    SEQUENTIAL_REWRITE = 3 // In this mode the flash page must be rewritten page by page when
+                      // a new sector is encountered. This requires a sequential
+                      // write
 } mem_mode_t;
 
 /** 
