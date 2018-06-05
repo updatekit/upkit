@@ -22,7 +22,7 @@ pull_error memory_open_impl(mem_object_t* ctx, mem_id_t id, mem_mode_t mode) {
     return PULL_SUCCESS;
 }
 
-int memory_read_impl(mem_object_t* ctx, void* memory_buffer, address_t size, address_t offset) {
+int memory_read_impl(mem_object_t* ctx, void* memory_buffer, size_t size, address_t offset) {
     PULL_ASSERT(ctx != NULL);
     PULL_ASSERT(ctx->start + offset + size < ctx->end);
     if (ctx->fdescr->read(memory_buffer, ctx->start+offset, size) == 0) {
@@ -31,7 +31,7 @@ int memory_read_impl(mem_object_t* ctx, void* memory_buffer, address_t size, add
     return -1;
 }
 
-int memory_write_impl(mem_object_t* ctx, const void* memory_buffer, uint16_t size, address_t offset) {
+int memory_write_impl(mem_object_t* ctx, const void* memory_buffer, size_t size, address_t offset) {
     PULL_ASSERT(ctx != NULL);
     PULL_ASSERT(ctx->start + offset + size < ctx->end_offset);
     if (ctx->mode == SEQUENTIAL_REWRITE && ((ctx->start + offset) % ctx->fdescr->page_size) == 0) {
