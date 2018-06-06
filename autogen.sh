@@ -26,10 +26,11 @@ clone cryptoauthlib https://github.com/MicrochipTech/cryptoauthlib.git
 # Patch the repositories
 PATCHDIR=patches
 for dir in $(cd $PATCHDIR && find * -type d -print); do
+    echo "Dir is $dir"
     for f in $(find $PATCHDIR/$dir -maxdepth 1 -name *.patch| sort); do
         patch=$PWD/$f
         echo "Applying patch: $patch"
-        (cd ext/$dir && git am --ignore-whitespace $patch)
+        (cd ext/$dir && git am --ignore-whitespace --ignore-space-change $patch)
     done
 done
 

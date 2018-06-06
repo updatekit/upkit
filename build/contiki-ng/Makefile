@@ -27,6 +27,9 @@ BOARDDIR = target/$(TARGET)/$(BOARD)
 LIBPULL_APPLICATION=1
 include makefiles/Makefile.libpull
 
+# Define flags
+CFLAGS += -DWITH_CONTIKI_NG=1
+
 # Add the update process
 PROJECT_SOURCEFILES += update_process.c
 

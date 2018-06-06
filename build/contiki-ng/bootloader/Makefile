@@ -34,7 +34,7 @@ include ../makefiles/Makefile.libpull
 CFLAGS += -DDISABLE_ALL_OUTPUT=1
 
 # Security Configurations
-ext= ../ext
+ext= $(ROOTDIR)/ext
 ifeq ($(SEC_LIB),TINYDTLS)
 	include ../makefiles/Makefile.tinydtls
 else ifeq ($(SEC_LIB),CRYPTOAUTHLIB)
