@@ -4,7 +4,9 @@
 set -e
 
 # Include the configuration file
-source Makefile.conf
+source Makefile.target
+cat Makefile.target
+source target/$TARGET/$BOARD/Makefile.conf
 
 ROOTDIR=$(cd $(dirname $0) && pwd -P)
 
@@ -17,7 +19,7 @@ FIRMWARE_DIR="$ROOTDIR/firmware"
 BOOTLOADER="$ROOTDIR/bootloader/bootloader.bin"
 BOOTLOADER_CTX="$ROOTDIR/bootloader/bootloader_ctx.bin"
 MANIFEST="$FIRMWARE_DIR/manifest.bin"
-IMAGE="$ROOTDIR/runner.bin"
+IMAGE="$ROOTDIR/application/runner.bin"
 FIRMWARE="$ROOTDIR/firmware/firmware.bin"
 
 check_args() {

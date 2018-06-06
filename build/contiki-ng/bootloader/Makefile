@@ -8,7 +8,9 @@ SEC_LIB ?= TINYCRYPT
 #####################################################
 #   		   End Configurable Parameters          #
 #####################################################
-include ../Makefile.conf
+# This Makefiles assumes taht you already have a saved target
+include ../Makefile.target
+include ../target/$(TARGET)/$(BOARD)/Makefile.conf
 
 CONTIKI_PROJECT=bootloader
 all: ota
@@ -32,7 +34,7 @@ include ../makefiles/Makefile.libpull
 CFLAGS += -DDISABLE_ALL_OUTPUT=1
 
 # Security Configurations
-ext= ../ext
+ext= $(ROOTDIR)/ext
 ifeq ($(SEC_LIB),TINYDTLS)
 	include ../makefiles/Makefile.tinydtls
 else ifeq ($(SEC_LIB),CRYPTOAUTHLIB)

@@ -3,6 +3,14 @@
 
 #if MEMORY_FLASH_IMPL == 1
 
+uint32_t get_start_offset(mem_id_t id) {
+    return flash_objects[id].start;
+}
+
+uint32_t get_end_offset(mem_id_t id) {
+    return flash_objects[id].end;
+}
+
 pull_error memory_open_impl(mem_object_t* ctx, mem_id_t id, mem_mode_t mode) {
     PULL_ASSERT(ctx != NULL);
     memcpy(ctx, &flash_objects[id], sizeof(mem_object_t));
@@ -15,7 +23,7 @@ pull_error memory_open_impl(mem_object_t* ctx, mem_id_t id, mem_mode_t mode) {
     if (ctx->mode == WRITE_ALL) {
         for (offset = ctx->start; offset < ctx->end; offset += ctx->fdescr->page_size) {
             if (ctx->fdescr->rst != NULL) {
-                ctx->fdrstt();
+                ctx->fdescr->rst();
             }
             if (ctx->fdescr->erase(offset, ctx->fdescr->page_size) != 0) {
                 log_debug("Error ereasing page %lu\n", offset/ctx->fdescr->page_size);
