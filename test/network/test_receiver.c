@@ -16,6 +16,7 @@ TEST_RUNNER();
 mem_object_t obj;
 
 void setUp(void) {
+    restore_assets();
     TEST_ASSERT_TRUE(memory_open(&obj, OBJ_A, WRITE_ALL) == PULL_SUCCESS);
 }
 

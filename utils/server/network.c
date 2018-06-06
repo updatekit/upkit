@@ -18,8 +18,8 @@ static int verify_key(const coap_session_t *session,
         const uint8_t *other_pub_y, 
         size_t key_size) {
     int validate = 0;
-    validate |= memcmp(other_pub_x, client_x, key_size);
-    validate |= memcmp(other_pub_y, client_y, key_size);
+    validate |= memcmp(other_pub_x, dtls_client_x_g, key_size);
+    validate |= memcmp(other_pub_y, dtls_client_y_g, key_size);
     printf("Client certificate validation: ");
     printf("%s\n", validate == 0? "success": "failure");
     return validate == 0? 1: -1;
