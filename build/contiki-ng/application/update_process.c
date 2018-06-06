@@ -5,7 +5,7 @@
 #include <libpull_agents/update.h>
 #include <libpull/security.h>
 
-#include "../default_configs.h"
+#include "../../../default_keys.h"
 #include "platform_headers.h"
 
 PROCESS(update_process, "OTA Update process");
@@ -59,7 +59,7 @@ PROCESS_THREAD(update_process, ev, data) {
     conn_config(&cfg.receiver, "coap://[fd00::1]", COAP_DEFAULT_PORT, PULL_UDP, NULL, "firmware");
     update_agent_reuse_connection(&cfg, 0);
     update_agent_set_identity(&cfg, identity_g);
-    update_agent_vendor_keys(&cfg, x, y);
+    update_agent_vendor_keys(&cfg, vendor_x_g, vendor_y_g);
     update_agent_digest_func(&cfg, df);
     update_agent_ecc_func(&cfg, ef);
     update_agent_set_buffer(&cfg, buffer, BUFFER_SIZE);

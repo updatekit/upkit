@@ -3,7 +3,7 @@
 #include "contiki-lib.h"
 #include "dev/watchdog.h"
 #include "platform_headers.h"
-#include "../default_configs.h"
+#include "../../../default_keys.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -50,7 +50,7 @@ PROCESS_THREAD(bootloader, ev, data) {
         .swap_size = SWAP_SIZE
     };
     specialize_crypto_functions();
-    bootloader_agent_vendor_keys(&cfg, x, y);
+    bootloader_agent_vendor_keys(&cfg, vendor_x_g, vendor_y_g);
     bootloader_agent_digest_func(&cfg, df);
     bootloader_agent_ecc_func(&cfg, ef);
     bootloader_agent_set_buffer(&cfg, buffer, BUFFER_SIZE);

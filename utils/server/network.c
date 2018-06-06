@@ -18,8 +18,8 @@ static int verify_key(const coap_session_t *session,
         const uint8_t *other_pub_y, 
         size_t key_size) {
     int validate = 0;
-    validate |= memcmp(other_pub_x, client_x, key_size);
-    validate |= memcmp(other_pub_y, client_y, key_size);
+    validate |= memcmp(other_pub_x, dtls_client_x_g, key_size);
+    validate |= memcmp(other_pub_y, dtls_client_y_g, key_size);
     printf("Client certificate validation: ");
     printf("%s\n", validate == 0? "success": "failure");
     return validate == 0? 1: -1;
@@ -53,7 +53,7 @@ coap_context_t* get_coap_context(const char *node) {
     coap_context_set_psk(ctx, psk_key.identity, psk_key.key, psk_key.len);
     // Register ECDSA param
     coap_context_set_ecdsa(ctx, DEFAULT_CURVE,
-            ecdsa_priv_key, ecdsa_pub_key_x, ecdsa_pub_key_y, verify_key);
+            dtls_server_priv_g, dtls_server_x_g, dtls_server_y_g, verify_key);
 
     for (rp = result; rp != NULL; rp = rp->ai_next) {
         coap_address_t addr;

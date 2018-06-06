@@ -1,9 +1,7 @@
 #include <libpull/security/sha256.h>
 #include "libpull_agents/bootloader_agent.h"
 
-#include "support/sample_data.h"
-#include "support/test_runner.h"
-#include "unity.h"
+#include "support/support.h"
 #include <unistd.h>
 
 #define FOREACH_TEST(DO) \

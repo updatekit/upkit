@@ -8,6 +8,6 @@
 #include "invalid_digest.h"
 #include "test_runner.h"
 #include "platform_headers.h"
-#include "sample_data.h"
+#include "../../default_keys.h"
 
 #endif /* TEST_SUPPORT_SUPPORT_H_ */

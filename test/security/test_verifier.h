@@ -6,7 +6,7 @@
 #include "manifest_mock.h"
 
 #include "invalid_digest.h" // Test Support
-#include "sample_data.h" // Test Support
+#include "support/support.h"
 
 #define BUFFER_LEN 1024
 static uint8_t buffer[BUFFER_LEN];
