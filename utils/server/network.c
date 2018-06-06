@@ -53,7 +53,7 @@ coap_context_t* get_coap_context(const char *node) {
     coap_context_set_psk(ctx, psk_key.identity, psk_key.key, psk_key.len);
     // Register ECDSA param
     coap_context_set_ecdsa(ctx, DEFAULT_CURVE,
-            dtls_server_priv_g, dtls_server_x_g, dtls_server_y_g, verify_key);
+            ecdsa_priv_key, ecdsa_pub_key_x, ecdsa_pub_key_y, verify_key);
 
     for (rp = result; rp != NULL; rp = rp->ai_next) {
         coap_address_t addr;
