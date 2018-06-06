@@ -8,7 +8,9 @@ SEC_LIB ?= TINYCRYPT
 #####################################################
 #   		   End Configurable Parameters          #
 #####################################################
-include ../Makefile.conf
+# This Makefiles assumes taht you already have a saved target
+include ../Makefile.target
+include ../target/$(TARGET)/$(BOARD)/Makefile.conf
 
 CONTIKI_PROJECT=bootloader
 all: ota

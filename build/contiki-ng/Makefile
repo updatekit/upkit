@@ -10,7 +10,8 @@ CONN_TYPE ?= CONN_UDP
 #####################################################
 #              End Configurable Parameters          #
 #####################################################
-include Makefile.conf
+include Makefile.target
+include target/$(TARGET)/$(BOARD)/Makefile.conf
 
 CONTIKI_PROJECT=runner
 all: ota

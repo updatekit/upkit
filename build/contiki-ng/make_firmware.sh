@@ -4,7 +4,8 @@
 set -e
 
 # Include the configuration file
-source Makefile.conf
+source Makefile.target
+source target/$TARGET/$BOARD/Makefile.conf
 
 ROOTDIR=$(cd $(dirname $0) && pwd -P)
 
