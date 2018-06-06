@@ -31,7 +31,7 @@ include makefiles/Makefile.libpull
 PROJECT_SOURCEFILES += update_process.c
 
 # Include CryptoAuthLib for performing verification
-ext=ext
+ext=$(ROOTDIR)/ext
 ifeq ($(SEC_LIB),TINYDTLS)
 	include makefiles/Makefile.tinydtls
 else ifeq ($(SEC_LIB),CRYPTOAUTHLIB)

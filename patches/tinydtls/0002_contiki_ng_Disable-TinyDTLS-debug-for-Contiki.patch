@@ -15,11 +15,11 @@ index f8fc64a..9a0ec38 100644
  #ifdef HAVE_VPRINTF
  void dsrv_log(log_t level, char *format, ...);
  #else
-+#if DEBUG_TINYDTLS == 1
++#if defined(WITH_CONTIKI_NG) && DEBUG_TINYDTLS == 1
  #define dsrv_log(level, format, ...) PRINTF(format, ##__VA_ARGS__)
-+#else /* DEBUG_TINYDTLS == 1 */
++#elif defined(WITH_CONTIKI_NG) && DEBUG_TINYDTLS == 0
 +#define dsrv_log(level, format, ...)
-+#endif /* DEBUG_TINYDTLS == 1 */
++#endif
  #endif
  
  #ifndef NDEBUG

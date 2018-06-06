@@ -17,10 +17,12 @@ index 7493423..303db9c 100644
  #include <string.h>
  #include "atca_command.h"
  #include "atca_devtypes.h"
++#ifdef WITH_CONTIKI_NG
 +#include "lib/memb.h"
 +
 +/* Contiki Memory Allocation */
 +MEMB(commands, atca_command, 20);
++#endif /* WITH_CONTIKI_NG */
  
  /*Execution times for ATSHA204A supported commands...*/
  static const device_execution_time_t device_execution_time_204[] = {
@@ -29,13 +31,22 @@ index 7493423..303db9c 100644
      ATCACommand ca_cmd;
  
 -    ca_cmd = (ATCACommand)malloc(sizeof(atca_command));
++#ifdef WITH_CONTIKI_NG
 +    ca_cmd = (ATCACommand)memb_alloc(&commands);
++#else
++    ca_cmd = (ATCACommand)malloc(sizeof(atca_command));
++#endif
      ca_cmd->dt = device_type;
      ca_cmd->clock_divider = 0;
      if (status != ATCA_SUCCESS)
      {
 -        free(ca_cmd);
++#ifdef WITH_CONTIKI_NG
 +        memb_free(&commands, ca_cmd);
++#else
++        free(ca_cmd);
++#endif
+
          ca_cmd = NULL;
      }
  
@@ -44,7 +55,11 @@ index 7493423..303db9c 100644
      if (*ca_cmd)
      {
 -        free((void*)*ca_cmd);
++#ifdef WITH_CONTIKI_NG
 +        memb_free(&commands, (void*)*ca_cmd);
++#else
++        free((void*)*ca_cmd);
++#endif
      }
  
      *ca_cmd = NULL;
@@ -56,12 +71,13 @@ index d01eb98..8c20d91 100644
   */
  
  #include <stdlib.h>
--#include "atca_device.h"
-+#include "atca_device.h"
+ #include "atca_device.h"
++#ifdef WITH_CONTIKI_NG
 +#include "lib/memb.h"
 +
 +/* Contiki Memory Allocation */
 +MEMB(devices, struct atca_device, 20);
++#endif
  
  /** \defgroup device ATCADevice (atca_)
   * \brief ATCADevice object - composite of command and interface objects
@@ -70,14 +86,22 @@ index d01eb98..8c20d91 100644
      }
  
 -    ca_dev = (ATCADevice)malloc(sizeof(struct atca_device));
++#ifdef WITH_CONTIKI_NG
 +    ca_dev = (ATCADevice)memb_alloc(&devices);
++#else
++    ca_dev = (ATCADevice)malloc(sizeof(struct atca_device));
++#endif
      ca_dev->mCommands = (ATCACommand)newATCACommand(cfg->devtype);
      ca_dev->mIface    = (ATCAIface)newATCAIface(cfg);
  
      if (ca_dev->mCommands == NULL || ca_dev->mIface == NULL)
      {
 -        free(ca_dev);
++#ifdef WITH_CONTIKI_NG
 +        memb_free(&devices, ca_dev);
++#else
++        free(ca_dev);
++#endif
          ca_dev = NULL;
      }
  
@@ -86,7 +110,11 @@ index d01eb98..8c20d91 100644
          deleteATCACommand( (ATCACommand*)&(dev->mCommands));
          deleteATCAIface((ATCAIface*)&(dev->mIface));
 -        free((void*)*ca_dev);
++#ifdef WITH_CONTIKI_NG
 +        memb_free(&devices, (void*)*ca_dev);
++#else
++        free((void*)*ca_dev);
++#endif
      }
  
      *ca_dev = NULL;
@@ -98,18 +126,20 @@ index 81f1aeb..adaabbd 100644
  
  #include <stdlib.h>
  #include "atca_iface.h"
--#include "hal/atca_hal.h"
-+#include "hal/atca_hal.h"
+ #include "hal/atca_hal.h"
++#ifdef WITH_CONTIKI_NG
 +#include "lib/memb.h"
++#endif
  
  /** \defgroup interface ATCAIface (atca_)
   *  \brief Abstract interface to all CryptoAuth device types.  This interface
   *  connects to the HAL implementation and abstracts the physical details of the
   *  device communication from all the upper layers of CryptoAuthLib
     @{ */
-+
++#ifdef WITH_CONTIKI_NG
 +/* Contiki Memory Allocation */
 +MEMB(ifaces, struct atca_iface, 5);
++#endif
  
  ATCA_STATUS _atinit(ATCAIface ca_iface, ATCAHAL_t *hal);
  
@@ -118,14 +148,22 @@ index 81f1aeb..adaabbd 100644
      ATCAIface ca_iface;
  
 -    ca_iface = (ATCAIface)malloc(sizeof(struct atca_iface));
++#ifdef WITH_CONTIKI_NG
 +    ca_iface = (ATCAIface)memb_alloc(&ifaces);
++#else
++    ca_iface = (ATCAIface)malloc(sizeof(struct atca_iface));
++#endif
      ca_iface->mType = cfg->iface_type;
      ca_iface->mIfaceCFG = cfg;
  
      if (atinit(ca_iface) != ATCA_SUCCESS)
      {
 -        free(ca_iface);
++#ifdef WITH_CONTIKI_NG
 +        memb_free(&ifaces, ca_iface);
++#else
++        free(ca_iface);
++#endif
          ca_iface = NULL;
      }
  
@@ -134,7 +172,11 @@ index 81f1aeb..adaabbd 100644
      {
          hal_iface_release( (*ca_iface)->mType, (*ca_iface)->hal_data);  // let HAL clean up and disable physical level interface if ref count is 0
 -        free((void*)*ca_iface);
++#ifdef WITH_CONTIKI_NG
 +       memb_free(&ifaces, (void*)*ca_iface);
++#else
++        free((void*)*ca_iface);
++#endif
      }
  
      *ca_iface = NULL;

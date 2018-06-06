@@ -17,9 +17,9 @@ index d0a8c33..9eb575d 100644
  #include <stdlib.h>
  #include "global.h"
  #endif /* WITH_CONTIKI */
-+#ifdef WITH_CONTIKI
++#ifdef WITH_CONTIKI_NG
 +#include "dev/watchdog.h"
-+#endif
++#endif /* WITH_CONTIKI_NG */
  #ifdef HAVE_INTTYPES_H
  #define __STDC_FORMAT_MACROS
  #include <inttypes.h>
@@ -35,14 +35,18 @@ index d0a8c33..9eb575d 100644
      dtls_info("Added packet for reordering\n");
      return 0;
    } else if (dtls_uint16_to_int(hs_header->message_seq) == peer->handshake_params->hs_state.mseq_r) {
++    #ifdef WITH_CONTIKI_NG
 +    watchdog_stop();
++    #endif /* WITH_CONTIKI_NG */
      /* Found the expected packet, use this and all the buffered packet */
      int next = 1;
  
      res = handle_handshake_msg(ctx, peer, session, role, state, data, data_length);
 -    if (res < 0)
 +    if (res < 0) {
++        #ifdef WITH_CONTIKI_NG
 +        watchdog_start();
++        #endif /* WITH_CONTIKI_NG */
        return res;
 +    }
  
@@ -52,7 +56,9 @@ index d0a8c33..9eb575d 100644
            next = 1;
            res = handle_handshake_msg(ctx, peer, session, role, peer->state, node->data, node->length);
            if (res < 0) {
-+              watchdog_start();
++            #ifdef WITH_CONTIKI_NG
++            watchdog_start();
++            #endif /* WITH_CONTIKI_NG */
              return res;
            }
  
@@ -60,7 +66,9 @@ index d0a8c33..9eb575d 100644
          }
        }
      }
++    #ifdef WITH_CONTIKI_NG
 +    watchdog_start();
++    #endif /* WITH_CONTIKI_NG */
      return res;
    }
    assert(0);
@@ -73,7 +81,9 @@ index 80e56d6..f8fc64a 100644
  #  define DEBUG DEBUG_PRINT
  # endif /* DEBUG */
 -#include "net/ip/uip-debug.h"
++#ifdef WITH_CONTIKI_NG
 +#include "ipv6/uip-debug.h"
++#endif /* WITH_CONTIKI_NG */
  
  #ifdef CONTIKI_TARGET_MBXXX
  extern char __Stack_Init, _estack;
@@ -86,7 +96,9 @@ index 8cd8a93..7fbdfd8 100644
  
  #ifdef WITH_CONTIKI
 -#include "ip/uip.h"
++#ifdef WITH_CONTIKI_NG
 +#include "ipv6/uip.h"
++#endif /* WITH_CONTIKI_NG */
  typedef struct {
    unsigned char size;
    uip_ipaddr_t addr;

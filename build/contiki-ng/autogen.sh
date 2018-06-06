@@ -16,35 +16,11 @@ git submodule update --init --recursive
 )
 echo "Cloning the Contiki-NG repository...done"
 
-# Clone TinyDTLS
-echo "Cloning tinydtls..."
-git clone --quiet --progress --recurse-submodules \
-    --single-branch --depth 2 https://git.eclipse.org/r/tinydtls/org.eclipse.tinydtls \
-    ext/tinydtls
-echo "Cloning tinydtls...done"
-
-# Clone CryptoAuthlib
-echo "Cloning cryptoauthlib..."
-git clone --quiet --progress --recursive \
-    git@github.com:libpull/cryptoauthlib-hal.git \
-    ext/cryptoauthlib
-echo "Cloning cryptoauthlib...done"
-
-# Clone tinycrypt
-echo "Cloning tinycrypt..."
-git clone --quiet --progress \
-    --single-branch --depth 2 https://github.com/01org/tinycrypt.git \
-    ext/tinycrypt
-echo "Cloning tinycrypt...done"
-
-# Patch the repositories
 PATCHDIR=patches
 for dir in $(cd $PATCHDIR && find * -type d -print); do
-    for f in $(find $PATCHDIR/$dir -maxdepth 1 -name '*.patch' -print | sort); do
+    for f in $(find $PATCHDIR/$dir -maxdepth 1 -name *.patch| sort); do
         patch=$PWD/$f
         echo "Applying patch: $patch"
-        (cd ext/$dir/
-        git am --ignore-whitespace $patch
-        )
+        (cd ext/$dir && git am --ignore-whitespace $patch)
     done
 done
