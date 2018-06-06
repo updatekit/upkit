@@ -1,2 +1,2 @@
-TARGET = zoul
-BOARD = firefly-reva
+TARGET=zoul
+BOARD=firefly-reva

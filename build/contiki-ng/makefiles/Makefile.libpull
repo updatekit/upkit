@@ -5,8 +5,8 @@ ifeq ($(LIBPULL_BOOTLOADER), 1)
 	PROJECT_SOURCEFILES += bootloader_agent.c
 endif
 ifeq ($(LIBPULL_APPLICATION), 1)
-	LIBPULLDIRS += $(ROOTDIR)/src/network ./connection
-	CFLAGS += -I./connection
+	LIBPULLDIRS += $(ROOTDIR)/src/network ../connection
+	CFLAGS += -I../connection
 	PROJECTDIRS = $(ROOTDIR)/agents
 	PROJECT_SOURCEFILES += update.c
 endif

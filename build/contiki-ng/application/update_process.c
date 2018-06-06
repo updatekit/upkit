@@ -5,8 +5,7 @@
 #include <libpull_agents/update.h>
 #include <libpull/security.h>
 
-#include "default_configs.h"
-#include "connection/connection_ercoap.h"
+#include "../default_configs.h"
 #include "platform_headers.h"
 
 PROCESS(update_process, "OTA Update process");
