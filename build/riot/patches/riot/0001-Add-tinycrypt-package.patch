@@ -1,0 +1,212 @@
+From 6e6bef6ea5c8e7962ea08d82e0ba49f9ccfb84f6 Mon Sep 17 00:00:00 2001
+From: Antonio Langiu <antonio.langiu@studenti.polito.it>
+Date: Thu, 14 Jun 2018 11:20:13 +0200
+Subject: [PATCH 1/3] Add tinycrypt package
+
+---
+ pkg/tinycrypt/Makefile              | 12 +++++
+ pkg/tinycrypt/Makefile.include      |  1 +
+ pkg/tinycrypt/Makefile.tinycrypt    |  3 ++
+ pkg/tinycrypt/doc.txt               |  6 +++
+ tests/pkg_tinycrypt/Makefile        | 13 ++++++
+ tests/pkg_tinycrypt/main.c          | 90 +++++++++++++++++++++++++++++++++++++
+ tests/pkg_tinycrypt/tests/01-run.py | 20 +++++++++
+ 7 files changed, 145 insertions(+)
+ create mode 100644 pkg/tinycrypt/Makefile
+ create mode 100644 pkg/tinycrypt/Makefile.include
+ create mode 100644 pkg/tinycrypt/Makefile.tinycrypt
+ create mode 100644 pkg/tinycrypt/doc.txt
+ create mode 100644 tests/pkg_tinycrypt/Makefile
+ create mode 100644 tests/pkg_tinycrypt/main.c
+ create mode 100755 tests/pkg_tinycrypt/tests/01-run.py
+
+diff --git a/pkg/tinycrypt/Makefile b/pkg/tinycrypt/Makefile
+new file mode 100644
+index 000000000..ff862ffce
+--- /dev/null
++++ b/pkg/tinycrypt/Makefile
+@@ -0,0 +1,12 @@
++PKG_NAME=tinycrypt
++PKG_URL=https://github.com/01org/tinycrypt
++PKG_VERSION=3ea1a609e7aff9f2d8d13803e1076b7a8e551804
++PKG_LICENSE=BSD-3-Clause
++
++.PHONY: all
++
++all: git-download
++	"$(MAKE)" -C $(PKG_BUILDDIR)/lib/source/ \
++			  -f $(RIOTPKG)/tinycrypt/Makefile.$(PKG_NAME)
++
++include $(RIOTBASE)/pkg/pkg.mk
+diff --git a/pkg/tinycrypt/Makefile.include b/pkg/tinycrypt/Makefile.include
+new file mode 100644
+index 000000000..ac7a28bc3
+--- /dev/null
++++ b/pkg/tinycrypt/Makefile.include
+@@ -0,0 +1 @@
++INCLUDES += -I$(PKGDIRBASE)/tinycrypt/lib/include
+diff --git a/pkg/tinycrypt/Makefile.tinycrypt b/pkg/tinycrypt/Makefile.tinycrypt
+new file mode 100644
+index 000000000..0d2f0c527
+--- /dev/null
++++ b/pkg/tinycrypt/Makefile.tinycrypt
+@@ -0,0 +1,3 @@
++MODULE = tinycrypt
++
++include $(RIOTBASE)/Makefile.base
+diff --git a/pkg/tinycrypt/doc.txt b/pkg/tinycrypt/doc.txt
+new file mode 100644
+index 000000000..32c69306d
+--- /dev/null
++++ b/pkg/tinycrypt/doc.txt
+@@ -0,0 +1,6 @@
++/**
++ * @defgroup pkg_tinycrypt tinycrypt crypto library
++ * @ingroup  pkg
++ * @brief    Memory optimized crypto library for embedded devices
++ * @see      https://github.com/01org/tinycrypt
++ */
+diff --git a/tests/pkg_tinycrypt/Makefile b/tests/pkg_tinycrypt/Makefile
+new file mode 100644
+index 000000000..1607473dd
+--- /dev/null
++++ b/tests/pkg_tinycrypt/Makefile
+@@ -0,0 +1,13 @@
++include ../Makefile.tests_common
++
++# tinycrypt works for 32-bit architectures only. The nrf52dk is chosen as a
++# placeholder for all Cortex-M4 boards.
++BOARD_WHITELIST += native nrf52dk
++
++USEPKG += tinycrypt
++USEMODULE = fmt
++
++include $(RIOTBASE)/Makefile.include
++
++test:
++	tests/01-run.py
+diff --git a/tests/pkg_tinycrypt/main.c b/tests/pkg_tinycrypt/main.c
+new file mode 100644
+index 000000000..dac57daa6
+--- /dev/null
++++ b/tests/pkg_tinycrypt/main.c
+@@ -0,0 +1,90 @@
++/*
++ * Copyright (C) 2018 Freie Universität Berlin
++ *
++ * This file is subject to the terms and conditions of the GNU Lesser
++ * General Public License v2.1. See the file LICENSE in the top level
++ * directory for more details.
++ */
++
++/**
++ * @ingroup     tests
++ * @{
++ *
++ * @file
++ * @brief       Test the correct loading and linking of the tinycrypt package
++ *
++ * @author      Hauke Petersen <hauke.petersen@fu-berlin.de>
++ *
++ * @}
++ */
++
++#include <stdio.h>
++#include <string.h>
++
++#include "fmt.h"
++#include "tinycrypt/aes.h"
++
++static void dump_block(const char *head, const uint8_t *block)
++{
++    printf("%s [", head);
++    for (unsigned i = 0; i < TC_AES_BLOCK_SIZE; i++) {
++        char tmp[3] = { 0 };
++        fmt_byte_hex(tmp, block[i]);
++        printf(" 0x%s", tmp);
++    }
++    printf(" ]\n");
++}
++
++int main(void)
++{
++    puts("Tinycrypt AES128 test\n");
++
++    struct tc_aes_key_sched_struct s;
++
++    /* 128-bit key to use */
++    const char *key = "Thats my Kung Fu";
++    /* one block (TC_AES_BLOCK_SIZE := 16 byte) of plain text */
++    const char *plain = "Two One Nine Two";
++    /* some memory to store the encrypted data (add '\0` termination)*/
++    uint8_t cipher[TC_AES_BLOCK_SIZE + 1];
++    uint8_t result[TC_AES_BLOCK_SIZE + 1];
++    memset(cipher, 0, TC_AES_BLOCK_SIZE + 1);
++    memset(result, 0, TC_AES_BLOCK_SIZE + 1);
++
++    /* initialize key */
++    puts("128-bit key used for this test:");
++    printf("key (ASCII): '%s'\n", key);
++    dump_block("      key:", (const uint8_t *)key);
++    tc_aes128_set_encrypt_key(&s, (const uint8_t *)key);
++
++    puts("\nData to encrypt (1 block of 16 bytes):");
++    printf(" plain text: '%s'\n", plain);
++    dump_block("      hex:", (const uint8_t *)plain);
++
++    puts("\nCipher and result before encryption:");
++    dump_block("   cypher:", cipher);
++
++    /* encrypt data */
++    tc_aes_encrypt(cipher, (const uint8_t *)plain, &s);
++
++    puts("\nEncrypted data:");
++    dump_block("encrypted:", cipher);
++
++    /* decrypt data again */
++    tc_aes128_set_decrypt_key(&s, (const uint8_t *)key);
++    tc_aes_decrypt(result, cipher, &s);
++
++    puts("\nAnd now decrypt the cipher again:");
++    dump_block("decrypted:", result);
++    printf("    ASCII: %s\n\n", (const char *)result);
++
++    /* test results */
++    if (memcmp(plain, result, TC_AES_BLOCK_SIZE) != 0) {
++        puts("[FAILED]");
++    }
++    else {
++        puts("[SUCCESS]");
++    }
++
++    return 0;
++}
+diff --git a/tests/pkg_tinycrypt/tests/01-run.py b/tests/pkg_tinycrypt/tests/01-run.py
+new file mode 100755
+index 000000000..7534d4272
+--- /dev/null
++++ b/tests/pkg_tinycrypt/tests/01-run.py
+@@ -0,0 +1,20 @@
++#!/usr/bin/env python3
++
++# Copyright (C) 2017 Freie Universität Berlin
++#
++# This file is subject to the terms and conditions of the GNU Lesser
++# General Public License v2.1. See the file LICENSE in the top level
++# directory for more details.
++
++import os
++import sys
++
++
++def testfunc(child):
++    child.expect_exact('[SUCCESS]')
++
++
++if __name__ == "__main__":
++    sys.path.append(os.path.join(os.environ['RIOTTOOLS'], 'testrunner'))
++    from testrunner import run
++    sys.exit(run(testfunc))
+-- 
+2.13.1
+

@@ -12,7 +12,7 @@
 
 #define IS_CONTINUE(agent_msg) (agent_msg.event > EVENT_CONTINUE_START_ && agent_msg.event < EVENT_CONTINUE_END_ )
 #define IS_SEND(agent_msg) (agent_msg.event > EVENT_SEND_START_ && agent_msg.event < EVENT_SEND_END_ )
-#define IS_RECOVER(agent_msg) (agent_msg.event > EVENT_RECOVER_START_ && agent_msg.event < EVENT_SEND_END_ )
+#define IS_RECOVER(agent_msg) (agent_msg.event > EVENT_RECOVER_START_ && agent_msg.event < EVENT_RECOVER_END_ )
 #define IS_FAILURE(agent_msg) (agent_msg.event > EVENT_FAILURE_START_ && agent_msg.event < EVENT_FAILURE_END_ )
 
 #define GET_CONNECTION(agent_msg) ((txp_ctx*) (agent_msg.event_data))

@@ -1,0 +1,39 @@
+# This Makefile is used to build libpull for RIOT as a package
+# This Makefile assumes to be called from the RIOT Makfile so
+# that all the CFLAGS and includes are setted already by RIOT.
+# Moreover it assumes that BINDIR is defined.
+#
+# This Makefile will build the objects files in the current directory
+# so if you change the build platform you need to clean the generated
+# files.
+
+MODULES = common memory network security
+SRCS := $(foreach module,$(MODULES), $(wildcard src/$(module)/*.c))
+
+CFLAGS += -Iinclude -I. $(INCLUDES)
+
+# Default configuration
+CFLAGS += -DWITH_SIMPLE_MANIFEST=1
+
+OBJS=$(subst .c,.o,$(SRCS))
+
+%.o: %.c
+	$(CC) -c $< -o $@ $(CFLAGS)
+
+$(BINDIR)/libpull.a: $(OBJS)
+	$(AR) -rsv $@ $(OBJS)
+	$(RANLIB) -t $@
+
+clean:
+	rm -f $(OBJS) $(BINDIR)/libpull.a
+
+# Check input parameters
+ifeq (,$(BINDIR))
+	$(warning The BINDIR variable is not defined)
+endif
+ifeq (,$(AR))
+	$(warning The AR variable in not defined)
+endif
+ifeq (,$(RANLIB))
+	$(warning The RANLIB variable is not defined)
+endif

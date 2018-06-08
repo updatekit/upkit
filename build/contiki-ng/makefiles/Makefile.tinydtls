@@ -1,5 +1,4 @@
 # Add Tinydtls sources
-#
 PROJECTDIRS += $(ext)/tinydtls $(ext)/tinydtls/aes $(ext)/tinydtls/sha2 $(ext)/tinydtls/ecc
 PROJECT_SOURCEFILES += dtls.c crypto.c hmac.c rijndael.c sha2.c
 PROJECT_SOURCEFILES += ccm.c netq.c dtls_time.c peer.c session.c ecc.c

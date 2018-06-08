@@ -34,6 +34,7 @@ void test_get_firmware(void) {
     pull_error err = txp_init(&txp, PROV_SERVER, 0, PULL_UDP, NULL);
     TEST_ASSERT_TRUE(!err);
     err = receiver_open(&rcv, &txp, identity_g, "firmware", &obj);
+    TEST_ASSERT_TRUE(!err);
     while (!rcv.firmware_received) {
         err = receiver_chunk(&rcv);
         TEST_ASSERT_TRUE(!err);

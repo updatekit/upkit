@@ -7,8 +7,8 @@
 #ifndef LIBPULL_MEMORY_MANIFEST_H_
 #define LIBPULL_MEMORY_MANIFEST_H_
 
-#include <libpull/common.h>
 #include <libpull/memory/simple_manifest.h>
+#include <libpull/common.h>
 #include <libpull/security/digest.h>
 #include <libpull/security/ecc.h>
 #include <stdint.h>

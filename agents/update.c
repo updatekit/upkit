@@ -54,8 +54,9 @@ agent_msg_t update_agent(update_agent_config* cfg, update_agent_ctx_t* ctx) {
 
     // (5) Connection to receiver server
     PULL_CONTINUE(EVENT_CONN_RECEIVER, NULL);
+    static txp_ctx* rtxp;
     if (cfg->reuse_connection) {
-        ctx->rtxp = ctx->stxp;
+        rtxp = &ctx->stxp;
     } else { 
         ctx->err = txp_init(&ctx->rtxp, cfg->receiver.endpoint,
                     cfg->receiver.port, cfg->receiver.connection_type, 
@@ -64,8 +65,9 @@ agent_msg_t update_agent(update_agent_config* cfg, update_agent_ctx_t* ctx) {
             log_error(ctx->err, "Error while connecting to receiver server\n");
             PULL_CONTINUE(EVENT_CONN_RECEIVER_FAILURE, &ctx->err);
         }
+        rtxp = &ctx->rtxp;
     }
-    ctx->err = receiver_open(&ctx->rctx, &ctx->rtxp, cfg->identity, cfg->receiver.resource, &ctx->new_obj);
+    ctx->err = receiver_open(&ctx->rctx, rtxp, cfg->identity, cfg->receiver.resource, &ctx->new_obj);
     if (ctx->err) {
         log_error(ctx->err, "Error opening the receiver\n");
         PULL_CONTINUE(EVENT_CONN_RECEIVER_FAILURE_2, &ctx->err);
@@ -75,14 +77,16 @@ agent_msg_t update_agent(update_agent_config* cfg, update_agent_ctx_t* ctx) {
     PULL_CONTINUE(EVENT_RECEIVE, NULL);
     while (!ctx->rctx.firmware_received) {
         ctx->err = receiver_chunk(&ctx->rctx);
-        PULL_CONTINUE(EVENT_RECEIVE_SEND, &(ctx->rtxp));
+        PULL_CONTINUE(EVENT_RECEIVE_SEND, rtxp);
         if (ctx->err) {
             log_error(ctx->err, "Error receiving chunk\n");
             PULL_CONTINUE(EVENT_RECEIVE_RECOVER, &ctx->err);
             continue;
         }
     }
-    txp_end(&ctx->rtxp);
+    if (!cfg->reuse_connection) {
+        txp_end(&ctx->rtxp);
+    }
     ctx->err = receiver_close(&ctx->rctx); // Check this ctx->error
 
     // (6) Verify received firmware
