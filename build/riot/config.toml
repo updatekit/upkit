@@ -1,0 +1,19 @@
+# This is a configuration file for contiki
+
+title = "Contiki application"
+
+# Firmware Configurations
+version = "0x0001"
+platform = "0xbeef"
+offset = "0x100"
+
+# Paths
+signature_file = "signature.bin"
+binary_file = "application/bin/remote-reva/runner.bin"
+out_file = "firmware/manifest.bin"
+
+# Keys
+server_priv_key = "../../utils/firmware_tool/keys/server.priv"
+server_pub_key = "../../utils/firmware_tool/keys/server.pub"
+vendor_priv_key = "../../utils/firmware_tool/keys/vendor.priv"
+vendor_pub_key = "../../utils/firmware_tool/keys/vendor.pub"

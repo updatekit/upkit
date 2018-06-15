@@ -2,7 +2,6 @@
 #define MEMORY_FILE_POSIX_H_
 
 #include <libpull/common.h>
-#include <libpull/memory.h>
 
 struct mem_object_t {
     char* path;
@@ -25,7 +24,7 @@ enum memory_objects_enum {
 
 /******* Testing functions *******/
 void copy_asset(char* src, char* dest);
-void restore_assets();
+void restore_assets(void);
 /***** End Testing functions *****/
 
 #endif /* MEMORY_FILE_POSIX_H_ */

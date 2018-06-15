@@ -1,0 +1,39 @@
+From b87bd907521b232f64efd6a30ce104c7fee6acad Mon Sep 17 00:00:00 2001
+From: Antonio Langiu <antonio.langiu@studenti.polito.it>
+Date: Thu, 14 Jun 2018 11:21:18 +0200
+Subject: [PATCH 3/3] Fix error when building with setsockopt
+
+---
+ sys/posix/include/netinet/in.h    | 3 +++
+ sys/posix/sockets/posix_sockets.c | 1 +
+ 2 files changed, 4 insertions(+)
+
+diff --git a/sys/posix/include/netinet/in.h b/sys/posix/include/netinet/in.h
+index 7475b91a4..96911deeb 100644
+--- a/sys/posix/include/netinet/in.h
++++ b/sys/posix/include/netinet/in.h
+@@ -57,6 +57,9 @@ extern "C" {
+  */
+ #define IN6ADDR_LOOPBACK_INIT   IPV6_ADDR_LOOPBACK
+ 
++#define	IN_CLASSD(i)		(((long)(i) & 0xf0000000) == 0xe0000000)
++#define	IN_MULTICAST(i)		IN_CLASSD(i)
++
+ /**
+  * @name    IPv6 address macros
+  * @{
+diff --git a/sys/posix/sockets/posix_sockets.c b/sys/posix/sockets/posix_sockets.c
+index ae7195b32..996352396 100644
+--- a/sys/posix/sockets/posix_sockets.c
++++ b/sys/posix/sockets/posix_sockets.c
+@@ -21,6 +21,7 @@
+ #include <errno.h>
+ #include <stdbool.h>
+ #include <string.h>
++#include <sys/time.h>
+ 
+ #include "bitfield.h"
+ #include "mutex.h"
+-- 
+2.13.1
+

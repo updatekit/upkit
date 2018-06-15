@@ -4,9 +4,8 @@
 set -e
 
 # Include the configuration file
-source Makefile.target
-cat Makefile.target
-source target/$TARGET/$BOARD/Makefile.conf
+BOARD=remote-reva
+source boards/$BOARD/Makefile.conf
 
 ROOTDIR=$(cd $(dirname $0) && pwd -P)
 
@@ -16,10 +15,10 @@ FIRMWARE_TOOL="$FIRMWARE_TOOL_DIR/firmware_tool"
 FIRMWARE_DIR="$ROOTDIR/firmware"
 
 # Configurations
-BOOTLOADER="$ROOTDIR/bootloader/bootloader.bin"
+BOOTLOADER="$ROOTDIR/bootloader/bin/remote-reva/bootloader.bin"
 BOOTLOADER_CTX="$ROOTDIR/bootloader/bootloader_ctx.bin"
 MANIFEST="$FIRMWARE_DIR/manifest.bin"
-IMAGE="$ROOTDIR/application/runner.bin"
+IMAGE="$ROOTDIR/application/bin/remote-reva/runner.bin"
 FIRMWARE="$ROOTDIR/firmware/firmware.bin"
 
 check_args() {
@@ -76,6 +75,7 @@ generate_flashable_firmware() {
                         $CCFG_START_OFFSET $CCFG_END_OFFSET \
                 $FIRMWARE -binary -offset $IMAGE_START_OFFSET -crop \
                         $IMAGE_START_OFFSET $IMAGE_END_OFFSET
+                    -fill 0xff $IMAGE_END_OFFSET $BOOTLOADER_CTX_START_OFFSET
                 $BOOTLOADER_CTX -binary -offset $BOOTLOADER_CTX_START_OFFSET -crop \
                         $BOOTLOADER_CTX_START_OFFSET $BOOTLOADER_CTX_END_OFFSET"
     $cmd -o firmware.hex -intel
