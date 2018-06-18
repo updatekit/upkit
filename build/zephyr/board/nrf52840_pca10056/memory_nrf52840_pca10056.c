@@ -38,7 +38,10 @@ static int internal_flash_erase(address_t offset, size_t page_size) {
 }
 // 0 on success
 static int internal_flash_program(const uint8_t* buffer, address_t offset, size_t size) {
-    return flash_write(flash_device, offset, buffer, size);
+    flash_write_protection_set(flash_device, false);
+    uint8_t value = flash_write(flash_device, offset, buffer, size);
+    flash_write_protection_set(flash_device, true);
+    return value;
 }
 // 0 on success
 static int internal_flash_read(uint8_t* buffer, address_t offset, size_t size) {
