@@ -28,12 +28,6 @@ static mem_object_t obj;
 int cb_called = 0;
 
 static txp_ctx txp;
-static receiver_msg_t msg = {
-    .msg_version = MESSAGE_VERSION,
-    .offset = 0,
-    .udid = 0,
-    .random = 0
-};
 
 void stest_prepare() {
     cb_called = 0;
