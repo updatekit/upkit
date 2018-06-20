@@ -5,7 +5,6 @@
 
 int main(void) {
     UnityBegin("memory");
-    UNITY_BEGIN();
     RUN_TEST(test_memory, test_memory_line);
     UnityEnd();
     while(1){};

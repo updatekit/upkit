@@ -4,7 +4,7 @@
 #include <libpull/network.h>
 #include <libpull/common.h>
 
-#include "shared.h"
+#include "stest.h"
 #include "platform_headers.h"
 #include "default_keys.h"
 
@@ -35,13 +35,13 @@ static receiver_msg_t msg = {
     .random = 0
 };
 
-void setUp() {
+void stest_prepare() {
     cb_called = 0;
     pull_error err = txp_init(&txp, SERVER_ADDR, SERVER_PORT, PULL_UDP, NULL);
-    TEST_ASSERT_EQUAL_INT_MESSAGE(PULL_SUCCESS, err, "Error initializing transport\n");
+    STEST_TRUE(!err)
 }
 
-void tearDown() {
+void stest_clean() {
     txp_end(&txp);
 }
 
@@ -64,32 +64,32 @@ static void handler_cmp_memory(pull_error err, const char* data, const int len, 
     }
 }
 
-DEFINE_TEST(test_txp) {
+STEST_DEFINE(test_txp) {
     uint16_t version = EXPECTED_VERSION;
     pull_error err = txp_on_data(&txp, handler_cmp_memory, &version);
-    TEST_ASSERT_EQUAL_INT_MESSAGE(PULL_SUCCESS, err, err_as_str(err));
+    STEST_TRUE(!err);
     while (cb_called < 10) {
         err = txp_request(&txp, GET, "/version", NULL, 0);
-        TEST_ASSERT_EQUAL_INT_MESSAGE(PULL_SUCCESS, err, err_as_str(err));
+        STEST_TRUE(!err);
         loop_once(&txp, TIMEOUT_MS);
     }
-    TEST_ASSERT_EQUAL_INT_MESSAGE(10, cb_called, "Callback not called 10 times\n");
+    STEST_TRUE(cb_called == 10);
 }
 
-DEFINE_TEST(test_receiver) {
+STEST_DEFINE(test_receiver) {
     mem_object_t obj;
     pull_error err = memory_open(&obj, OBJ_2, WRITE_ALL);
-    TEST_ASSERT_EQUAL_INT_MESSAGE(PULL_SUCCESS, err, err_as_str(err));
+    STEST_TRUE(!err);
     receiver_ctx rcv;
     err = receiver_open(&rcv, &txp, identity_g, "/firmware", &obj);
-    TEST_ASSERT_EQUAL_INT_MESSAGE(PULL_SUCCESS, err, err_as_str(err));
+    STEST_TRUE(!err);
     while (!rcv.firmware_received) {
         err = receiver_chunk(&rcv);
-        TEST_ASSERT_EQUAL_INT_MESSAGE(PULL_SUCCESS, err, err_as_str(err));
+        STEST_TRUE(!err);
         loop(&txp, TIMEOUT_MS);
     }
     err = receiver_close(&rcv);
-    TEST_ASSERT_EQUAL_INT_MESSAGE(PULL_SUCCESS, err, err_as_str(err));
+    STEST_TRUE(!err);
 }
 
 #endif /* TEST_PLATFORM_NETWORK_H_ */

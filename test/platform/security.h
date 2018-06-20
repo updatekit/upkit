@@ -2,6 +2,7 @@
 #define TEST_PLATFORM_SECURITY_H_
 
 #include <libpull/security.h>
+#include "default_keys.h"
 #include "shared.h"
 
 static digest_func df;

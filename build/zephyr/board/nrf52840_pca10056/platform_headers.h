@@ -6,7 +6,7 @@
 //#include "./utils.h"
 
 #ifndef DISABLE_LIBPULL_NETWORK
-#include "connection_libcoap.h"
+#include "connection.h"
 #endif
 
 #endif /* PLATFORM_HEADERS_H_ */
