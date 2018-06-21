@@ -3,9 +3,7 @@
 
 #include "platform_headers.h"
 
-#include <arch/arm/cortex_m/cmsis.h>
-
-#define RESET_VECTOR    0x4
+#define RESET_VECTOR 0x4
 
 typedef void (*load_addr_t)(void);
 
@@ -28,19 +26,14 @@ void load_object(mem_id_t id) {
     memory_close(&obj);
 
     uint32_t destination_address = get_start_offset(id)+get_offset(&mt);
-    log_debug("loading address %lx\n", destination_address);
 
-    //INTERRUPTS_DISABLE();
+    INTERRUPTS_DISABLE();
 
-    // Update vector table address
-    SCB->VTOR = destination_address;
+    sys_clock_disable();
 
-    // Update stack
-    uint32_t stack = *(uint32_t *)(destination_address);
-    __set_MSP(stack);
-    __set_PSP(stack);
+    __set_MSP(destination_address);
+    __set_PSP(destination_address);
 
-    // Jump to address
     load_addr_t load_addr = (load_addr_t)(*(uint32_t *)(destination_address + RESET_VECTOR));
     load_addr();
 }
