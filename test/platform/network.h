@@ -4,7 +4,7 @@
 #include <libpull/network.h>
 #include <libpull/common.h>
 
-#include "stest.h"
+#include "ntest.h"
 #include "platform_headers.h"
 #include "default_keys.h"
 
@@ -29,13 +29,13 @@ int cb_called = 0;
 
 static txp_ctx txp;
 
-void stest_prepare() {
+void ntest_prepare() {
     cb_called = 0;
     pull_error err = txp_init(&txp, SERVER_ADDR, SERVER_PORT, PULL_UDP, NULL);
-    STEST_TRUE(!err)
+    nTEST_TRUE(!err, "Error initializing transport: %s", err_as_str(err));
 }
 
-void stest_clean() {
+void ntest_clean() {
     txp_end(&txp);
 }
 
@@ -58,32 +58,32 @@ static void handler_cmp_memory(pull_error err, const char* data, const int len, 
     }
 }
 
-STEST_DEFINE(test_txp) {
+void test_txp(void) {
     uint16_t version = EXPECTED_VERSION;
     pull_error err = txp_on_data(&txp, handler_cmp_memory, &version);
-    STEST_TRUE(!err);
+    nTEST_TRUE(!err, "Error setting on data: %s", err_as_str(err));
     while (cb_called < 10) {
         err = txp_request(&txp, GET, "/version", NULL, 0);
-        STEST_TRUE(!err);
+        nTEST_TRUE(!err, "Error in txp_request: %s", err_as_str(err));
         loop_once(&txp, TIMEOUT_MS);
     }
-    STEST_TRUE(cb_called == 10);
+    nTEST_COMPARE_INT(cb_called, 10);
 }
 
-STEST_DEFINE(test_receiver) {
+void test_receiver(void) {
     mem_object_t obj;
     pull_error err = memory_open(&obj, OBJ_2, WRITE_ALL);
-    STEST_TRUE(!err);
+    nTEST_TRUE(!err, "Error opening memory: %s", err_as_str(err));
     receiver_ctx rcv;
     err = receiver_open(&rcv, &txp, identity_g, "/firmware", &obj);
-    STEST_TRUE(!err);
+    nTEST_TRUE(!err, "Error opening receiver: %s", err_as_str(err));
     while (!rcv.firmware_received) {
         err = receiver_chunk(&rcv);
-        STEST_TRUE(!err);
+        nTEST_TRUE(!err, "Error in receiver_chunk: %s", err_as_str(err));
         loop(&txp, TIMEOUT_MS);
     }
     err = receiver_close(&rcv);
-    STEST_TRUE(!err);
+    nTEST_TRUE(!err, "Error closing receiver: %s", err_as_str(err));
 }
 
 #endif /* TEST_PLATFORM_NETWORK_H_ */
