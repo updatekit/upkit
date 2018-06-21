@@ -52,13 +52,20 @@ check_firmware_tool() {
 
 generate_manifest() {
     echo "Generating firmware manifest..."
+    (( IMAGE_START_OFFSET=$IMAGE_START_PAGE*$PAGE_SIZE+$MANIFEST_SIZE ))
+    (( IMAGE_END_OFFSET=$IMAGE_END_PAGE*$PAGE_SIZE))
+    srec_cat $IMAGE -binary \
+         -crop $IMAGE_START_OFFSET $IMAGE_END_OFFSET \
+         -offset -$IMAGE_START_OFFSET -o $FIRMWARE.tmp -binary
     ($FIRMWARE_TOOL manifest generate -vv)
     echo "Generating firmware manifest...done"
 }
 
 generate_ota_image() {
     echo "Adding the manifest to the firmware..."
-    srec_cat $MANIFEST -binary $IMAGE -binary -offset $MANIFEST_SIZE -o $FIRMWARE -binary
+
+    srec_cat $MANIFEST -binary $FIRMWARE.tmp -binary \
+        -offset $MANIFEST_SIZE -o $FIRMWARE -binary
     echo "Adding the manifest to the firmware...done"
 }
 

@@ -8,7 +8,7 @@ offset = "0x100"
 
 # Paths
 signature_file = "signature.bin"
-binary_file = "application/build/zephyr/zephyr.bin"
+binary_file = "firmware/firmware.bin.tmp"
 out_file = "firmware/manifest.bin"
 
 # Keys
