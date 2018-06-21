@@ -1,6 +1,5 @@
-# This is a configuration file for RIOT
-
-title = "RIOT application"
+# This is a configuration file for Zephyr
+title = "Zephyr application"
 
 # Firmware Configurations
 version = "0x0001"
@@ -9,7 +8,7 @@ offset = "0x100"
 
 # Paths
 signature_file = "signature.bin"
-binary_file = "application/bin/remote-reva/runner.bin"
+binary_file = "application/build/zephyr/zephyr.bin"
 out_file = "firmware/manifest.bin"
 
 # Keys

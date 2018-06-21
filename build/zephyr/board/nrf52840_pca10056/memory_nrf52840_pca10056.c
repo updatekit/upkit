@@ -58,22 +58,20 @@ static flash_descr_t internal_flash_descr = {
     .close = NULL, /* not necessary */
     .rst = NULL
 };
-/*
-The flash is divided into 256 pages of 4 kB each that can be accessed by the CPU
-via both the ICODE and DCODE.
-*/
 
-// PAGE_SIZE is defined in Makefile.conf
-//#define BOOTLOADER_SIZE (BOOTLOADER_END_PAGE-BOOTLOADER_START_PAGE)*PAGE_SIZE
-#define IMAGE_START_PAGE 0
-#define IMAGE_END_PAGE 100
+#define RECOVERY_IMAGE 0
+#define PAGE_SIZE 0x1000
+#define INITIAL_MEMORY_OFFSET 0x0
+#define BOOTLOADER_START_PAGE 0
+#define BOOTLOADER_END_PAGE 8
+#define IMAGE_START_PAGE 9
+#define IMAGE_END_PAGE 109
+#define MANIFEST_SIZE 0x100
+#define BOOTLOADER_CTX_START_OFFSET 0x8000
+#define BOOTLOADER_CTX_END_OFFSET 0x9000
 
+#define BOOTLOADER_SIZE (BOOTLOADER_END_PAGE-BOOTLOADER_START_PAGE)*PAGE_SIZE
 #define IMAGE_SIZE (IMAGE_END_PAGE-IMAGE_START_PAGE)*PAGE_SIZE
-
-#define INITIAL_MEMORY_OFFSET 0
-#define BOOTLOADER_SIZE 0
-#define BOOTLOADER_CTX_START_OFFSET 0
-#define BOOTLOADER_CTX_END_OFFSET 0
 
 mem_object_t flash_objects[] = {
     [BOOTLOADER] = {
