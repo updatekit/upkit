@@ -6,10 +6,9 @@
 #include "network.h" // Test header
 
 int main() {
-    printf("starting test\n");
-    STEST_INIT();
-    STEST_RUN(test_txp);
-    STEST_RUN(test_receiver);
-    STEST_END();
+    nTEST_INIT();
+    nTEST_RUN(test_txp);
+    nTEST_RUN(test_receiver);
+    nTEST_END();
     return 0;
 }

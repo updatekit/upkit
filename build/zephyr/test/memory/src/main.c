@@ -4,9 +4,8 @@
 #include "memory.h"
 
 int main(void) {
-    UnityBegin("memory");
-    RUN_TEST(test_memory, test_memory_line);
-    UnityEnd();
-    while(1){};
+    nTEST_INIT();
+    nTEST_RUN(test_memory);
+    nTEST_END();
     return 0;
 }
