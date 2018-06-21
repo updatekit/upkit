@@ -1,6 +1,8 @@
 #include <libpull_agents/bootloader_agent.h>
-#include "platform_headers.h"
 #include "default_keys.h"
+
+#define BOOTLOADER
+#include "platform_headers.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -50,7 +52,7 @@ int main(void) {
         } else if (IS_CONTINUE(agent_msg)) {
             if (agent_msg.event == EVENT_BOOT) {
                 printf("loading object\n");
-                //load_object(*((mem_id_t*) agent_msg.event_data));
+                load_object(*((mem_id_t*) agent_msg.event_data));
             }
         }
         // XXX I still need to manage the fatal errors
