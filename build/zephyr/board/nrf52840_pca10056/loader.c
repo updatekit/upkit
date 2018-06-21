@@ -1,6 +1,7 @@
 #include <libpull/common.h>
 #include <libpull/memory.h>
 
+#define WITH_BOOTLOADER
 #include "platform_headers.h"
 
 #define RESET_VECTOR 0x4

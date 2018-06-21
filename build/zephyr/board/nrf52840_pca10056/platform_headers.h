@@ -5,7 +5,7 @@
 #include "loader.h"
 #include "utils.h"
 
-#ifdef BOOTLOADER
+#ifdef WITH_BOOTLOADER
 #include <arch/arm/cortex_m/cmsis.h>
 #include <drivers/system_timer.h>
 #endif

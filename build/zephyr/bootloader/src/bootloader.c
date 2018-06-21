@@ -1,7 +1,7 @@
 #include <libpull_agents/bootloader_agent.h>
 #include "default_keys.h"
 
-#define BOOTLOADER
+#define WITH_BOOTLOADER 1
 #include "platform_headers.h"
 
 #include <stdio.h>
