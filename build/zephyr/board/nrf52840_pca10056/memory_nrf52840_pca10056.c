@@ -59,7 +59,6 @@ static flash_descr_t internal_flash_descr = {
     .rst = NULL
 };
 
-#define RECOVERY_IMAGE 0
 #define PAGE_SIZE 0x1000
 #define INITIAL_MEMORY_OFFSET 0x0
 #define BOOTLOADER_START_PAGE 0
@@ -71,6 +70,8 @@ static flash_descr_t internal_flash_descr = {
 #define BOOTLOADER_CTX_END_OFFSET 0x9000
 
 #define BOOTLOADER_SIZE (BOOTLOADER_END_PAGE-BOOTLOADER_START_PAGE)*PAGE_SIZE
+#define BOOTLOADER_CTX_SIZE (BOOTLOADER_CTX_END_OFFSET-BOOTLOADER_CTX_START_OFFSET)
+#define IMAGE_OFFSET BOOTLOADER_SIZE+BOOTLOADER_CTX_SIZE
 #define IMAGE_SIZE (IMAGE_END_PAGE-IMAGE_START_PAGE)*PAGE_SIZE
 
 mem_object_t flash_objects[] = {
@@ -85,18 +86,18 @@ mem_object_t flash_objects[] = {
         .fdescr = &internal_flash_descr
     },
     [OBJ_1] = {
-        .start = INITIAL_MEMORY_OFFSET + BOOTLOADER_SIZE,
-        .end = INITIAL_MEMORY_OFFSET + BOOTLOADER_SIZE + IMAGE_SIZE,
+        .start = INITIAL_MEMORY_OFFSET + IMAGE_OFFSET,
+        .end = INITIAL_MEMORY_OFFSET + IMAGE_OFFSET + IMAGE_SIZE,
         .fdescr = &internal_flash_descr
     },
     [OBJ_2] = {
-        .start = INITIAL_MEMORY_OFFSET + BOOTLOADER_SIZE + IMAGE_SIZE,
-        .end = INITIAL_MEMORY_OFFSET + BOOTLOADER_SIZE + 2*IMAGE_SIZE,
+        .start = INITIAL_MEMORY_OFFSET + IMAGE_OFFSET + IMAGE_SIZE,
+        .end = INITIAL_MEMORY_OFFSET + IMAGE_OFFSET + 2*IMAGE_SIZE,
         .fdescr = &internal_flash_descr
     },
     [SWAP] = {
-        .start = INITIAL_MEMORY_OFFSET + BOOTLOADER_SIZE + 2*IMAGE_SIZE,
-        .end = INITIAL_MEMORY_OFFSET + BOOTLOADER_SIZE + 2*IMAGE_SIZE + PAGE_SIZE,
+        .start = INITIAL_MEMORY_OFFSET + IMAGE_OFFSET + 2*IMAGE_SIZE,
+        .end = INITIAL_MEMORY_OFFSET + IMAGE_OFFSET + 2*IMAGE_SIZE + PAGE_SIZE,
         .fdescr = &internal_flash_descr
     }
 };
