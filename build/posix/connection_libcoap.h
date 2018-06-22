@@ -41,7 +41,7 @@ typedef struct {
     blockwise_ctx_t bctx;
 } cb_ctx_t;
 
-typedef struct txp_ctx_ {
+typedef struct txp_ctx {
     coap_context_t* coap_ctx;
     coap_session_t* coap_session;
     cb_ctx_t cb_ctx;

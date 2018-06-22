@@ -49,7 +49,7 @@ typedef enum rest_method {
      PULL_DTLS_ECDH
  } conn_type;
 
-typedef struct txp_ctx_ txp_ctx;
+typedef struct txp_ctx txp_ctx;
 
 /** 
  * \brief Init the transport context.

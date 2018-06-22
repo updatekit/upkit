@@ -43,7 +43,6 @@ pull_error tinycrypt_secp256r1_ecc_verify(const uint8_t* x, const uint8_t* y, co
     memcpy(signature+32, s, 32);
     if (uECC_verify(pub_key, (uint8_t*) data, (size_t) data_len, signature, uECC_secp256r1()) != 1) {
         return VERIFICATION_FAILED_ERROR;
-
     }
     return PULL_SUCCESS;
 }

@@ -30,7 +30,7 @@ typedef struct {
 /** 
  * Receiver context used to hold data for the receiver function
  */
-typedef struct receiver_ctx_ {
+typedef struct receiver_ctx {
     identity_t identity;
     const char* resource;
     mem_object_t* obj;
