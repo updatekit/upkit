@@ -22,10 +22,3 @@ include_directories(${ROOTDIR}/test/platform)
 file(GLOB board_src ${BOARDDIR}/*.c)
 target_sources(app PRIVATE ${board_src})
 
-
-# Add the Unity testing framework
-file(GLOB unity_src ${ROOTDIR}/ext/unity/src/*.c)
-file(GLOB unity_header ${ROOTDIR}/ext/unity/src/*.h)
-target_sources(app PRIVATE ${unity_src})
-include_directories(${ROOTDIR}/ext/unity/src)
-
