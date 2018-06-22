@@ -14,6 +14,7 @@
 #include <libpull/common.h>
 #include <libpull/memory/memory_objects.h>
 #include <libpull/network/connection_interface.h>
+#include <libpull/network/writer.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -31,22 +32,16 @@ typedef struct {
  * Receiver context used to hold data for the receiver function
  */
 typedef struct receiver_ctx {
-    identity_t identity;
+    writer_ctx_t wctx;
+    receiver_msg_t msg;
+    txp_ctx* txp;
+    identity_t* identity;
     const char* resource;
-    mem_object_t* obj;
-    manifest_t mt;
-    int manifest_received;
     pull_error err;
     uint8_t num_err;
-    txp_ctx* txp;
-    uint32_t expected;
     uint8_t firmware_received;
     uint32_t start_offset;
-    uint32_t received;
-    receiver_msg_t msg;
 } receiver_ctx;
-
-
 
 /** 
  * \brief Open the receiver context.
@@ -65,7 +60,7 @@ typedef struct receiver_ctx {
  * \returns PULL_SUCCESS in case the receiver was correcly initialized or
  * the specific error otherwise.
  */
-pull_error receiver_open(receiver_ctx* ctx, txp_ctx* txp, identity_t identity,
+pull_error receiver_open(receiver_ctx* ctx, txp_ctx* txp, identity_t* identity,
                         const char* resource, mem_object_t* obj);
 
 /** 

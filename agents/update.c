@@ -67,7 +67,7 @@ agent_msg_t update_agent(update_agent_config* cfg, update_agent_ctx_t* ctx) {
         }
         rtxp = &ctx->rtxp;
     }
-    ctx->err = receiver_open(&ctx->rctx, rtxp, cfg->identity, cfg->receiver.resource, &ctx->new_obj);
+    ctx->err = receiver_open(&ctx->rctx, rtxp, &cfg->identity, cfg->receiver.resource, &ctx->new_obj);
     if (ctx->err) {
         log_error(ctx->err, "Error opening the receiver\n");
         PULL_CONTINUE(EVENT_CONN_RECEIVER_FAILURE_2, &ctx->err);

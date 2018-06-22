@@ -1,0 +1,24 @@
+#ifndef LIBPULL_NETWORK_WRITER_H_
+#define LIBPULL_NETWORK_WRITER_H_
+
+#include <libpull/common.h>
+#include <libpull/memory.h>
+#include <string.h>
+
+typedef pull_error (* validate_mt)(manifest_t* mt, void* user_data);
+
+typedef struct writer_ctx_t {
+    mem_object_t* obj;
+    manifest_t mt;
+    uint32_t received;
+    uint32_t expected;
+    bool manifest_received;
+    validate_mt validate_cb;
+    void* user_data;
+} writer_ctx_t;
+
+pull_error writer_open(writer_ctx_t* ctx, mem_object_t* obj, validate_mt cb, void* user_data);
+pull_error writer_chunk(writer_ctx_t* ctx, const char* data, uint32_t len);
+pull_error writer_close(writer_ctx_t* ctx);
+
+#endif /* LIBPULL_NETWORK_WRITER_H_ */
