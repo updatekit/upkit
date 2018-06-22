@@ -126,7 +126,7 @@ static const unsigned char ecdsa_pub_key_y[CURVE_LEN] = {
 };
 
 /* Generic device identity */
-static const identity_t identity_g = {
+static identity_t identity_g = {
     .udid = 0x0101,
     .random = 0x0202
 };

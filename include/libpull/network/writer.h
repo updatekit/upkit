@@ -13,11 +13,11 @@ typedef struct writer_ctx_t {
     uint32_t received;
     uint32_t expected;
     bool manifest_received;
-    validate_mt validate;
+    validate_mt validate_cb;
     void* user_data;
 } writer_ctx_t;
 
-pull_error writer_open(writer_ctx_t* ctx, mem_object_t* obj, validate_mt v, void* user_data);
+pull_error writer_open(writer_ctx_t* ctx, mem_object_t* obj, validate_mt cb, void* user_data);
 pull_error writer_chunk(writer_ctx_t* ctx, const char* data, uint32_t len);
 pull_error writer_close(writer_ctx_t* ctx);
 

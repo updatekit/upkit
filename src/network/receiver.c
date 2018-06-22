@@ -7,6 +7,18 @@
 
 #define MAX_RECEIVER_ERRORS 10
 
+pull_error validate_manifest(manifest_t* mt, void* validate_data) {
+    log_debug("Manifest received\n");
+    identity_t i = *(identity_t*) validate_data;
+    print_manifest(mt);
+
+    if (validate_identity(i, get_identity(mt)) != PULL_SUCCESS) {
+        log_debug("Received invalid identity\n");
+        return INVALID_IDENTITY_ERROR;
+    }
+    return PULL_SUCCESS;
+}
+
 static void handler(pull_error txp_err, const char* data, int len, void* more) {
     receiver_ctx* ctx = (receiver_ctx*) more;
     if (txp_err) {
@@ -24,6 +36,7 @@ static void handler(pull_error txp_err, const char* data, int len, void* more) {
     ctx->err = writer_chunk(&ctx->wctx, data, len);
     if (ctx->err) {
         break_loop(ctx->txp);
+        return;
     }
     if (ctx->wctx.received == ctx->wctx.expected) {
         ctx->firmware_received = 1;
@@ -31,13 +44,13 @@ static void handler(pull_error txp_err, const char* data, int len, void* more) {
     }
 }
 
-pull_error receiver_open(receiver_ctx* ctx, txp_ctx* txp, identity_t identity,
+pull_error receiver_open(receiver_ctx* ctx, txp_ctx* txp, identity_t* identity,
         const char* resource, mem_object_t* obj) {
     memset(ctx, 0, sizeof(receiver_ctx));
     ctx->txp = txp;
     ctx->resource = resource;
     ctx->identity = identity;
-    writer_open(&ctx->wctx, obj, NULL, NULL);
+    writer_open(&ctx->wctx, obj, validate_manifest, identity);
     return PULL_SUCCESS;
 }
 
@@ -47,7 +60,6 @@ pull_error receiver_chunk(receiver_ctx* ctx) {
         log_error(err, "Failure setting receiver callback\n");
         return RECEIVER_CHUNK_ERROR;
     }
-    ctx->start_offset = ctx->wctx.received;
     switch(ctx->err) {
         // Recoverable errors
         case MEMORY_WRITE_ERROR:
@@ -60,12 +72,16 @@ pull_error receiver_chunk(receiver_ctx* ctx) {
             // Not recoverable error. The upgrade process should start again
         case INVALID_SIZE_ERROR:
             return ctx->err;
-        default: /* ignore all the other cases */ break;
+        default: /* ignore all the other cases */ 
+            break;
     }
+
     ctx->msg.msg_version = MESSAGE_VERSION;
-    ctx->msg.offset = ctx->start_offset;
-    ctx->msg.udid = ctx->identity.udid;
-    ctx->msg.random = ctx->identity.random;
+    ctx->msg.offset = ctx->wctx.received;
+
+    ctx->msg.udid = ctx->identity->udid;
+    ctx->msg.random = ctx->identity->random;
+
     err = txp_request(ctx->txp, GET_BLOCKWISE2, ctx->resource, (const char*) &(ctx->msg), sizeof(receiver_msg_t));
     if (err) {
         log_error(err, "Failure setting receiver request\n");

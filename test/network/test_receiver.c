@@ -33,7 +33,7 @@ void test_get_firmware(void) {
     receiver_ctx rcv;
     pull_error err = txp_init(&txp, PROV_SERVER, 0, PULL_UDP, NULL);
     TEST_ASSERT_TRUE(!err);
-    err = receiver_open(&rcv, &txp, identity_g, "firmware", &obj);
+    err = receiver_open(&rcv, &txp, &identity_g, "firmware", &obj);
     TEST_ASSERT_TRUE(!err);
     while (!rcv.firmware_received) {
         err = receiver_chunk(&rcv);
@@ -55,7 +55,7 @@ void test_get_firmware_dtls(void) {
     };
     pull_error err = txp_init(&txp, PROV_SERVER, 0, PULL_DTLS_ECDH, &ecdh_data);
     TEST_ASSERT_TRUE(!err);
-    err = receiver_open(&rcv, &txp, identity_g, "firmware", &obj);
+    err = receiver_open(&rcv, &txp, &identity_g, "firmware", &obj);
     printf("Starting receiving the firmware\n");
     while (!rcv.firmware_received) {
         err = receiver_chunk(&rcv);
@@ -73,7 +73,7 @@ void test_receiver_chunk_invalid_transport(void) {
     receiver_ctx rcv;
     pull_error err = txp_init(&txp, PROV_SERVER, 0, PULL_UDP, NULL);
     TEST_ASSERT_TRUE(!err);
-    err = receiver_open(&rcv, &txp, identity_g, "firmware", &obj);
+    err = receiver_open(&rcv, &txp, &identity_g, "firmware", &obj);
     TEST_ASSERT_TRUE(!err);
     rcv.txp = NULL;
     err = receiver_chunk(&rcv);
@@ -85,7 +85,7 @@ void test_get_firmware_invalid_resource(void) {
     receiver_ctx rcv;
     pull_error err = txp_init(&txp, PROV_SERVER, 0, PULL_UDP, NULL);
     TEST_ASSERT_TRUE(!err);
-    err = receiver_open(&rcv, &txp, identity_g, "antani", &obj);
+    err = receiver_open(&rcv, &txp, &identity_g, "antani", &obj);
     TEST_ASSERT_TRUE(!err);
     while (!rcv.firmware_received && !err) {
         err = receiver_chunk(&rcv);
@@ -102,7 +102,7 @@ void test_get_firmware_invalid_size(void) {
     receiver_ctx rcv;
     pull_error err = txp_init(&txp, PROV_SERVER, 0, PULL_UDP, NULL);
     TEST_ASSERT_TRUE(!err);
-    err = receiver_open(&rcv, &txp, identity_g, "firmware/invalid_size", &obj);
+    err = receiver_open(&rcv, &txp, &identity_g, "firmware/invalid_size", &obj);
     TEST_ASSERT_TRUE(!err);
     while (!rcv.firmware_received && !err) {
         err = receiver_chunk(&rcv);
