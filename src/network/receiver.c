@@ -1,9 +1,9 @@
 #include <libpull/network/receiver.h>
+#include <libpull/network/writer.h>
 #include <libpull/network/async_interface.h>
 #include <libpull/memory/memory_objects.h>
 #include <libpull/memory/memory_interface.h>
 #include <libpull/common.h>
-#include <string.h>
 
 #define MAX_RECEIVER_ERRORS 10
 
@@ -15,60 +15,19 @@ static void handler(pull_error txp_err, const char* data, int len, void* more) {
         break_loop(ctx->txp);
         return;
     }
-    if (len <= 0) {
+    if (len <= 0 || data == NULL) {
         log_error(NETWORK_ERROR, "The received lenght (%d) is invalid\n", len);
         ctx->err = NETWORK_ERROR; 
         break_loop(ctx->txp);
         return;
     }
-    if (memory_write(ctx->obj, (const uint8_t*) data, len, ctx->received) != len) {
-        log_error(MEMORY_WRITE_ERROR, "Failure writing the received data\n");
-        ctx->err = MEMORY_WRITE_ERROR;
+    ctx->err = writer_chunk(&ctx->wctx, data, len);
+    if (ctx->err) {
         break_loop(ctx->txp);
-        return;
     }
-    if (!ctx->manifest_received) {
-        log_debug("Manifest still not received\n");
-        int16_t missing = sizeof(manifest_t)-ctx->received;
-        if (missing <= 0) {
-            log_debug("Manifest received\n");
-            print_manifest(&ctx->mt);
-            if (validate_identity(ctx->identity, get_identity(&ctx->mt)) != PULL_SUCCESS) { 
-                log_debug("Received invalid identity\n");
-                ctx->err = INVALID_IDENTITY_ERROR;
-                break_loop(ctx->txp);
-                return;
-            }
-            ctx->expected = get_size(&ctx->mt)+get_offset(&ctx->mt);
-            // TODO find a way to check if the firmware to receive is
-            // bigger than the object size
-            // XXX the value returned by get_size is an unsigned and it does not
-            // make sense to check for <= 0; TODO fix it
-            if (get_size(&ctx->mt) <= 0 /* ||ctx->mt.vendor.size > MAX_FIRMWARE_SIZE-sizeof(manifest_t)*/) {
-                log_debug("Received an invalid size %d, aborting\n", (int) ctx->mt.vendor.size);
-                ctx->err = INVALID_SIZE_ERROR;
-                break_loop(ctx->txp);
-                return;
-            }
-            ctx->manifest_received = 1;
-        } else {
-            uint8_t* mt_ptr = (uint8_t*) &ctx->mt;
-            memcpy(mt_ptr+ctx->received, data, ctx->received+len<=sizeof(manifest_t)? len: missing);
-        }
-    }
-    ctx->received+=len;
-    if (ctx->manifest_received) {
-        log_info("Received %u bytes. Expected %u bytes\r", ctx->received, ctx->expected);
-        if (ctx->received == ctx->expected) {
-            ctx->firmware_received = 1;
-            ctx->err = PULL_SUCCESS;
-            break_loop(ctx->txp);
-        } else if (ctx->received > ctx->expected) {
-            ctx->err = INVALID_SIZE_ERROR;
-            log_error(INVALID_SIZE_ERROR, "Error receiving the firmware\n");
-            break_loop(ctx->txp);
-            return;
-        }
+    if (ctx->wctx.received == ctx->wctx.expected) {
+        ctx->firmware_received = 1;
+        break_loop(ctx->txp);
     }
 }
 
@@ -76,12 +35,9 @@ pull_error receiver_open(receiver_ctx* ctx, txp_ctx* txp, identity_t identity,
         const char* resource, mem_object_t* obj) {
     memset(ctx, 0, sizeof(receiver_ctx));
     ctx->txp = txp;
-    ctx->err = PULL_SUCCESS;
-    ctx->obj = obj;
     ctx->resource = resource;
     ctx->identity = identity;
-    ctx->obj = obj;
-    ctx->firmware_received = 0;
+    writer_open(&ctx->wctx, obj, NULL, NULL);
     return PULL_SUCCESS;
 }
 
@@ -91,7 +47,7 @@ pull_error receiver_chunk(receiver_ctx* ctx) {
         log_error(err, "Failure setting receiver callback\n");
         return RECEIVER_CHUNK_ERROR;
     }
-    ctx->start_offset = ctx->received;
+    ctx->start_offset = ctx->wctx.received;
     switch(ctx->err) {
         // Recoverable errors
         case MEMORY_WRITE_ERROR:
@@ -119,6 +75,6 @@ pull_error receiver_chunk(receiver_ctx* ctx) {
 }
 
 pull_error receiver_close(receiver_ctx* ctx) {
-    /* Do nothing */
+    writer_close(&ctx->wctx);
     return PULL_SUCCESS;
 }

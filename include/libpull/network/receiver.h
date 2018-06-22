@@ -14,6 +14,7 @@
 #include <libpull/common.h>
 #include <libpull/memory/memory_objects.h>
 #include <libpull/network/connection_interface.h>
+#include <libpull/network/writer.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -34,15 +35,12 @@ typedef struct receiver_ctx {
     identity_t identity;
     const char* resource;
     mem_object_t* obj;
-    manifest_t mt;
-    int manifest_received;
     pull_error err;
     uint8_t num_err;
     txp_ctx* txp;
-    uint32_t expected;
     uint8_t firmware_received;
     uint32_t start_offset;
-    uint32_t received;
+    writer_ctx_t wctx;
     receiver_msg_t msg;
 } receiver_ctx;
 
