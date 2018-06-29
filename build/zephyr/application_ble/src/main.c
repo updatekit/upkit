@@ -1,13 +1,9 @@
-#include <zephyr/types.h>
-#include <stddef.h>
+#include <zephyr.h>
 #include <string.h>
 #include <stdio.h>
-#include <zephyr.h>
 
 #include <bluetooth/bluetooth.h>
 #include <bluetooth/conn.h>
-#include <bluetooth/uuid.h>
-#include <bluetooth/gatt.h>
 
 #include "libpull_gatt.h"
 
@@ -23,18 +19,23 @@ static const struct bt_data sd[] = {
 	BT_DATA(BT_DATA_NAME_COMPLETE, DEVICE_NAME, DEVICE_NAME_LEN),
 };
 
-static void connected(struct bt_conn *conn, u8_t err)
-{
+struct bt_conn *default_conn;
+
+static void connected(struct bt_conn *conn, uint8_t err) {
 	if (err) {
 		printf("Connection failed (err %u)\n", err);
 	} else {
+        default_conn = bt_conn_ref(conn);
 		printf("Connected\n");
 	}
 }
 
-static void disconnected(struct bt_conn *conn, u8_t reason)
-{
+static void disconnected(struct bt_conn *conn, uint8_t reason) {
 	printf("Disconnected (reason %u)\n", reason);
+    if (default_conn) {
+        bt_conn_unref(default_conn);
+        default_conn = NULL;
+    }
 }
 
 static struct bt_conn_cb conn_callbacks = {
@@ -42,28 +43,29 @@ static struct bt_conn_cb conn_callbacks = {
 	.disconnected = disconnected,
 };
 
-void main(void)
+int main(void)
 {
 	int err;
 
 	err = bt_enable(NULL);
 	if (err) {
 		printf("Bluetooth init failed (err %d)\n", err);
-		return;
+		return 1;
 	}
 
 	printf("Bluetooth initialized\n");
 
-    libpull_gatt_init();
+    mem_object_t obj;
+    libpull_gatt_init(&obj);
 
 	bt_conn_cb_register(&conn_callbacks);
-
 	err = bt_le_adv_start(BT_LE_ADV_CONN, ad, ARRAY_SIZE(ad), sd, ARRAY_SIZE(sd));
 
 	if (err) {
-		printf("Advertising failed to start (err %d)\n", err);
-		return;
+		printf("Advertising failed (err %d)\n", err);
+		return 1;
 	}
-
-	printf("Advertising successfully started\n");
+    printf("Advertising...");
+    return 0;
 }
+
