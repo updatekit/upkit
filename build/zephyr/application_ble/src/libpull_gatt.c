@@ -12,7 +12,7 @@
 
 #include "libpull_gatt.h"
 
-push_receiver_ctx_t ctx;
+libpull_fsm_ctx_t ctx;
 
 /* Libpull GATT service UUIDs */
 static struct bt_uuid_128 libpull_service_udid =
@@ -152,8 +152,9 @@ static ssize_t libpull_fsm(struct bt_conn *conn,
     uint8_t old_state = ctx.state;
     uint8_t old_result = ctx.result;
     pull_error err;
+    log_debug("\nReceived %u bytes\n", len);
     libpull_cmd_t cmd = (*characteristic == update_characteristic)? CMD_UPDATE: CMD_PACKAGE;
-    err = push_receiver_receive(&ctx, cmd, buf, len);
+    err = libpull_fsm_receive(&ctx, cmd, buf, len);
     if (err) {
         log_error(err, "Error in the fsm\n");
         return 0;
@@ -170,7 +171,7 @@ static ssize_t libpull_fsm(struct bt_conn *conn,
 static struct bt_gatt_service libpull_service = BT_GATT_SERVICE(libpull_attrs);
 
 pull_error libpull_gatt_init(mem_object_t *obj) {
-    pull_error err = push_receiver_init(&ctx, obj);
+    pull_error err = libpull_fsm_init(&ctx, obj);
     if (err) {
         log_error(err, "Error initializing push receiver\n");
         return err;

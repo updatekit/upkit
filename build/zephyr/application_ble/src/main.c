@@ -4,6 +4,7 @@
 
 #include <bluetooth/bluetooth.h>
 #include <bluetooth/conn.h>
+#include <bluetooth/gatt.h>
 
 #include "libpull_gatt.h"
 
@@ -11,7 +12,7 @@
 #define DEVICE_NAME_LEN	(sizeof(DEVICE_NAME) - 1)
 
 static const struct bt_data ad[] = {
-	BT_DATA_BYTES(BT_DATA_FLAGS, (BT_LE_AD_GENERAL | BT_LE_AD_NO_BREDR)),
+	BT_DATA_BYTES(BT_DATA_FLAGS, BT_LE_AD_NO_BREDR),
 	BT_DATA_BYTES(BT_DATA_UUID16_ALL, 0x0a, 0x18),
 };
 
@@ -25,6 +26,7 @@ static void connected(struct bt_conn *conn, uint8_t err) {
 	if (err) {
 		printf("Connection failed (err %u)\n", err);
 	} else {
+        printf("Max MTU: %u\n", bt_gatt_get_mtu(conn));
         default_conn = bt_conn_ref(conn);
 		printf("Connected\n");
 	}

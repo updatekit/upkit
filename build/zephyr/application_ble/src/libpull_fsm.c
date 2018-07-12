@@ -1,4 +1,4 @@
-#include "push_receiver.h"
+#include "libpull_fsm.h"
 
 #include <libpull/memory.h>
 
@@ -11,7 +11,7 @@ int default_CSPRNG(uint8_t *dest, unsigned int size) {
     return 0;
 }
 
-pull_error push_receiver_init(push_receiver_ctx_t* ctx, mem_object_t* obj) {
+pull_error libpull_fsm_init(libpull_fsm_ctx_t* ctx, mem_object_t* obj) {
     ctx->state = STATE_IDLE;
     ctx->result = RESULT_INIT;
     ctx->obj = obj;
@@ -29,9 +29,9 @@ pull_error push_receiver_init(push_receiver_ctx_t* ctx, mem_object_t* obj) {
     return PULL_SUCCESS;
 }
 
-pull_error pre_verification(manifest_t* mt, void* user_data) {
+pull_error fsm_pre_verification(manifest_t* mt, void* user_data) {
     /*log_info("Validating received manifest\n");
-    push_receiver_ctx_t* ctx = (push_receiver_ctx_t*) user_data;
+    libpull_fsm_ctx_t* ctx = (libpull_fsm_ctx_t*) user_data;
     if (get_version(mt) <= ctx->version) {
         log_debug("received version: %u - local version: %u\n", get_version(mt), ctx->version);
         log_error(INVALID_OBJECT_ERROR, "Received firmware has invalid version\n");
@@ -48,13 +48,13 @@ pull_error pre_verification(manifest_t* mt, void* user_data) {
 #define BUFFER_SIZE 1024
 uint8_t buffer[BUFFER_SIZE];
 
-pull_error post_verification(mem_object_t* obj, void* user_data) {
+pull_error fsm_post_verification(mem_object_t* obj, void* user_data) {
     // XXX These informations should be derived from the specific user data
     return verify_object(obj, tinycrypt_digest_sha256, vendor_x_g, vendor_y_g,
             tinycrypt_secp256r1_ecc, buffer, BUFFER_SIZE);
 }
 
-pull_error push_receiver_receive(push_receiver_ctx_t* ctx, libpull_cmd_t cmd, const uint8_t* buf, size_t len) {
+pull_error libpull_fsm_receive(libpull_fsm_ctx_t* ctx, libpull_cmd_t cmd, const uint8_t* buf, size_t len) {
     pull_error err;
     version_t ignore;
     switch (ctx->state) {
@@ -75,7 +75,7 @@ pull_error push_receiver_receive(push_receiver_ctx_t* ctx, libpull_cmd_t cmd, co
                 return err;
             }
             // (2) Open the writer
-            err = writer_open(&ctx->wctx, ctx->obj, pre_verification, ctx);
+            err = writer_open(&ctx->wctx, ctx->obj, fsm_pre_verification, ctx);
             if (err) {
                 log_error(err, "Error opening the memory_object\n");
                 return err;
@@ -116,7 +116,7 @@ pull_error push_receiver_receive(push_receiver_ctx_t* ctx, libpull_cmd_t cmd, co
             // (2) perform verification
             log_debug("Performing verification\n");
             memory_open(ctx->obj, ctx->id, READ_ONLY);
-            err = post_verification(ctx->obj, NULL /* here I must pass some data */);
+            err = fsm_post_verification(ctx->obj, NULL /* here I must pass some data */);
             memory_close(ctx->obj);
             if (err) {
                 log_error(err, "Verification failed\n");
@@ -125,6 +125,7 @@ pull_error push_receiver_receive(push_receiver_ctx_t* ctx, libpull_cmd_t cmd, co
                 ctx->state = STATE_IDLE;
                 return err;
             }
+            log_debug("Verification failed\n");
             ctx->result = RESULT_SUCCESS;
             break;
         default:

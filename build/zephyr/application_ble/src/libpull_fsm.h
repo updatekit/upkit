@@ -1,5 +1,5 @@
-#ifndef LIBPULL_PUSH_RECEIVER_H_
-#define LIBPULL_PUSH_RECEIVER_H_
+#ifndef LIBPULL_libpull_fsm_H_
+#define LIBPULL_libpull_fsm_H_
 
 #include <libpull/common.h>
 #include <libpull/network/writer.h>
@@ -35,7 +35,7 @@ enum libpull_result_t {
 typedef uint8_t libpull_state_t;
 typedef uint8_t libpull_result_t;
 
-typedef struct push_receiver_ctx_t {
+typedef struct libpull_fsm_ctx_t {
     version_t version;
     platform_t platform;
     identity_t identity;
@@ -45,14 +45,14 @@ typedef struct push_receiver_ctx_t {
     writer_ctx_t wctx;
     mem_id_t id;
     mem_object_t* obj;
-} push_receiver_ctx_t;
+} libpull_fsm_ctx_t;
 
-pull_error push_receiver_init(push_receiver_ctx_t* ctx, mem_object_t* obj);
+pull_error libpull_fsm_init(libpull_fsm_ctx_t* ctx, mem_object_t* obj);
 
-pull_error pre_verification(manifest_t* mt, void* user_data);
+pull_error fsm_pre_verification(manifest_t* mt, void* user_data);
 
-pull_error post_verification(mem_object_t* obj, void* user_data);
+pull_error fsm_post_verification(mem_object_t* obj, void* user_data);
 
-pull_error push_receiver_receive(push_receiver_ctx_t* ctx, libpull_cmd_t cmd, const uint8_t* buf, size_t len);
+pull_error libpull_fsm_receive(libpull_fsm_ctx_t* ctx, libpull_cmd_t cmd, const uint8_t* buf, size_t len);
 
-#endif /* LIBPULL_PUSH_RECEIVER_H_ */
+#endif /* LIBPULL_libpull_fsm_H_ */
