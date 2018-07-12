@@ -1,4 +1,4 @@
-#include "libpull_fsm.h"
+#include <libpull/fsm/libpull_fsm.h>
 
 #include <libpull/memory.h>
 

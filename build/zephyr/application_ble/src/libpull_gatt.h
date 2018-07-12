@@ -5,7 +5,7 @@
 extern "C" {
 #endif
 
-#include "libpull_fsm.h"
+#include <libpull/fsm/libpull_fsm.h>
 
 /* These UUID has been generated using
  * https://www.uuidgenerator.net */
