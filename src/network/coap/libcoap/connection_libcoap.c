@@ -1,13 +1,15 @@
+#ifdef WITH_CONNECTION_LIBCOAP
+
 #include "connection_libcoap.h"
 
 #include <unistd.h>
 #include <sys/select.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
-//#include <arpa/inet.h>
-//#include <netdb.h>
-//
-//#include <block.h>
+#include <arpa/inet.h>
+#include <netdb.h>
+#include <coap/coap.h>
+#include <coap/block.h>
 
 #define CALLBACK(a,b,c) ((void(*)())((cb_ctx_t*)ctx->app)->cb)(a,b,c,((cb_ctx_t*)ctx->app)->more)
 #define BCTX ((cb_ctx_t*)ctx->app)->bctx
@@ -47,9 +49,7 @@ pull_error txp_init(txp_ctx* ctx, const char* addr, uint16_t port, conn_type typ
             final_port = !port? COAP_DEFAULT_PORT: port;
             break;
         case PULL_DTLS_PSK:
-            // XXX Until I implement DTLS also for the libpull port for RIOT
-            // I cannnot enable this code
-            /*proto = COAP_PROTO_DTLS;
+            proto = COAP_PROTO_DTLS;
             final_port = !port? COAPS_DEFAULT_PORT: port;
             dtls_psk_data_t* psk_data = (dtls_psk_data_t*) conn_data;
             if (!psk_data) {
@@ -68,7 +68,7 @@ pull_error txp_init(txp_ctx* ctx, const char* addr, uint16_t port, conn_type typ
             coap_context_set_ecdsa(ctx->coap_ctx, SECP256R1,
                     ecdh_data->priv_key, ecdh_data->pub_key_x,
                     ecdh_data->pub_key_y, libcoap_verify_key);
-            break;*/
+            break;
         default:
             log_error(INVALID_CONN_DATA_ERROR, "Protocol not supported\n");
             return INVALID_CONN_DATA_ERROR;
@@ -77,17 +77,34 @@ pull_error txp_init(txp_ctx* ctx, const char* addr, uint16_t port, conn_type typ
     coap_set_log_level(LOG_DEBUG);
     coap_dtls_set_log_level(LOG_DEBUG);
 #endif 
-    ipv6_addr_t ipv6_addr;
-    ipv6_addr_from_str(&ipv6_addr, addr);
-
-    coap_address_t bind_addr;
-    coap_address_init(&bind_addr);
-    memcpy(&bind_addr.addr.sin6.sin6_addr, &ipv6_addr, sizeof(ipv6_addr));
-    bind_addr.size = sizeof(struct sockaddr_in6);
-    bind_addr.addr.sin6.sin6_port = htons(final_port);
-    bind_addr.addr.sa.sa_family = AF_INET6;
-
-    ctx->coap_session = coap_new_client_session(ctx->coap_ctx, NULL, &bind_addr, proto);
+    // Resolve the address
+    struct addrinfo hints;
+    struct addrinfo *result = NULL, *rp;
+    memset(&hints, 0, sizeof(struct addrinfo));
+    hints.ai_family = AF_UNSPEC;
+    hints.ai_socktype = SOCK_DGRAM;
+    hints.ai_flags = AI_PASSIVE | AI_ALL;
+    int error = getaddrinfo(addr, NULL, &hints, &result);
+    if (error) {
+        log_error(RESOLVER_ERROR, "getaddrinfo: %s\n", gai_strerror(error));
+        return RESOLVER_ERROR;
+    }
+    // Create a libcoap session
+    ctx->coap_session = NULL;
+    log_debug("Resolving host %s and port %d\n", addr, final_port);
+    for (rp = result; rp != NULL; rp = rp->ai_next) {
+        coap_address_t bind_addr;
+        if (rp->ai_addrlen <= sizeof(bind_addr.addr) && (rp->ai_family == AF_INET6 || rp->ai_family == AF_INET)) {
+            coap_address_init(&bind_addr);
+            bind_addr.size = rp->ai_addrlen;
+            memcpy(&bind_addr.addr, rp->ai_addr, rp->ai_addrlen);
+            bind_addr.addr.sin.sin_port = htons(final_port);
+            ctx->coap_session = coap_new_client_session(ctx->coap_ctx, NULL, &bind_addr, proto);
+            if (ctx->coap_session)
+                break;
+        }
+    }
+    freeaddrinfo(result);
     return ctx->coap_session == NULL ? RESOLVER_ERROR : PULL_SUCCESS;
 }
 
@@ -250,3 +267,5 @@ void txp_end(txp_ctx* ctx) {
     }
     coap_cleanup();
 }
+
+#endif /* WITH_CONNECTION_LIBCOAP */

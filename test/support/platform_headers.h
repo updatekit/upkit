@@ -2,7 +2,7 @@
 #define PLATFORM_HEADERS_H_
 
 #include "build/posix/memory_posix.h"
-#include "build/posix/connection_libcoap.h"
-#include "build/posix/async_libcoap.h"
+#include "src/network/coap/libcoap/connection_libcoap.h"
+#include "src/network/coap/libcoap/async_libcoap.h"
 
 #endif /* PLATFORM_HEADERS_H_ */

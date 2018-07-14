@@ -5,11 +5,11 @@ AM_CFLAGS = -Wall -I. -Iinclude -Iext/tinycrypt/lib/include -Iext/tinydtls -DHAV
 
 noinst_LIBRARIES = libpull.a
 
-libpull_a_SOURCES = src/common/error.c src/common/identity.c
-libpull_a_SOURCES += src/memory/manifest.c src/memory/memory_objects.c src/memory/simple_manifest.c
-libpull_a_SOURCES += src/memory/memory_impl.c src/memory/memory_flash.c
-libpull_a_SOURCES += src/network/receiver.c src/network/subscriber.c src/network/connection_config.c src/network/writer.c
-libpull_a_SOURCES += src/security/verifier.c src/security/tinycrypt.c src/security/tinydtls.c src/security/cryptoauthlib.c
+libpull_a_SOURCES = src/core/common/error.c src/core/common/identity.c
+libpull_a_SOURCES += src/core/memory/manifest.c src/core/memory/memory_objects.c src/core/memory/simple_manifest.c
+libpull_a_SOURCES += src/core/memory/memory_impl.c src/core/memory/memory_flash.c
+libpull_a_SOURCES += src/core/network/receiver.c src/core/network/subscriber.c src/core/network/connection_config.c src/core/network/writer.c
+libpull_a_SOURCES += src/core/security/verifier.c src/core/security/tinycrypt.c src/core/security/tinydtls.c src/core/security/cryptoauthlib.c
 
 pkginclude_HEADERS = include/
 # TODO Finish including all the headers

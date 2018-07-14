@@ -6,7 +6,7 @@
 #include <bluetooth/conn.h>
 #include <bluetooth/gatt.h>
 
-#include "libpull_gatt.h"
+#include <libpull/network/gatt.h>
 
 #define DEVICE_NAME	CONFIG_BT_DEVICE_NAME
 #define DEVICE_NAME_LEN	(sizeof(DEVICE_NAME) - 1)

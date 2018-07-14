@@ -1,3 +1,5 @@
+#ifdef WITH_CONNECTION_ERCOAP
+
 #include <libpull/common.h>
 #include <libpull/network.h>
 
@@ -62,3 +64,5 @@ inline void txp_end(txp_ctx* ctx) {
     // TODO this must be implemented and it is important for DTLS because in
     // case of error is useful to close the connection and free the resources
 }
+
+#endif /* WITH_CONNECTION_ERCOAP */

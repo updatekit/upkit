@@ -1,6 +1,8 @@
 #ifndef CONNECTION_LIBCOAP_H_
 #define CONNECTION_LIBCOAP_H_
 
+#ifdef WITH_CONNECTION_LIBCOAP
+
 #include <libpull/common.h>
 #include <libpull/network/connection_interface.h>
 #include <libpull/security/ecc.h>
@@ -41,7 +43,7 @@ typedef struct {
     blockwise_ctx_t bctx;
 } cb_ctx_t;
 
-typedef struct txp_ctx_ {
+typedef struct txp_ctx {
     coap_context_t* coap_ctx;
     coap_session_t* coap_session;
     cb_ctx_t cb_ctx;
@@ -59,4 +61,5 @@ pull_error txp_observe(txp_ctx* ctx, const char* resource, const char* token, ui
 
 void txp_end(txp_ctx* ctx);
 
+#endif /* WITH_CONNECTION_LIBCOAP */
 #endif /* CONNECTION_LIBCOAP_H_ */

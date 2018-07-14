@@ -1,6 +1,9 @@
+#ifdef WITH_CONNECTION_ZOAP
+
 #include <stdio.h>
 
-#include "async.h"
+#include <libpull/common.h>
+#include <libpull/network.h>
 #include "connection.h"
 
 /* This is a blocking function, it will return when the
@@ -23,3 +26,5 @@ void loop(txp_ctx* ctx, uint32_t timeout) {
 void break_loop(txp_ctx* ctx) {
     ctx->loop = 0;
 }
+
+#endif /* WITH_CONNECTION_ZOAP */

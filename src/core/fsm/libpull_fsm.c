@@ -2,7 +2,6 @@
 
 #include <libpull/memory.h>
 
-// XXX This must be removed
 #include "platform_headers.h"
 #include "default_keys.h"
 #include <libpull/security.h>

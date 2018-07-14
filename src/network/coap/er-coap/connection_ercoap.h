@@ -1,6 +1,8 @@
 #ifndef CONNECTION_ERCOAP_H_
 #define CONNECTION_ERCOAP_H_
 
+#ifdef WITH_CONNECTION_ERCOAP
+
 #include <libpull/common.h>
 #include <libpull/network.h>
 
@@ -46,4 +48,5 @@ pull_error txp_observe(txp_ctx* ctx, const char* resource, const char* token, ui
 
 void txp_end(txp_ctx* ctx);
 
+#endif /* WITH_CONNECTION_ERCOAP */
 #endif /* CONNECTION_ERCOAP_H_ */

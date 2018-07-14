@@ -1,6 +1,8 @@
 #ifndef CONNECTION_H_
 #define CONNECTION_H_
 
+#ifdef WITH_CONNECTION_ZOAP
+
 #include <libpull/common.h>
 #include <libpull/network/connection_interface.h>
 #include <libpull/security/ecc.h>
@@ -15,9 +17,6 @@
 #define COAP_DEFAULT_PORT 5683
 #define COAPS_DEFAULT_PORT 5684
 
-// To support blockwise requests the callback should be aware of the
-// parameters used to perform the request, to create a new response with
-// the correct data
 typedef struct {
     uint8_t method;
     uint8_t enabled;
@@ -34,18 +33,13 @@ typedef struct {
     callback cb;
     void* more;
     blockwise_request_t bctx;
-
     struct coap_block_context block;
 } cb_ctx_t;
 
 typedef struct txp_ctx {
     struct net_context *net_ctx;
     struct sockaddr_in6 dest_addr;
-
-
-
     pull_error err;
-
     cb_ctx_t cb_ctx;
     void* conn_data;
     uint8_t loop;
@@ -55,4 +49,5 @@ typedef struct txp_ctx {
 void udp_receive(struct net_context *context,
     struct net_pkt *pkt, int status, void *user_data);
 
+#endif /* WITH_CONNECTION_ZOAP */
 #endif /* CONNECTION_H_ */

@@ -1,3 +1,5 @@
+#ifdef WITH_UPDATE_AGENT
+
 #include <libpull_agents/update.h>
 
 #include "platform_headers.h"
@@ -113,3 +115,4 @@ agent_msg_t update_agent(update_agent_config* cfg, update_agent_ctx_t* ctx) {
     PULL_FINISH(EVENT_APPLY);
 }
 
+#endif /* WITH_UPDATE_AGENT */

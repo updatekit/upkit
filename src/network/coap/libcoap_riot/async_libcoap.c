@@ -1,4 +1,7 @@
+#ifdef WITH_CONNECTION_LIBCOAP_RIOT
+
 #include "async_libcoap.h"
+#include "connection_libcoap.h"
 
 #include <coap/coap.h>
 #include <stdio.h>
@@ -31,3 +34,5 @@ void loop(txp_ctx* ctx, uint32_t timeout) {
 void break_loop(txp_ctx* ctx) {
     ctx->loop = 0;
 }
+
+#endif /* WITH_CONNECTION_LIBCOAP_RIOT */

@@ -1,3 +1,4 @@
+#ifdef WITH_CONNECTION_LIBCOAP
 #include "async_libcoap.h"
 
 #include <coap/coap.h>
@@ -24,3 +25,5 @@ void loop(txp_ctx* ctx, uint32_t timeout) {
 void break_loop(txp_ctx* ctx) {
     ctx->loop = 0;
 }
+
+#endif /* WITH_CONNECTION_LIBCOAP */

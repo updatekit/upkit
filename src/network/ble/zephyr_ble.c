@@ -1,3 +1,5 @@
+#ifdef WITH_ZEPHYR_BLE
+
 #include <string.h>
 #include <zephyr.h>
 
@@ -182,3 +184,5 @@ pull_error libpull_gatt_init(mem_object_t *obj) {
     }
     return PULL_SUCCESS;
 }
+
+#endif /* WITH_ZEPHYR_BLE */

@@ -1,3 +1,5 @@
+#ifdef WITH_CONNECTION_ZOAP
+
 #include "connection.h"
 
 #include <net/coap_link_format.h>
@@ -357,3 +359,5 @@ void txp_end(txp_ctx* ctx) {
     }
     ctx->net_ctx = NULL;
 }
+
+#endif /* WITH_CONNECTION_ZOAP */
