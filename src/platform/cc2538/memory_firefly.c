@@ -1,11 +1,10 @@
-#include "memory_firefly.h"
-#include "./rom.h"
-
-#include "./utils.h"
-
 #include <libpull/memory.h>
 #include <libpull/common.h>
 #include <string.h>
+
+#include "memory_firefly.h"
+#include "platform_headers.h"
+#include "./rom.h"
 
 const mem_slot_t memory_slots[] = {
     {
@@ -53,7 +52,6 @@ static flash_descr_t internal_flash_descr = {
     .rst = NULL
 };
 
-// PAGE_SIZE is defined in Makefile.conf
 #define BOOTLOADER_SIZE (BOOTLOADER_END_PAGE-BOOTLOADER_START_PAGE)*PAGE_SIZE
 #define IMAGE_SIZE (IMAGE_END_PAGE-IMAGE_START_PAGE)*PAGE_SIZE
 
