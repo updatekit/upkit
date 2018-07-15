@@ -1,3 +1,5 @@
+#ifdef WITH_PLATFORM_POSIX
+
 #include "memory_posix.h"
 
 #include <stdio.h>
@@ -127,3 +129,5 @@ pull_error memory_close_impl(mem_object_t* ctx) {
     }
     return PULL_SUCCESS;
 }
+
+#endif /* WITH_PLATFORM_POSIX */

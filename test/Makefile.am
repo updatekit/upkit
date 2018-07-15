@@ -2,6 +2,7 @@ AUTOMAKE_OPTIONS = subdir-objects
 AM_CFLAGS = -Wall -I. -I../include -I../ext/tinycrypt/lib/include -I../ext/tinydtls -DHAVE_CONFIG_H
 AM_CFLAGS += -I../build/posix -Isupport -I../ext/unity/src -I../ext/libcoap/include -Imocks
 AM_CFLAGS += -DHAVE_CONFIG_H -DUSE_TESTING_KEYS=1 -DWITH_CONNECTION_LIBCOAP=1 -DWITH_UPDATE_AGENT=1
+AM_CFLAGS += -DWITH_PLATFORM_POSIX=1
 
 if COND_GCOV
   MAYBE_COVERAGE= -fprofile-arcs -ftest-coverage
@@ -25,13 +26,13 @@ SUPPORT_SRC = support/external_variables.c support/utils.c
 AGENTS_SRC = ../src/agents/update.c ../src/agents/bootloader_agent.c
 
 NETWORK_IMPL = ../src/network/coap/libcoap/connection_libcoap.c ../src/network/coap/libcoap/async_libcoap.c
-MEMORY_IMPL = ../src/core/memory/memory_impl.c ../build/posix/memory_posix.c
+MEMORY_IMPL = ../src/core/memory/memory_impl.c ../src/platform/posix/memory_posix.c
 MANIFEST_IMPL = ../src/core/memory/manifest.c ../src/core/memory/simple_manifest.c
 
 ALL_SRC = $(UNITY_SRC) $(COMMON_SRC) $(MEMORY_SRC) $(SECURITY_SRC) $(MANIFEST_IMPL) $(NETWORK_SRC)
 ALL_SRC += $(NETWORK_IMPL) $(MEMORY_IMPL) $(SUPPORT_SRC)
 
-MOCK_MEMORY = mocks/memory_mock.c ../build/posix/memory_posix.c
+MOCK_MEMORY = mocks/memory_mock.c ../src/platform/posix/memory_posix.c
 MOCK_MANIFEST = mocks/manifest_mock.c ../src/core/memory/simple_manifest.c
 NO_MOCK_SRC = $(UNITY_SRC) $(COMMON_SRC) $(SECURITY_SRC) $(NETWORK_SRC) $(NETWORK_IMPL) $(MEMORY_SRC) $(SUPPORT_SRC)
 

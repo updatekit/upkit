@@ -1,6 +1,8 @@
 #ifndef MEMORY_FILE_POSIX_H_
 #define MEMORY_FILE_POSIX_H_
 
+#ifdef WITH_PLATFORM_POSIX
+
 #include <libpull/common.h>
 
 struct mem_object_t {
@@ -27,4 +29,5 @@ void copy_asset(char* src, char* dest);
 void restore_assets(void);
 /***** End Testing functions *****/
 
+#endif /* WITH_PLATFORM_POSIX */
 #endif /* MEMORY_FILE_POSIX_H_ */

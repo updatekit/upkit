@@ -35,6 +35,18 @@ typedef struct mem_object_t {
 
 extern mem_object_t flash_objects[];
 
+#ifndef WITH_CUSTOM_OBJECTS
+
+enum memory_objects_enum {
+    BOOTLOADER = 0, // 0
+    BOOTLOADER_CTX, // 1
+    OBJ_1,          // 2
+    OBJ_2,          // 3
+    SWAP            // 4
+};
+
+#endif /* WITH_CUSTOM_OBJECTS */
+
 #endif /* MEMORY_FLASH_IMPL == 1 */
 
 #endif /* LIBPULL_MEMORY_FLASH_INTERFACE_H_ */

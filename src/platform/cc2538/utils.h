@@ -1,11 +1,15 @@
 #ifndef FIREFLY_UTILS_H_
 #define FIREFLY_UTILS_H_
 
-// Considering that the cc2538 does not have a way to block the watchdog, we
-// only reset the timer.
-
+#ifdef CONTIKI
+#include <dev/watchdog.h>
+#define WATCHDOG_STOP() watchdog_periodic()
+#define WATCHDOG_START() watchdog_periodic()
+#else /* CONTIKI */
 #define WATCHDOG_STOP()
 #define WATCHDOG_START()
+#endif /* CONTIKI */
+
 #define INTERRUPTS_DISABLE() (void) irq_disable();
 #define INTERRUPTS_ENABLE() (void) irq_enable();
 

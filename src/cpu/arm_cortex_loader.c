@@ -2,7 +2,6 @@
 #include <libpull/memory.h>
 
 #include "platform_headers.h"
-#include "cpu.h"
 
 #define RESET_VECTOR    0x4
 
