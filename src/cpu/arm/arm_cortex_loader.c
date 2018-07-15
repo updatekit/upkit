@@ -1,3 +1,5 @@
+#ifdef WITH_ARM_CORTEX_LOADER
+
 #include <libpull/common.h>
 #include <libpull/memory.h>
 
@@ -42,3 +44,4 @@ void load_object(mem_id_t id) {
     load_addr_t load_addr = (load_addr_t)(*(uint32_t *)(destination_address + RESET_VECTOR));
     load_addr();
 }
+#endif /* WITH_ARM_CORTEX_LOADER */

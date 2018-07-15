@@ -1,8 +1,6 @@
 #ifndef CONNECTION_H_
 #define CONNECTION_H_
 
-#ifdef WITH_CONNECTION_ZOAP
-
 #include <libpull/common.h>
 #include <libpull/network/connection_interface.h>
 #include <libpull/security/ecc.h>
@@ -49,5 +47,4 @@ typedef struct txp_ctx {
 void udp_receive(struct net_context *context,
     struct net_pkt *pkt, int status, void *user_data);
 
-#endif /* WITH_CONNECTION_ZOAP */
 #endif /* CONNECTION_H_ */

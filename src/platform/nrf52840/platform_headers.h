@@ -1,8 +1,8 @@
 #ifndef PLATFORM_HEADERS_H_
 #define PLATFORM_HEADERS_H_
 
-#include "memory_nrf52840_pca10056.h"
-#include "loader.h"
+#ifdef WITH_PLATFORM_NRF52840
+
 #include "utils.h"
 
 #ifdef WITH_BOOTLOADER
@@ -11,7 +11,8 @@
 #endif
 
 #ifndef DISABLE_LIBPULL_NETWORK
-#include "connection.h"
+#include <libpull_network/coap/connection_zoap.h>
 #endif
 
+#endif /* WITH_PLATFORM_NRF52840 */
 #endif /* PLATFORM_HEADERS_H_ */

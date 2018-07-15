@@ -249,4 +249,4 @@ void txp_end(txp_ctx* ctx) {
     coap_cleanup();
 }
 
-/* WITH_CONNECTION_LIBCOAP_RIOT */
+#endif /* WITH_CONNECTION_LIBCOAP_RIOT */

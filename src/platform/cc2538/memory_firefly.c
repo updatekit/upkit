@@ -1,3 +1,5 @@
+#ifdef WITH_PLATFORM_CC2538
+
 #include <libpull/memory.h>
 #include <libpull/common.h>
 #include <string.h>
@@ -82,3 +84,4 @@ mem_object_t flash_objects[] = {
         .fdescr = &internal_flash_descr
     }
 };
+#endif /* WITH_PLATFORM_CC2538 */

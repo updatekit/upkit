@@ -1,3 +1,5 @@
+#ifdef WITH_PLATFORM_CC2650
+
 #include "ti-lib.h"
 #include "contiki.h"
 #include "driverlib/flash.h"
@@ -147,3 +149,4 @@ mem_object_t flash_objects[] = {
         .fdescr = &external_flash_descr
     }
 };
+#endif /* WITH_PLATFORM_CC2650 */

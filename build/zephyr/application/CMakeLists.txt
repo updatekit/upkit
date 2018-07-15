@@ -6,26 +6,15 @@ target_sources(app PRIVATE src/runner.c)
 set(ROOTDIR "../../..")
 
 # Add libpull to the build
-file(GLOB libpull_src ${ROOTDIR}/src/**/*.c)
+file(GLOB_RECURSE libpull_src ${ROOTDIR}/src/*.c)
 file(GLOB libpull_headers ${ROOTDIR}/include)
 target_sources(app PRIVATE ${libpull_src})
 include_directories(${libpull_headers} ${ROOTDIR})
 
-set(CONNDIR "../connection")
-file(GLOB conn_src ${CONNDIR}/*.c)
-target_sources(app PRIVATE ${conn_src})
-include_directories(${CONNDIR})
-
 add_definitions(-DSIMPLE_MANIFEST=1 -DLOGGER_VERBOSITY=4)
 add_definitions(-DMEMORY_FLASH_IMPL=1 -DWITH_TINYCRYPT=1)
+add_definitions(-DWITH_UPDATE_AGENT=1 -DWITH_CONNECTION_ZOAP=1)
+add_definitions(-DWITH_PLATFORM_NRF52840=1)
 
-# Add the board files
-set(BOARDDIR "../board/${BOARD}")
-include_directories(${BOARDDIR})
-include_directories(${ROOTDIR}/test/platform)
-file(GLOB board_src ${BOARDDIR}/*.c)
-target_sources(app PRIVATE ${board_src})
-
-# Add the update agent source
-file(GLOB update_src ${ROOTDIR}/agents/update.c)
-target_sources(app PRIVATE ${update_src})
+# Add the board headers
+include_directories(${ROOTDIR}/src/platform/nrf52840)
