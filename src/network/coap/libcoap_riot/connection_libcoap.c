@@ -1,11 +1,11 @@
 #ifdef WITH_CONNECTION_LIBCOAP_RIOT
 
-#include "connection_libcoap.h"
-
 #include <unistd.h>
 #include <sys/select.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
+
+#include "platform_headers.h"
 
 #define CALLBACK(a,b,c) ((void(*)())((cb_ctx_t*)ctx->app)->cb)(a,b,c,((cb_ctx_t*)ctx->app)->more)
 #define BCTX ((cb_ctx_t*)ctx->app)->bctx

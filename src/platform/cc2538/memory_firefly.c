@@ -4,9 +4,8 @@
 #include <libpull/common.h>
 #include <string.h>
 
-#include "memory_firefly.h"
 #include "platform_headers.h"
-#include "./rom.h"
+#include "rom.h"
 
 const mem_slot_t memory_slots[] = {
     {

@@ -1,8 +1,5 @@
 #ifdef WITH_CONNECTION_LIBCOAP_RIOT
 
-#include "async_libcoap.h"
-#include "connection_libcoap.h"
-
 #include <coap/coap.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -11,6 +8,8 @@
 #include <unistd.h>
 
 #include "xtimer.h"
+
+#include "platform_headers.h"
 
 /* This is a blocking function, it will return when the
  * message has been received or the timeout is exceeded */
