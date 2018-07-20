@@ -3,7 +3,7 @@
 #include <libpull/memory/memory_objects.h>
 
 #include "memory_mock.h" // Mock
-#include "memory_posix.h" // Real Implmentation
+#include "platform_headers.h"
 
 #include "manifest_mock.h" // Mock
 #include <libpull/memory/simple_manifest.h> // Real Implementation

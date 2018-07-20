@@ -25,4 +25,4 @@ script:
   - make check
 
 after_success:
-  - coveralls -e test -e ext -e /usr -e utils -e build -i src -b test -r . --gcov-options '\-lp'
+  - coveralls -e test -e ext -e /usr -e utils -e build -i src/core -i src/agents -b test -r . --gcov-options '\-lp'
