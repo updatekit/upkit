@@ -6,7 +6,7 @@
 #include "board-peripherals.h"
 
 #include <libpull/common.h>
-#include "memory_cc2650.h"
+#include <libpull/memory.h>
 
 #include <string.h>
 
@@ -14,14 +14,9 @@
 
 const mem_slot_t memory_slots[] = { 
     {
-        .id = OBJ_RUN,
+        .id = OBJ_1,
         .bootable = true,
         .loaded = true
-    },
-    {
-        .id = OBJ_1,
-        .bootable = false,
-        .loaded = false
     },
     {
         .id = OBJ_2,
@@ -105,9 +100,6 @@ int external_flash_close(void) {
     external_memory_open--;
     return 0;
 }
-
-;
-
 static flash_descr_t external_flash_descr = {
     .page_size = FLASH_PAGE_SIZE,
     .open = external_flash_open,
@@ -133,20 +125,15 @@ mem_object_t flash_objects[] = {
         .end = INITIAL_MEMORY_OFFSET + BOOTLOADER_CTX_END_OFFSET,
         .fdescr = &internal_flash_descr
     },
-    [OBJ_RUN] = {
+    [OBJ_1] = {
         .start = INITIAL_MEMORY_OFFSET + BOOTLOADER_SIZE,
         .end = INITIAL_MEMORY_OFFSET + BOOTLOADER_SIZE + IMAGE_SIZE,
         .fdescr = &internal_flash_descr
     },
-    [OBJ_1] = {
+    [OBJ_2] = {
         .start = 0x34000,
         .end = 0x4E000,
         .fdescr = &external_flash_descr
     },
-    [OBJ_2] = {
-        .start = 0x4E000,
-        .end = 0x68000,
-        .fdescr = &external_flash_descr
-    }
 };
 #endif /* WITH_PLATFORM_CC2650 */

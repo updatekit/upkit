@@ -5,6 +5,9 @@
 
 #include "platform_headers.h"
 
+// XXX this is Contiki only
+#include "ti-lib.h"
+
 #define RESET_VECTOR    0x4
 
 typedef void (*load_addr_t)(void);
@@ -13,6 +16,9 @@ void load_object(mem_id_t id) {
     mem_object_t obj;
     manifest_t mt;
     pull_error err;
+
+    register uint32_t msp __asm("msp");
+    register uint32_t psp __asm("psp");
 
     // Get image offset
     err = memory_open(&obj, id, READ_ONLY);
@@ -33,12 +39,13 @@ void load_object(mem_id_t id) {
     INTERRUPTS_DISABLE();
 
     // Update vector table address
-    SCB->VTOR = destination_address;
+    //SCB->VTOR = destination_address;
+    HWREG(NVIC_VTABLE) = destination_address;
 
     // Update stack
     uint32_t stack = *(uint32_t *)(destination_address);
-    __set_MSP(stack);
-    __set_PSP(stack);
+    msp = stack;
+    psp = stack;
 
     // Jump to address
     load_addr_t load_addr = (load_addr_t)(*(uint32_t *)(destination_address + RESET_VECTOR));
