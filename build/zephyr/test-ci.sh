@@ -1,5 +1,21 @@
 #!/bin/sh -e
 
+function build() {
+    if [ ! -d "build" ]; then
+        mkdir build
+    fi
+    if [ -d "build/$2" ]; then
+        rm -rf "build/$2"
+    fi
+    mkdir "build/$2"
+    (
+    cd "build/$2"
+    cmake -GUnix\ Makefiles -DBOARD=$1 -DCONF_FILE=prj_$1.conf \
+        ../../$2
+    make && echo "$2 $1: Build successfull"
+    )
+}
+
 ROOTDIR=$(cd $(dirname $0) && pwd -P)
 (
     cd $ROOTDIR
@@ -8,22 +24,6 @@ ROOTDIR=$(cd $(dirname $0) && pwd -P)
     # to make sure that the library still builds for all the supported platforms
     # When using Zephyr we currently support the following platforms:
     platforms="nrf52840_pca10056"
-
-    function build() {
-        if [ ! -d "build" ]; then
-            mkdir build
-        fi
-        if [ -d "build/$2" ]; then
-            rm -rf "build/$2"
-        fi
-        mkdir "build/$2"
-        (
-        cd "build/$2"
-        cmake -GUnix\ Makefiles -DBOARD=$1 -DCONF_FILE=prj_$1.conf \
-            ../../$2
-        make && echo "$2 $1: Build successfull"
-        )
-    }
 
     # Prepare for the Zephyr build
     ./autogen.sh
