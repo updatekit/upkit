@@ -28,8 +28,3 @@ matrix:
       env: SCRIPT=build/zephyr/test-ci.sh
     - name: "Build Test: RIOT"
       env: SCRIPT=build/riot/test-ci.sh
-
-after_success:
-  - if [ $SCRIPT = "tests/test-ci.sh" ]; then \
-    coveralls -e test -e ext -e /usr -e utils -e build -i src/core -i src/agents -b test -r . --gcov-options '\-lp' \
-    fi
