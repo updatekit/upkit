@@ -24,6 +24,7 @@ before_install:
 install:
   - ./autogen.sh
   - ./configure --enable-gcov
+  - which arm-none-eabi-gcc
 
 script: 
   - ./$SCRIPT
