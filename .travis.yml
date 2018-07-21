@@ -21,7 +21,7 @@ script:
 matrix:
   include:
     - name: "Unit Test"
-      env: SCRIPT=tests/test-ci.sh
+      env: SCRIPT=test/test-ci.sh
     - name: "Build Test: Contiki-NG"
       env: SCRIPT=build/contiki-ng/test-ci.sh
     - name: "Build Test: Zephyr"
