@@ -25,6 +25,7 @@ build() {
 (
     cd $ROOTDIR
     # Prepare for the Zephyr build
+    export ZEPHYR_TOOLCHAIN_VARIANT=gccarmemb
     ./autogen.sh
     source ext/zephyr/zephyr-env.sh
 
