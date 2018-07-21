@@ -10,27 +10,23 @@ clone() {
     echo "Cloning $1...done"
 }
 
-# if the ext dir is already present then assume it is not modified and correctly
-# cached
-if [ ! -d "ext" ]; then
-    mkdir ext
-    clone libcoap https://github.com/obgm/libcoap.git "16685d7"
-    clone tinydtls https://git.eclipse.org/r/tinydtls/org.eclipse.tinydtls
-    clone tinycrypt https://github.com/01org/tinycrypt.git
-    clone unity https://github.com/ThrowTheSwitch/Unity.git
-    #clone cryptoauthlib https://github.com/MicrochipTech/cryptoauthlib.git
-
-    # Patch the repositories
-    PATCHDIR=patches
-    for dir in $(cd $PATCHDIR && find * -type d -print); do
-        echo "Dir is $dir"
-        for f in $(find "$PATCHDIR/$dir" -maxdepth 1 -name "*.patch"| sort); do
+patch() {
+    for dir in $(find $1 -type d -print); do
+        for f in $(find "$1/$dir" -maxdepth 1 -name "*.patch"| sort); do
             patch=$PWD/$f
             echo "Applying patch: $patch"
             (cd ext/$dir && git am --ignore-whitespace --ignore-space-change $patch)
         done
     done
+}
 
+if [ ! -d "ext" ]; then
+    mkdir ext
+fi
+
+if [ ! -d "ext/libcoap" ]; then
+    clone libcoap https://github.com/obgm/libcoap.git "16685d7"
+    patch patches/libcoap
     # Build libcoap
     (echo "Build libcoap..."
     cd ext/libcoap
@@ -39,7 +35,10 @@ if [ ! -d "ext" ]; then
     ./configure --with-tinydtls --disable-shared --disable-examples
     make
     echo "Build libcoap...done")
-
+fi
+if [ ! -d "ext/tinydtls" ]; then
+    clone tinydtls https://git.eclipse.org/r/tinydtls/org.eclipse.tinydtls
+    patch patches/tinydtls
     # Build tinydtls
     (echo "Build tinydtls..."
     cd ext/tinydtls
@@ -49,12 +48,18 @@ if [ ! -d "ext" ]; then
     ./configure --without-debug
     make libtinydtls.a CFLAGS="$POSIX_OPTIMIZATIONS"
     echo "Build tinydtls...done")
-
+fi
+if [ ! -d "ext/tinycrypt" ]; then
+    clone tinycrypt https://github.com/01org/tinycrypt.git
+    patch patches/tinycrypt
     # Build tinycrypt
     echo "Build tinycrypt..."
     (cd ext/tinycrypt && make ENABLE_TESTS=false)
     echo "Build tinycrypt...done"
-
 fi
+if [ ! -d "ext/unity" ]; then
+    clone unity https://github.com/ThrowTheSwitch/Unity.git
+fi
+#clone cryptoauthlib https://github.com/MicrochipTech/cryptoauthlib.git
 
 autoreconf -i
