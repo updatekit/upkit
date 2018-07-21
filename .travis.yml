@@ -9,6 +9,7 @@ addons:
       - gcovr
       - gcc-arm-none-eabi
       - device-tree-compiler
+      - gperf
 
 #cache:
 #directories:
