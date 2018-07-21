@@ -16,13 +16,20 @@ install:
   - ./configure --enable-gcov
 
 script: 
-  - make
-  - make firmware_tool
-  - make server
-  - make assets
-  - ./utils/server/server -f assets/slot_d.bin >/dev/null 2>&1 &
-  - make clean # This is needed since the library has been build before without coverage support
-  - make check
+  - ./$SCRIPT
+
+matrix:
+  include:
+    - name: "Unit Test"
+      env: SCRIPT=tests/test-ci.sh
+    - name: "Build Test: Contiki-NG"
+      env: SCRIPT=build/contiki-ng/test-ci.sh
+    - name: "Build Test: Zephyr"
+      env: SCRIPT=build/zephyr/test-ci.sh
+    - name: "Build Test: RIOT"
+      env: SCRIPT=build/riot/test-ci.sh
 
 after_success:
-  - coveralls -e test -e ext -e /usr -e utils -e build -i src/core -i src/agents -b test -r . --gcov-options '\-lp'
+  - if [ $SCRIPT = "tests/test-ci.sh" ]; then \
+    coveralls -e test -e ext -e /usr -e utils -e build -i src/core -i src/agents -b test -r . --gcov-options '\-lp' \
+    fi
