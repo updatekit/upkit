@@ -1,6 +1,12 @@
 #!/bin/bash -e
+ROOTDIR=$(cd $(dirname $0) && pwd -P)
 
-function build() {
+# This script should be called in the continuous integration service
+# to make sure that the library still builds for all the supported platforms
+# When using Zephyr we currently support the following platforms:
+platforms="nrf52840_pca10056"
+
+build() {
     if [ ! -d "build" ]; then
         mkdir build
     fi
@@ -16,21 +22,13 @@ function build() {
     )
 }
 
-ROOTDIR=$(cd $(dirname $0) && pwd -P)
 (
     cd $ROOTDIR
-
-    # This script should be called in the continuous integration service
-    # to make sure that the library still builds for all the supported platforms
-    # When using Zephyr we currently support the following platforms:
-    platforms="nrf52840_pca10056"
-
     # Prepare for the Zephyr build
     ./autogen.sh
     source ext/zephyr/zephyr-env.sh
 
-    # nrf52840
-    for p in "$platforms"; do
+    for p in $platforms; do
         build $p "application"
         build $p "bootloader"
     done
