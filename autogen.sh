@@ -11,10 +11,10 @@ clone() {
 }
 
 patch() {
-    for dir in $(find $1 -type d -print); do
-        for f in $(find "$1/$dir" -maxdepth 1 -name "*.patch"| sort); do
+    for dir in $(cd patches && find $1 -type d -print); do
+        for f in $(find "patches/$dir" -maxdepth 1 -name "*.patch"| sort); do
             patch=$PWD/$f
-            echo "Applying patch: $patch"
+            echo "applying patch $patch"
             (cd ext/$dir && git am --ignore-whitespace --ignore-space-change $patch)
         done
     done
@@ -26,7 +26,7 @@ fi
 
 if [ ! -d "ext/libcoap" ]; then
     clone libcoap https://github.com/obgm/libcoap.git "16685d7"
-    patch patches/libcoap
+    patch libcoap
     # Build libcoap
     (echo "Build libcoap..."
     cd ext/libcoap
@@ -38,7 +38,7 @@ if [ ! -d "ext/libcoap" ]; then
 fi
 if [ ! -d "ext/tinydtls" ]; then
     clone tinydtls https://git.eclipse.org/r/tinydtls/org.eclipse.tinydtls
-    patch patches/tinydtls
+    patch tinydtls
     # Build tinydtls
     (echo "Build tinydtls..."
     cd ext/tinydtls
@@ -51,7 +51,7 @@ if [ ! -d "ext/tinydtls" ]; then
 fi
 if [ ! -d "ext/tinycrypt" ]; then
     clone tinycrypt https://github.com/01org/tinycrypt.git
-    patch patches/tinycrypt
+    patch tinycrypt
     # Build tinycrypt
     echo "Build tinycrypt..."
     (cd ext/tinycrypt && make ENABLE_TESTS=false)
