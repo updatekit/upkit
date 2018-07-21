@@ -8,6 +8,7 @@ addons:
       - srecord
       - gcovr
       - gcc-arm-none-eabi
+      - device-tree-compiler
 
 #cache:
 #directories:
