@@ -5,9 +5,6 @@
 
 #include "platform_headers.h"
 
-// XXX this is Contiki only
-#include "ti-lib.h"
-
 #define RESET_VECTOR    0x4
 
 typedef void (*load_addr_t)(void);
@@ -39,8 +36,7 @@ void load_object(mem_id_t id) {
     INTERRUPTS_DISABLE();
 
     // Update vector table address
-    //SCB->VTOR = destination_address;
-    HWREG(NVIC_VTABLE) = destination_address;
+    SET_VTOR(destination_address);
 
     // Update stack
     uint32_t stack = *(uint32_t *)(destination_address);

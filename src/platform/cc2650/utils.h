@@ -7,4 +7,6 @@
 #define INTERRUPTS_DISABLE()
 #define INTERRUPTS_ENABLE()
 
+#define SET_VTOR(addr) HWREG(NVIC_VTABLE) = addr
+
 #endif /* FIREFLY_UTILS_H_ */

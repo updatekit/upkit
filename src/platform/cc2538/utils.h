@@ -14,6 +14,8 @@
 #define WATCHDOG_START()
 #endif /* CONTIKI */
 
+#define SET_VTOR(addr) SCB->VTOR = addr
+
 #define INTERRUPTS_DISABLE() (void) irq_disable();
 #define INTERRUPTS_ENABLE() (void) irq_enable();
 

@@ -6,4 +6,6 @@
 #define INTERRUPTS_DISABLE() irq_lock()
 #define INTERRUPTS_ENABLE()
 
+#define SET_VTOR(addr) SCB->VTOR = addr
+
 #endif /* UTILS_H_ */

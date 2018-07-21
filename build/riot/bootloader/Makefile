@@ -26,6 +26,8 @@ include $(BOARDDIR)/Makefile.conf
 include $(BOARDDIR)/Makefile.export
 export ENABLE_BOOTLOADER = 1
 
+CFLAGS += $(BOARD_CFLAGS)
+
 EXTERNAL_MODULE_DIRS = $(ROOTDIR)/src
 USEMODULE += libpull
 
