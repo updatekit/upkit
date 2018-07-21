@@ -8,6 +8,13 @@ addons:
       - srecord
       - gcovr
 
+cache:
+  directories:
+    - ext
+    - build/contiki-ng/ext
+    - build/riot/ext
+    - build/zephyr/ext
+
 before_install:
   - pip install --user cpp-coveralls
 
