@@ -1,4 +1,4 @@
-#!/bin/sh -e
+#!/bin/bash -e
 
 function build() {
     if [ ! -d "build" ]; then
