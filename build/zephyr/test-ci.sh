@@ -1,6 +1,11 @@
 #!/bin/bash -e
 ROOTDIR=$(cd $(dirname $0) && pwd -P)
 
+# These flags are required by the Zephyr buildchain
+unset GCCARMEMB_TOOLCHAIN_PATH
+export ZEPHYR_TOOLCHAIN_VARIANT=cross-compile
+export CROSS_COMPILE=/usr/bin/arm-none-eabi-
+
 # This script should be called in the continuous integration service
 # to make sure that the library still builds for all the supported platforms
 # When using Zephyr we currently support the following platforms:
