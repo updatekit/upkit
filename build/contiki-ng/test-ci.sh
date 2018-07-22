@@ -9,6 +9,7 @@ platforms="remote-reva"
 build() {
     (
     cd "$2"
+    ls
     make && echo "$2 $1: Build successfull"
     )
 }
@@ -18,6 +19,7 @@ build() {
     # Prepare for the build
     ./autogen.sh
 
+    echo "Starting build"
     for p in $platforms; do
         build $p "application"
         build $p "bootloader"

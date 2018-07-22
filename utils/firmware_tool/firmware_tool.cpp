@@ -13,7 +13,7 @@
     commands[#name] = name##_command;
 
 #define PRINT_SHORT_ARG(type, name, arg_name, ...) \
-    std::cout << " [-" << arg_name << " " << #name << "]"; 
+    std::cout << " [-" << arg_name << " " << #name << "]";
 
 int help(Context ctx) {
     std::cout << "usage: " + ctx.get_prog_name() << " <command>";

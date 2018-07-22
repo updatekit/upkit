@@ -193,7 +193,7 @@ int manifest_validate_command(Context ctx) {
     }
     input.read((char*) &mt, sizeof(manifest_t));
     input.close();
-    
+
     // (2) Validate Size
     struct stat buf;
     stat(ctx.get_binary_file().c_str(), &buf);
@@ -209,7 +209,7 @@ int manifest_validate_command(Context ctx) {
     std::ifstream file(ctx.get_binary_file(), std::ios_base::in | std::ios_base::binary);
     if (!file) {
         log_item("digest", false);
-    } else { 
+    } else {
         char* buffer = new char[BUFFER_LEN];
         while (!file.eof()) {
             file.read(buffer, BUFFER_LEN);
@@ -225,7 +225,7 @@ int manifest_validate_command(Context ctx) {
         uint8_t* hash = (uint8_t*) digest.finalize(&dctx); // TODO check the size of the hash
         log_item("digest", memcmp(get_digest(&mt), hash, digest.size) == 0);
     }
-    
+
     // (4) Validate Server Public Key
     std::ifstream server_pub_key(ctx.get_server_pub_key(), std::ios_base::binary);
     if (!server_pub_key) {

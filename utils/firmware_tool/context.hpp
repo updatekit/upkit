@@ -40,7 +40,7 @@ class Context {
 
     int verbosity = 0;
     FOREACH_ARG(DECLARE_ARG)
-    
+
     public:
         Context(std::string);
         int parse_conf();

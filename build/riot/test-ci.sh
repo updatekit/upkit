@@ -5,10 +5,18 @@
 # When using RIOT we currently support the following platforms
 platforms="remote-reva"
 
-build() {
+build_application() {
     (
-    cd "$2"
-    make && echo "$2 $1: Build successfull"
+    cd application
+    make prepare && \
+    make && echo "application: $1: Build successfull"
+    )
+}
+
+build_bootloader() {
+    (
+    cd bootloader
+    make && echo "bootloader: $1: Build successfull"
     )
 }
 
@@ -20,7 +28,7 @@ ROOTDIR=$(cd $(dirname $0) && pwd -P)
     ./autogen.sh
 
     for p in $platforms; do
-        build $p "application"
-        build $p "bootloader"
+        build_application $p
+        build_bootloader $p
     done
 )

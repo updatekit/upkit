@@ -111,7 +111,7 @@ package-lock.json
 .DS_Store
 
 # Generated Makefiles
+/Makefile
 test/Makefile
-Makefile
 utils/server/Makefile
 utils/firmware_tool/Makefile

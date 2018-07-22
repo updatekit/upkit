@@ -17,7 +17,7 @@ git submodule update --init --recursive
 echo "Cloning the Contiki-NG repository...done"
 
 PATCHDIR=patches
-for dir in $(cd $PATCHDIR && find * -type d -print); do
+for dir in $(cd $PATCHDIR && find . -type d -print); do
     for f in $(find "$PATCHDIR/$dir" -maxdepth 1 -name "*.patch"| sort); do
         patch=$PWD/$f
         echo "Applying patch: $patch"

@@ -48,7 +48,7 @@ else ifeq ($(SEC_LIB),TINYCRYPT)
 	USEPKG += tinycrypt
 endif
 
-EXTERNAL_MODULE_DIRS = $(ROOTDIR)/src $(BOARDDIR)
+EXTERNAL_MODULE_DIRS = $(ROOTDIR)/src
 USEMODULE += libpull 
 
 include $(BOARDDIR)/Makefile.conf
@@ -79,5 +79,9 @@ USEMODULE += gnrc_ipv6_default
 USEMODULE += gnrc_icmpv6_echo
 USEMODULE += gnrc_sock_udp
 CFLAGS += -DPOSIX_SETSOCKOPT=1
+
+LINKER_DEFINES = $(BOARD_CFLAGS)
+prepare:
+	$(Q)$(CC) -P -E $(LINKER_DEFINES) $(BOARDDIR)/linker_script.c -o $(BINDIR)/linker_script.ld
 
 include $(RIOTBASE)/Makefile.include

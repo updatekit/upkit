@@ -30,10 +30,12 @@ build() {
 (
     cd $ROOTDIR
     # Prepare for the Zephyr build
-    export ZEPHYR_TOOLCHAIN_VARIANT=gccarmemb
     ./autogen.sh
-    source ext/zephyr/zephyr-env.sh
 
+    # Install python packages required by the build toolchain
+    pip install -r ext/zephyr/scripts/requirements.txt
+
+    source ext/zephyr/zephyr-env.sh
     for p in $platforms; do
         build $p "application"
         build $p "bootloader"
