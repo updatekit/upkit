@@ -1,6 +1,6 @@
 #ifdef WITH_CONNECTION_LIBCOAP
 
-#include "connection_libcoap.h"
+#include <libpull_network/coap/connection_libcoap.h> 
 
 #include <unistd.h>
 #include <sys/select.h>
