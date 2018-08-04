@@ -35,7 +35,7 @@
 #define DECLARE(name, ...) \
     int name##_command(Context ctx); \
     FOREACH_##name##_COMMAND(DECLARE_SUBCOMMANDS)
-    
+
 FOREACH_COMMAND(DECLARE);
 
 #undef DECLARE

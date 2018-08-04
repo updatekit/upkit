@@ -43,7 +43,7 @@ int Context::parse_arguments(int argc, char** argv) {
             case 'v': verbosity++; break;
             case 'y': config_file_name = std::string(real_argv[optind-1]); break;
             FOREACH_ARG(PARSE_ARG)
-            default: 
+            default:
               std::cout << "Invalid arg:" << real_argv[optind-1] << std::endl;
               return 1;
         }

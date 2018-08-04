@@ -1,10 +1,9 @@
 #ifdef WITH_CONNECTION_ZOAP
 
-#include <stdio.h>
-
 #include <libpull/common.h>
 #include <libpull/network.h>
-#include "connection.h"
+
+#include "platform_headers.h"
 
 /* This is a blocking function, it will return when the
  * message has been received or the timeout is exceeded */

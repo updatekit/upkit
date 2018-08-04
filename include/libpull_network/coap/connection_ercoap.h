@@ -14,13 +14,13 @@
 #define COAP_DEFAULT_PORT 5683
 #define COAPS_DEFAULT_PORT 5684
 
-struct txp_ctx_ {
+typedef struct txp_ctx {
     callback cb;
     void* more;
     coap_endpoint_t endpoint;
     coap_message_t request;
     coap_request_state_t request_state;
-};
+} txp_ctx;
 
 void ercoap_handler(coap_message_t* response);
 

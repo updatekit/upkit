@@ -17,4 +17,4 @@ void loop(txp_ctx* ctx, uint32_t timeout);
 void break_loop(txp_ctx* ctx);
 
 #endif /* WITH_CONNECTION_LIBCOAP */
-#endif /* ASYNC_LIBCOAP_H_ */ 
+#endif /* ASYNC_LIBCOAP_H_ */

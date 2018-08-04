@@ -1,5 +1,6 @@
 #ifdef WITH_CONNECTION_LIBCOAP
-#include "async_libcoap.h"
+
+#include <libpull_network/coap/async_libcoap.h>
 
 #include <coap/coap.h>
 #include <stdio.h>

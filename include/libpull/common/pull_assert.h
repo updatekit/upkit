@@ -4,9 +4,8 @@
 #if ENABLE_ASSERT == 1
 #include <assert.h>
 #define PULL_ASSERT(cond) assert(cond);
-
 #else
-#define PULL_ASSERT(cond) 
+#define PULL_ASSERT(cond)
 
 #endif /* ENABLE_ASSERT == 1 */
 

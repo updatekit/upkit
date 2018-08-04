@@ -9,7 +9,7 @@
 
 #ifdef __cplusplus
 extern "C" {
-#endif /* __cplusplus */ 
+#endif /* __cplusplus */
 
 #include <stdint.h>
 

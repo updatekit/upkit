@@ -12,8 +12,7 @@ CONN_TYPE ?= CONN_UDP
 #####################################################
 
 APPLICATION = runner
-
-BOARD = remote-reva
+BOARD ?= remote-reva
 
 RIOTBASE ?= $(CURDIR)/../ext/riot
 DEVELHELP ?= 1
@@ -23,13 +22,18 @@ QUIET ?= 1
 # Include the libpull module to the build
 ROOTDIR= $(CURDIR)/../../..
 BOARDDIR = $(CURDIR)/../boards/$(BOARD)
-CONNECTIONDIR = $(CURDIR)/../connection
 
-INCLUDES += -I$(ROOTDIR)/include -I$(ROOTDIR) -I$(BOARDDIR)
+#ifeq ($(BOARD),"remote-reva")
+	CFLAGS += -I$(ROOTDIR)/src/platform/cc2538
+	CFLAGS += -DWITH_PLATFORM_CC2538=1
+#endif
+CFLAGS += -DWITH_CONNECTION_LIBCOAP_RIOT=1
+CFLAGS += -DWITH_UPDATE_AGENT
+
+INCLUDES += -I$(ROOTDIR)/include -I$(ROOTDIR)
 INCLUDES += -DSIMPLE_MANIFEST=1 -DLOGGER_VERBOSITY=$(LOGGER_VERBOSITY)
 # Enable the flash interface
 INCLUDES += -DMEMORY_FLASH_IMPL=1
-INCLUDES += -I $(CONNECTIONDIR)
 
 ifeq ($(SEC_LIB),TINYDTLS)
 	CFLAGS += -DWITH_TINYDTLS=1
@@ -44,16 +48,18 @@ else ifeq ($(SEC_LIB),TINYCRYPT)
 	USEPKG += tinycrypt
 endif
 
-EXTERNAL_MODULE_DIRS = $(ROOTDIR)/src $(BOARDDIR) $(CONNECTIONDIR) $(ROOTDIR)/agents
-USEMODULE += libpull board_remote_reva riot_connection agents
+EXTERNAL_MODULE_DIRS = $(ROOTDIR)/src
+USEMODULE += libpull 
 
+include $(BOARDDIR)/Makefile.conf
+include $(BOARDDIR)/Makefile.export
+CFLAGS += $(BOARD_CFLAGS)
 export ENABLE_UPDATE_AGENT=1
 
 # Allow to disable the external linker script to run the 
 # image directly without bootloader
 ifneq ($(NOOTA),1)
-	export LINKFLAGS = -L$(BOARDDIR)
-	export LINKER_SCRIPT=linker_script.ld
+	export LINKER_SCRIPT=$(BINDIR)/linker_script.ld
 endif
 
 # A better way to disable the CCA is by defining
@@ -73,9 +79,9 @@ USEMODULE += gnrc_ipv6_default
 USEMODULE += gnrc_icmpv6_echo
 USEMODULE += gnrc_sock_udp
 CFLAGS += -DPOSIX_SETSOCKOPT=1
-# Use setsockopt to set a timeout
 
-
-
+LINKER_DEFINES = $(BOARD_CFLAGS)
+prepare:
+	$(Q)$(CC) -P -E $(LINKER_DEFINES) $(BOARDDIR)/linker_script.c -o $(BINDIR)/linker_script.ld
 
 include $(RIOTBASE)/Makefile.include

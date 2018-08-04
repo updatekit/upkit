@@ -22,7 +22,7 @@ func_moxygen() {
 }
 
 echo "Updating Wiki documentation..."
-if [[ ! -d "$WIKI_PATH" ]]; then
+if [ ! -d "$WIKI_PATH" ]; then
     git clone $WIKI_REPO $WIKI_PATH
 fi
 echo "Updating Wiki documentation...done"

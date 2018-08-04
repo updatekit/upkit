@@ -5,7 +5,7 @@
 #include <coap/coap_dtls.h>
 
 #include "../server.h"
-    
+
 #define DEFINE_RESOURCE(r, resource, title) { \
     r = coap_resource_init((unsigned char*) resource, strlen(resource), 0); \
     coap_add_attr(r, (unsigned char *)"ct", 2, (unsigned char *)"0", 1, 0); \

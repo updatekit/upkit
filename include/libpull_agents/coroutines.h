@@ -16,7 +16,7 @@
         return agent_msg; \
         case ev:; \
     } while(0)
-        
+
 #define PULL_FINISH(ev) \
         case ev: \
             agent_msg.event = ev; \

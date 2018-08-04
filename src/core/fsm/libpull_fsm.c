@@ -6,10 +6,6 @@
 #include "default_keys.h"
 #include <libpull/security.h>
 
-int default_CSPRNG(uint8_t *dest, unsigned int size) {
-    return 0;
-}
-
 pull_error libpull_fsm_init(libpull_fsm_ctx_t* ctx, mem_object_t* obj) {
     ctx->state = STATE_IDLE;
     ctx->result = RESULT_INIT;

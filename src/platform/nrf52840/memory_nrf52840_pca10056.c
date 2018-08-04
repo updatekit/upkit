@@ -1,7 +1,7 @@
-#include "memory_nrf52840_pca10056.h"
+#ifdef WITH_PLATFORM_NRF52840
 
+#include "platform_headers.h"
 #include <flash.h>
-
 #include <libpull/memory.h>
 #include <libpull/common.h>
 #include <string.h>
@@ -101,3 +101,5 @@ mem_object_t flash_objects[] = {
         .fdescr = &internal_flash_descr
     }
 };
+
+#endif /* WITH_PLATFORM_NRF52840 */

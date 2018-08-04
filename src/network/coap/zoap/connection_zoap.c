@@ -1,8 +1,7 @@
 #ifdef WITH_CONNECTION_ZOAP
 
-#include "connection.h"
-
 #include <net/coap_link_format.h>
+#include "platform_headers.h"
 
 static uint8_t method_mapper[] = {
     [GET] = COAP_METHOD_GET,

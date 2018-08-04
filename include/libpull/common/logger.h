@@ -53,7 +53,7 @@ extern uint8_t verbosity_level;
     #define log_err(error, args...) \
         log_output("%s:", err_as_str(error)); \
         log_output(args);
-#else 
+#else
     #define log_err(error, args...) \
         log_output("%s\n", err_as_str(error));
 #endif

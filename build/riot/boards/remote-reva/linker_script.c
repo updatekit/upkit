@@ -19,7 +19,8 @@
 /* Memory Space Definitions: */
 MEMORY
 {
-    rom   (rx ) : ORIGIN = (OTA_OFFSET), LENGTH = (OTA_LENGTH)
+    rom   (rx ) : ORIGIN = ((IMAGE_START_PAGE*PAGE_SIZE)+MANIFEST_SIZE), 
+            LENGTH = ((IMAGE_END_PAGE-IMAGE_START_PAGE)-MANIFEST_SIZE)
 #ifndef CCFG_DISABLE
     cca   (rx ) : ORIGIN = 0x0027ffd4, LENGTH = 44
 #endif

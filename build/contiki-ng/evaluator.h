@@ -96,10 +96,9 @@
     STOP_EVALUATOR(name); \
     PRINT_EVALUATOR(type, name); \
     START_EVALUATOR(name);
+#else
 
-#else 
-
-#define INIT_TEST(value) 
+#define INIT_TEST(value)
 #define DEFINE_EVALUATOR(name)
 #define START_EVALUATOR(name)
 #define STOP_EVALUATOR(name)

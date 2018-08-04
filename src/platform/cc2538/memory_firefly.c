@@ -1,10 +1,11 @@
+#ifdef WITH_PLATFORM_CC2538
+
 #include <libpull/memory.h>
 #include <libpull/common.h>
 #include <string.h>
 
-#include "memory_firefly.h"
 #include "platform_headers.h"
-#include "./rom.h"
+#include "rom.h"
 
 const mem_slot_t memory_slots[] = {
     {
@@ -82,3 +83,4 @@ mem_object_t flash_objects[] = {
         .fdescr = &internal_flash_descr
     }
 };
+#endif /* WITH_PLATFORM_CC2538 */

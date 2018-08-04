@@ -11,6 +11,12 @@
 
 #define SERVER_ADDR "fd11:22::1c62:fd83:83e7:1063"
 
+#if  WITH_TINYCRYPT
+int default_CSPRNG(uint8_t *dest, unsigned int size) {
+    return 0;
+}
+#endif
+
 static agent_msg_t agent_msg;
 static update_agent_config cfg;
 static update_agent_ctx_t ctx;
@@ -26,12 +32,6 @@ void specialize_crypto_functions() {
     ef = tinycrypt_secp256r1_ecc;
 #endif
 }
-
-#if  WITH_TINYCRYPT
-int default_CSPRNG(uint8_t *dest, unsigned int size) {
-    return 0;
-}
-#endif
 
 int main(void) {
     specialize_crypto_functions();

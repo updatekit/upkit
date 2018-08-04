@@ -1,23 +1,18 @@
 # Include libpull sources
 ifeq ($(LIBPULL_BOOTLOADER), 1)
 	CFLAGS += -DDISABLE_LIBPULL_NETWORK=1
-	PROJECTDIRS = $(ROOTDIR)/agents
-	PROJECT_SOURCEFILES += bootloader_agent.c
 endif
 ifeq ($(LIBPULL_APPLICATION), 1)
-	LIBPULLDIRS += $(ROOTDIR)/src/network ../connection
-	CFLAGS += -I../connection
-	PROJECTDIRS = $(ROOTDIR)/agents
-	PROJECT_SOURCEFILES += update.c
+	CFLAGS += -DWITH_CONNECTION_ERCOAP=1
 endif
 ifeq ($(DISABLE_MAIN),1) 
 	LIBPULLDIRS += $(BOARDDIR)/bootloader
 endif
-LIBPULLDIRS += $(ROOTDIR)/src/common $(ROOTDIR)/src/memory
-LIBPULLDIRS += $(ROOTDIR)/src/security $(BOARDDIR)
-PROJECT_SOURCEFILES += $(notdir $(shell find $(LIBPULLDIRS) -maxdepth 1 \( -name '*.c' ! -name 'linker_script.c' \) ))
-PROJECTDIRS += $(LIBPULLDIRS)
-CFLAGS += -I$(ROOTDIR)/include
+
+PROJECTDIRS += $(shell find $(ROOTDIR)/src -type d ! -name ".deps")
+PROJECT_SOURCEFILES += $(notdir $(shell find $(ROOTDIR)/src -name '*.c'))
+CFLAGS += -I$(ROOTDIR)/include -I$(ROOTDIR)
+
 CFLAGS += -DSIMPLE_MANIFEST -DLOGGER_VERBOSITY=$(LOGGER_VERBOSITY)
-# Enable the flash interface
 CFLAGS += -DMEMORY_FLASH_IMPL=1
+CFLAGS += -DWITH_ARM_CORTEX_LOADER=1

@@ -32,7 +32,6 @@ void manifest_mock_restore() {
     manifest_mock.sign_manifest_vendor = sign_manifest_vendor_impl;
     manifest_mock.sign_manifest_server = sign_manifest_server_impl;
 }
-
 /* This does not needs to be mocked */
 void print_manifest_impl(const manifest_t* mt);
 void print_manifest(const manifest_t* mt) {

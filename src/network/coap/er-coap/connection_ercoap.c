@@ -3,7 +3,7 @@
 #include <libpull/common.h>
 #include <libpull/network.h>
 
-#include "connection_ercoap.h"
+#include "platform_headers.h"
 
 #include "pt.h"
 

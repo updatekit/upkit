@@ -1,0 +1,2 @@
+CFLAGS += -I$(ROOTDIR)/src/platform/cc2650
+CFLAGS += -DWITH_PLATFORM_CC2650=1
