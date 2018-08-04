@@ -9,11 +9,11 @@
 #include <coap/coap.h>
 #include <coap/block.h>
 
+#include "platform_headers.h"
+
 #ifdef SYSTEM_RESOLVER
 #include <netdb.h>
 #endif
-
-#include "platform_headers.h"
 
 #define CALLBACK(a,b,c) ((void(*)())((cb_ctx_t*)ctx->app)->cb)(a,b,c,((cb_ctx_t*)ctx->app)->more)
 #define BCTX ((cb_ctx_t*)ctx->app)->bctx
