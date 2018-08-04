@@ -21,10 +21,10 @@ void loop(txp_ctx* ctx, uint32_t timeout) {
     while(ctx->loop) {
         log_debug("Starting loop\n");
         int ret = coap_run_once(ctx->coap_ctx, timeout);
-        if (ret > timeout) {
+        /*if (ret > timeout) {
             log_debug("Timeout received\n");
             return;
-        }
+        }*/
     }
     log_debug("Loop end\n");
 }
