@@ -5,27 +5,21 @@
 
 #include "support/support.h"
 
-#define FOREACH_TEST(DO) \
-    DO(update_polling,0)
-
-TEST_RUNNER();
-
 #define PROV_SERVER "localhost"
 
-void setUp(void) {
-}
+void ntest_prepare(void) {}
 
-void tearDown(void) {
+void ntest_clean(void) {
     restore_assets();
 }
 
 static void check_update_cb(pull_error err, const char* data, int len, void* more) {
     subscriber_ctx* ctx = (subscriber_ctx*) more;
-    TEST_ASSERT(data != NULL);
-    TEST_ASSERT_TRUE(len == 2);
+    nTEST_TRUE(data != NULL);
+    nTEST_TRUE(len == 2);
     version_t version;
     memcpy(&version, data, sizeof(version_t));
-    TEST_ASSERT_EQUAL_HEX(0xD, version);
+    nTEST_COMPARE_HEX(0xD, version);
     break_loop(ctx->txp);
 }
 
@@ -35,9 +29,9 @@ void test_update_polling(void) {
     txp_init(&txp, PROV_SERVER, 0, PULL_UDP, NULL);
     mem_object_t obj_t;
     pull_error err = subscribe(&ctx, &txp, "version", &obj_t);
-    TEST_ASSERT_TRUE(!err);
+    nTEST_TRUE(!err);
     err = check_updates(&ctx, check_update_cb);
-    TEST_ASSERT_TRUE(!err);
+    nTEST_TRUE(!err);
     loop(&txp, 1000);
     // XXX This is not valid.. The loop function should return the reason why
     // it returned
@@ -45,3 +39,9 @@ void test_update_polling(void) {
 }
 
 // TODO: add more tests making requests to invalid endpoints
+
+int main() {
+    nTEST_RUN(test_update_polling);
+}
+
+

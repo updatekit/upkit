@@ -4,11 +4,6 @@
 #include "support/support.h"
 #include <unistd.h>
 
-#define FOREACH_TEST(DO) \
-    DO(bootloader_success, 0)
-
-TEST_RUNNER();
-
 #define BUFFER_SIZE 1024
 
 static agent_msg_t agent_msg;
@@ -20,11 +15,11 @@ static uint8_t buffer[BUFFER_SIZE];
 
 // The test logic should update the OBJ_2 with the firmware with version 0xdead
 // After the test is finished I invalidate the OBJ_2 to restore the status
-void setUp(void) {
+void ntest_prepare(void) {
     bzero(&cfg, sizeof(cfg));
 }
 
-void tearDown(void) { 
+void ntest_clean(void) { 
     restore_assets();
     retries = 3;
     success = 0;
@@ -45,13 +40,17 @@ void test_bootloader_success(void) {
             break;
         } else if (IS_CONTINUE(agent_msg)) {
             if (agent_msg.event == EVENT_BOOT) {
-                TEST_ASSERT_TRUE(agent_msg.event == EVENT_BOOT);
-                TEST_ASSERT_EQUAL_INT(OBJ_B, GET_BOOT_ID(agent_msg));
+                nTEST_TRUE(agent_msg.event == EVENT_BOOT);
+                nTEST_COMPARE_INT(OBJ_B, GET_BOOT_ID(agent_msg));
                 success = true;
                 break;
             }
             continue;
         }
     }
-    TEST_ASSERT_TRUE_MESSAGE(success, "Error during the booting process");
+    nTEST_TRUE(success, "Error during the booting process");
+}
+
+int main() {
+    nTEST_RUN(test_bootloader_success);
 }
