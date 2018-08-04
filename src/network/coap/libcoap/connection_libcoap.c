@@ -6,9 +6,12 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
-#include <netdb.h>
 #include <coap/coap.h>
 #include <coap/block.h>
+
+#ifdef SYSTEM_RESOLVER
+#include <netdb.h>
+#endif
 
 #include "platform_headers.h"
 
@@ -49,6 +52,7 @@ pull_error txp_init(txp_ctx* ctx, const char* addr, uint16_t port, conn_type typ
             proto = COAP_PROTO_UDP;
             final_port = !port? COAP_DEFAULT_PORT: port;
             break;
+#ifndef DISABLE_DTLS
         case PULL_DTLS_PSK:
             proto = COAP_PROTO_DTLS;
             final_port = !port? COAPS_DEFAULT_PORT: port;
@@ -70,6 +74,7 @@ pull_error txp_init(txp_ctx* ctx, const char* addr, uint16_t port, conn_type typ
                     ecdh_data->priv_key, ecdh_data->pub_key_x,
                     ecdh_data->pub_key_y, libcoap_verify_key);
             break;
+#endif
         default:
             log_error(INVALID_CONN_DATA_ERROR, "Protocol not supported\n");
             return INVALID_CONN_DATA_ERROR;
