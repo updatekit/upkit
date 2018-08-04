@@ -1,6 +1,6 @@
 AUTOMAKE_OPTIONS = subdir-objects
 AM_CFLAGS = -Wall -I. -I../include -I../ext/tinycrypt/lib/include -I../ext/tinydtls -DHAVE_CONFIG_H
-AM_CFLAGS += -I../build/posix -Isupport -I../ext/unity/src -I../ext/libcoap/include -Imocks
+AM_CFLAGS += -I../build/posix -Isupport -I../ext/libcoap/include -Imocks
 AM_CFLAGS += -DHAVE_CONFIG_H -DUSE_TESTING_KEYS=1 -DWITH_CONNECTION_LIBCOAP=1 -DWITH_UPDATE_AGENT=1
 AM_CFLAGS += -DWITH_PLATFORM_POSIX=1
 
@@ -16,7 +16,6 @@ MOSTLYCLEANFILES = idsgrep.aux idsgrep.log idsgrep.blg idsgrep.bbl idsgrep.toc \
 LIBS = ../ext/libcoap/.libs/libcoap-1.a ../ext/tinydtls/libtinydtls.a
 LIBS += ../ext/tinycrypt/lib/libtinycrypt.a
 
-UNITY_SRC = ../ext/unity/src/unity.c
 COMMON_SRC = ../src/core/common/error.c ../src/core/common/identity.c
 MEMORY_SRC = ../src/core/memory/memory_objects.c 
 SECURITY_SRC = ../src/core/security/verifier.c
@@ -29,12 +28,12 @@ NETWORK_IMPL = ../src/network/coap/libcoap/connection_libcoap.c ../src/network/c
 MEMORY_IMPL = ../src/core/memory/memory_impl.c ../src/platform/posix/memory_posix.c
 MANIFEST_IMPL = ../src/core/memory/manifest.c ../src/core/memory/simple_manifest.c
 
-ALL_SRC = $(UNITY_SRC) $(COMMON_SRC) $(MEMORY_SRC) $(SECURITY_SRC) $(MANIFEST_IMPL) $(NETWORK_SRC)
+ALL_SRC = $(COMMON_SRC) $(MEMORY_SRC) $(SECURITY_SRC) $(MANIFEST_IMPL) $(NETWORK_SRC)
 ALL_SRC += $(NETWORK_IMPL) $(MEMORY_IMPL) $(SUPPORT_SRC)
 
 MOCK_MEMORY = mocks/memory_mock.c ../src/platform/posix/memory_posix.c
 MOCK_MANIFEST = mocks/manifest_mock.c ../src/core/memory/simple_manifest.c
-NO_MOCK_SRC = $(UNITY_SRC) $(COMMON_SRC) $(SECURITY_SRC) $(NETWORK_SRC) $(NETWORK_IMPL) $(MEMORY_SRC) $(SUPPORT_SRC)
+NO_MOCK_SRC = $(COMMON_SRC) $(SECURITY_SRC) $(NETWORK_SRC) $(NETWORK_IMPL) $(MEMORY_SRC) $(SUPPORT_SRC)
 
 TINYCRYPT_SRC = ../src/core/security/tinycrypt.c ../ext/tinycrypt/lib/source/ecc_platform_specific.c
 TINYDTLS_SRC = ../src/core/security/tinydtls.c

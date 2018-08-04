@@ -57,9 +57,6 @@ if [ ! -d "ext/tinycrypt" ]; then
     (cd ext/tinycrypt && make ENABLE_TESTS=false)
     echo "Build tinycrypt...done"
 fi
-if [ ! -d "ext/unity" ]; then
-    clone unity https://github.com/ThrowTheSwitch/Unity.git
-fi
 #clone cryptoauthlib https://github.com/MicrochipTech/cryptoauthlib.git
 
 autoreconf -i

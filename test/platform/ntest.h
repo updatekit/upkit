@@ -43,12 +43,15 @@ static char* cur_name;
     PFUNC("+-- TEST "STR(name)": %s\n", (assertions)? GREEN("passed"): RED("failed")); \
 }
 
+#define nTEST_RETURN() return test_failed
+
 #define nTEST_TRUE(cond, message...) { \
+    int condres = (cond); \
     PFUNC("|---- %s:%s:%d: %s", __FILENAME__, cur_name, __LINE__, \
-            (!!((cond)))? GREEN("passed"):RED("failed")); \
-    (!!(cond))? PFUNC("\n"): PFUNC(""message); \
-    assertions = (!!(cond))? assertions+1: 0; \
-    if (!cond) return; \
+            (condres)? GREEN("passed"):RED("failed")); \
+    (condres)? PFUNC("\n"): PFUNC(""message); \
+    assertions = (condres)? assertions+1: 0; \
+    if (!condres) return; \
 }
 
 #define nTEST_FALSE(cond, message...) \

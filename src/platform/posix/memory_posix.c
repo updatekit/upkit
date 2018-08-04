@@ -55,7 +55,7 @@ void copy_asset(char* src, char* dest) {
     s = fopen(src, "r");
     d = fopen(dest, "w");
     if (s == NULL || d == NULL) {
-        printf("Cannot open files %s %s\n", src, dest);
+        log_warn("Cannot open files %s %s\n", src, dest);
         return;
     }
     while ( (ch = fgetc(s)) != EOF) {

@@ -1,14 +1,9 @@
 #include <libpull/security/sha256.h>
-
 #include "libpull_agents/update.h"
+
 #include "support/support.h"
 
 #include <unistd.h>
-
-#define FOREACH_TEST(DO) \
-    DO(update_success, 0) \
-    DO(update_success_dtls, 0)
-TEST_RUNNER();
 
 #define TIMEOUT 1000
 #define BUFFER_SIZE 1024
@@ -20,14 +15,14 @@ static int8_t retries = 3;
 static uint8_t success = 0;
 static uint8_t buffer[BUFFER_SIZE];
 
-void setUp(void) {
+void ntest_prepare(void) {
     bzero(&cfg, sizeof(cfg));
     bzero(&ctx, sizeof(ctx));
     retries = 3;
     success = 0;
 }
 
-void tearDown(void) { 
+void ntest_clean(void) { 
     restore_assets();
 }
 
@@ -60,7 +55,7 @@ void update_runner(conn_type type, void* data) {
             loop(GET_CONNECTION(agent_msg), TIMEOUT);
         }
     }
-    TEST_ASSERT_TRUE_MESSAGE(success, "There was an error during the update phase\n");
+    nTEST_TRUE(success, "There was an error during the update phase\n");
 }
 
 void test_update_success(void) {
@@ -74,4 +69,12 @@ void test_update_success_dtls(void) {
          .pub_key_y = (uint8_t*) dtls_client_y_g
     };
     update_runner(PULL_DTLS_ECDH, &ecdh_data);
+}
+
+int main() {
+    nTEST_INIT();
+    nTEST_RUN(test_update_success);
+    nTEST_RUN(test_update_success_dtls);
+    nTEST_END();
+    nTEST_RETURN();
 }
