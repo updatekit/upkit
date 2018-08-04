@@ -32,7 +32,7 @@ uint8_t buffer[BUFFER_SIZE];
 
 static bool already_validated_flag = false;
 
-pull_error restore_recovery_image() {
+pull_error restore_factory_image() {
     return GENERIC_ERROR;
 }
 
@@ -71,21 +71,21 @@ agent_msg_t bootloader_agent(bootloader_agent_config* cfg) {
                 }
             }
         }
-#if RECOVERY_IMAGE
-        // (2.2) Store recovery image
-        PULL_CONTINUE(EVENT_STORE_RECOVERY, NULL);
-        log_debug("Storing Recovery Image\n");
-        err = memory_open(&destination_slot, cfg->recovery_id, WRITE_ALL);
+#if FACTORY_IMAGE
+        // (2.2) Store factory image
+        PULL_CONTINUE(EVENT_STORE_FACTORY, NULL);
+        log_debug("Storing Factory Image\n");
+        err = memory_open(&destination_slot, cfg->factory_id, WRITE_ALL);
         if (err) {
             PULL_CONTINUE(EVENT_STORE_RECOVER_FAILURE, &err);
         }
-        PULL_CONTINUE(EVENT_STORE_RECOVERY_COPY_START, NULL)
+        PULL_CONTINUE(EVENT_STORE_FACTORY_COPY_START, NULL)
         err = copy_firmware(&newest_bootable, &destination_slot, buffer, BUFFER_SIZE);
-        PULL_CONTINUE(EVENT_STORE_RECOVERY_COPY_STOP, NULL)
+        PULL_CONTINUE(EVENT_STORE_FACTORY_COPY_STOP, NULL)
         if (err) {
-            PULL_CONTINUE(EVENT_STORE_RECOVERY_COPY_FAILURE, &err);
+            PULL_CONTINUE(EVENT_STORE_FACTORY_COPY_FAILURE, &err);
         }
-#endif /* RECOVERY_IMAGE == 1 */
+#endif /* FACTORY_IMAGE == 1 */
         // (2.3) Store bootloader context
         PULL_CONTINUE(EVENT_STORE_BOOTLAODER_CTX, NULL);
         bctx.startup_flags = 0x0;
@@ -168,12 +168,12 @@ agent_msg_t bootloader_agent(bootloader_agent_config* cfg) {
             boot_id = id_newest_bootable;
         } else {
             PULL_CONTINUE(EVENT_VALIDATE_BOOTABLE_FAILURE, &err);
-#if RECOVERY_IMAGE
-            // (5.1.1) Restore the recovery image if available
-            PULL_CONTINUE(EVENT_RECOVERY_RESTORE, NULL);
-            PULL_CONTINUE(EVENT_RECOVERY_RESTORE_START, NULL);
-            err = restore_recovery_image(&id_newest_bootable);
-            PULL_CONTINUE(EVENT_RECOVERY_RESTORE_STOP, NULL);
+#if FACTORY_IMAGE
+            // (5.1.1) Restore the factory image if available
+            PULL_CONTINUE(EVENT_FACTORY_RESET, NULL);
+            PULL_CONTINUE(EVENT_FACTORY_RESET_START, NULL);
+            err = restore_factory_image(&id_newest_bootable);
+            PULL_CONTINUE(EVENT_FACTORY_RESET_STOP, NULL);
             if (!err) {
                 boot_id = id_newest_bootable;
             } else {
