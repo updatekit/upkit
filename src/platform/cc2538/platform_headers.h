@@ -5,6 +5,6 @@
 #include "cpu.h"
 
 #include <libpull_network/coap/connection_ercoap.h>
-#include <libpull_network/coap/connection_libcoap_riot.h>
+#include <libpull_network/coap/connection_libcoap.h>
 
 #endif /* CC2538_PLATFORM_HEADERS_H_ */

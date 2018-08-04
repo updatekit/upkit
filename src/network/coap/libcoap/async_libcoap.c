@@ -9,6 +9,8 @@
 #include <sys/types.h>
 #include <unistd.h>
 
+#include "platform_headers.h"
+
 /* This is a blocking function, it will return when the
  * message has been received or the timeout is exceeded */
 void loop_once(txp_ctx* ctx, uint32_t timeout) {
@@ -16,9 +18,13 @@ void loop_once(txp_ctx* ctx, uint32_t timeout) {
 }
 
 void loop(txp_ctx* ctx, uint32_t timeout) {
-    ctx->loop = 1;
     while(ctx->loop) {
-        coap_run_once(ctx->coap_ctx, timeout);
+        log_debug("Starting loop\n");
+        int ret = coap_run_once(ctx->coap_ctx, timeout);
+        if (ret > timeout) {
+            log_debug("Timeout received\n");
+            return;
+        }
     }
     log_debug("Loop end\n");
 }
