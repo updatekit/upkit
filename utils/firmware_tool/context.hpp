@@ -32,7 +32,6 @@
     << std::setw(20) << #name << std::setw(40) << help << std::endl;
 
 class Context {
-
     std::string prog_name;
     std::string config_file_name = "config.toml";
     std::vector<std::string> subcommands;

@@ -3,13 +3,17 @@
 #include <libpull_network/coap/connection_libcoap.h> 
 
 #include <unistd.h>
-#include <sys/select.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
-#include <netdb.h>
 #include <coap/coap.h>
 #include <coap/block.h>
+
+#include "platform_headers.h"
+
+#ifdef SYSTEM_RESOLVER
+#include <netdb.h>
+#endif
 
 #define CALLBACK(a,b,c) ((void(*)())((cb_ctx_t*)ctx->app)->cb)(a,b,c,((cb_ctx_t*)ctx->app)->more)
 #define BCTX ((cb_ctx_t*)ctx->app)->bctx
@@ -48,6 +52,7 @@ pull_error txp_init(txp_ctx* ctx, const char* addr, uint16_t port, conn_type typ
             proto = COAP_PROTO_UDP;
             final_port = !port? COAP_DEFAULT_PORT: port;
             break;
+#ifndef DISABLE_DTLS
         case PULL_DTLS_PSK:
             proto = COAP_PROTO_DTLS;
             final_port = !port? COAPS_DEFAULT_PORT: port;
@@ -69,6 +74,7 @@ pull_error txp_init(txp_ctx* ctx, const char* addr, uint16_t port, conn_type typ
                     ecdh_data->priv_key, ecdh_data->pub_key_x,
                     ecdh_data->pub_key_y, libcoap_verify_key);
             break;
+#endif
         default:
             log_error(INVALID_CONN_DATA_ERROR, "Protocol not supported\n");
             return INVALID_CONN_DATA_ERROR;
@@ -76,7 +82,8 @@ pull_error txp_init(txp_ctx* ctx, const char* addr, uint16_t port, conn_type typ
 #ifdef DEBUG_LIBCOAP
     coap_set_log_level(LOG_DEBUG);
     coap_dtls_set_log_level(LOG_DEBUG);
-#endif 
+#endif
+#ifdef SYSTEM_RESOLVER
     // Resolve the address
     struct addrinfo hints;
     struct addrinfo *result = NULL, *rp;
@@ -105,6 +112,20 @@ pull_error txp_init(txp_ctx* ctx, const char* addr, uint16_t port, conn_type typ
         }
     }
     freeaddrinfo(result);
+#endif /* SYSTEM_RESOLVER */
+#ifdef RIOT_RESOLVER
+    ipv6_addr_t ipv6_addr;
+    ipv6_addr_from_str(&ipv6_addr, addr);
+
+    coap_address_t bind_addr;
+    coap_address_init(&bind_addr);
+    memcpy(&bind_addr.addr.sin6.sin6_addr, &ipv6_addr, sizeof(ipv6_addr));
+    bind_addr.size = sizeof(struct sockaddr_in6);
+    bind_addr.addr.sin6.sin6_port = htons(final_port);
+    bind_addr.addr.sa.sa_family = AF_INET6;
+
+    ctx->coap_session = coap_new_client_session(ctx->coap_ctx, NULL, &bind_addr, proto);
+#endif /* RIOT_RESOLVER */
     return ctx->coap_session == NULL ? RESOLVER_ERROR : PULL_SUCCESS;
 }
 

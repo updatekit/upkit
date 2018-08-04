@@ -51,15 +51,5 @@ typedef struct txp_ctx {
     uint8_t loop;
 } txp_ctx;
 
-pull_error txp_init(txp_ctx* ctx, const char* addr, uint16_t port, conn_type type, void* conn_data);
-
-pull_error txp_on_data(txp_ctx* ctx, callback handler, void* more);
-
-pull_error txp_request(txp_ctx* ctx, rest_method method, const char* resource, const char* data, uint16_t length);
-
-pull_error txp_observe(txp_ctx* ctx, const char* resource, const char* token, uint8_t token_length);
-
-void txp_end(txp_ctx* ctx);
-
 #endif /* WITH_CONNECTION_LIBCOAP */
 #endif /* CONNECTION_LIBCOAP_H_ */
