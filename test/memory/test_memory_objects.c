@@ -94,4 +94,5 @@ int main() {
     nTEST_RUN(test_copy_firmware);
     nTEST_RUN(test_swap_firmware);
     nTEST_END();
+    nTEST_RETURN();
 }

@@ -41,5 +41,6 @@ int main() {
     nTEST_RUN(test_verify_object_invalid_digest_update);
     nTEST_RUN(test_verify_object_invalid_key);
     nTEST_END();
+    nTEST_RETURN();
 }
 

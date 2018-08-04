@@ -52,5 +52,8 @@ void test_bootloader_success(void) {
 }
 
 int main() {
+    nTEST_INIT();
     nTEST_RUN(test_bootloader_success);
+    nTEST_END();
+    nTEST_RETURN();
 }

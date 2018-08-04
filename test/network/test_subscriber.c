@@ -41,7 +41,10 @@ void test_update_polling(void) {
 // TODO: add more tests making requests to invalid endpoints
 
 int main() {
+    nTEST_INIT();
     nTEST_RUN(test_update_polling);
+    nTEST_END();
+    nTEST_RETURN();
 }
 
 

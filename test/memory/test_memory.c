@@ -72,4 +72,5 @@ int main() {
     nTEST_RUN(test_memory_write_random);
     nTEST_RUN(test_memory_invalid_object);
     nTEST_END();
+    nTEST_RETURN();
 }

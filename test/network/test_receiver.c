@@ -107,8 +107,11 @@ void test_get_firmware_invalid_size(void) {
 }
 
 int main() {
+    nTEST_INIT();
     nTEST_RUN(test_get_firmware);
     nTEST_RUN(test_receiver_chunk_invalid_transport);
     nTEST_RUN(test_get_firmware_invalid_resource);
     nTEST_RUN(test_get_firmware_dtls);
+    nTEST_END();
+    nTEST_RETURN();
 }

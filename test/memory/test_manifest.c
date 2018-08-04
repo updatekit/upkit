@@ -121,5 +121,6 @@ int main() {
     nTEST_RUN(test_sign_verify_manifest_server);
     nTEST_RUN(test_sign_verify_manifest_vendor_invalid_digest);
     nTEST_END();
+    nTEST_RETURN();
 }
 
