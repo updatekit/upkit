@@ -4,23 +4,6 @@
 
 #include "support/support.h"
 
-#define FOREACH_TEST(DO) \
-    DO(manifest_version, 0) \
-    DO(manifest_platform, 0) \
-    DO(manifest_size,0) \
-    DO(manifest_offset,0) \
-    DO(manifest_server_key_x,0) \
-    DO(manifest_server_key_y,0) \
-    DO(manifest_digest,0) \
-    DO(manifest_vendor_signature_r,0) \
-    DO(manifest_vendor_signature_s,0) \
-    DO(manifest_server_signature_r,0) \
-    DO(manifest_server_signature_s,0) \
-    DO(sign_verify_manifest_vendor,0) \
-    DO(sign_verify_manifest_server,0) \
-    DO(sign_verify_manifest_vendor_invalid_digest,0)
-TEST_RUNNER();
-
 #define BUFFER_LEN 1024
 
 /* Default parameters used for the test */
@@ -39,7 +22,7 @@ uint8_t* server_signature_s_g = (uint8_t*) vendor_s_g;
 /* setUp function called every time a new test is executed */
 manifest_t mt;
 uint8_t size = 32;
-void setUp(void) {
+void ntest_prepare(void) {
     bzero(&mt, sizeof(manifest_t));
     set_size(&mt, size_g);
     set_offset(&mt, offset_g);
@@ -54,53 +37,55 @@ void setUp(void) {
     set_server_signature_s(&mt, server_signature_s_g, size);
 }
 
+void ntest_clean() {};
+
 void test_manifest_version(void) {
-    TEST_ASSERT_TRUE(version_g == get_version(&mt));
+    nTEST_TRUE(version_g == get_version(&mt));
 }
 void test_manifest_platform(void) {
-    TEST_ASSERT_TRUE(platform_g == get_platform(&mt));
+    nTEST_TRUE(platform_g == get_platform(&mt));
 }
 void test_manifest_size(void) {
-    TEST_ASSERT_TRUE(size_g == get_size(&mt));
+    nTEST_TRUE(size_g == get_size(&mt));
 }
 void test_manifest_offset(void) {
-    TEST_ASSERT_TRUE(offset_g == get_offset(&mt));
+    nTEST_TRUE(offset_g == get_offset(&mt));
 }
 void test_manifest_server_key_x(void) {
-    TEST_ASSERT_EQUAL_UINT8_ARRAY(server_key_x_g, get_server_key_x(&mt), 32);
+    nTEST_COMPARE_MEM(server_key_x_g, get_server_key_x(&mt), 32*sizeof(uint8_t));
 }
 void test_manifest_server_key_y(void) {
-    TEST_ASSERT_EQUAL_UINT8_ARRAY(server_key_y_g, get_server_key_y(&mt), 32);
+    nTEST_COMPARE_MEM(server_key_y_g, get_server_key_y(&mt), 32*sizeof(uint8_t));
 }
 void test_manifest_digest(void) {
-    TEST_ASSERT_EQUAL_UINT8_ARRAY(digest_g, get_digest(&mt), 32);
+    nTEST_COMPARE_MEM(digest_g, get_digest(&mt), 32*sizeof(uint8_t));
 }
 void test_manifest_vendor_signature_r(void) {
     uint8_t new_size;
-    TEST_ASSERT_EQUAL_MEMORY(vendor_signature_r_g, get_vendor_signature_r(&mt, &new_size), size);
-    TEST_ASSERT_EQUAL_UINT8(size, new_size);
+    nTEST_COMPARE_MEM(vendor_signature_r_g, get_vendor_signature_r(&mt, &new_size), size);
+    nTEST_COMPARE_UINT(size, new_size);
 }
 void test_manifest_vendor_signature_s(void) {
     uint8_t new_size;
-    TEST_ASSERT_EQUAL_MEMORY(vendor_signature_s_g, get_vendor_signature_s(&mt, &new_size), size);
-    TEST_ASSERT_EQUAL_UINT8(size, new_size);
+    nTEST_COMPARE_MEM(vendor_signature_s_g, get_vendor_signature_s(&mt, &new_size), size);
+    nTEST_COMPARE_UINT(size, new_size);
 }
 void test_manifest_server_signature_r(void) {
     uint8_t new_size;
-    TEST_ASSERT_EQUAL_MEMORY(server_signature_r_g, get_server_signature_r(&mt, &new_size), size);
-    TEST_ASSERT_EQUAL_UINT8(size, new_size);
+    nTEST_COMPARE_MEM(server_signature_r_g, get_server_signature_r(&mt, &new_size), size);
+    nTEST_COMPARE_UINT(size, new_size);
 }
 void test_manifest_server_signature_s(void) {
     uint8_t new_size;
-    TEST_ASSERT_EQUAL_MEMORY(server_signature_s_g, get_server_signature_s(&mt, &new_size), size);
-    TEST_ASSERT_EQUAL_UINT8(size, new_size);
+    nTEST_COMPARE_MEM(server_signature_s_g, get_server_signature_s(&mt, &new_size), size);
+    nTEST_COMPARE_UINT(size, new_size);
 }
 
 void test_sign_verify_manifest_vendor(void) {
     uint8_t buffer[BUFFER_LEN];
     pull_error err = sign_manifest_vendor(&mt, tinycrypt_digest_sha256, 
-                        vendor_priv_g, buffer, tinycrypt_secp256r1_ecc);
-    TEST_ASSERT_TRUE(err == PULL_SUCCESS);
+            vendor_priv_g, buffer, tinycrypt_secp256r1_ecc);
+    nTEST_TRUE(err == PULL_SUCCESS);
     err = verify_manifest_vendor(&mt, tinycrypt_digest_sha256, vendor_x_g, vendor_y_g, tinycrypt_secp256r1_ecc);
 }
 void test_sign_verify_manifest_vendor_invalid_digest(void) {
@@ -108,13 +93,33 @@ void test_sign_verify_manifest_vendor_invalid_digest(void) {
     digest_func f = tinycrypt_digest_sha256;
     f.init = invalid_init;
     pull_error err = sign_manifest_vendor(&mt, f, vendor_priv_g, buffer, tinycrypt_secp256r1_ecc);
-    TEST_ASSERT_TRUE(err);
+    nTEST_TRUE(err);
     err = verify_manifest_vendor(&mt, f, vendor_x_g, vendor_y_g, tinycrypt_secp256r1_ecc);
-    TEST_ASSERT_TRUE(err);
+    nTEST_TRUE(err);
 }
 void test_sign_verify_manifest_server(void) {
     uint8_t buffer[BUFFER_LEN];
     pull_error err = sign_manifest_server(&mt, tinycrypt_digest_sha256, vendor_priv_g, buffer, tinycrypt_secp256r1_ecc);
-    TEST_ASSERT_TRUE(err == PULL_SUCCESS);
+    nTEST_TRUE(err == PULL_SUCCESS);
     err = verify_manifest_server(&mt, tinycrypt_digest_sha256, server_x_g, server_y_g, tinycrypt_secp256r1_ecc);
 }
+
+int main() {
+    nTEST_INIT();
+    nTEST_RUN(test_manifest_version);
+    nTEST_RUN(test_manifest_platform);
+    nTEST_RUN(test_manifest_size);
+    nTEST_RUN(test_manifest_offset);
+    nTEST_RUN(test_manifest_server_key_x);
+    nTEST_RUN(test_manifest_server_key_y);
+    nTEST_RUN(test_manifest_digest);
+    nTEST_RUN(test_manifest_vendor_signature_r);
+    nTEST_RUN(test_manifest_vendor_signature_s);
+    nTEST_RUN(test_manifest_server_signature_r);
+    nTEST_RUN(test_manifest_server_signature_s);
+    nTEST_RUN(test_sign_verify_manifest_vendor);
+    nTEST_RUN(test_sign_verify_manifest_server);
+    nTEST_RUN(test_sign_verify_manifest_vendor_invalid_digest);
+    nTEST_END();
+}
+
