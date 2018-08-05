@@ -8,11 +8,11 @@ void ntest_prepare(void) {}
 void ntest_clean(void) {}
 
 const char test_str[] = "this_string_is_a_test_for_the_CRC_16_function";
-const uint16_t test_result = 0xB265;
+const uint16_t test_result = 0x99A3; // CRC-CCITT
 
 void test_crc16(void) {
     uint16_t given;
-    given = crc16(test_str, sizeof(test_str));
+    given = crc16(test_str, sizeof(test_str)-1);
     nTEST_COMPARE_HEX(given, test_result);
 }
 
