@@ -17,7 +17,7 @@ extern "C" {
 #endif /* __cplusplus */
 
 typedef struct {
-    txp_ctx* txp;
+    conn_ctx* conn;
     const char* resource;
     uint8_t has_updates;
     version_t current_version;
@@ -32,7 +32,7 @@ typedef struct {
  * error.
  * \param data Data received by the network. NULL if error.
  * \param len Lenght of the received data. 0 if error.
- * \param more Pointer passed during initialization of the transport object.
+ * \param more Pointer passed during initialization of the connection object.
  * \note The more parameter can be useful to pass receive some structure
  * from the function creating the trasnport when the callback is called.
  */
@@ -41,16 +41,16 @@ void subscriber_cb(pull_error err, const char* data, int len, void* more);
 /** 
  * \brief Subscribe to a backend for updates.
  * This functions initialize the subsciber context and subscribe to a
- * specific resource. It requires an already initialized transport context.
+ * specific resource. It requires an already initialized connection context.
  *
  * \param ctx A pointer to the subscriber.
- * \param txp An already opended transport object.
+ * \param conn An already opended connection object.
  * \param resource A string rapresenting the resource.
  * \param obj_t A temporary memory object.
  * 
  * \returns PULL_SUCCESS on success or the specific error otherwise.
  */
-pull_error subscribe(subscriber_ctx* ctx, txp_ctx* txp, const char* resource, mem_object_t* obj_t);
+pull_error subscribe(subscriber_ctx* ctx, conn_ctx* conn, const char* resource, mem_object_t* obj_t);
 
 /** 
  * \brief Check the presence of an update.
@@ -67,7 +67,7 @@ pull_error check_updates(subscriber_ctx* ctx, callback cb);
 
 /** 
  * \brief Unsubscribe from the backend. This function closes context,
- * however does not closes the transport tham must be closed by the
+ * however does not closes the connection tham must be closed by the
  * caller.
  * 
  * \param ctx The subscriber context to close.

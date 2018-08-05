@@ -6,17 +6,17 @@
 
 agent_msg_t update_agent(update_agent_config* cfg, update_agent_ctx_t* ctx) {
 
-    // (1) Init transport interface
+    // (1) Init the connection interface
     PULL_BEGIN(EVENT_INIT);
-    ctx->err = txp_init(&ctx->stxp, cfg->subscriber.endpoint, cfg->subscriber.port, cfg->subscriber.connection_type, cfg->subscriber.conn_data);
+    ctx->err = conn_init(&ctx->sconn, cfg->subscriber.endpoint, cfg->subscriber.port, cfg->subscriber.connection_type, cfg->subscriber.conn_data);
     if (ctx->err) {
-        log_error(ctx->err, "Error initializing the transport interface\n");
+        log_error(ctx->err, "Error initializing the connection interface\n");
         PULL_CONTINUE(EVENT_INIT_FAILURE, &ctx->err);
     }
 
     // (2) Subscribe to the server
     PULL_CONTINUE(EVENT_SUBSCRIBE, NULL);
-    ctx->err = subscribe(&ctx->sctx, &ctx->stxp, cfg->subscriber.resource, &ctx->obj_t);
+    ctx->err = subscribe(&ctx->sctx, &ctx->sconn, cfg->subscriber.resource, &ctx->obj_t);
     if (ctx->err) {
         log_error(ctx->err, "Error subscribing to the server\n");
         PULL_CONTINUE(EVENT_SUBSCRIBE_FAILURE, &ctx->err);
@@ -32,7 +32,7 @@ agent_msg_t update_agent(update_agent_config* cfg, update_agent_ctx_t* ctx) {
             PULL_CONTINUE(EVENT_CHECKING_UPDATES_RECOVER, &ctx->err);
             continue;
         }
-        PULL_CONTINUE(EVENT_CHECKING_UPDATES_SEND, &(ctx->stxp));
+        PULL_CONTINUE(EVENT_CHECKING_UPDATES_SEND, &(ctx->sconn));
         if (!ctx->sctx.has_updates) {
             PULL_CONTINUE(EVENT_CHECKING_UPDATES_TIMEOUT, NULL);
         }
@@ -56,20 +56,20 @@ agent_msg_t update_agent(update_agent_config* cfg, update_agent_ctx_t* ctx) {
 
     // (5) Connection to receiver server
     PULL_CONTINUE(EVENT_CONN_RECEIVER, NULL);
-    static txp_ctx* rtxp;
+    static conn_ctx* rconn;
     if (cfg->reuse_connection) {
-        rtxp = &ctx->stxp;
+        rconn = &ctx->sconn;
     } else { 
-        ctx->err = txp_init(&ctx->rtxp, cfg->receiver.endpoint,
+        ctx->err = conn_init(&ctx->rconn, cfg->receiver.endpoint,
                     cfg->receiver.port, cfg->receiver.connection_type, 
                     cfg->receiver.conn_data);
         if (ctx->err) {
             log_error(ctx->err, "Error while connecting to receiver server\n");
             PULL_CONTINUE(EVENT_CONN_RECEIVER_FAILURE, &ctx->err);
         }
-        rtxp = &ctx->rtxp;
+        rconn = &ctx->rconn;
     }
-    ctx->err = receiver_open(&ctx->rctx, rtxp, &cfg->identity, cfg->receiver.resource, &ctx->new_obj);
+    ctx->err = receiver_open(&ctx->rctx, rconn, &cfg->identity, cfg->receiver.resource, &ctx->new_obj);
     if (ctx->err) {
         log_error(ctx->err, "Error opening the receiver\n");
         PULL_CONTINUE(EVENT_CONN_RECEIVER_FAILURE_2, &ctx->err);
@@ -79,7 +79,7 @@ agent_msg_t update_agent(update_agent_config* cfg, update_agent_ctx_t* ctx) {
     PULL_CONTINUE(EVENT_RECEIVE, NULL);
     while (!ctx->rctx.firmware_received) {
         ctx->err = receiver_chunk(&ctx->rctx);
-        PULL_CONTINUE(EVENT_RECEIVE_SEND, rtxp);
+        PULL_CONTINUE(EVENT_RECEIVE_SEND, rconn);
         if (ctx->err) {
             log_error(ctx->err, "Error receiving chunk\n");
             PULL_CONTINUE(EVENT_RECEIVE_RECOVER, &ctx->err);
@@ -87,7 +87,7 @@ agent_msg_t update_agent(update_agent_config* cfg, update_agent_ctx_t* ctx) {
         }
     }
     if (!cfg->reuse_connection) {
-        txp_end(&ctx->rtxp);
+        conn_end(&ctx->rconn);
     }
     ctx->err = receiver_close(&ctx->rctx); // Check this ctx->error
 
@@ -111,7 +111,7 @@ agent_msg_t update_agent(update_agent_config* cfg, update_agent_ctx_t* ctx) {
     PULL_CONTINUE(EVENT_FINAL, NULL);
     ctx->err = memory_close(&ctx->new_obj);
     ctx->err = unsubscribe(&ctx->sctx);
-    txp_end(&ctx->stxp);
+    conn_end(&ctx->sconn);
     PULL_FINISH(EVENT_APPLY);
 }
 

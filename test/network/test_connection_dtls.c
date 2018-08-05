@@ -21,7 +21,7 @@ void stress_echo(void);
         } \
     }}
 
-txp_ctx ctx;
+conn_ctx ctx;
 int max_retry_g;
 int timeout_g;
 int cb_called;
@@ -33,12 +33,12 @@ void ntest_prepare(void) {
 }
 
 void ntest_clean(void) {
-    txp_end(&ctx);
+    conn_end(&ctx);
 }
 
 void test_udp(void) {
     // Set up udp connection
-    pull_error error = txp_init(&ctx, PROV_SERVER, 0, PULL_UDP, NULL);
+    pull_error error = conn_init(&ctx, PROV_SERVER, 0, PULL_UDP, NULL);
     nTEST_TRUE(!error);
     get();
     echo();
@@ -52,7 +52,7 @@ void test_dtls_ecdsa(void) {
         .pub_key_x = (uint8_t *) dtls_client_x_g,
         .pub_key_y = (uint8_t *) dtls_client_y_g
     };
-    pull_error error = txp_init(&ctx, PROV_SERVER, 0, PULL_DTLS_ECDH, &ecdh_data);
+    pull_error error = conn_init(&ctx, PROV_SERVER, 0, PULL_DTLS_ECDH, &ecdh_data);
     nTEST_TRUE(!error);
     get();
     echo();
@@ -72,7 +72,7 @@ void handler_stress_echo(pull_error err, const char* data, const int len, void* 
     nTEST_TRUE(len == sizeof(int));
     int counter = *(int*)data;
     nTEST_COMPARE_INT((*(int*)more)++, counter++);
-    pull_error error = txp_request(&ctx, GET, "echo", (const char*) &counter, sizeof(int));
+    pull_error error = conn_request(&ctx, GET, "echo", (const char*) &counter, sizeof(int));
     nTEST_TRUE(!error);
     cb_called++;
 }
@@ -87,9 +87,9 @@ void handler_blockwise(pull_error err, const char* data, const int len, void* mo
 void echo(void) {
     cb_called = 0;
     char data[] = "expected";
-    pull_error error = txp_on_data(&ctx, handler_cmp_memory, data);
+    pull_error error = conn_on_data(&ctx, handler_cmp_memory, data);
     nTEST_TRUE(!error);
-    error = txp_request(&ctx, GET, "echo", data, strlen(data));
+    error = conn_request(&ctx, GET, "echo", data, strlen(data));
     nTEST_TRUE(!error);
     LOOP_CONDITION(!cb_called);
     nTEST_COMPARE_INT(1, cb_called);
@@ -98,9 +98,9 @@ void echo(void) {
 void stress_echo(void) {
     cb_called = 0;
     int counter = 0;
-    pull_error error = txp_on_data(&ctx, handler_stress_echo, &counter);
+    pull_error error = conn_on_data(&ctx, handler_stress_echo, &counter);
     nTEST_TRUE(!error);
-    error = txp_request(&ctx, GET, "echo", (const char*) &counter, sizeof(int));
+    error = conn_request(&ctx, GET, "echo", (const char*) &counter, sizeof(int));
     nTEST_TRUE(!error);
     LOOP_CONDITION(cb_called < 100);
     //nTEST_COMPARE_INT(100, counter); FIX ME
@@ -110,15 +110,15 @@ void stress_echo(void) {
 void get(void) {
     cb_called = 0;
     uint16_t expected = 0xd;
-    pull_error error = txp_on_data(&ctx, handler_cmp_memory, &expected);
+    pull_error error = conn_on_data(&ctx, handler_cmp_memory, &expected);
     nTEST_TRUE(!error);
-    error = txp_request(&ctx, GET, "version", NULL, 0);
+    error = conn_request(&ctx, GET, "version", NULL, 0);
     nTEST_TRUE(!error);
     LOOP_CONDITION(!cb_called);
     expected = 0x0;
-    error = txp_on_data(&ctx, handler_cmp_memory, &expected);
+    error = conn_on_data(&ctx, handler_cmp_memory, &expected);
     nTEST_TRUE(!error);
-    error = txp_request(&ctx, GET, "version/invalid", NULL, 0);
+    error = conn_request(&ctx, GET, "version/invalid", NULL, 0);
     nTEST_TRUE(!error);
     LOOP_CONDITION(cb_called < 2);
     nTEST_COMPARE_INT(2, cb_called);

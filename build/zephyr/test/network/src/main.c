@@ -7,7 +7,7 @@
 
 int main() {
     nTEST_INIT();
-    nTEST_RUN(test_txp);
+    nTEST_RUN(test_conn);
     nTEST_RUN(test_receiver);
     nTEST_END();
     return 0;

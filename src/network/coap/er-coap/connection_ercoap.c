@@ -7,23 +7,23 @@
 
 #include "pt.h"
 
-static txp_ctx* shared_ctx = NULL;
+static conn_ctx* shared_ctx = NULL;
 
-pull_error txp_init(txp_ctx* ctx, const char* addr, uint16_t port, conn_type type, void* data) {
+pull_error conn_init(conn_ctx* ctx, const char* addr, uint16_t port, conn_type type, void* data) {
     // TODO validate input
     if (!coap_endpoint_parse(addr, strlen(addr), &ctx->endpoint)) {
-        log_error(TRANSPORT_INIT_ERROR, "Error parsing the endpoint\n");
-        return TRANSPORT_INIT_ERROR;
+        log_error(CONNECTION_INIT_ERROR, "Error parsing the endpoint\n");
+        return CONNECTION_INIT_ERROR;
     }
     if (!coap_endpoint_connect(&ctx->endpoint)) {
-        log_error(TRANSPORT_INIT_ERROR, "Error connecting to the endpoint\n");
-        return TRANSPORT_INIT_ERROR;
+        log_error(CONNECTION_INIT_ERROR, "Error connecting to the endpoint\n");
+        return CONNECTION_INIT_ERROR;
     }
 
     return PULL_SUCCESS;
 }
 
-pull_error txp_on_data(txp_ctx* ctx, callback handler, void* more) {
+pull_error conn_on_data(conn_ctx* ctx, callback handler, void* more) {
     if (handler == NULL) {
         log_error(CALLBACK_ERROR, "Error, received callback was null\n");
         return CALLBACK_ERROR;
@@ -33,7 +33,7 @@ pull_error txp_on_data(txp_ctx* ctx, callback handler, void* more) {
     return PULL_SUCCESS;
 }
 
-pull_error txp_request(txp_ctx* ctx, rest_method method, const char* resource, const char* data, uint16_t length) {
+pull_error conn_request(conn_ctx* ctx, rest_method method, const char* resource, const char* data, uint16_t length) {
     shared_ctx = ctx;
     coap_init_message(&ctx->request, COAP_TYPE_CON, COAP_GET, 0);
     log_debug("Sending request of lenght %d to resource %s\n", length, resource);
@@ -45,7 +45,7 @@ pull_error txp_request(txp_ctx* ctx, rest_method method, const char* resource, c
     return PULL_SUCCESS;
 }
 
-void break_loop(txp_ctx* ctx) {
+void break_loop(conn_ctx* ctx) {
     ctx->request_state.response = NULL;
     process_post(ctx->request_state.process, PROCESS_EVENT_POLL, NULL);
 }
@@ -56,11 +56,11 @@ void ercoap_handler(coap_message_t* response) {
     shared_ctx->cb(PULL_SUCCESS, (const char*) chunk, len, shared_ctx->more);
 }
 
-pull_error txp_observe(txp_ctx* ctx, const char* resource, const char* token, uint8_t token_length) {
+pull_error conn_observe(conn_ctx* ctx, const char* resource, const char* token, uint8_t token_length) {
     return PULL_SUCCESS;
 }
 
-inline void txp_end(txp_ctx* ctx) {
+inline void conn_end(conn_ctx* ctx) {
     // TODO this must be implemented and it is important for DTLS because in
     // case of error is useful to close the connection and free the resources
 }

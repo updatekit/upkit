@@ -20,19 +20,19 @@ static void check_update_cb(pull_error err, const char* data, int len, void* mor
     version_t version;
     memcpy(&version, data, sizeof(version_t));
     nTEST_COMPARE_HEX(0xD, version);
-    break_loop(ctx->txp);
+    break_loop(ctx->conn);
 }
 
 void test_update_polling(void) {
     subscriber_ctx ctx;
-    txp_ctx txp;
-    txp_init(&txp, PROV_SERVER, 0, PULL_UDP, NULL);
+    conn_ctx conn;
+    conn_init(&conn, PROV_SERVER, 0, PULL_UDP, NULL);
     mem_object_t obj_t;
-    pull_error err = subscribe(&ctx, &txp, "version", &obj_t);
+    pull_error err = subscribe(&ctx, &conn, "version", &obj_t);
     nTEST_TRUE(!err);
     err = check_updates(&ctx, check_update_cb);
     nTEST_TRUE(!err);
-    loop(&txp, 1000);
+    loop(&conn, 1000);
     // XXX This is not valid.. The loop function should return the reason why
     // it returned
     unsubscribe(&ctx);

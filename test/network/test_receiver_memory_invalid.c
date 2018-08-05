@@ -27,16 +27,16 @@ void test_get_firmware_invalid_memory_write(void) {
     NO_MOCK(memory_flush);
     NO_MOCK(memory_close);
 
-    txp_ctx txp;
+    conn_ctx conn;
     receiver_ctx rcv;
-    pull_error err = txp_init(&txp, PROV_SERVER, 0, CONN_UDP, NULL);
+    pull_error err = conn_init(&conn, PROV_SERVER, 0, CONN_UDP, NULL);
     TEST_ASSERT_TRUE(!err);
     mem_object obj_t;
-    err = receiver_open(&rcv, &txp, "firmware", OBJ_A, &obj_t);
+    err = receiver_open(&rcv, &conn, "firmware", OBJ_A, &obj_t);
     TEST_ASSERT_TRUE(!err);
     while (!rcv.firmware_received && !err) {
         err = receiver_chunk(&rcv);
-        loop(&txp, 1000);
+        loop(&conn, 1000);
     }
     TEST_ASSERT_TRUE_MESSAGE(err == MEMORY_WRITE_ERROR, err_as_str(err));
 }
