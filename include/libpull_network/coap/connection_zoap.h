@@ -34,14 +34,14 @@ typedef struct {
     struct coap_block_context block;
 } cb_ctx_t;
 
-typedef struct txp_ctx {
+typedef struct conn_ctx {
     struct net_context *net_ctx;
     struct sockaddr_in6 dest_addr;
     pull_error err;
     cb_ctx_t cb_ctx;
     void* conn_data;
     uint8_t loop;
-} txp_ctx;
+} conn_ctx;
 
 /* This callback is called everytime data are received */
 void udp_receive(struct net_context *context,

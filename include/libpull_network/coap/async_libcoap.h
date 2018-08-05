@@ -10,11 +10,11 @@
 
 #include <coap/coap.h>
 
-void loop_once(txp_ctx* ctx, uint32_t timeout);
+void loop_once(conn_ctx* ctx, uint32_t timeout);
 
-void loop(txp_ctx* ctx, uint32_t timeout);
+void loop(conn_ctx* ctx, uint32_t timeout);
 
-void break_loop(txp_ctx* ctx);
+void break_loop(conn_ctx* ctx);
 
 #endif /* WITH_CONNECTION_LIBCOAP */
 #endif /* ASYNC_LIBCOAP_H_ */

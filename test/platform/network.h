@@ -27,16 +27,16 @@
 static mem_object_t obj;
 int cb_called = 0;
 
-static txp_ctx txp;
+static conn_ctx conn;
 
 void ntest_prepare() {
     cb_called = 0;
-    pull_error err = txp_init(&txp, SERVER_ADDR, SERVER_PORT, PULL_UDP, NULL);
-    nTEST_TRUE(!err, "Error initializing transport: %s", err_as_str(err));
+    pull_error err = conn_init(&conn, SERVER_ADDR, SERVER_PORT, PULL_UDP, NULL);
+    nTEST_TRUE(!err, "Error initializing connection: %s", err_as_str(err));
 }
 
 void ntest_clean() {
-    txp_end(&txp);
+    conn_end(&conn);
 }
 
 static void handler_cmp_memory(pull_error err, const char* data, const int len, void* more) {
@@ -54,18 +54,18 @@ static void handler_cmp_memory(pull_error err, const char* data, const int len, 
     }
     cb_called++;
     if (cb_called >= 10) {
-        txp.loop = 0;
+        conn.loop = 0;
     }
 }
 
-void test_txp(void) {
+void test_conn(void) {
     uint16_t version = EXPECTED_VERSION;
-    pull_error err = txp_on_data(&txp, handler_cmp_memory, &version);
+    pull_error err = conn_on_data(&conn, handler_cmp_memory, &version);
     nTEST_TRUE(!err, "Error setting on data: %s", err_as_str(err));
     while (cb_called < 10) {
-        err = txp_request(&txp, GET, "/version", NULL, 0);
-        nTEST_TRUE(!err, "Error in txp_request: %s", err_as_str(err));
-        loop_once(&txp, TIMEOUT_MS);
+        err = conn_request(&conn, GET, "/version", NULL, 0);
+        nTEST_TRUE(!err, "Error in conn_request: %s", err_as_str(err));
+        loop_once(&conn, TIMEOUT_MS);
     }
     nTEST_COMPARE_INT(cb_called, 10);
 }
@@ -75,12 +75,12 @@ void test_receiver(void) {
     pull_error err = memory_open(&obj, OBJ_2, WRITE_ALL);
     nTEST_TRUE(!err, "Error opening memory: %s", err_as_str(err));
     receiver_ctx rcv;
-    err = receiver_open(&rcv, &txp, identity_g, "/firmware", &obj);
+    err = receiver_open(&rcv, &conn, identity_g, "/firmware", &obj);
     nTEST_TRUE(!err, "Error opening receiver: %s", err_as_str(err));
     while (!rcv.firmware_received) {
         err = receiver_chunk(&rcv);
         nTEST_TRUE(!err, "Error in receiver_chunk: %s", err_as_str(err));
-        loop(&txp, TIMEOUT_MS);
+        loop(&conn, TIMEOUT_MS);
     }
     err = receiver_close(&rcv);
     nTEST_TRUE(!err, "Error closing receiver: %s", err_as_str(err));

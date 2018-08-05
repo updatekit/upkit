@@ -13,7 +13,7 @@ static void* test_thread(void* args) {
     // Wait 4 seconds for the network to setup
     xtimer_sleep(4);
     UnityBegin("network.h");
-    RUN_TEST(test_txp, test_txp_line);
+    RUN_TEST(test_conn, test_conn_line);
     RUN_TEST(test_receiver, test_receiver_line);
     UnityEnd();
     return NULL;

@@ -13,11 +13,11 @@
 
 /* This is a blocking function, it will return when the
  * message has been received or the timeout is exceeded */
-void loop_once(txp_ctx* ctx, uint32_t timeout) {
+void loop_once(conn_ctx* ctx, uint32_t timeout) {
     coap_run_once(ctx->coap_ctx, timeout);
 }
 
-void loop(txp_ctx* ctx, uint32_t timeout) {
+void loop(conn_ctx* ctx, uint32_t timeout) {
     ctx->loop = 1;
     while(ctx->loop) {
         log_debug("Starting loop\n");
@@ -30,7 +30,7 @@ void loop(txp_ctx* ctx, uint32_t timeout) {
     log_debug("Loop end\n");
 }
 
-void break_loop(txp_ctx* ctx) {
+void break_loop(conn_ctx* ctx) {
     ctx->loop = 0;
 }
 

@@ -14,19 +14,19 @@
 #define COAP_DEFAULT_PORT 5683
 #define COAPS_DEFAULT_PORT 5684
 
-typedef struct txp_ctx {
+typedef struct conn_ctx {
     callback cb;
     void* more;
     coap_endpoint_t endpoint;
     coap_message_t request;
     coap_request_state_t request_state;
-} txp_ctx;
+} conn_ctx;
 
 void ercoap_handler(coap_message_t* response);
 
-// This macro takes a txp_ctx and sets the correct values to send a message
+// This macro takes a conn_ctx and sets the correct values to send a message
 // with er-coap. The need of rewriting this macro is because I moved the
-// request state to the txp_ctx to make sure we are able to block the loop
+// request state to the conn_ctx to make sure we are able to block the loop
 // in case of an error is detected in the callback
 #define COAP_SEND(_ctx_) \
     {\
@@ -36,17 +36,17 @@ void ercoap_handler(coap_message_t* response);
                         &(_ctx_->request), ercoap_handler)); \
     };
 
-pull_error txp_init(txp_ctx* ctx, const char* addr, uint16_t port, conn_type type, void* data);
+pull_error conn_init(conn_ctx* ctx, const char* addr, uint16_t port, conn_type type, void* data);
 
-pull_error txp_on_data(txp_ctx* ctx, callback handler, void* more);
+pull_error conn_on_data(conn_ctx* ctx, callback handler, void* more);
 
-pull_error txp_request(txp_ctx* ctx, rest_method method, const char* resource, const char* data, uint16_t length);
+pull_error conn_request(conn_ctx* ctx, rest_method method, const char* resource, const char* data, uint16_t length);
 
-void break_loop(txp_ctx* ctx);
+void break_loop(conn_ctx* ctx);
 
-pull_error txp_observe(txp_ctx* ctx, const char* resource, const char* token, uint8_t token_length);
+pull_error conn_observe(conn_ctx* ctx, const char* resource, const char* token, uint8_t token_length);
 
-void txp_end(txp_ctx* ctx);
+void conn_end(conn_ctx* ctx);
 
 #endif /* WITH_CONNECTION_ERCOAP */
 #endif /* CONNECTION_ERCOAP_H_ */

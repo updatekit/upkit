@@ -19,7 +19,7 @@ extern "C" {
  * \param err Error received or PULL_SUCCESS if no error.
  * \param data Received data.
  * \param len Lenght of received data.
- * \param more Raw pointer passed during transport initialization.
+ * \param more Raw pointer passed during connection initialization.
  */
 typedef void (* callback)(pull_error err, const char* data, int len, void* more);
 

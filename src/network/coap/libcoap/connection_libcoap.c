@@ -33,15 +33,15 @@ static uint8_t method_mapper[] = {
 
 static int libcoap_verify_key(const coap_session_t *session, const uint8_t *other_pub_x,
         const uint8_t *other_pub_y, size_t key_size) {
-    // TODO Get the txp_ctx and call the verify key
+    // TODO Get the conn_ctx and call the verify key
     return 1;
 }
 
-pull_error txp_init(txp_ctx* ctx, const char* addr, uint16_t port, conn_type type, void* conn_data) {
+pull_error conn_init(conn_ctx* ctx, const char* addr, uint16_t port, conn_type type, void* conn_data) {
     ctx->coap_ctx = coap_new_context(NULL);
     if (ctx->coap_ctx == NULL) {
-        log_error(TRANSPORT_INIT_ERROR, "Failure creating the CoAP context\n");
-        return TRANSPORT_INIT_ERROR;
+        log_error(CONNECTION_INIT_ERROR, "Failure creating the CoAP context\n");
+        return CONNECTION_INIT_ERROR;
     }
     ctx->conn_data = conn_data;
     // Configure the connection
@@ -207,7 +207,7 @@ void handler_libcoap(struct coap_context_t * ctx,
 // each context! You should be sure to set just one handler for
 // all the received packets. If you need to manage more connections
 // simultaneously you should use two context and two sessions!
-pull_error txp_on_data(txp_ctx* ctx, callback handler, void* more) {
+pull_error conn_on_data(conn_ctx* ctx, callback handler, void* more) {
     if (ctx == NULL || handler == NULL) {
         return GENERIC_ERROR; // TODO SPECIALIZE THIS ERROR
     }
@@ -231,7 +231,7 @@ static pull_error split_resource(const char* resource, coap_pdu_t* request) {
     return PULL_SUCCESS;
 }
 
-pull_error txp_request(txp_ctx* ctx, rest_method method, const char* resource, 
+pull_error conn_request(conn_ctx* ctx, rest_method method, const char* resource, 
         const char* data, uint16_t length) {
     coap_pdu_t* request = coap_pdu_init(COAP_MESSAGE_CON, method_mapper[method],
             coap_new_message_id(ctx->coap_session), 
@@ -275,11 +275,11 @@ pull_error txp_request(txp_ctx* ctx, rest_method method, const char* resource,
     return PULL_SUCCESS;
 }
 
-pull_error txp_observe(txp_ctx* ctx, const char* resource, const char* token, uint8_t token_length) {
+pull_error conn_observe(conn_ctx* ctx, const char* resource, const char* token, uint8_t token_length) {
     return PULL_SUCCESS;
 }
 
-void txp_end(txp_ctx* ctx) {
+void conn_end(conn_ctx* ctx) {
     if (ctx->coap_session != NULL) {
         coap_session_release(ctx->coap_session);
     }

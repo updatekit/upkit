@@ -28,8 +28,8 @@ extern "C" {
     ERROR(GENERIC)          /** Generic error */\
     ERROR(NOT_IMPLEMENTED)  /** Method not implemented */\
     ERROR(INVALID_ARGUMENTS) \
-    /* Transport Errors */  \
-    ERROR(TRANSPORT_INIT)   /** The transport initialization failed */\
+    /* connection Errors */  \
+    ERROR(CONNECTION_INIT)   /** The connection initialization failed */\
     ERROR(CALLBACK)         /** The callback could not be setted */\
     ERROR(RESOLVER)         /** Error resolving the backend */\
     ERROR(INVALID_URL)      /** The URL of the provided resource is invalid */\

@@ -4,7 +4,7 @@
  * \defgroup Network
  * \brief This module includes component to interact with the network.
  *
- * It relies on the transport interface that must be implemented by
+ * It relies on the connection interface that must be implemented by
  * the developer using this library.
  * \{
  */
@@ -34,7 +34,7 @@ typedef struct {
 typedef struct receiver_ctx {
     writer_ctx_t wctx;
     receiver_msg_t msg;
-    txp_ctx* txp;
+    conn_ctx* conn;
     identity_t* identity;
     const char* resource;
     pull_error err;
@@ -46,13 +46,13 @@ typedef struct receiver_ctx {
 /** 
  * \brief Open the receiver context.
  * This function start the connection with the backend. It uses a
- * transport object to communicate with it and needs a string
+ * connection object to communicate with it and needs a string
  * rappresenting the resource we want to receive from the backend.
  * It stores the received content into a memory object.
  * 
  * \param ctx The receiver context that should be passed to every receiver
  * function.
- * \param txp The transport object. It must be already initialized.
+ * \param conn The connection object. It must be already initialized.
  * \param identity The device identity used for this particular request
  * \param resource The resource we want to download from the backend.
  * \param obj Memory object used to store the received data. It must be opened.
@@ -60,7 +60,7 @@ typedef struct receiver_ctx {
  * \returns PULL_SUCCESS in case the receiver was correcly initialized or
  * the specific error otherwise.
  */
-pull_error receiver_open(receiver_ctx* ctx, txp_ctx* txp, identity_t* identity,
+pull_error receiver_open(receiver_ctx* ctx, conn_ctx* conn, identity_t* identity,
                         const char* resource, mem_object_t* obj);
 
 /** 

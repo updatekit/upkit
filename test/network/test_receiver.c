@@ -21,87 +21,87 @@ void ntest_clean(void) {
 }
 
 void test_get_firmware(void) {
-    txp_ctx txp;
+    conn_ctx conn;
     receiver_ctx rcv;
-    pull_error err = txp_init(&txp, PROV_SERVER, 0, PULL_UDP, NULL);
+    pull_error err = conn_init(&conn, PROV_SERVER, 0, PULL_UDP, NULL);
     nTEST_TRUE(!err);
-    err = receiver_open(&rcv, &txp, &identity_g, "firmware", &obj);
+    err = receiver_open(&rcv, &conn, &identity_g, "firmware", &obj);
     nTEST_TRUE(!err);
     while (!rcv.firmware_received) {
         err = receiver_chunk(&rcv);
         nTEST_TRUE(!err);
-        loop(&txp, 1000);
+        loop(&conn, 1000);
     }
     err = receiver_close(&rcv);
     nTEST_TRUE(!err);
-    txp_end(&txp);
+    conn_end(&conn);
 }
 
 void test_get_firmware_dtls(void) {
-    txp_ctx txp;
+    conn_ctx conn;
     receiver_ctx rcv;
     dtls_ecdh_data_t ecdh_data = {
         .priv_key = (uint8_t *) dtls_client_priv_g,
         .pub_key_x = (uint8_t *) dtls_client_x_g,
         .pub_key_y = (uint8_t *) dtls_client_y_g
     };
-    pull_error err = txp_init(&txp, PROV_SERVER, 0, PULL_DTLS_ECDH, &ecdh_data);
+    pull_error err = conn_init(&conn, PROV_SERVER, 0, PULL_DTLS_ECDH, &ecdh_data);
     nTEST_TRUE(!err);
-    err = receiver_open(&rcv, &txp, &identity_g, "firmware", &obj);
+    err = receiver_open(&rcv, &conn, &identity_g, "firmware", &obj);
     printf("Starting receiving the firmware\n");
     while (!rcv.firmware_received) {
         err = receiver_chunk(&rcv);
         nTEST_TRUE(!err);
-        loop(&txp, 1000);
+        loop(&conn, 1000);
     }
     printf("firmware downloaded\n");
     err = receiver_close(&rcv);
     nTEST_TRUE(!err);
-    txp_end(&txp);
+    conn_end(&conn);
 }
 
-void test_receiver_chunk_invalid_transport(void) {
-    txp_ctx txp;
+void test_receiver_chunk_invalid_connection(void) {
+    conn_ctx conn;
     receiver_ctx rcv;
-    pull_error err = txp_init(&txp, PROV_SERVER, 0, PULL_UDP, NULL);
+    pull_error err = conn_init(&conn, PROV_SERVER, 0, PULL_UDP, NULL);
     nTEST_TRUE(!err);
-    err = receiver_open(&rcv, &txp, &identity_g, "firmware", &obj);
+    err = receiver_open(&rcv, &conn, &identity_g, "firmware", &obj);
     nTEST_TRUE(!err);
-    rcv.txp = NULL;
+    rcv.conn = NULL;
     err = receiver_chunk(&rcv);
     nTEST_TRUE(err);
 }
 
 void test_get_firmware_invalid_resource(void) {
-    txp_ctx txp;
+    conn_ctx conn;
     receiver_ctx rcv;
-    pull_error err = txp_init(&txp, PROV_SERVER, 0, PULL_UDP, NULL);
+    pull_error err = conn_init(&conn, PROV_SERVER, 0, PULL_UDP, NULL);
     nTEST_TRUE(!err);
-    err = receiver_open(&rcv, &txp, &identity_g, "antani", &obj);
+    err = receiver_open(&rcv, &conn, &identity_g, "antani", &obj);
     nTEST_TRUE(!err);
     while (!rcv.firmware_received && !err) {
         err = receiver_chunk(&rcv);
         if (err) {
             continue; // This should be applied everywhere
         }
-        loop(&txp, 1000);
+        loop(&conn, 1000);
     }
     nTEST_TRUE(err == NETWORK_ERROR, "%s\n", err_as_str(err));
 }
 
 void test_get_firmware_invalid_size(void) {
-    txp_ctx txp;
+    conn_ctx conn;
     receiver_ctx rcv;
-    pull_error err = txp_init(&txp, PROV_SERVER, 0, PULL_UDP, NULL);
+    pull_error err = conn_init(&conn, PROV_SERVER, 0, PULL_UDP, NULL);
     nTEST_TRUE(!err);
-    err = receiver_open(&rcv, &txp, &identity_g, "firmware/invalid_size", &obj);
+    err = receiver_open(&rcv, &conn, &identity_g, "firmware/invalid_size", &obj);
     nTEST_TRUE(!err);
     while (!rcv.firmware_received && !err) {
         err = receiver_chunk(&rcv);
         if (err) {
             continue; // This should be applied everywhere
         }
-        loop(&txp, 1000);
+        loop(&conn, 1000);
     }
     nTEST_TRUE(err == INVALID_SIZE_ERROR, "%s\n", err_as_str(err));
 }
@@ -109,7 +109,7 @@ void test_get_firmware_invalid_size(void) {
 int main() {
     nTEST_INIT();
     nTEST_RUN(test_get_firmware);
-    nTEST_RUN(test_receiver_chunk_invalid_transport);
+    nTEST_RUN(test_receiver_chunk_invalid_connection);
     nTEST_RUN(test_get_firmware_invalid_resource);
     nTEST_RUN(test_get_firmware_dtls);
     nTEST_END();

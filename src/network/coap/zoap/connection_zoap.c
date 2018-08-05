@@ -16,21 +16,21 @@ static uint8_t method_mapper[] = {
 
 #define BLOCK_SIZE COAP_BLOCK_64
 
-pull_error txp_init(txp_ctx* ctx, const char* addr, uint16_t port, conn_type type, void* conn_data) {
+pull_error conn_init(conn_ctx* ctx, const char* addr, uint16_t port, conn_type type, void* conn_data) {
     int res;
 
     ctx->conn_data = conn_data;
 	if (net_addr_pton(AF_INET6, addr, &ctx->dest_addr.sin6_addr)) {
-        log_error(TRANSPORT_INIT_ERROR, "Invalid address\n");
-		return TRANSPORT_INIT_ERROR;
+        log_error(CONNECTION_INIT_ERROR, "Invalid address\n");
+		return CONNECTION_INIT_ERROR;
 	}
     ctx->dest_addr.sin6_family = AF_INET6;
     ctx->dest_addr.sin6_port = htons(COAP_DEFAULT_PORT);
 
     res = net_context_get(PF_INET6, SOCK_DGRAM, IPPROTO_UDP, &ctx->net_ctx);
     if (res != 0) {
-        log_error(TRANSPORT_INIT_ERROR, "Error getting an UDP context\n");
-        return TRANSPORT_INIT_ERROR;
+        log_error(CONNECTION_INIT_ERROR, "Error getting an UDP context\n");
+        return CONNECTION_INIT_ERROR;
     }
 
     struct sockaddr_in6 my_addr;
@@ -46,7 +46,7 @@ pull_error txp_init(txp_ctx* ctx, const char* addr, uint16_t port, conn_type typ
             sizeof(my_addr));
     if (res) {
         NET_ERR("Could not bind the context");
-        return TRANSPORT_INIT_ERROR;
+        return CONNECTION_INIT_ERROR;
     }
 
     // This allows to obtain the context from the callback
@@ -56,7 +56,7 @@ pull_error txp_init(txp_ctx* ctx, const char* addr, uint16_t port, conn_type typ
 
 void udp_receive(struct net_context *context,
         struct net_pkt *pkt, int status, void *user_data) {
-    struct txp_ctx* ctx = (txp_ctx*)user_data;
+    struct conn_ctx* ctx = (conn_ctx*)user_data;
     struct coap_packet response;
 
     if (status < 0) {
@@ -225,7 +225,7 @@ end:
     net_pkt_unref(pkt);
 }
 
-pull_error txp_on_data(txp_ctx* ctx, callback handler, void* more) {
+pull_error conn_on_data(conn_ctx* ctx, callback handler, void* more) {
     if (ctx == NULL || handler == NULL) {
         return GENERIC_ERROR; // TODO SPECIALIZE THIS ERROR
     }
@@ -234,7 +234,7 @@ pull_error txp_on_data(txp_ctx* ctx, callback handler, void* more) {
     return PULL_SUCCESS;
 }
 
-pull_error txp_request(txp_ctx* ctx, rest_method method, const char* resource, 
+pull_error conn_request(conn_ctx* ctx, rest_method method, const char* resource, 
         const char* data, uint16_t length) {
     struct coap_packet request;
     struct net_pkt *pkt;
@@ -347,14 +347,14 @@ pull_error txp_request(txp_ctx* ctx, rest_method method, const char* resource,
     return PULL_SUCCESS;
 }
 
-pull_error txp_observe(txp_ctx* ctx, const char* resource, const char* token, uint8_t token_length) {
+pull_error conn_observe(conn_ctx* ctx, const char* resource, const char* token, uint8_t token_length) {
     /* NOT IMPLEMENTED */
     return PULL_SUCCESS;
 }
 
-void txp_end(txp_ctx* ctx) {
+void conn_end(conn_ctx* ctx) {
     if (net_context_put(ctx->net_ctx) < 0) {
-        log_warn("Error closing the transport\n");
+        log_warn("Error closing the connection\n");
     }
     ctx->net_ctx = NULL;
 }
