@@ -15,7 +15,7 @@
 #define IS_RECOVER(agent_msg) (agent_msg.event > EVENT_RECOVER_START_ && agent_msg.event < EVENT_RECOVER_END_ )
 #define IS_FAILURE(agent_msg) (agent_msg.event > EVENT_FAILURE_START_ && agent_msg.event < EVENT_FAILURE_END_ )
 
-#define GET_CONNECTION(agent_msg) ((txp_ctx*) (agent_msg.event_data))
+#define GET_CONNECTION(agent_msg) ((conn_ctx*) (agent_msg.event_data))
 #define GET_ERROR(agent_msg) ((pull_error) *(agent_msg.event_data))
 
 #define FOREACH_IGNORED_EVENT(ACTION) \
@@ -114,10 +114,10 @@ static inline void update_agent_set_buffer(update_agent_config* cfg, uint8_t* bu
 }
 
 typedef struct update_agent_ctx_t {
-    txp_ctx stxp;
+    conn_ctx sconn;
     subscriber_ctx sctx;
     receiver_ctx rctx;
-    txp_ctx rtxp;
+    conn_ctx rconn;
     mem_id_t id;
     mem_object_t new_obj;
     mem_object_t obj_t;

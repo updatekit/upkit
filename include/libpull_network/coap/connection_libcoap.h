@@ -33,7 +33,7 @@ typedef struct dtls_ecdh_data_t {
     uint8_t* priv_key;
     uint8_t* pub_key_x;
     uint8_t* pub_key_y;
-    int (*verify_key) (txp_ctx* ctx, uint8_t key_size,
+    int (*verify_key) (conn_ctx* ctx, uint8_t key_size,
             const uint8_t* server_pub_x, const uint8_t* server_pub_y);
 } dtls_ecdh_data_t;
 
@@ -43,13 +43,13 @@ typedef struct {
     blockwise_ctx_t bctx;
 } cb_ctx_t;
 
-typedef struct txp_ctx {
+typedef struct conn_ctx {
     coap_context_t* coap_ctx;
     coap_session_t* coap_session;
     cb_ctx_t cb_ctx;
     void* conn_data;
     uint8_t loop;
-} txp_ctx;
+} conn_ctx;
 
 #endif /* WITH_CONNECTION_LIBCOAP */
 #endif /* CONNECTION_LIBCOAP_H_ */
