@@ -19,5 +19,6 @@
 #include <libpull/common/identity.h>
 #include <libpull/common/pull_assert.h>
 #include <libpull/common/external.h>
+#include <libpull/common/crc16.h>
 
 #endif /* LIBPULL_COMMON_H_ */
