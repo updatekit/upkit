@@ -4,7 +4,7 @@
  * otherwise the final application will fail during the linking
  * process.
  * \author Antonio Langiu
- * \defgroup Common
+ * \defgroup com_ext
  * \{
  */
 #ifndef LIBPULL_COMMON_EXTERNAL_H_

@@ -1,5 +1,15 @@
+/** \file writer.h
+ * \brief Module used to write the received update to memory using a buffered
+ * or not buffer output.
+ * \author Antonio Langiu
+ * \defgroup net_writer
+ * \{
+ */
 #ifndef LIBPULL_NETWORK_WRITER_H_
 #define LIBPULL_NETWORK_WRITER_H_
+#ifdef __cplusplus
+extern "C" {
+#endif /* __cplusplus */
 
 #include <libpull/common.h>
 #include <libpull/memory.h>
@@ -29,4 +39,7 @@ pull_error writer_open(writer_ctx_t* ctx, mem_object_t* obj, validate_mt cb, voi
 pull_error writer_chunk(writer_ctx_t* ctx, const char* data, uint32_t len);
 pull_error writer_close(writer_ctx_t* ctx);
 
-#endif /* LIBPULL_NETWORK_WRITER_H_ */
+#ifdef __cplusplus
+ }
+#endif /* __cplusplus */
+#endif /* \} LIBPULL_NETWORK_WRITER_H_ */

@@ -8,7 +8,7 @@
  *  - Debug: All the output is printed. This affect heavily the
  *  memory footprint of the library.
  * \author Antonio Langiu
- * \defgroup Common
+ * \defgroup com_logger
  * \{
  */
 #ifndef LIBPULL_COMMON_LOGGER_H_

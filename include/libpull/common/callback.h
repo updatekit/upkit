@@ -2,7 +2,7 @@
   * \brief Declaration of the callback used in the library to handle
   * with network events.
   * \author Antonio Langiu
-  * \defgroup Common
+  * \defgroup com_cb
   * \{
   */
 #ifndef LIBPULL_COMMON_CALLBACK_H_

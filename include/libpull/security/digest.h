@@ -2,7 +2,7 @@
  * \brief Set of functions to calculate the digest wrapping some cryptographic
  * libraries.
  * \author Antonio Langiu
- * \defgroup Security
+ * \defgroup sec_digest
  * \{
  */
 #ifndef LIBPULL_SECURITY_DIGEST_H_

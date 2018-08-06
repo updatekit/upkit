@@ -1,7 +1,7 @@
 /** \file manifest.h
  * \brief Manifest identifying a memory object.
  * \author Antonio Langiu
- * \defgroup Memory
+ * \defgroup mem_man
  * \{
  */
 #ifndef LIBPULL_MEMORY_MANIFEST_H_

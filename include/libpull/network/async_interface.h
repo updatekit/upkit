@@ -6,7 +6,7 @@
  * on an event loop and this interface can be implemented to deal with them.
  * The implemention is optional.
  * \author Antonio Langiu
- * \defgroup Common
+ * \defgroup net_async
  * \{
  */
 #ifndef LIBPULL_NETWORK_ASYNC_INTERFACE_H_

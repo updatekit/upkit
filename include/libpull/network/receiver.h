@@ -1,7 +1,6 @@
 /** \file receiver.h
- * \brief Set of functions to download an update into a memory object.
  * \author Antonio Langiu
- * \defgroup Network
+ * \defgroup net_rec
  * \brief This module includes component to interact with the network.
  *
  * It relies on the connection interface that must be implemented by

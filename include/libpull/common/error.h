@@ -5,7 +5,7 @@
  * In this way it is possible for the calling function to have a
  * finite set of errors returned by the function.
  * \author Antonio Langiu
- * \defgroup Common
+ * \defgroup com_error
  * \brief This module includes common component used in all the library.
  *
  * It includes utilities functions such as the logger and the error

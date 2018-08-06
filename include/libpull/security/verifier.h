@@ -1,7 +1,6 @@
 /** \file verifier.h
- * \brief Set of functions to verify a memory object signature.
  * \author Antonio Langiu
- * \defgroup Security
+ * \defgroup sec_ver
  * \brief This module includes component to perform secured updates.
  * 
  * The components allow to grant integrity, authenticity and confidentiality

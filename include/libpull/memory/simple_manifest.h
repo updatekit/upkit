@@ -1,7 +1,7 @@
 /** \file simple_manifest.h
  * \brief Structure of a simple manifest
  * \author Antonio Langiu
- * \defgroup Memory
+ * \defgroup mem_sman
  * \{
  */
 #ifndef LIBPULL_MEMORY_SIMPLE_MANIFEST_H_

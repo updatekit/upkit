@@ -1,7 +1,7 @@
 /** \file connection_interface.h
  * \brief Interface to connect with the network.
  * \author Antonio Langiu
- * \defgroup connection
+ * \defgroup net_connint
  * \brief Interface to connect with the network.
  *
  * This interface must be defined by the library user to match
