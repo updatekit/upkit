@@ -1,16 +1,7 @@
 /** \file error.h
- * \brief Errors definition.
- *
- * Each module should returns just errors of that particular module.
- * In this way it is possible for the calling function to have a
- * finite set of errors returned by the function.
  * \author Antonio Langiu
  * \defgroup com_error
- * \brief This module includes common component used in all the library.
- *
- * It includes utilities functions such as the logger and the error
- * functions or the interface for some components that must be defined
- * by the developer.
+ * \brief Errors definition.
  * \{
  */
 #ifndef LIBPULL_COMMON_ERROR_H_
@@ -24,21 +15,33 @@ extern "C" {
 #define GENERATE_STRING(STRING) #STRING,
 
 #define FOREACH_ERROR(ERROR) \
-    /* Generic Errors */    \
-    ERROR(GENERIC)          /** Generic error */\
-    ERROR(NOT_IMPLEMENTED)  /** Method not implemented */\
-    ERROR(INVALID_ARGUMENTS) \
+    /* Generic Errors */     \
+    /** Generic error */     \
+    ERROR(GENERIC)           \
+    /** Method not implemented */\
+    ERROR(NOT_IMPLEMENTED)   \
     /* connection Errors */  \
-    ERROR(CONNECTION_INIT)   /** The connection initialization failed */\
-    ERROR(CALLBACK)         /** The callback could not be setted */\
-    ERROR(RESOLVER)         /** Error resolving the backend */\
-    ERROR(INVALID_URL)      /** The URL of the provided resource is invalid */\
-    ERROR(BLOCK_WISE)       /** Error during the Block-Wise transfer */\
-    ERROR(INVALID_METHOD)   /** The request method is invalid or not supported */\
-    ERROR(INVALID_RESOURCE) /** The requested resource is invalid */\
-    ERROR(INVALID_DATA)     /** The received data is invalid */\
-    ERROR(INVALID_CONN_DATA) /** The data used to inizialize the connection is invalid */\
-    ERROR(REQUEST)          /** Error performing the request */\
+    ERROR(INVALID_ARGUMENTS) \
+    /** The connection initialization failed */\
+    ERROR(CONNECTION_INIT)   \
+    /** The callback could not be setted */\
+    ERROR(CALLBACK)          \
+    /** Error resolving the backend */\
+    ERROR(RESOLVER)          \
+    /** The URL of the provided resource is invalid */\
+    ERROR(INVALID_URL)       \
+    /** Error during the Block-Wise transfer */\
+    ERROR(BLOCK_WISE)        \
+    /** The request method is invalid or not supported */\
+    ERROR(INVALID_METHOD)    \
+    /** The requested resource is invalid */\
+    ERROR(INVALID_RESOURCE)  \
+    /** The received data is invalid */\
+    ERROR(INVALID_DATA)      \
+    /** The data used to inizialize the connection is invalid */\
+    ERROR(INVALID_CONN_DATA) \
+    /** Error performing the request */\
+    ERROR(REQUEST)          \
     ERROR(REQUEST_RST)      \
     ERROR(SEND)             \
     /* Memory Errors */     \
@@ -84,11 +87,22 @@ extern "C" {
     /* Signature Errors */ \
     ERROR(SIGN_FAILED) \
 
+/** 
+ * \brief Each module should returns just errors of that particular module.
+ * In this way it is possible for the calling function to have a
+ * finite set of errors returned by the function.
+ */
 typedef enum {
     PULL_SUCCESS = 0,
     FOREACH_ERROR(GENERATE_ENUM)
 } pull_error;
 
+/** 
+ * \brief  This function returns a string representing the literal
+ * representation of the error.
+ * \param err The error to be printed.
+ * \returns Pointer to a string describing the error.
+ */
 const char* err_as_str(pull_error err);
 
 #ifdef __cplusplus

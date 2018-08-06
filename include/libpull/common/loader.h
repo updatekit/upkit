@@ -1,5 +1,4 @@
 /** \file loader.h
- * \brief Loader interface used to load the object once stored.
  * \author Antonio Langiu
  * \defgroup com_loader
  * \{
@@ -10,6 +9,11 @@
 extern "C" {
 #endif /* __cplusplus */
 
+/** 
+ * \brief Loader interface used to load the object once stored.
+ * 
+ * \param id Id of the memory object to be loaded.
+ */
 void load_object(mem_id_t id);
 
 #ifdef __cplusplus

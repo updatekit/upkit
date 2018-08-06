@@ -1,5 +1,4 @@
 /** \file crc16.h
-  * \brief Functions used to calculate the CRC 16.
   * \author Antonio Langiu
   * \defgroup com_crc16
   * \{

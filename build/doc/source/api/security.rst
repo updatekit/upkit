@@ -8,27 +8,26 @@ Security API
    :local:
    :backlinks: top
 
-digest.h
-ecc.h
-sha256.h
-verifier.h
-
 Digest 
 ******
 
 .. doxygengroup:: sec_digest
+   :content-only:
 
 ECC
 ***
 
 .. doxygengroup:: sec_ecc
+   :content-only:
 
 SHA 256
 *******
 
 .. doxygengroup:: sec_sha256
+   :content-only:
 
 Verifier
 ********
 
 .. doxygengroup:: sec_ver
+   :content-only:
