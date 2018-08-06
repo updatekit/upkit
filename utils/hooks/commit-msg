@@ -1,0 +1,10 @@
+#!/bin/sh
+# This is a simple bash script to validate conventional commits.
+
+commit_regex='(fix|feat|docs|style|refactor|perf|test)(\([A-Za-z0-9_]+\))?: (.*\n)*'
+error_msg="The commit is not conformant to the conventional commit standard"
+
+if ! grep -iqE "$commit_regex" "$1"; then
+    echo "$error_msg" >&2
+    exit 1
+fi
