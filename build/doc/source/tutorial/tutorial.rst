@@ -10,4 +10,5 @@ too far from the steps described in this tutorial.
    :maxdepth: 1
 
    introduction.md
-
+   libpull_setup.md
+   network_setup.md
