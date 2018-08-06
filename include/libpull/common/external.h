@@ -40,7 +40,7 @@ extern "C" {
  *  };
  * ~~~~~
  */
-ex *tern const mem_slot_t memory_slots[];
+extern const mem_slot_t memory_slots[];
 
 /** \brief OBJ_END must be used to end a memory slot list. Internally 
  * the library uses it to know when to stop cycling over the structure.
