@@ -87,7 +87,14 @@ html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
 # further.  For a list of options available for each theme, see the
 # documentation.
 #
-# html_theme_options = {}
+html_theme_options = {
+    'canonical_url': 'https://libpull.readthedocs.io/en/stable/',
+    'analytics_id': 'UA-40929498-2',
+    'sticky_navigation': True,
+}
+
+html_logo = 'libpull.png'
+html_style = 'override.css'
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
