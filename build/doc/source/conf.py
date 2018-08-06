@@ -90,6 +90,7 @@ html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
 html_theme_options = {
     'canonical_url': 'https://libpull.readthedocs.io/en/stable/',
     'analytics_id': 'UA-40929498-2',
+    'logo_only': True,
     'sticky_navigation': True,
 }
 
