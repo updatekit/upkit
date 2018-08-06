@@ -83,7 +83,13 @@ where type is one of the following prefix:
 - docs: adding/improving documentation;
 - style: fixing indentation/code style;
 - refactor: refactoring code;
+- perf: a code change to improve performance;
 - test: adding/fixing unit tests;
+
+Since this process can be tediuos while writing commits we
+suggest the [cz-cli tool](https://github.com/commitizen/cz-cli)
+that helps in writing commits conformant to the conventional
+commits standards.
 
 The optional scope can be used to specify where the type is applied.
 For example, in case we are adding a new test for the memory module
