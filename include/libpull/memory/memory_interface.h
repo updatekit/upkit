@@ -11,7 +11,7 @@
  * an allocated memory object. This can be done allocating it
  * statically or dinamically, depending on the platform uonstraints.
  * \author Antonio Langiu
- * \defgroup Memory
+ * \defgroup mem_memint
  * \{
  */
 #ifndef LIBPULL_MEMORY_MEMORY_INTERFACE_H_

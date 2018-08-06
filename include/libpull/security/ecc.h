@@ -1,7 +1,7 @@
 /** \file ecc.h
  * \brief Set of functions to work with ECC signature.
  * \author Antonio Langiu
- * \defgroup Security
+ * \defgroup sec_ecc
  * \{
  */
 #ifndef LIBPULL_SECURITY_ECC_H_

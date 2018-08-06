@@ -1,14 +1,7 @@
 /** \file logger.h
- * \brief Logging functions.
- *
- * 4 logging level are supported:
- *  - Error: Just the errors are printed.
- *  - Warn: Error and warnings are printed.
- *  - Info: Error, warnign and also information strings.
- *  - Debug: All the output is printed. This affect heavily the
- *  memory footprint of the library.
  * \author Antonio Langiu
- * \defgroup Common
+ * \defgroup com_logger
+
  * \{
  */
 #ifndef LIBPULL_COMMON_LOGGER_H_
@@ -27,6 +20,13 @@ extern "C" {
  * a constant, defining the LOGGER_VERBOSITY define. In this way the 
  * compiler will be able to optimize the code and remove the non needed
  * debugging directives.
+ *
+ * 4 logging level are supported:
+ *  - Error: Just the errors are printed.
+ *  - Warn: Error and warnings are printed.
+ *  - Info: Error, warnign and also information strings.
+ *  - Debug: All the output is printed. This affect heavily the
+ *  memory footprint of the library.
  */
 #include <stdint.h>
 #ifdef LOGGER_VERBOSITY
@@ -65,6 +65,12 @@ extern uint8_t verbosity_level;
 
 #define log_debug(args...) log_impl(VERBOSITY_DEBUG, args)
 #define log_info(args...) log_impl(VERBOSITY_INFO, args)
+/**
+ * \brief This function takes as first parameter an error and
+ * then an arbitrary number of arguments that will be printed.
+ * The first arguemnt will be used to print the literal value
+ * of the error.
+ */
 #define log_error(err, args...) log_err(err, args)
 #define log_warn(args...) log_impl(VERBOSITY_WARN, args)
 

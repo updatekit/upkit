@@ -39,7 +39,11 @@ matrix:
       env: SCRIPT=build/riot/test-ci.sh
     - name: "Build Test: Zephyr"
       env: SCRIPT=build/zephyr/test-ci.sh
+    - name: "Build Documentation"
+      env: SCRIPT=build/doc/test-ci.sh
   allow_failures:
     - name: "Build Test: Zephyr"
       env: SCRIPT=build/zephyr/test-ci.sh
+    - name: "Build Documentation"
+      env: SCRIPT=build/doc/test-ci.sh
 

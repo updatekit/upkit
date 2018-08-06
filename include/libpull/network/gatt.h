@@ -1,9 +1,15 @@
+/** \file gatt.h
+ * \brief Constants used to define BLE GATT Services and Characteristics.
+ * \author Antonio Langiu
+ * \defgroup net_gatt
+ * \{
+ */
 #ifndef LIBPULL_NETWORK_GATT_H_
 #define LIBPULL_NETWORK_GATT_H_
 
 #ifdef __cplusplus
 extern "C" {
-#endif
+#endif /* __cplusplus */
 
 #include <libpull/fsm/libpull_fsm.h>
 
@@ -58,6 +64,5 @@ pull_error libpull_gatt_init();
 
 #ifdef __cplusplus
 }
-#endif
-
-#endif /* LIBPULL_NETWORK_GATT_H_ */
+#endif /* __cplusplus */
+#endif /* \} LIBPULL_NETWORK_GATT_H_ */

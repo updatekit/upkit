@@ -1,7 +1,7 @@
 /** \file sha256.h
  * \brief Set of functions to calculate digest with SHA 256 function.
  * \author Antonio Langiu
- * \defgroup Security
+ * \defgroup sec_sha256
  * \{
  */
 #ifndef LIBPULL_SECURITY_SHA256_H_

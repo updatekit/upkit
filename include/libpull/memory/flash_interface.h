@@ -1,7 +1,17 @@
+/** \file flash_interface.h
+ * \brief Interface used to easily implement the memory interface when using
+ * flash.
+ * \author Antonio Langiu
+ * \defgroup mem_flashint
+ * \{
+ */
 #ifndef LIBPULL_MEMORY_FLASH_INTERFACE_H_
 #define LIBPULL_MEMORY_FLASH_INTERFACE_H_
 
 #include <libpull/common.h>
+#ifdef __cplusplus
+extern "C" {
+#endif /* __cplusplus */
 
 #if MEMORY_FLASH_IMPL == 1
 
@@ -49,4 +59,7 @@ enum memory_objects_enum {
 
 #endif /* MEMORY_FLASH_IMPL == 1 */
 
-#endif /* LIBPULL_MEMORY_FLASH_INTERFACE_H_ */
+#ifdef __cplusplus
+}
+#endif /* __cplusplus */
+#endif /* \} LIBPULL_MEMORY_FLASH_INTERFACE_H_ */

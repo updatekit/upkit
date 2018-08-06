@@ -1,7 +1,7 @@
 /** \file subscriber.h
  * \brief Set of functions to check the presence of an update.
  * \author Antonio Langiu
- * \defgroup Network
+ * \defgroup net_sub
  * \{
  */
 #ifndef LIBPULL_NETWORK_SUBSCRIBER_H_

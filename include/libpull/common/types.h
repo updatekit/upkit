@@ -1,7 +1,7 @@
 /** \file types.h
  * \brief Types to be used for consistency in the whole library.
  * \author Antonio Langiu
- * \defgroup Common
+ * \defgroup com_types
  * \{
  */
 #ifndef LIBPULL_COMMON_TYPES_H_

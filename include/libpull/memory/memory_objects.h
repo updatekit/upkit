@@ -1,8 +1,6 @@
 /** \file memory_objects.h
- * \brief This file contains function to work with the memory object
- * abastrction.
  * \author Antonio Langiu
- * \defgroup Memory
+ * \defgroup mem_memobj
  * \brief This module include components to interact with a memory object.
  *
  * It rapresent an abstraction allowing to intract with a memory object

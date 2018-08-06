@@ -1,10 +1,10 @@
 /** \file external.h
+ * \author Antonio Langiu
+ * \defgroup com_ext
  * \brief This file includes some external functions that
  * must be defined in the application. This is mandatory as
  * otherwise the final application will fail during the linking
  * process.
- * \author Antonio Langiu
- * \defgroup Common
  * \{
  */
 #ifndef LIBPULL_COMMON_EXTERNAL_H_
@@ -17,10 +17,34 @@
 extern "C" {
 #endif /* __cplusplus */
 
+/** 
+ * \brief  This structure contains a list of the memory slots needed
+ * by your application. We already have a standard definition but you
+ * can define it by yourself and personalize according to your needs.
+ * 
+ * An example of a correctly implemented memory slot is structure is:
+ *
+ * ~~~~~{.c}
+ *   const mem_slot_t memory_slots[] = {
+ *    {
+ *        .id = OBJ_1,
+ *        .bootable = true,
+ *        .loaded = true
+ *    },
+ *    {
+ *        .id = OBJ_2,
+ *       .bootable = false,
+ *       .loaded = false
+ *   },
+ *   {OBJ_END}
+ *  };
+ * ~~~~~
+ */
 extern const mem_slot_t memory_slots[];
 
-/** OBJ_END defines the final value used to stop the cicle on the
- * memory objects. */
+/** \brief OBJ_END must be used to end a memory slot list. Internally 
+ * the library uses it to know when to stop cycling over the structure.
+ */
 #define OBJ_END -1
 
 #ifdef __cplusplus

@@ -5,6 +5,7 @@
 [![GitHub license](https://img.shields.io/github/license/libpull/libpull.svg)](https://github.com/libpull/libpull/blob/update/readme/LICENSE)
 [![GitHub issues](https://img.shields.io/github/issues/libpull/libpull.svg)](https://github.com/libpull/libpull/issues)
 [![GitHub release](https://img.shields.io/github/release/libpull/libpull.svg)](https://github.com/libpull/libpull/releases)
+[![Documentation Status](https://readthedocs.org/projects/libpull/badge/?version=latest)](https://libpull.readthedocs.io/en/latest/?badge=latest)
 [![Build Status](https://travis-ci.org/libpull/libpull.svg?branch=master)](https://travis-ci.org/libpull/libpull)
 [![Coverage Status](https://coveralls.io/repos/github/libpull/libpull/badge.svg)](https://coveralls.io/github/libpull/libpull)
 [![CodeFactor](https://www.codefactor.io/repository/github/libpull/libpull/badge)](https://www.codefactor.io/repository/github/libpull/libpull)

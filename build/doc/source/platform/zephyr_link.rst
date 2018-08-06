@@ -1,0 +1,1 @@
+.. include:: ../../../zephyr/README.rst

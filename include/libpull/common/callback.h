@@ -1,18 +1,15 @@
 /** \file callback.h
-  * \brief Declaration of the callback used in the library to handle
-  * with network events.
   * \author Antonio Langiu
-  * \defgroup Common
+  * \defgroup com_cb
   * \{
   */
 #ifndef LIBPULL_COMMON_CALLBACK_H_
 #define LIBPULL_COMMON_CALLBACK_H_
-
-#include <libpull/common/error.h>
-
 #ifdef __cplusplus
 extern "C" {
 #endif /* __cplusplus */
+
+#include <libpull/common/error.h>
 
 /** 
  * \brief Callback used to handle network events.
