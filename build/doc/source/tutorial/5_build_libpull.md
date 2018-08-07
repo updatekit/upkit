@@ -73,6 +73,16 @@ $ cmake -GNinja -DBOARD=nrf52840_pca10056 -DCONF_FILE=prj.conf ..
 $ ninja
 ```
 
+The bootloader once loaded on the device needs to have a storage to save persistent data. This is what is in libpull is called the *bootloader_ctx*.
+To create a bootloader context we provide a program contained in the `bootloader_ctx` folder of each platform.
+
+You can build it using the following commands:
+
+```
+$ cd bootloader_ctx
+$ make
+```
+
 If the build was successfull you can now move to the next step.
 
 ## Build the application
@@ -100,7 +110,54 @@ To create a firmware you can invoke the previosly described script:
 $ ./make_firmware.sh
 ```
 
-If the firmware has been build successfully you will find it 
+If the firmware has been successfully created you will find it on the main folder in two formats:
 
+- fimrware.hex (Intel Hex version)
+- firmare.bin (Binary version)
 
+## Flash the firmware
 
+We can use now the `nrfjprog` to flash the firmware, using the command:
+
+```
+$ nrfjprog --eraseall
+$ nrfjprog --program firmware.hex
+$ nrfjprog --reset
+```
+Using minicom you can analyze the output. If everything is working correctly you should see the bootloader output:
+
+```
+***** Booting Zephyr OS v0.0.1-179-g67dce7f *****
+Bootloader started
+id: bootable 2 - non bootable 3
+id: bootable 2 - non bootable 3
+version: bootable 1 - non bootable 0
+Start phase GET_OBJECT_MANIFEST
+Start phase CALCULATING_DIGEST
+Digest: initial offset 256u final offset 226396 size 226140
+Start phase VERIFY_DIGEST
+Start phase VERIFY_VENDOR_SIGNATURE
+Vendor Signature Valid
+Start phase VERIFY_SERVER_SIGNATURE
+Server Signature Valid
+loading object
+loading address 9100
+```
+
+At the address 9100 the `./make_firmware.sh` script placed the application that should boot with the following output:
+
+```
+***** Booting Zephyr OS v0.0.1-179-g67dce7f *****
+Zephyr Shell, Zephyr version: 1.12.0
+Type 'help' for a list of available commands
+shell> [net] [INF] ot_state_changed_handler: State changed! Flags: 0x000010e4 Current role: 2
+[net] [INF] ot_state_changed_handler: State changed! Flags: 0x00000001 Current role: 2
+[net] [INF] ot_state_changed_handler: State changed! Flags: 0x00000200 Current role: 2
+[net] [INF] ot_state_changed_handler: State changed! Flags: 0x00000001 Current role: 2
+Getting the newest firmware from memory
+the id of the newest firmware is 2
+Checking for updates
+....
+```
+
+At this point we are ready for the last phase, starting the update server and sending a new image to the device.
