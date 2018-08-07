@@ -1,7 +1,7 @@
 #include <libpull/common.h>
 #include <stdint.h>
 
-uint16_t crc16(const unsigned char* data, unsigned char length){
+uint16_t libpull_crc16(const unsigned char* data, unsigned char length){
     // CRC-CCITT (Initialized with 0xFFFF)
     unsigned char x;
     unsigned short crc = 0xFFFF;

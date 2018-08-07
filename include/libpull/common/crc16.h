@@ -10,7 +10,15 @@
 extern "C" {
 #endif /* __cplusplus */
 
-uint16_t crc16(const unsigned char* data, unsigned char length);
+/** 
+ * \brief  Function to calculate the CRC16
+ * 
+ * \param data The data for which we want to calculate the CRC.
+ * \param length The length of the data.
+ * 
+ * \returns The 16bits of the CRC 16.
+ */
+uint16_t libpull_crc16(const unsigned char* data, unsigned char length);
 
 #ifdef __cplusplus
  }
