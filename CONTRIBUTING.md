@@ -10,8 +10,9 @@ documentation and follow the tutorial to test it on a real device.
 
 ## Contributing
 
-If you already did it, then you are ready to contribute it. 
-The kind of contribution may be diveded by the contribution
+If you readed the documentation and checked the open issues,
+then you are ready to contribute it. 
+The contribution may be diveded by the contribution
 goal.
 
 ### Increase portability

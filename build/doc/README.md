@@ -1,4 +1,4 @@
-#Libpull Documentation
+#Documentation Guidelines
 
 The **libpull** documentation is build using the following tools:
 

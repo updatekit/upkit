@@ -92,7 +92,7 @@ html_theme_options = {
     'sticky_navigation': True,
 }
 
-html_logo = 'libpull.png'
+html_logo = 'img/libpull.png'
 html_style = 'override.css'
 
 # Add any paths that contain custom static files (such as style sheets) here,
