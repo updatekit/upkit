@@ -9,6 +9,7 @@ too far from the steps described in this tutorial.
 .. toctree::
    :maxdepth: 1
 
-   introduction.md
-   libpull_setup.md
-   network_setup.md
+   1_introduction.md
+   2_getting_started.md
+   3_libpull_setup.md
+   4_network_setup.md
