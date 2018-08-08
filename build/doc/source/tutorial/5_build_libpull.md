@@ -87,6 +87,16 @@ If the build was successfull you can now move to the next step.
 
 ## Build the application
 
+The application contains the update agent, in charge of contacting the server to receive the update. This means that the update agent must be able to commicate with the server and must know its IP address.
+
+The IP address of the server, that in this case is the one of your *wpan0* network, must be hardcoded in the `application/src/runner.c` file, editing the `SERVER ADDR` preprocessor variable.
+
+```
+#define SERVER_ADDR <your_public_ipv6_address>
+```
+
+The public IPv6 address can be taken from the *ifconfig* command as previously shown in this tutorial.
+
 To build the application you need to perform the same Zephyr build steps in the application directory:
 
 ```

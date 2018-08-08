@@ -13,3 +13,5 @@ too far from the steps described in this tutorial.
    2_getting_started.md
    3_libpull_setup.md
    4_network_setup.md
+   5_build_libpull.md
+   6_test_update.md
