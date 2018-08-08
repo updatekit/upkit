@@ -2,6 +2,13 @@
  * \brief Update agent provided by libpull.
  * \author Antonio Langiu
  * \defgroup ag_update
+ * \brief
+ * The update agent is the application using the libpull library to effectively
+ * perform the update. It is in charge of communicating with the network and
+ * coordinate the operations to successfully download, verify and apply the
+ * update image. It should be normally executed in parallel to the standard
+ * application. In this way, when an update is available, the device will
+ * require the minimum time to obtain it.
  * \{
  */
 #ifdef __cplusplus
@@ -81,7 +88,7 @@ typedef enum agent_event_t {
     EVENT_FAILURE_END_
 } agent_event_t;
 
-/** 
+/**
  * \brief  Message returned to the calling function.
  */
 typedef struct agent_msg_t {
@@ -89,7 +96,7 @@ typedef struct agent_msg_t {
     void * event_data;
 } agent_msg_t;
 
-/** 
+/**
  * \brief  Configuration structure for the update agent.
  */
 typedef struct {
@@ -105,11 +112,11 @@ typedef struct {
     size_t buffer_size;
 } update_agent_config;
 
-/** 
+/**
  * \brief  The update agents connects to the subscription server and the
- * provisioning server. If the connection to both server should be done with 
+ * provisioning server. If the connection to both server should be done with
  * the same connection than the connection must be reused.
- * 
+ *
  * \param cfg Pointer to the configuration structure.
  * \param reuse Boolean indicating if the connection should be reused (1 to
  * reuse).
@@ -118,10 +125,10 @@ static inline void update_agent_reuse_connection(update_agent_config* cfg, uint8
     cfg->reuse_connection = reuse;
 }
 
-/** 
+/**
  * \brief  Function to set the device identity used to identify the device with
  * the server.
- * 
+ *
  * \param cfg Pointer to the configuration structure.
  * \param identity Identity structure.
  */
@@ -129,9 +136,9 @@ static inline void update_agent_set_identity(update_agent_config* cfg, identity_
     cfg->identity = identity;
 }
 
-/** 
+/**
  * \brief  Function to set the vendor keys.
- * 
+ *
  * \param cfg Pointer to the configuration structure.
  * \param x The X component of the vendor key.
  * \param y The Y component of the vendor key.
@@ -141,9 +148,9 @@ static inline void update_agent_vendor_keys(update_agent_config* cfg, uint8_t* x
     cfg->vendor_y = y;
 }
 
-/** 
+/**
  * \brief  Function to set the digest function.
- * 
+ *
  * \param cfg Pointer to the configuration structure.
  * \param df Digest function to be used. (To see all the available digest
  * functions check the documentation at security/digest).
@@ -152,9 +159,9 @@ static inline void update_agent_digest_func(update_agent_config* cfg, digest_fun
     cfg->df = df;
 }
 
-/** 
+/**
  * \brief  Function to set the ECC function.
- * 
+ *
  * \param cfg Pointer to the configuration structure.
  * \param ef ECC function to be used. (To see all the available ECC
  * functions check the documentation at security/ECC).
@@ -163,9 +170,9 @@ static inline void update_agent_ecc_func(update_agent_config* cfg, ecc_func_t ef
     cfg->ef = ef;
 }
 
-/** 
+/**
  * \brief  Function to set the buffer for the update agent.
- * 
+ *
  * \param cfg Pointer to the configuration structure.
  * \param buffer Pointer to the buffer.
  * \param buffer_size Size of the buffer.
@@ -175,7 +182,7 @@ static inline void update_agent_set_buffer(update_agent_config* cfg, uint8_t* bu
     cfg->buffer_size = buffer_size;
 }
 
-/** 
+/**
  * \brief Context of the update agent.
  */
 typedef struct update_agent_ctx_t {
@@ -189,15 +196,15 @@ typedef struct update_agent_ctx_t {
     pull_error err;
 } update_agent_ctx_t;
 
-/** 
+/**
  * \brief  Function to execute the update agent. This function will return
  * several times, each time with a different message indicating the state of the
  * update agent. In this way you can interact with the update agent modifying
  * the states.
- * 
+ *
  * \param cfg Pointer to the configuration structure.
  * \param ctx Pointer to the update agent context.
- * 
+ *
  * \returns Messages containing the current event.
  */
 agent_msg_t update_agent(update_agent_config* cfg, update_agent_ctx_t* ctx);

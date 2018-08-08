@@ -9,7 +9,7 @@
 #define TIMEOUT 1000
 #define BUFFER_SIZE 1024
 
-#define SERVER_ADDR "fd11:22::1c62:fd83:83e7:1063"
+#define SERVER_ADDR "fd11:22::c86e:7efd:33a9:a69e"
 
 #if  WITH_TINYCRYPT
 int default_CSPRNG(uint8_t *dest, unsigned int size) {

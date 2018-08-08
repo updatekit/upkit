@@ -19,8 +19,6 @@ from subprocess import call
 # -- Doxygen -----------------------------------------------------------------
 call(['doxygen', 'Doxyfile'])
 
-
-
 breathe_projects = { "libpull" : "./doxyxml/" }
 breathe_default_project = "libpull"
 
@@ -44,7 +42,7 @@ release = u'0.3.0'
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
-extensions = ["sphinx.ext.pngmath", "sphinx.ext.todo", "breathe"]
+extensions = ["sphinx.ext.pngmath", "sphinx.ext.todo", "breathe", 'm2r']
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['templates']
@@ -52,8 +50,8 @@ templates_path = ['templates']
 # The suffix(es) of source filenames.
 # You can specify multiple suffix as a list of string:
 #
-# source_suffix = ['.rst', '.md']
-source_suffix = '.rst'
+source_suffix = ['.rst', '.md']
+#source_suffix = '.rst'
 
 # The master toctree document.
 master_doc = 'index'
@@ -94,7 +92,7 @@ html_theme_options = {
     'sticky_navigation': True,
 }
 
-html_logo = 'libpull.png'
+html_logo = 'img/libpull.png'
 html_style = 'override.css'
 
 # Add any paths that contain custom static files (such as style sheets) here,

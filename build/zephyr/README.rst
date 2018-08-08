@@ -1,2 +1,0 @@
-Zephyr Platform
-###############

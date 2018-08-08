@@ -1,2 +1,0 @@
-Contiki-NG Platform
-###################

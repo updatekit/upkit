@@ -12,13 +12,13 @@ const uint16_t test_result = 0x99A3; // CRC-CCITT
 
 void test_crc16(void) {
     uint16_t given;
-    given = crc16(test_str, sizeof(test_str)-1);
+    given = libpull_crc16(test_str, sizeof(test_str)-1);
     nTEST_COMPARE_HEX(given, test_result);
 }
 
 void test_crc16_failure(void) {
     uint16_t given;
-    given = crc16(test_str, strlen(test_str)-2);
+    given = libpull_crc16(test_str, strlen(test_str)-2);
     nTEST_FALSE(given == test_result);
 }
 
