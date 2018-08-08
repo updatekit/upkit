@@ -25,11 +25,6 @@
 int pipeline_lzss_init(pipeline_ctx_t* ctx, pipeline_write write, void* more);
 int pipeline_lzss_process(pipeline_ctx_t* ctx, uint8_t* buf, int l);
 
-typedef struct pipeline_func_t {
-    int (*init)(pipeline_ctx_t* ctx, pipeline_write write, void* more);
-    int (*process)(pipeline_ctx_t* ctx, uint8_t* buf, int l);
-} pipeline_func_t;
-
 static pipeline_func_t lzss_pipeline = {
     .init = pipeline_lzss_init,
     .process = pipeline_lzss_process,
