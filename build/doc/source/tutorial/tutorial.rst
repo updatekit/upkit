@@ -2,7 +2,7 @@ Tutorial
 ########
 
 To guide you in using libpull with your platform
-we provide you a tutorial with our reference platform.
+we provide a tutorial based on our reference platform.
 Integrating libpull with your solution should not be
 too far from the steps described in this tutorial.
 

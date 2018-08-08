@@ -1,9 +1,12 @@
-# Libpull build
-In this part of the tutorial you will learn how to build the libpull bootloader and update agent, build them togeather and flash them to the device.
+# Libpull Build
+
+In this part of the tutorial you will learn how to build the libpull bootloader, the update agent, and how to compose them togeather to create a flashable firmware.
 
 ## Zephyr build
 
-To build the bootloader we need to go to the specific platform build folder. Libpull defines a folder for each platform containing the all the scripts and tools to work with the specific platform, in our case Zephyr.
+To build the bootloader we need to go to the specific platform build folder. Libpull defines a folder for each platform containing the all the scripts and tools necessary for the platform, in our case Zephyr.
+
+Move to the Zephyr platform folder:
 
 ```
 $ cd ~/libpull_tutorial/libpull/build/zephyr
@@ -15,21 +18,21 @@ On this folder you will find the following content:
 - **application**: folder containing the code and the build system for the application;
 - **bootloader**: folder containing the code and build system for the bootloader;
 - **board**: folder containing the boards specific files;
-- **bootloader_ctx**: folder containing the bootloader context;
-- **config.toml**: file indicating the options for the firmware_tool utility;
+- **bootloader_ctx**: folder containing the bootloader context files;
+- **config.toml**: configuration file of the *firmware_tool* program;
 - **make_firmware.sh**: a script to build together the bootloader and the application in a single flashable image;
-- **test**: a folder containing a set of tests that must pass on the board before executing libpull;
+- **test**: a folder containing a set of tests used to test the board with libpull;
 
-We will start executing the tests to see if they pass on the device and start undestanding how the build process works.
+We will start executing the tests to see if they pass on the device, and also to start undestanding how the build process works.
 
-Before executing any compilation you should execute the:
+First of all, let's clone the dependencies using the:
 
 ```
 $ ./autogen.sh
 ```
-script contained in the `build/zephyr` folder that will download all the needed dependencies.
+script contained in the `build/zephyr` folder.
 
-Once you have downloaded it you need to import the `zephyr-env.sh` variables to your environment. You can do it with the commands:
+Once Zephyr has been cloned, you have to import the `zephyr-env.sh` variables to your environment. You can do it with the commands:
 
 ```
 $ cd ext/zephyr
@@ -56,11 +59,7 @@ $ ninja flash
 $ minicom -D /dev/tty.your_device
 ```
 
-***
-⚠️ Remember to always import the Zephyr variables to your bash environment using the zephyr-env.sh
-***
-
-Analyzing the output of the test you can understand if it works on your device.
+Analyzing the output of the test you can understand if that particular component of libpull correctly works on your board and with your configuration.
 
 ## Build the bootloader
 
@@ -73,7 +72,7 @@ $ cmake -GNinja -DBOARD=nrf52840_pca10056 -DCONF_FILE=prj.conf ..
 $ ninja
 ```
 
-The bootloader once loaded on the device needs to have a storage to save persistent data. This is what is in libpull is called the *bootloader_ctx*.
+The bootloader, once loaded on the device, needs to have a storage to save persistent data. This is what is in libpull is called the *bootloader_ctx*.
 To create a bootloader context we provide a program contained in the `bootloader_ctx` folder of each platform.
 
 You can build it using the following commands:
@@ -83,11 +82,11 @@ $ cd bootloader_ctx
 $ make
 ```
 
-If the build was successfull you can now move to the next step.
+If the build was successfull you should now have a `bootloader_ctx.bin` file and you are ready to move to the next steps.
 
 ## Build the application
 
-The application contains the update agent, in charge of contacting the server to receive the update. This means that the update agent must be able to commicate with the server and must know its IP address.
+The application contains the update agent in charge of contacting the server to receive the update. This means that the update agent must be able to commicate with the server and must know its IP address.
 
 The IP address of the server, that in this case is the one of your *wpan0* network, must be hardcoded in the `application/src/runner.c` file, editing the `SERVER ADDR` preprocessor variable.
 
@@ -110,11 +109,11 @@ If the build was successfull you can now move to the next step.
 
 ## Create the flashable firmware
 
-Now that we have a bootloader and an application we can build a flashable firmware. To do it each platform folder contains a `./make_firmware.sh` script that will invoke all the programs to create a flashable binary according to the specific variables of the board.
+Now that we have a bootloader and an application we can build a flashable firmware. Each platform folder contains a `./make_firmware.sh` script that will invoke all the programs to create a flashable binary according to the specific variables of the board.
 
-In the case of the *nRF52840* you can find the variables in the `board/nrf52840_pca10056/Makefile.conf` file.
+In the case of the *nRF52840* you can find the board variables in the `board/nrf52840_pca10056/Makefile.conf` file.
 
-To create a firmware you can invoke the previosly described script:
+To create a flashable firmware you can invoke the previosly described script:
 
 ```
 $ ./make_firmware.sh
@@ -154,7 +153,7 @@ loading object
 loading address 9100
 ```
 
-At the address 9100 the `./make_firmware.sh` script placed the application that should boot with the following output:
+At the address 9100 the `./make_firmware.sh` script placed the application that, once boooted should print the following messages:
 
 ```
 ***** Booting Zephyr OS v0.0.1-179-g67dce7f *****

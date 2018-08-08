@@ -25,14 +25,14 @@ Since [OpenThread provides an already built version](https://openthread.io/guide
 ⚠️ We assume you have some knowledge on the Thread networks. If not, you might want to run the [OpenThread Simulation Codelab](https://codelabs.developers.google.com/codelabs/openthread-simulation/#0), to get familiar with the basics Thread concepts.
 ***
 
-You can download a prebuild version of the firmware using the following commands:
+You can download and extract a prebuild version of the firmware using the following commands:
 
 ```
 $ wget https://openthread.io/guides/ncp/ot-ncp-ftd-gccb354fb-nrf52840.tar.gz
 $ tar -xzvf ot-ncp-ftd-gccb354fb-nrf52840.tar.gz
 ```
 
-Now you should have a hex file called `ot-ncp-ftd-gccb354fb-nrf52840.hex` containing the firmware. You can flash it following the steps at [this link](https://openthread.io/guides/ncp/firmware) or following the next steps:
+You should now have a hex file called `ot-ncp-ftd-gccb354fb-nrf52840.hex` containing the firmware. You can flash it following the steps at [this link](https://openthread.io/guides/ncp/firmware) or following the next steps:
 
 ```
 $ nrfjprog -f nrf52 --chiperase --program ot-ncp-ftd-gccb354fb-nrf52840.hex --reset
@@ -76,7 +76,7 @@ In virtualbox you can do it by adding a filter for the `SEGGER J-Link` USB devic
 in the ports settings.
 ***
 
-Clone the border router:
+Clone the border router on your Linux machine:
 
 ```
 $ git clone https://github.com/openthread/borderrouter
@@ -98,7 +98,8 @@ under `/dev/tty.*`.
 Configure the device port in the `wpantund` configuration file `/etc/wpantund.conf`.
 The effective port depends on your configuration but, for example, can be `/dev/ttyACM0` or `/dev/ttyUSB0`.
 
-Now reboot the Linux machine and all the services should be executed at startup.
+Rebooting the Linux machine all the installed services shluld be executed at
+startup.
 
 To check if the services are running you can use the `sudo systemctl status` command. All the following services should be listed and enabled:
 
@@ -107,7 +108,7 @@ To check if the services are running you can use the `sudo systemctl status` co
 - otbr-web.service
 - wpantund.service
 
-If not all of them are running you can use the script located at `borderrouter/script/server` to start all of them.
+If not all of them are running you can use the script located at `borderrouter/script/server` to start them.
 
 You can now verify if the borderrouter is successfully configured and the board has been recognized by using the `wpanctl` command.
 
@@ -115,7 +116,7 @@ You can now verify if the borderrouter is successfully configured and the board 
 $ sudo wpanctl status
 ```
 
-If the configuration is correct you should see an output like this:
+If the configuration is correct you should see an output similar to:
 ```
 wpan0 => [
 	"NCP:State" => "offline"
@@ -127,14 +128,14 @@ wpan0 => [
 ]
 ```
 
-If the value of NCP:State is different, you can find some solutions at [this link](https://openthread.io/guides/border-router/build).
+If the value of NCP:State is different from "*offline*", you can find some solutions at [this link](https://openthread.io/guides/border-router/build).
 
 ## Connnect to the border router web interface
 
-The OpenThread border router has a web interface usable to configure the network. You can connect to it by accessing the address `localhost:80` with a browser.
+The OpenThread border router has a web interface to configure the network. You can connect to it by accessing the address `localhost:80` with a browser.
 
 ***
-ℹ️ If you are using a virtual machine without a web interface you can route the port 80 to your host.
+ℹ️ If you are using a virtual machine without a web interface you can route the port 80 to your host machine.
 ***
 
 Once you can access the web interface you should move to the `Form` page to create a new network, as shown in the image.
@@ -147,7 +148,7 @@ Once you clicked the `Form` button you should see a popup with the following mes
 
 We will now test the created OpenThread network using the other nRF52840 board and a Zephyr sample.
 
-We can now move back to the Zephyr cloned repository:
+Move back to the Zephyr cloned repository:
 
 ```
 $ cd ~/libpull_tutorial/zephyr
@@ -160,7 +161,7 @@ $ cd samples/net/echo_client
 $ wget https://gist.githubusercontent.com/AntonioLangiu/5d4184085cf81a816c0b904b27b41c7e/raw/fe0bc763b991b64686534a5e0c2cd12c760a7771/prj_nrf52840_ot.conf
 ```
 
-The configuration file contains the directive to enable OpenThread and the OpenThread shell that we will use for testing. To understand the configuration you can read the Zephyr documentation.
+The configuration file contains the directive to enable OpenThread and the OpenThread shell that we will use for testing. To understand the configuration you can read the [Zephyr documentation](https://docs.zephyrproject.org).
 
 We can now build and flash the firmware on the board:
 
@@ -195,13 +196,13 @@ Typing `cmd scan` you should see the following output:
 | 0 | Libpull Tutorial"""" | 1111111122222222 | 1234 | 8a246d3fd47592be | 15 | -44 |  50 |
 ```
 
-OpenThread provides an official [docuementation for the CLI](https://github.com/openthread/openthread/blob/master/src/cli/README.md) describing each command and how to use it.
+OpenThread provides an official [documentation for the CLI](https://github.com/openthread/openthread/blob/master/src/cli/README.md) describing each command and how to use it.
 
 To test if the device is able to communicate with the server using the OpenThread network already created we can use netcat to listed for udp packets and send an udp packet from the device.
 
-First we need to understand the network configuration of our computer. With the command `ifconfig` we can see the various interfaces of our PC and the IP address assigned to them. To see the IP reachable from our board we should search for the `wpan0` interface and check the assigned ipv6 addresses.
+First we need to understand the network configuration of our computer. With the command `ifconfig` we can see the various interfaces of our PC and the IP address assigned to them. You can find the global IPv6 address reachable from the OpenThread network checking the addresses assigned to the `wpan0` interface.
 
-In our case the configuration was as follow, but in your computer it may be different:
+In our case the configuration was as follow, but in your computer it will be different:
 
 ```
 wpan0: flags=4305<UP,POINTOPOINT,RUNNING,NOARP,MULTICAST>  mtu 1280
@@ -239,4 +240,4 @@ ot> cmd ping <global_ipv6_address_of_wpan0_interface>
 
 Setting an OpenThread network really depends from your available configuration. You should have a basic understanding of the OpenThread principles and how to configure a Linux network.
 
-If you arrived here, it means you are able to send and receive packets from your device to the listening server using the OpenThread network. This is required to move formward since the device will need to communicate with our testing server.
+If you arrived here, it means you are able to send and receive packets from your device to the listening server using the OpenThread network. This is required to move formward since to receive the firmware the device will need to communicate with our testing server.

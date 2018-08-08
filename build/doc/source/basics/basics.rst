@@ -10,6 +10,8 @@ the main logic and how to contribute.
    :maxdepth: 1
 
    library.md
+   agents.rst
+   cryptographic_libraries.md
    documentation.rst
    contributing.rst
 

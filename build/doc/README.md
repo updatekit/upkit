@@ -48,7 +48,7 @@ You can see all the available targets invoking `make`. If you want to build
 the HTML documentation you can use `html` target, such as:
 
 ```
-make target
+make html
 ```
 
 ## Documentation CI
@@ -60,6 +60,3 @@ You can see the state of the current documentation by analyzing the
 Moreover, we are building the documentation on Travis to be sure all functions
 are documented.
 
-
-
-- 

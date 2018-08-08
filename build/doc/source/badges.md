@@ -1,0 +1,5 @@
+[![GitHub license](https://img.shields.io/github/license/libpull/libpull.svg)](https://github. com/libpull/libpull/blob/update/readme/LICENSE)
+[![GitHub release](https://img.shields.io/github/release/libpull/libpull.svg)](https://github. com/libpull/libpull/releases)
+[![Build Status](https://travis-ci.org/libpull/libpull.svg?branch=master)](https://travis-ci.org/libpull/libpull)
+[![CodeFactor](https://www.codefactor.io/repository/github/libpull/libpull/badge)](https://    www.codefactor.io/repository/github/libpull/libpull)
+ [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat)](https:// github.com/libpull/libpull/pulls)

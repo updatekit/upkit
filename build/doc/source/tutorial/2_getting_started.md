@@ -24,10 +24,7 @@ To test if your setup is ready to work with Zephyr and the nRF52840 board,
 build the hello world sample provided by the Zephyr project and load it to
 the board.
 
-You can follow the [official documentation](http://docs.zephyrproject.org/boards/arm/nrf52840_pca10056/doc/nrf52840_pca10056.html) for this task.
-
-The are the steps you may follow to complete this task, however it really
-depends on you configurations:
+You can follow the [official documentation](http://docs.zephyrproject.org/boards/arm/nrf52840_pca10056/doc/nrf52840_pca10056.html) for this task or the next steps:
 
     $ cd zephyr
     $ source zephyr-env.sh
@@ -37,12 +34,12 @@ depends on you configurations:
     $ ninja
     
 If the build was successfull you are now ready to flash the firmware
-on the device and check the output:
+on the device:
 
     $ ninja flash
     
-To read the serial output we use minicom, but you can use every program
-you like (i.e., screen).
+To read the serial output we use [Minicom](https://en.wikipedia.org/wiki/Minicom), but you can use every serial
+communication program you like (i.e., screen).
 
 If everthing was correct you should see the following output:
 
@@ -51,16 +48,16 @@ If everthing was correct you should see the following output:
 
 ## Install the flashing tool
 
-If you don't have them already installed you need to install the `nrfjprog`
-contained in the [nRF5x Command Line Tools](https://www.nordicsemi.com/eng/Products/nRF52840#Downloads).
+To flash the libpull generated firmware we will use `nrfjprog`. You can have it
+instaling the 
+[nRF5x Command Line Tools](https://www.nordicsemi.com/eng/Products/nRF52840#Downloads).
 
-This program is needed to interact with the nRF52840 board. To test if it is
-working use the command:
+This program is needed to interact with the nRF52840 board. To test if it works
+use the command:
 
 ```
 $ nrfjprog --ids
 ```
 
-that shows the serial numbers of all the boards
-connected to the computer.
+that shows the serial numbers of all the boards connected to the computer.
 
