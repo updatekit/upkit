@@ -1,4 +1,4 @@
-#Riot Platform
+# Riot Platform
 
 Libpull can be used to perform Software Updates for IoT devices using the RIOT platform.
 

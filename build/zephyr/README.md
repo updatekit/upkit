@@ -1,4 +1,4 @@
-#Zephyr Platform
+# Zephyr Platform
 
 Libpull can be used to perform Software Updates for IoT devices using the Zephyr platform.
 
