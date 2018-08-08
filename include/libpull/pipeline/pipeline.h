@@ -23,6 +23,4 @@ typedef struct pipeline_ctx_t {
     pipeline_ctx_t* next_ctx;
 } pipeline_ctx_t;
 
-
-
 #endif /* LIBPULL_PIPELINE_PIPELINE_H_ */
