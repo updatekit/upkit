@@ -10,18 +10,16 @@
 [![Coverage Status](https://coveralls.io/repos/github/libpull/libpull/badge.svg)](https://coveralls.io/github/libpull/libpull)
 [![CodeFactor](https://www.codefactor.io/repository/github/libpull/libpull/badge)](https://www.codefactor.io/repository/github/libpull/libpull)
 [![GitHub pull-requests](https://img.shields.io/github/issues-pr/libpull/libpull.svg)](https://github.com/libpull/libpull/pulls)
-[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat)](https://github.com/libpull/libpull/pulls)
 
+libpull is a C library to implement secure and portable software updates on IoT devices.
 
-
-libpull is a C library to implement secure and portable updates on IoT devices.
 It targets [Class 1](https://tools.ietf.org/html/rfc7228#section-3)
 constrained devices, characterized by ~10 kB of RAM and ~100 kB of ROM.
 However, its lightweight and modular approach can be beneficial also for bigger devices.
 
 The library can be included into MCU firmware to perform
 Over The Air updates. It is composed of many high-level
-modules that interact with the low-level interfaces, implemented
+modules that interact with the low-level abstraction layer, implemented
 for the specific platform. This is needed since
 accessing the memory and the network on embedded systems
 is a complex task and each platform and architecture uses its
@@ -32,6 +30,9 @@ to reduce the costs of securing IoT devices, allowing an easy
 device update and management also for very
 constrained applications.
 
+## Online Presence
 
-⚠  **Version: 0.0.1 - The API and the modules can change at any point until we
-reach a stable version.**
+**Documentation**: [libpull.readthedocs.io](http://libpull.readthedocs.io)
+**Twitter**: [@libpull](https://twitter.com/libpull)
+**Join Slack**: [libpull.slack.com](https://join.slack.com/t/libpull/shared_invite/enQtNDEyOTkzMjE5MDkxLTEyZjUxZGE4MDYwNzE4ODdmYzFkZTA1NDAyN2ExOGVlYzQ3ODhkNTk1ZTZjMDExMmE1NjhiNmUyYjRmN2ZkYzc)
+
