@@ -140,7 +140,7 @@ The OpenThread border router has a web interface to configure the network. You c
 
 Once you can access the web interface you should move to the `Form` page to create a new network, as shown in the image.
 
-![image](../img/openthread_br_form_network.png) 
+![image](../img/documentation/openthread_br_form_network.png) 
 
 Once you clicked the `Form` button you should see a popup with the following message `FORM operation is successful`.
 
