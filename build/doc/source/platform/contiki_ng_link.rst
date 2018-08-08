@@ -1,1 +1,1 @@
-.. include:: ../../../contiki-ng/README.rst
+.. mdinclude:: ../../../contiki-ng/README.md

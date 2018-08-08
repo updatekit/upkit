@@ -1,1 +1,1 @@
-.. include:: ../../../zephyr/README.rst
+.. mdinclude:: ../../../zephyr/README.md

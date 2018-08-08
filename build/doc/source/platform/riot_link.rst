@@ -1,1 +1,1 @@
-.. include:: ../../../riot/README.rst
+.. mdinclude:: ../../../riot/README.md
