@@ -32,7 +32,7 @@ constrained applications.
 
 ## Online Presence
 
-**Documentation**: [libpull.readthedocs.io](http://libpull.readthedocs.io)
-**Twitter**: [@libpull](https://twitter.com/libpull)
-**Join Slack**: [libpull.slack.com](https://join.slack.com/t/libpull/shared_invite/enQtNDEyOTkzMjE5MDkxLTEyZjUxZGE4MDYwNzE4ODdmYzFkZTA1NDAyN2ExOGVlYzQ3ODhkNTk1ZTZjMDExMmE1NjhiNmUyYjRmN2ZkYzc)
+- **Documentation**: [libpull.readthedocs.io](http://libpull.readthedocs.io)
+- **Twitter**: [@libpull](https://twitter.com/libpull)
+- **Join Slack**: [libpull.slack.com](https://join.slack.com/t/libpull/shared_invite/enQtNDEyOTkzMjE5MDkxLTEyZjUxZGE4MDYwNzE4ODdmYzFkZTA1NDAyN2ExOGVlYzQ3ODhkNTk1ZTZjMDExMmE1NjhiNmUyYjRmN2ZkYzc)
 
