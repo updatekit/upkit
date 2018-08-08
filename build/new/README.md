@@ -1,4 +1,4 @@
-# New Platform
+#New Platform
 
 If you want to integrate a new platform you will find
 here a small tutorial suggesting the steps to do it
