@@ -1,84 +1,159 @@
-#include <libpull/pipeline.h>
+/*-
+ * Copyright 2003-2005 Colin Percival
+ * Copyright 2012 Matthew Endsley
+ * Copyright 2018 Antonio Langiu
+ * All rights reserved
+ *
+ * Redistribution and use in source and binary forms, with or without
+ * modification, are permitted providing that the following conditions 
+ * are met:
+ * 1. Redistributions of source code must retain the above copyright
+ *    notice, this list of conditions and the following disclaimer.
+ * 2. Redistributions in binary form must reproduce the above copyright
+ *    notice, this list of conditions and the following disclaimer in the
+ *    documentation and/or other materials provided with the distribution.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR
+ * IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ * WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ * ARE DISCLAIMED.  IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY
+ * DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+ * DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS
+ * OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+ * HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
+ * STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING
+ * IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ * POSSIBILITY OF SUCH DAMAGE.
+ */
+
 #include <stdio.h>
 #include <stdint.h>
 #include <stdbool.h>
 #include <string.h>
-/*
+#include "pipeline_bspatch.h"
 
-int pipeline_bspatch_init(pipeline_ctx_t* ctx, pipeline_write write, void* more) {
-    ctx->write = write;
+int pipeline_bspatch_init(pipeline_ctx_t* ctx, void* more) {
+    ctx->finish = false;
     ctx->more = more;
     ctx->state = 0;
     return 0;
 }
 
+// TODO tomorrow:
+// 1. the offtin function must be moved to a int32_t value since it reduces the
+// size of the final patch and is enought for small systems where the size of
+// the firmware is quite for sure less than 4gb
+
+typedef union ctrl_t {
+    uint8_t c[8];
+    int64_t y;
+} ctrl_t;
+
 // Returns < 0 on error; >=0 number of bytes processed
 int pipeline_bspatch_process(pipeline_ctx_t* ctx, uint8_t* buf, int len) {
-    // TODO implement a check for the boundaries
+    // TODO implement a check for the bundaries
     // A corrupted patch could let this program access random memory
     // The oldsize shuold be passed during the configuration, since if
     // it is embedded in the patch it could be used to access random bytes
-    static ctrl_t ctrl;
-    static uint8_t i;
-    static bspatch_state_t bspatch_state;
-    uint8_t buffer; 
+	
+    static uint8_t ctrl_buf[8];
+	static int64_t oldpos,newpos;
+	static ctrl_t ctrl[3];
+	static int64_t i;
+    static uint8_t j;
+    static ctrl_t newsize;
 
     // bufp points to the number of bytes processed of the received buffer
     uint8_t* bufp = buf;
-    uint8_t* oldp = (uint8_t*) ctx->stage_data;
+    uint8_t* old = (uint8_t*) ctx->stage_data;
+    if (ctx->finish) {
+        return 0;
+    }
 
     pipelineBegin
-        i = 0;
-    ctrl.y = 24; // header size
-    bspatch_state = READ_HEADER;
-    while(1) {
-        while((buf+len-bufp) == 0) {
-            pipelineReturn(0);
-        }
-        switch(bspatch_state) {
-            case READ_HEADER:
-                // read header
-                if (i < 16) {
-                    if (*bufp != 0x2a) {
-                        return -1;
-                    }
+    {
+	    oldpos=0;
+        newpos=0;
+
+        // Check magic
+        for (j=0; j<24; j++) {
+            while ((buf+len-bufp) == 0) {
+                pipelineReturn(bufp-buf);
+            }
+            if (j < 16) {
+                if (*bufp != 0x2a) {
+                    return -1;
                 }
-                i++;
-                bufp++;
-                break;
-            case READ_CTRL:
-                if (i != 4) {
-                    ctrl.c[i] = *bufp;
+            } else {
+                if (j != (16+8)) {
+                    newsize.c[j-16] = *bufp;
                 } else {
-                    ctrl.c[i]= *bufp & 0x7F;
-                    ctrl.y= ((*bufp & 0x80)? -ctrl.y: ctrl.y);
-                    bspatch_state++;
-                    i=0;
+                    newsize.c[j-16]= *bufp & 0x7F;
+                    newsize.y= ((*bufp & 0x80)? -newsize.y: newsize.y);
+                }
+            }
+            bufp++;
+        }
+        if(newsize.y < 0) {
+            return -2;
+        }
+    }
+	while(newpos < newsize.y) {
+		/* Read control data */
+		for(i=0;i<=2;i++) {
+            for (j=0; j<8; j++) {
+                while((buf+len-bufp) == 0) {
+                    pipelineReturn(bufp-buf);
+                }
+                if (j != 7) {
+                    ctrl[i].c[j] = *bufp;
+                } else {
+                    ctrl[i].c[j]= *bufp & 0x7F;
+                    ctrl[i].y= ((*bufp & 0x80)? -ctrl[i].y: ctrl[i].y);
                 }
                 bufp++;
-                i++;
-                continue;
-            case SUM:
-                buffer = *bufp + *oldp;
-                ctx->write(&buffer, 1, ctx);
-                bufp++;
-                oldp++;
-                break;
-            case INSERT:
-                ctx->write(bufp, 1, ctx);
-                bufp++;
-                break;
-            case SHIFT:
-                oldp+=ctrl.y;
-                ctrl.y = 0;
-                break;
+            }
+		};
+
+		/* Sanity-check */
+		if(newpos+ctrl[0].y > newsize.y) {
+			return -1;
         }
-        if (ctrl.y-- <= 0) {
-            bspatch_state = (bspatch_state%3)+1;
+
+		/* Add old data to diff string */
+        for(i=0;i<ctrl[0].y;i++) {
+            while ((buf+len-bufp) == 0) {
+                pipelineReturn(bufp-buf);
+            }
+            uint8_t buffer = *bufp + old[oldpos+i];
+            ctx->next_func->process(ctx->next_ctx, &buffer, 1);
+            bufp++;
         }
-    };
+
+		/* Adjust pointers */
+		newpos+=ctrl[0].y;
+		oldpos+=ctrl[0].y;
+
+		/* Sanity-check */
+        if(newpos+ctrl[1].y > newsize.y) {
+            return -1;
+        }
+
+		/* Read extra string */
+        for (i=0; i<ctrl[1].y; i++) {
+            while ((buf+len-bufp) == 0) {
+                pipelineReturn(bufp-buf);
+            }
+            ctx->next_func->process(ctx->next_ctx, &buffer, 1);
+            bufp++;
+        }
+
+		/* Adjust pointers */
+		newpos+=ctrl[1].y;
+		oldpos+=ctrl[2].y;
+	};
+    ctx->finish = true;
     pipelineFinish
-    // This function always returns inside the while
+	return bufp-buf;
 }
 
-*/

@@ -13,7 +13,8 @@
     ARG(std::string, vendor_pub_key, 'c', "File rapresenting the vendor public key")\
     ARG(std::string, server_priv_key, 'k', "File rappresenting the server private key")\
     ARG(std::string, server_pub_key, 'm', "File rappresenting the server public key")\
-    ARG(std::string, binary_file, 'b', "File rappresenting the firmware")\
+    ARG(std::string, binary_file, 'b', "First binary file in input")\
+    ARG(std::string, second_binary_file, 'z', "Second binary file in input")\
     ARG(std::string, out_file, 'f', "Output file")
 
 #define DECLARE_ARG(type, name, ...) \
