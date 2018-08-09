@@ -52,3 +52,8 @@ echo "Generate slots...done"
 # Generate the bootloader context
 $FIRMWAREDIR/firmware_tool bootctx generate -f $ASSETSDIR/bootctx
 $FIRMWAREDIR/firmware_tool bootctx generate -f $ASSETSDIR/bootctx.pristine
+
+# Generate the LZSS compressed file
+# The compressed file is a compressed version of slot_a.pristine
+$FIRMWAREDIR/firmware_tool pipeline compress -b $ASSETSDIR/slot_a.pristine \
+    -f $ASSETSDIR/slot_a.compressed

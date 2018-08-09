@@ -82,8 +82,8 @@ void output2(std::ofstream &outfile, int x, int y)
 
 /* The compress functions needs to get the
  * following values from the context:
- * -b (binary_file): the compressed input file
- * -f (output_file): the file where to store the decompressed version
+ * -b (binary_file): the input file
+ * -f (output_file): the file where to store the compressed version
  */
 int pipeline_compress_command(Context ctx) {
     int i, j, f1, x, y, r, s, bufferend;
@@ -154,10 +154,10 @@ static int getbit(std::ifstream &input, int n) {
     x = 0;
     for (i = 0; i < n; i++) {
         if (mask == 0) {
+            input.get(c);
             if (input.eof()) {
                 return EOF;
             }
-            input.get(c);
             buf = c;
             mask = 128;
         }
