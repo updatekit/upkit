@@ -26,79 +26,91 @@ IMPLEMENT(pipeline)
 #define F ((1 << EJ) + 1)  /* lookahead buffer size */
 int bit_buffer = 0, bit_mask = 128;
 unsigned long codecount = 0, textcount = 0;
-FILE *infile, *outfile;
 
-void error(void)
-{
-    printf("Output error\n");  exit(1);
-}
-
-void putbit1(void)
-{
+void putbit1(std::ofstream &outfile) {
     bit_buffer |= bit_mask;
     if ((bit_mask >>= 1) == 0) {
-        if (fputc(bit_buffer, outfile) == EOF) error();
+        outfile.put(bit_buffer);
         bit_buffer = 0;  bit_mask = 128;  codecount++;
     }
 }
 
-void putbit0(void)
+void putbit0(std::ofstream &outfile)
 {
     if ((bit_mask >>= 1) == 0) {
-        if (fputc(bit_buffer, outfile) == EOF) error();
+        outfile.put(bit_buffer);
         bit_buffer = 0;  bit_mask = 128;  codecount++;
     }
 }
 
-void flush_bit_buffer(void)
+void flush_bit_buffer(std::ofstream &outfile)
 {
     if (bit_mask != 128) {
-        if (fputc(bit_buffer, outfile) == EOF) error();
+        outfile.put(bit_buffer);
         codecount++;
     }
 }
 
-void output1(int c)
+void output1(std::ofstream &outfile, int c)
 {
     int mask;
 
-    putbit1();
+    putbit1(outfile);
     mask = 256;
     while (mask >>= 1) {
-        if (c & mask) putbit1();
-        else putbit0();
+        if (c & mask) putbit1(outfile);
+        else putbit0(outfile);
     }
 }
 
-void output2(int x, int y)
+void output2(std::ofstream &outfile, int x, int y)
 {
     int mask;
 
-    putbit0();
+    putbit0(outfile);
     mask = N;
     while (mask >>= 1) {
-        if (x & mask) putbit1();
-        else putbit0();
+        if (x & mask) putbit1(outfile);
+        else putbit0(outfile);
     }
     mask = (1 << EJ);
     while (mask >>= 1) {
-        if (y & mask) putbit1();
-        else putbit0();
+        if (y & mask) putbit1(outfile);
+        else putbit0(outfile);
     }
 }
 
 /* The compress functions needs to get the
  * following values from the context:
- * 
- *
+ * -b (binary_file): the compressed input file
+ * -f (output_file): the file where to store the decompressed version
  */
 int pipeline_compress_command(Context ctx) {
-    int i, j, f1, x, y, r, s, bufferend, c;
+    int i, j, f1, x, y, r, s, bufferend;
     static unsigned char buffer[N * 2];
+    char c;
 
+    // 0. Open the input file
+    std::ifstream input(ctx.get_binary_file());
+    if (! input.is_open()) {
+        std::cerr << "Error opening input file\n" << std::endl;
+        return EXIT_FAILURE;
+    }
+    // 1. Open the output file
+    std::ofstream outfile(ctx.get_out_file());
+    if (! outfile.is_open()) {
+        std::cerr << "Error opening output file\n" << std::endl;
+        return EXIT_FAILURE;
+    }
+
+    // 2. Start the algorithm
     for (i = 0; i < N - F; i++) buffer[i] = ' ';
     for (i = N - F; i < N * 2; i++) {
-        if ((c = fgetc(infile)) == EOF) break;
+        input.get(c);
+        if (input.eof()) {
+            break;
+        }
+
         buffer[i] = c;  textcount++;
     }
     bufferend = i;  r = N - F;  s = 0;
@@ -113,19 +125,22 @@ int pipeline_compress_command(Context ctx) {
                     x = i;  y = j;
                 }
             }
-        if (y <= P) {  y = 1;  output1(c);  }
-        else output2(x & (N - 1), y - 2);
+        if (y <= P) {  y = 1;  output1(outfile, c);  }
+        else output2(outfile, x & (N - 1), y - 2);
         r += y;  s += y;
         if (r >= N * 2 - F) {
             for (i = 0; i < N; i++) buffer[i] = buffer[i + N];
             bufferend -= N;  r -= N;  s -= N;
             while (bufferend < N * 2) {
-                if ((c = fgetc(infile)) == EOF) break;
+                input.get(c);
+                if (input.eof()) {
+                    break;
+                }
                 buffer[bufferend++] = c;  textcount++;
             }
         }
     }
-    flush_bit_buffer();
+    flush_bit_buffer(outfile);
     printf("text:  %ld bytes\n", textcount);
     printf("code:  %ld bytes (%ld%%)\n",
             codecount, (codecount * 100) / textcount);
