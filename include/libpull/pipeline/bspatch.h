@@ -17,7 +17,7 @@ typedef enum bspatch_state_t {
     SHIFT = 4
 } bspatch_state_t;
 
-int pipeline_bspatch_init(pipeline_ctx_t* ctx, pipeline_write write, void* more);
+int pipeline_bspatch_init(pipeline_ctx_t* ctx, void* more);
 int pipeline_bspatch_process(pipeline_ctx_t* ctx, uint8_t* buf, int l);
 
 static const pipeline_func_t pipeline_bspatch = {

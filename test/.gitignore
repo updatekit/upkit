@@ -10,5 +10,6 @@ test_connection_dtls
 test_logic
 test_update
 test_bootloader_agent
-test_pipeline
 test_crc16
+test_pipeline
+test_lzss

@@ -19,7 +19,7 @@ void ntest_clean(void) {}
 #define VAL_TYPE uint8_t
 int success;
 
-int test_val_init(pipeline_ctx_t* ctx, pipeline_write write, void* more) {
+int test_val_init(pipeline_ctx_t* ctx, void* more) {
     ctx->more = more;
     return 0;
 }
@@ -39,7 +39,7 @@ pipeline_func_t test_val = {
     .process = test_val_process
 };
 
-int test_sum_init(pipeline_ctx_t* ctx, pipeline_write write, void* more) {
+int test_sum_init(pipeline_ctx_t* ctx, void* more) {
     /* This funtion does nothing */
     return 0;
 }
@@ -75,8 +75,8 @@ void test_one_stage(void) {
     pipeline_ctx_t ctx_sum;
     pipeline_ctx_t ctx_val;
 
-    test_val.init(&ctx_val, NULL, &expected);
-    test_sum.init(&ctx_sum, NULL/* this should have a value */, NULL);
+    test_val.init(&ctx_val, &expected);
+    test_sum.init(&ctx_sum, NULL);
 
     ctx_sum.next_func = &test_val;
     ctx_sum.next_ctx = &ctx_val;
@@ -97,19 +97,19 @@ void test_ten_stages(void) {
 
     }
     for (i=0; i<10; i++) {
-        test_sum.init(&ctx_sum[i], NULL/* this should have a value */, NULL);
+        test_sum.init(&ctx_sum[i], NULL);
     }
     for (i=0; i<9; i++) {
         ctx_sum[i].next_func = &test_sum;
         ctx_sum[i].next_ctx = &ctx_sum[i+1];
     }
 
-    test_val.init(&ctx_val, NULL, &expected);
+    test_val.init(&ctx_val, &expected);
 
     ctx_sum[9].next_func = &test_val;
     ctx_sum[9].next_ctx = &ctx_val;
 
-    test_sum.process(&ctx_sum, buffer, 100);
+    test_sum.process((pipeline_ctx_t*) &ctx_sum, buffer, 100);
     nTEST_TRUE(success);
 }
 

@@ -3,6 +3,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <string.h>
+/*
 
 int pipeline_bspatch_init(pipeline_ctx_t* ctx, pipeline_write write, void* more) {
     ctx->write = write;
@@ -80,3 +81,4 @@ int pipeline_bspatch_process(pipeline_ctx_t* ctx, uint8_t* buf, int len) {
     // This function always returns inside the while
 }
 
+*/

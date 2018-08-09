@@ -22,7 +22,7 @@
 #define N (1 << EI)  /* buffer size */
 #define F ((1 << EJ) + 1)  /* lookahead buffer size */
 
-int pipeline_lzss_init(pipeline_ctx_t* ctx, pipeline_write write, void* more);
+int pipeline_lzss_init(pipeline_ctx_t* ctx, void* more);
 int pipeline_lzss_process(pipeline_ctx_t* ctx, uint8_t* buf, int l);
 
 static pipeline_func_t lzss_pipeline = {

@@ -2,10 +2,9 @@
 
 #include <stdio.h>
 
-int pipeline_lzss_init(pipeline_ctx_t* ctx, pipeline_write write, void* more) {
+int pipeline_lzss_init(pipeline_ctx_t* ctx, void* more) {
     ctx->state = 0;
     ctx->finish = false;
-    ctx->write = write;
     ctx->more = more;
     return 0;
 }
@@ -42,9 +41,10 @@ int pipeline_lzss_process(pipeline_ctx_t* ctx, uint8_t* buf, int l) {
     r = N - F;
     while (1) {
         getbit(1, c);
+
         if (c) {
             getbit(8, c);
-            ctx->write((uint8_t*) &c, 1, ctx);
+            ctx->next_func->process(ctx->next_ctx, (uint8_t*) &c, 1);
             buffer[r++] = c;
             r &= (N - 1);
         } else {
@@ -53,7 +53,7 @@ int pipeline_lzss_process(pipeline_ctx_t* ctx, uint8_t* buf, int l) {
 
             for (k = 0; k <= j + 1; k++) {
                 c = buffer[(i + k) & (N - 1)];
-                ctx->write((uint8_t*) &c, 1, ctx);
+                ctx->next_func->process(ctx->next_ctx, (uint8_t*) &c, 1);
                 buffer[r++] = c;  r &= (N - 1);
             }
         }
