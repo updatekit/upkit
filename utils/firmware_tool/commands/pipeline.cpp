@@ -622,13 +622,13 @@ int pipeline_diff_command(Context ctx) {
     input1.seekg(0, std::ios_base::end);
     size1 = input1.tellg();
     input1.seekg(0, std::ios_base::beg);
-    buffer1 = new char [size2];
+    buffer1 = (char*) malloc(size1*sizeof(char));
     input1.read(buffer1, size1);
 
     input2.seekg(0, std::ios_base::end);
     size2 = input2.tellg();
     input2.seekg(0, std::ios_base::beg);
-    buffer2 = new char[size2];
+    buffer2 = (char*) malloc(size2*sizeof(char));
     input2.read(buffer2, size2);
 
     // 4. Write the patch header
