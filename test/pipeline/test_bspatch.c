@@ -14,7 +14,7 @@
 #define BSDIFF_INPUT1 "../assets/slot_a.bin"
 #define BSDIFF_INPUT2 "../assets/slot_b.bin"
 #define BSDIFF_PATCH "../assets/slot.patch"
-#define BSDIFF_PATCHED "../assets/slot_a.patched"
+#define BSDIFF_PATCHED "../assets/slot_b.patched"
 
 void ntest_prepare(void) {
     srand(time(NULL));
@@ -38,7 +38,6 @@ void ntest_clean(void) {}
          printf("Error writing bytes\n");
          return -1;
      }
-     printf("finito con successo\n");
      return l;
  }
 
@@ -78,13 +77,10 @@ void test_patch(void) {
         // 4.1. Read N bytes from the original file.
         readed = read(patch, &buffer, r);
         // 4.2. Pass the readed bytes to the bspatch stage of the pipeline.
-        printf("started\n");
         nTEST_TRUE(pipeline_bspatch.process(&bspatch_ctx, (uint8_t*)buffer, readed) >= 0);
-        printf("readed %d, r %d\n", readed, r);
     } while (readed == r);
-    printf("done\n");
     // 5. Compare the decompressed file with the original file.
-    nTEST_TRUE(file_compare(BSDIFF_INPUT2 ,BSDIFF_PATCHED) == 0);
+    nTEST_TRUE(file_compare(BSDIFF_INPUT2, BSDIFF_PATCHED) == 0);
 }
 
 int main() {

@@ -89,8 +89,9 @@ int pipeline_bspatch_process(pipeline_ctx_t* ctx, uint8_t* buf, int len) {
             return -2;
         }
     }
+    printf("len is %d\n", newsize);
 	while(newpos < newsize.y) {
-
+        printf("len %d\n", len);
 		/* Read control data */
 		for(i=0;i<=2;i++) {
             for (j=0; j<8; j++) {
@@ -109,7 +110,7 @@ int pipeline_bspatch_process(pipeline_ctx_t* ctx, uint8_t* buf, int len) {
 
 		/* Sanity-check */
 		if(newpos+ctrl[0].y > newsize.y) {
-            printf("exit 1\n");
+            printf("exit 1 %d %d\n", newpos+ctrl[0].y , newsize.y);
 			return -1;
         }
 

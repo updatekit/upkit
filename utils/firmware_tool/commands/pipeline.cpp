@@ -253,7 +253,17 @@ int pipeline_decompress_command(Context ctx) {
 
 extern "C" {
 
-static void split(int64_t *I, int64_t *V, int64_t start, int64_t len, int64_t h) {
+struct bsdiff_stream
+{
+ void* opaque;
+
+ void* (*malloc)(size_t size);
+ void (*free)(void* ptr);
+ int (*write)(struct bsdiff_stream* stream, const void* buffer, int size);
+};
+
+static void split(int64_t *I,int64_t *V,int64_t start,int64_t len,int64_t h)
+{
 	int64_t i,j,k,x,tmp,jj,kk;
 
 	if(len<16) {
@@ -313,7 +323,8 @@ static void split(int64_t *I, int64_t *V, int64_t start, int64_t len, int64_t h)
 	if(start+len>kk) split(I,V,kk,start+len-kk,h);
 }
 
-static void qsufsort(int64_t *I,int64_t *V,const uint8_t *old,int64_t oldsize) {
+static void qsufsort(int64_t *I,int64_t *V,const uint8_t *old,int64_t oldsize)
+{
 	int64_t buckets[256];
 	int64_t i,h,len;
 
@@ -350,7 +361,8 @@ static void qsufsort(int64_t *I,int64_t *V,const uint8_t *old,int64_t oldsize) {
 	for(i=0;i<oldsize+1;i++) I[V[i]]=i;
 }
 
-static int64_t matchlen(const uint8_t *old,int64_t oldsize,const uint8_t *nnew,int64_t nnewsize) {
+static int64_t matchlen(const uint8_t *old,int64_t oldsize,const uint8_t *nnew,int64_t nnewsize)
+{
 	int64_t i;
 
 	for(i=0;(i<oldsize)&&(i<nnewsize);i++)
@@ -360,7 +372,8 @@ static int64_t matchlen(const uint8_t *old,int64_t oldsize,const uint8_t *nnew,i
 }
 
 static int64_t search(const int64_t *I,const uint8_t *old,int64_t oldsize,
-		const uint8_t *nnew,int64_t nnewsize,int64_t st,int64_t en,int64_t *pos) {
+		const uint8_t *nnew,int64_t nnewsize,int64_t st,int64_t en,int64_t *pos)
+{
 	int64_t x,y;
 
 	if(en-st<2) {
@@ -384,7 +397,8 @@ static int64_t search(const int64_t *I,const uint8_t *old,int64_t oldsize,
 	};
 }
 
-static void offtout(int64_t x,uint8_t *buf) {
+static void offtout(int64_t x,uint8_t *buf)
+{
 	int64_t y;
 
 	if(x<0) y=-x; else y=x;
@@ -401,18 +415,12 @@ static void offtout(int64_t x,uint8_t *buf) {
 	if(x<0) buf[7]|=0x80;
 }
 
-struct bsdiff_stream {
-    void* opaque;
-
-    void* (*malloc)(size_t size);
-    void (*free)(void* ptr);
-    int (*write)(struct bsdiff_stream* stream, const void* buffer, int size);
-};
-
-static int64_t writedata(struct bsdiff_stream* stream, const void* buffer, int64_t length) {
+static int64_t writedata(struct bsdiff_stream* stream, const void* buffer, int64_t length)
+{
 	int64_t result = 0;
 
-	while (length > 0) {
+	while (length > 0)
+	{
 		const int smallsize = (int)MIN(length, INT_MAX);
 		const int writeresult = stream->write(stream, buffer, smallsize);
 		if (writeresult == -1)
@@ -424,10 +432,12 @@ static int64_t writedata(struct bsdiff_stream* stream, const void* buffer, int64
 		length -= smallsize;
 		buffer = (uint8_t*)buffer + smallsize;
 	}
+
 	return result;
 }
 
-struct bsdiff_request {
+struct bsdiff_request
+{
 	const uint8_t* old;
 	int64_t oldsize;
 	const uint8_t* nnew;
@@ -437,7 +447,8 @@ struct bsdiff_request {
 	uint8_t *buffer;
 };
 
-static int bsdiff_internal(const struct bsdiff_request req) {
+static int bsdiff_internal(const struct bsdiff_request req)
+{
 	int64_t *I,*V;
 	int64_t scan,pos,len;
 	int64_t lastscan,lastpos,lastoffset;
@@ -448,7 +459,7 @@ static int bsdiff_internal(const struct bsdiff_request req) {
 	uint8_t *buffer;
 	uint8_t buf[8 * 3];
 
-	if((V= (int64_t*) req.stream->malloc((req.oldsize+1)*sizeof(int64_t)))==NULL) return -1;
+	if((V=(int64_t*)req.stream->malloc((req.oldsize+1)*sizeof(int64_t)))==NULL) return -1;
 	I = req.I;
 
 	qsufsort(I,V,req.old,req.oldsize);
@@ -471,7 +482,7 @@ static int bsdiff_internal(const struct bsdiff_request req) {
 				(req.old[scsc+lastoffset] == req.nnew[scsc]))
 				oldscore++;
 
-			if(((len==oldscore) && (len!=0)) ||
+			if(((len==oldscore) && (len!=0)) || 
 				(len>oldscore+8)) break;
 
 			if((scan+lastoffset<req.oldsize) &&
@@ -540,17 +551,16 @@ static int bsdiff_internal(const struct bsdiff_request req) {
 	return 0;
 }
 
-} // END extern "C"
-
-int bsdiff(const uint8_t* old, int64_t oldsize, const uint8_t* nnew, int64_t nnewsize, struct bsdiff_stream* stream) {
+int bsdiff(const uint8_t* old, int64_t oldsize, const uint8_t* nnew, int64_t nnewsize, struct bsdiff_stream* stream)
+{
 	int result;
 	struct bsdiff_request req;
 
-	if((req.I= (int64_t *) stream->malloc((oldsize+1)*sizeof(int64_t)))==NULL) {
+	if((req.I=(int64_t*)stream->malloc((oldsize+1)*sizeof(int64_t)))==NULL)
 		return -1;
-    }
 
-	if((req.buffer= (unsigned char *) stream->malloc(nnewsize+1))==NULL) {
+	if((req.buffer=(uint8_t*)stream->malloc(nnewsize+1))==NULL)
+	{
 		stream->free(req.I);
 		return -1;
 	}
@@ -569,6 +579,8 @@ int bsdiff(const uint8_t* old, int64_t oldsize, const uint8_t* nnew, int64_t nne
 	return result;
 }
 
+} // End extern "C"
+
 static int diff_write(struct bsdiff_stream* stream, const void* buffer, int size) {
     std::ofstream* output = (std::ofstream*)stream->opaque;
     output->write((const char*)buffer, size);
@@ -577,7 +589,7 @@ static int diff_write(struct bsdiff_stream* stream, const void* buffer, int size
 
 struct bspatch_header {
     char magic[16];
-    char size[16];
+    char size[8];
 };
 
 /* This function should peform the diff between two files.
@@ -611,13 +623,13 @@ int pipeline_diff_command(Context ctx) {
     // 3. Read the files to a buffer
     input1.seekg(0, std::ios_base::end);
     size1 = input1.tellg();
-    input1.seekg(0, std::ios_base::end);
+    input1.seekg(0, std::ios_base::beg);
     buffer1 = new char [size2];
     input1.read(buffer1, size1);
 
     input2.seekg(0, std::ios_base::end);
     size2 = input2.tellg();
-    input2.seekg(0, std::ios_base::end);
+    input2.seekg(0, std::ios_base::beg);
     buffer2 = new char[size2];
     input2.read(buffer2, size2);
 
@@ -637,78 +649,81 @@ int pipeline_diff_command(Context ctx) {
     return bsdiff((const unsigned char*) buffer1, size1, (const unsigned char*) buffer2, size2, &stream);
 }
 
-struct bspatch_stream {
+/*********** START BSPATCH ***********/
+
+struct bspatch_stream
+{
     void* opaque;
     int (*read)(const struct bspatch_stream* stream, void* buffer, int length);
 };
 
+int bspatch(const uint8_t* old, int64_t oldsize, uint8_t* nnew, int64_t nnewsize, struct bspatch_stream* stream);
 
+static int64_t offtin(uint8_t *buf)
+{
+    int64_t y;
 
-static int64_t offtin(uint8_t *buf) {
-	int64_t y;
-	y=buf[7]&0x7F;
-	y=y*256;y+=buf[6];
-	y=y*256;y+=buf[5];
-	y=y*256;y+=buf[4];
-	y=y*256;y+=buf[3];
-	y=y*256;y+=buf[2];
-	y=y*256;y+=buf[1];
-	y=y*256;y+=buf[0];
-	if(buf[7]&0x80) y=-y;
-	return y;
+    y=buf[7]&0x7F;
+    y=y*256;y+=buf[6];
+    y=y*256;y+=buf[5];
+    y=y*256;y+=buf[4];
+    y=y*256;y+=buf[3];
+    y=y*256;y+=buf[2];
+    y=y*256;y+=buf[1];
+    y=y*256;y+=buf[0];
+
+    if(buf[7]&0x80) y=-y;
+
+    return y;
 }
 
-int bspatch(const uint8_t* old, int64_t oldsize, uint8_t* nnew, int64_t newsize, struct bspatch_stream* stream) {
-	uint8_t buf[8];
-	int64_t oldpos,newpos;
-	int64_t ctrl[3];
-	int64_t i;
+int bspatch(const uint8_t* old, int64_t oldsize, uint8_t* nnew, int64_t nnewsize, struct bspatch_stream* stream)
+{
+    uint8_t buf[8];
+    int64_t oldpos,nnewpos;
+    int64_t ctrl[3];
+    int64_t i;
 
-	oldpos=0;newpos=0;
-	while(newpos<newsize) {
-		/* Read control data */
-		for(i=0;i<=2;i++) {
-			if (stream->read(stream, buf, 8)) {
-				return -1;
-            }
-			ctrl[i]=offtin(buf);
-		};
+    oldpos=0;nnewpos=0;
+    while(nnewpos<nnewsize) {
+        /* Read control data */
+        for(i=0;i<=2;i++) {
+            if (stream->read(stream, buf, 8))
+                return -1;
+            ctrl[i]=offtin(buf);
+        };
 
-		/* Sanity-check */
-		if(newpos+ctrl[0]>newsize) {
-			return -1;
-        }
+        /* Sanity-check */
+        if(nnewpos+ctrl[0]>nnewsize)
+            return -1;
 
-		/* Read diff string */
-		if (stream->read(stream, nnew + newpos, ctrl[0])) {
-			return -1;
-        }
+        /* Read diff string */
+        if (stream->read(stream, nnew + nnewpos, ctrl[0]))
+            return -1;
 
-		/* Add old data to diff string */
-		for(i=0;i<ctrl[0];i++)
-			if((oldpos+i>=0) && (oldpos+i<oldsize))
-				nnew[newpos+i]+=old[oldpos+i];
+        /* Add old data to diff string */
+        for(i=0;i<ctrl[0];i++)
+            if((oldpos+i>=0) && (oldpos+i<oldsize))
+                nnew[nnewpos+i]+=old[oldpos+i];
 
-		/* Adjust pointers */
-		newpos+=ctrl[0];
-		oldpos+=ctrl[0];
+        /* Adjust pointers */
+        nnewpos+=ctrl[0];
+        oldpos+=ctrl[0];
 
-		/* Sanity-check */
-		if(newpos+ctrl[1]>newsize) {
-			return -1;
-        }
+        /* Sanity-check */
+        if(nnewpos+ctrl[1]>nnewsize)
+            return -1;
 
-		/* Read extra string */
-		if (stream->read(stream, nnew + newpos, ctrl[1])) {
-			return -1;
-        }
+        /* Read extra string */
+        if (stream->read(stream, nnew + nnewpos, ctrl[1]))
+            return -1;
 
-		/* Adjust pointers */
-		newpos+=ctrl[1];
-		oldpos+=ctrl[2];
-	};
+        /* Adjust pointers */
+        nnewpos+=ctrl[1];
+        oldpos+=ctrl[2];
+    };
 
-	return 0;
+    return 0;
 }
 
 static int patch_read(const struct bspatch_stream* stream, void* buffer, int length) {
@@ -754,7 +769,7 @@ int pipeline_patch_command(Context ctx) {
     // 3. Read the files to a buffer
     input1.seekg(0, std::ios_base::end);
     size1 = input1.tellg();
-    input1.seekg(0, std::ios_base::end);
+    input1.seekg(0, std::ios_base::beg);
     buffer1 = new char [size2];
     input1.read(buffer1, size1);
 
@@ -762,7 +777,7 @@ int pipeline_patch_command(Context ctx) {
     stream.read = patch_read;
     stream.opaque = &input2;
 
-    // 4.1 Get the new file size and alloc a buffer with that size
+    // 4.1 Get the nnew file size and alloc a buffer with that size
     struct bspatch_header header;
     input2.read((char*)&header, sizeof(header));
     if (input2.eof()) {
@@ -775,7 +790,6 @@ int pipeline_patch_command(Context ctx) {
         std::cerr << "Invalid patch: invalid size" << std::endl;
         return -1;
     }
-    printf("%lld size\n", size);
     char* buffer = new char [size];
     
     // 5. Start the algorithm
@@ -795,7 +809,5 @@ int pipeline_patch_command(Context ctx) {
     input1.close();
     input2.close();
     outfile.close();
-    free(buffer1);
-    free(buffer);
     return 0;
 }
