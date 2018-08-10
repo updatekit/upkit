@@ -576,6 +576,7 @@ static int diff_write(struct bsdiff_stream* stream, const void* buffer, int size
 }
 
 struct bspatch_header {
+    char magic[16];
     char size[16];
 };
 
@@ -622,6 +623,9 @@ int pipeline_diff_command(Context ctx) {
 
     // 4. Write the patch header
     bspatch_header header;
+    for (int i=0; i<16; i++) {
+        header.magic[i] = 0x2a;
+    }
     offtout(size2, (uint8_t*) &header.size);
     outfile.write((char*)&header, sizeof(header));
  

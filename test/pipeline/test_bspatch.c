@@ -34,11 +34,11 @@ void ntest_clean(void) {}
 
  int test_save_process(pipeline_ctx_t* ctx, uint8_t* buf, int l) {
      int *fp = (int*) ctx->stage_data;
-     exit(1);
      if (write(*fp, buf, l) != l) {
          printf("Error writing bytes\n");
          return -1;
      }
+     printf("finito con successo\n");
      return l;
  }
 
@@ -78,8 +78,11 @@ void test_patch(void) {
         // 4.1. Read N bytes from the original file.
         readed = read(patch, &buffer, r);
         // 4.2. Pass the readed bytes to the bspatch stage of the pipeline.
-        nTEST_TRUE(pipeline_bspatch.process(&bspatch_ctx, (uint8_t*)buffer, readed) == 0);
+        printf("started\n");
+        nTEST_TRUE(pipeline_bspatch.process(&bspatch_ctx, (uint8_t*)buffer, readed) >= 0);
+        printf("readed %d, r %d\n", readed, r);
     } while (readed == r);
+    printf("done\n");
     // 5. Compare the decompressed file with the original file.
     nTEST_TRUE(file_compare(BSDIFF_INPUT2 ,BSDIFF_PATCHED) == 0);
 }

@@ -46,7 +46,6 @@ int pipeline_bspatch_process(pipeline_ctx_t* ctx, uint8_t* buf, int len) {
     // The oldsize shuold be passed during the configuration, since if
     // it is embedded in the patch it could be used to access random bytes
 	
-    static uint8_t ctrl_buf[8];
 	static int64_t oldpos,newpos;
 	static ctrl_t ctrl[3];
 	static int64_t i;
@@ -60,6 +59,7 @@ int pipeline_bspatch_process(pipeline_ctx_t* ctx, uint8_t* buf, int len) {
         return 0;
     }
 
+    printf("state %d, len %d\n", ctx->state, len);
     pipelineBegin
     {
 	    oldpos=0;
@@ -72,6 +72,7 @@ int pipeline_bspatch_process(pipeline_ctx_t* ctx, uint8_t* buf, int len) {
             }
             if (j < 16) {
                 if (*bufp != 0x2a) {
+                    printf("Invalid patch\n");
                     return -1;
                 }
             } else {
@@ -89,6 +90,7 @@ int pipeline_bspatch_process(pipeline_ctx_t* ctx, uint8_t* buf, int len) {
         }
     }
 	while(newpos < newsize.y) {
+
 		/* Read control data */
 		for(i=0;i<=2;i++) {
             for (j=0; j<8; j++) {
@@ -107,6 +109,7 @@ int pipeline_bspatch_process(pipeline_ctx_t* ctx, uint8_t* buf, int len) {
 
 		/* Sanity-check */
 		if(newpos+ctrl[0].y > newsize.y) {
+            printf("exit 1\n");
 			return -1;
         }
 
@@ -126,12 +129,14 @@ int pipeline_bspatch_process(pipeline_ctx_t* ctx, uint8_t* buf, int len) {
 
 		/* Sanity-check */
         if(newpos+ctrl[1].y > newsize.y) {
+            printf("exit 2\n");
             return -1;
         }
 
 		/* Read extra string */
         for (i=0; i<ctrl[1].y; i++) {
             while ((buf+len-bufp) == 0) {
+                printf("hey\n");
                 pipelineReturn(bufp-buf);
             }
             ctx->next_func->process(ctx->next_ctx, bufp, 1);

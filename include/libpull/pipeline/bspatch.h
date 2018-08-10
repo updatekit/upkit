@@ -5,7 +5,7 @@
 #include <stdbool.h>
 
 typedef union ctrl_t {
-    uint8_t c[4];
+    uint8_t c[8];
     int32_t y;
 } ctrl_t;
 
