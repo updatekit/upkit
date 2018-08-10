@@ -30,7 +30,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <string.h>
-#include "pipeline_bspatch.h"
+#include <libpull/pipeline/bspatch.h>
 
 int pipeline_bspatch_init(pipeline_ctx_t* ctx, void* more) {
     ctx->finish = false;
@@ -38,16 +38,6 @@ int pipeline_bspatch_init(pipeline_ctx_t* ctx, void* more) {
     ctx->state = 0;
     return 0;
 }
-
-// TODO tomorrow:
-// 1. the offtin function must be moved to a int32_t value since it reduces the
-// size of the final patch and is enought for small systems where the size of
-// the firmware is quite for sure less than 4gb
-
-typedef union ctrl_t {
-    uint8_t c[8];
-    int64_t y;
-} ctrl_t;
 
 // Returns < 0 on error; >=0 number of bytes processed
 int pipeline_bspatch_process(pipeline_ctx_t* ctx, uint8_t* buf, int len) {
@@ -75,7 +65,7 @@ int pipeline_bspatch_process(pipeline_ctx_t* ctx, uint8_t* buf, int len) {
 	    oldpos=0;
         newpos=0;
 
-        // Check magic
+        // Get header and check size
         for (j=0; j<24; j++) {
             while ((buf+len-bufp) == 0) {
                 pipelineReturn(bufp-buf);
@@ -144,7 +134,7 @@ int pipeline_bspatch_process(pipeline_ctx_t* ctx, uint8_t* buf, int len) {
             while ((buf+len-bufp) == 0) {
                 pipelineReturn(bufp-buf);
             }
-            ctx->next_func->process(ctx->next_ctx, &buffer, 1);
+            ctx->next_func->process(ctx->next_ctx, bufp, 1);
             bufp++;
         }
 

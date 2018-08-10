@@ -23,7 +23,6 @@ void ntest_clean(void) {}
 
  int test_save_init(pipeline_ctx_t* ctx, void* more) {
      static int fp;
-     printf("fp %d\n", fp);
      if ((fp = open(LZSS_OUTPUT, O_WRONLY | O_CREAT, 0666)) < 0) {
         printf("Error opening output file\n");
         return -1;

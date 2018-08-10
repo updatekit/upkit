@@ -13,3 +13,4 @@ test_bootloader_agent
 test_crc16
 test_pipeline
 test_lzss
+test_bspatch

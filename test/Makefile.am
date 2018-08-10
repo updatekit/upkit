@@ -21,7 +21,7 @@ MEMORY_SRC = ../src/core/memory/memory_objects.c
 SECURITY_SRC = ../src/core/security/verifier.c
 NETWORK_SRC = ../src/core/network/receiver.c ../src/core/network/subscriber.c ../src/core/network/connection_config.c ../src/core/network/writer.c
 SUPPORT_SRC = support/external_variables.c support/utils.c
-PIPELINE_SRC = ../src/core/pipeline/lzss.c
+PIPELINE_SRC = ../src/core/pipeline/lzss.c ../src/core/pipeline/bspatch.c
 
 AGENTS_SRC = ../src/agents/update.c ../src/agents/bootloader_agent.c
 
@@ -44,7 +44,7 @@ agents_tests = test_update test_bootloader_agent
 network_tests = test_receiver test_subscriber test_connection_dtls #test_receiver_memory_invalid
 security_tests = test_tinycrypt test_tinydtls
 common_tests = test_crc16
-pipeline_tests = test_pipeline test_lzss
+pipeline_tests = test_pipeline test_lzss test_bspatch
 
 check_PROGRAMS = $(memory_tests) $(agents_tests) $(network_tests) $(security_tests) $(common_tests) $(pipeline_tests)
 TESTS = $(check_PROGRAMS)
@@ -74,3 +74,4 @@ test_crc16_SOURCES = common/test_crc16.c $(ALL_SRC)
 # Pipeline tests
 test_pipeline_SOURCES = pipeline/test_pipeline.c $(ALL_SCR)
 test_lzss_SOURCES = pipeline/test_lzss.c $(ALL_SRC)
+test_bspatch_SOURCES = pipeline/test_bspatch.c $(ALL_SRC)
