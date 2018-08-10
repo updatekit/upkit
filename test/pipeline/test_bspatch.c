@@ -56,7 +56,7 @@ void test_patch(void) {
     long bufsize = lseek(input1, 0, SEEK_CUR);
     nTEST_TRUE(lseek(input1, 0L, SEEK_SET) == 0);
     char* buffer1 = malloc(sizeof(char)*bufsize);
-    nTEST_TRUE(read(input1, buffer, bufsize) != bufsize);
+    nTEST_TRUE(read(input1, buffer1, bufsize) == bufsize);
     // 1. Open the patch file.
     int patch = open(BSDIFF_PATCH, O_RDONLY);
     nTEST_TRUE(patch >= 0);
