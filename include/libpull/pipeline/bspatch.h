@@ -1,5 +1,13 @@
+/** \file bspatch.h
+ * \author Antonio Langiu
+ * \defgroup pip_bspatch
+ * \{
+ */
 #ifndef LIBPULL_PIPELINE_BSPATCH_DECODER_H_
 #define LIBPULL_PIPELINE_BSPATCH_DECODER_H_
+#ifdef __cplusplus
+extern "C" {
+#endif /* __cplusplus */
 
 #include <libpull/pipeline.h>
 #include <stdbool.h>
@@ -25,5 +33,8 @@ static const pipeline_func_t pipeline_bspatch = {
     .process = pipeline_bspatch_process,
 };
 
+#ifdef __cplusplus
+}
+#endif /* __cplusplus */
 #endif /* LIBPULL_PIPELINE_BSPATCH_DECODER_H_ */
 
