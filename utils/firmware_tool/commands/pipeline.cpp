@@ -35,7 +35,6 @@
 #include <string.h>
 #include <memory>
 
-#include <libpull/security.h>
 #include <libpull/pipeline.h>
 
 #include "commands.hpp"
