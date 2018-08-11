@@ -10,6 +10,7 @@ libpull_a_SOURCES += src/core/memory/manifest.c src/core/memory/memory_objects.c
 libpull_a_SOURCES += src/core/memory/memory_impl.c src/core/memory/memory_flash.c
 libpull_a_SOURCES += src/core/network/receiver.c src/core/network/subscriber.c src/core/network/connection_config.c src/core/network/writer.c
 libpull_a_SOURCES += src/core/security/verifier.c src/core/security/tinycrypt.c src/core/security/tinydtls.c src/core/security/cryptoauthlib.c
+libpull_a_SOURCES += src/core/pipeline/lzss.c src/core/pipeline/bspatch.c
 
 pkginclude_HEADERS = include/
 # TODO Finish including all the headers

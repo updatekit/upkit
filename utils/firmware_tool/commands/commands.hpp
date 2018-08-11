@@ -6,7 +6,8 @@
     COMMAND(manifest, "interact with the manifest") \
     COMMAND(configs, "interact with the stored configuration") \
     COMMAND(help, "list the commands and the parameters") \
-    COMMAND(bootctx, "interact with a bootloader ctx")
+    COMMAND(bootctx, "interact with a bootloader ctx") \
+    COMMAND(pipeline, "prepare an image for the pipeline")
 
 #define FOREACH_keys_COMMAND(COMMAND) \
     COMMAND(keys, generate, "generate a key") \
@@ -25,6 +26,12 @@
 
 #define FOREACH_bootctx_COMMAND(COMMAND) \
     COMMAND(bootctx, generate, "generates a bootloader ctx")
+
+#define FOREACH_pipeline_COMMAND(COMMAND) \
+    COMMAND(pipeline, compress, "compress the image using the lzss algorithm") \
+    COMMAND(pipeline, decompress, "decompress the image using the lzss algorithm") \
+    COMMAND(pipeline, diff, "perform the bsdiff on an image") \
+    COMMAND(pipeline, patch, "perform the bsdiff on an image")
 
 #define FOREACH_help_COMMAND(COMMAND)
 /* Still empty */

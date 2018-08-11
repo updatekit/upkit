@@ -38,7 +38,7 @@ int Context::parse_arguments(int argc, char** argv) {
         return 0;
     }
     char** real_argv = &argv[i-1];
-    while ((opt = getopt(argc-i+1, real_argv, "va:l:s:p:c:b:f:k:m:y:")) != -1) {
+    while ((opt = getopt(argc-i+1, real_argv, "va:l:s:p:c:b:f:k:m:y:z:")) != -1) {
         switch (opt) {
             case 'v': verbosity++; break;
             case 'y': config_file_name = std::string(real_argv[optind-1]); break;

@@ -21,6 +21,7 @@ MEMORY_SRC = ../src/core/memory/memory_objects.c
 SECURITY_SRC = ../src/core/security/verifier.c
 NETWORK_SRC = ../src/core/network/receiver.c ../src/core/network/subscriber.c ../src/core/network/connection_config.c ../src/core/network/writer.c
 SUPPORT_SRC = support/external_variables.c support/utils.c
+PIPELINE_SRC = ../src/core/pipeline/lzss.c ../src/core/pipeline/bspatch.c ../src/core/pipeline/buffer.c
 
 AGENTS_SRC = ../src/agents/update.c ../src/agents/bootloader_agent.c
 
@@ -29,7 +30,7 @@ MEMORY_IMPL = ../src/core/memory/memory_impl.c ../src/platform/posix/memory_posi
 MANIFEST_IMPL = ../src/core/memory/manifest.c ../src/core/memory/simple_manifest.c
 
 ALL_SRC = $(COMMON_SRC) $(MEMORY_SRC) $(SECURITY_SRC) $(MANIFEST_IMPL) $(NETWORK_SRC)
-ALL_SRC += $(NETWORK_IMPL) $(MEMORY_IMPL) $(SUPPORT_SRC)
+ALL_SRC += $(NETWORK_IMPL) $(MEMORY_IMPL) $(SUPPORT_SRC) $(PIPELINE_SRC)
 
 MOCK_MEMORY = mocks/memory_mock.c ../src/platform/posix/memory_posix.c
 MOCK_MANIFEST = mocks/manifest_mock.c ../src/core/memory/simple_manifest.c
@@ -43,8 +44,9 @@ agents_tests = test_update test_bootloader_agent
 network_tests = test_receiver test_subscriber test_connection_dtls #test_receiver_memory_invalid
 security_tests = test_tinycrypt test_tinydtls
 common_tests = test_crc16
+pipeline_tests = test_pipeline test_lzss test_bspatch test_buffer
 
-check_PROGRAMS = $(memory_tests)  $(agents_tests) $(network_tests) $(security_tests) $(common_tests)
+check_PROGRAMS = $(memory_tests) $(agents_tests) $(network_tests) $(security_tests) $(common_tests) $(pipeline_tests)
 TESTS = $(check_PROGRAMS)
 
 # Memory tests
@@ -54,7 +56,6 @@ test_manifest_SOURCES = memory/test_manifest.c $(ALL_SRC) $(TINYCRYPT_SRC)
 
 # Network tests
 test_receiver_SOURCES = network/test_receiver.c $(ALL_SRC) $(TINYDTLS_SRC)
-#test_receiver_memory_invalid_SOURCES
 test_subscriber_SOURCES = network/test_subscriber.c $(ALL_SRC) $(TINYDTLS_SRC)
 test_connection_dtls_SOURCES = network/test_connection_dtls.c $(ALL_SRC) $(TINYDTLS_SRC)
 
@@ -69,3 +70,9 @@ test_bootloader_agent_CFLAGS = $(AM_CFLAGS) -DRECOVERY_IMAGE=0
 
 # Common tests
 test_crc16_SOURCES = common/test_crc16.c $(ALL_SRC)
+
+# Pipeline tests
+test_pipeline_SOURCES = pipeline/test_pipeline.c $(ALL_SCR)
+test_lzss_SOURCES = pipeline/test_lzss.c $(ALL_SRC)
+test_bspatch_SOURCES = pipeline/test_bspatch.c $(ALL_SRC)
+test_buffer_SOURCES = pipeline/test_buffer.c $(ALL_SRC)

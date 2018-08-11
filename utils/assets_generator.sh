@@ -52,3 +52,13 @@ echo "Generate slots...done"
 # Generate the bootloader context
 $FIRMWAREDIR/firmware_tool bootctx generate -f $ASSETSDIR/bootctx
 $FIRMWAREDIR/firmware_tool bootctx generate -f $ASSETSDIR/bootctx.pristine
+
+# Generate the LZSS compressed file
+# The compressed file is a compressed version of slot_a.pristine
+$FIRMWAREDIR/firmware_tool pipeline compress -b $ASSETSDIR/slot_a.pristine \
+    -f $ASSETSDIR/slot_a.compressed
+
+# Generate the bsdiff patch
+# The patch is generated between slot_a.pristine and slot_b.pristine
+$FIRMWAREDIR/firmware_tool pipeline diff -b $ASSETSDIR/slot_a.pristine \
+    -z $ASSETSDIR/slot_b.pristine -f $ASSETSDIR/slot.patch

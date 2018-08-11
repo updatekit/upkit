@@ -32,6 +32,9 @@ bool validate_server_pub_key(std::string value) {
 bool validate_binary_file(std::string value) {
     return file_exists(value);
 }
+bool validate_second_binary_file(std::string value) {
+    return file_exists(value);
+}
 bool validate_out_file(std::string value) {
     return file_exists(value);
 }
