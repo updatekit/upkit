@@ -1,4 +1,4 @@
-![Libpull logo](https://github.com/AntonioLangiu/libpull/raw/master/libpull.png)
+![Libpull logo](https://github.com/libpull/libpull_graphics/raw/master/logo/libpull.png)
 
 # The Portable Updates Lightweight Library
 
