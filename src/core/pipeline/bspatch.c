@@ -146,3 +146,9 @@ int pipeline_bspatch_process(pipeline_ctx_t* ctx, uint8_t* buf, int len) {
 	return bufp-buf;
 }
 
+int pipeline_bspatch_clear(pipeline_ctx_t*ctx) {
+    ctx->next_func->clear(ctx->next_ctx);
+    // Do nothing
+    return 0;
+}
+

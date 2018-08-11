@@ -31,13 +31,8 @@ int test_save_init(pipeline_ctx_t* ctx, void* more) {
     return 0;
 }
 
-int valid = 1;
-int buffer_size = 1000;
 int test_save_process(pipeline_ctx_t* ctx, uint8_t* buf, int l) {
     int *fp = (int*) ctx->stage_data;
-    if (l != buffer_size) {
-        valid = 0;
-    }
     if (write(*fp, buf, l) != l) {
         printf("Error writing bytes\n");
         return -1;
@@ -45,9 +40,16 @@ int test_save_process(pipeline_ctx_t* ctx, uint8_t* buf, int l) {
     return l;
 }
 
+int test_save_clear(pipeline_ctx_t* ctx) {
+    int *fp = (int*) ctx->stage_data;
+    close(fp);
+    return 0; 
+}
+
 pipeline_func_t test_save = {
     .init = test_save_init,
-    .process = test_save_process
+    .process = test_save_process,
+    .clear = test_save_clear
 };
 
 
@@ -80,10 +82,9 @@ void test_single_buffer(void) {
         r = (rand() % 50) + 50;
         readed = read(input, buffer, r);
         // 3. Pass the readed bytes to the stage until the file is finished
-        valid = 1;
         buffer_pipeline.process(&ctx_buffer, buffer, readed);
-        nTEST_TRUE(valid);
     } while (readed == r);
+    buffer_pipeline.clear(&ctx_buffer);
     close(input);
     // 4. Compare the decompressed file with the original file
     nTEST_TRUE(file_compare(BUFFER_OUTPUT, BUFFER_EXPECTED) == 0);

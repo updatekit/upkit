@@ -33,10 +33,12 @@ extern "C" {
 
 int pipeline_lzss_init(pipeline_ctx_t* ctx, void* more);
 int pipeline_lzss_process(pipeline_ctx_t* ctx, uint8_t* buf, int l);
+int pipeline_lzss_clear(pipeline_ctx_t*ctx);
 
 static const pipeline_func_t lzss_pipeline = {
     .init = pipeline_lzss_init,
     .process = pipeline_lzss_process,
+    .clear = pipeline_lzss_clear
 };
 
 #ifdef __cplusplus

@@ -25,6 +25,7 @@ typedef struct pipeline_ctx_t pipeline_ctx_t;
 typedef struct pipeline_func_t {
     int (*init)(pipeline_ctx_t* ctx, void* more);
     int (*process)(pipeline_ctx_t* ctx, uint8_t* buf, int l);
+    int (*clear)(pipeline_ctx_t*ctx);
 } pipeline_func_t;
 
 /** 

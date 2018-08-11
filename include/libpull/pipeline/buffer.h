@@ -13,10 +13,12 @@ extern "C" {
 
 int pipeline_buffer_init(pipeline_ctx_t* ctx, void* more);
 int pipeline_buffer_process(pipeline_ctx_t* ctx, uint8_t* buf, int l);
+int pipeline_buffer_clear(pipeline_ctx_t*ctx);
 
 static const pipeline_func_t buffer_pipeline = {
     .init = pipeline_buffer_init,
     .process = pipeline_buffer_process,
+    .clear = pipeline_buffer_clear
 };
 
 #ifdef __cplusplus

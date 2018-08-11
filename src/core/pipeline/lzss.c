@@ -63,3 +63,8 @@ int pipeline_lzss_process(pipeline_ctx_t* ctx, uint8_t* buf, int l) {
     return bufp-buf;
 }
 
+int pipeline_lzss_clear(pipeline_ctx_t*ctx) {
+    ctx->next_func->clear(ctx->next_ctx);
+    // Do nothing
+    return 0;
+}

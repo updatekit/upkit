@@ -27,10 +27,12 @@ typedef enum bspatch_state_t {
 
 int pipeline_bspatch_init(pipeline_ctx_t* ctx, void* more);
 int pipeline_bspatch_process(pipeline_ctx_t* ctx, uint8_t* buf, int l);
+int pipeline_bspatch_clear(pipeline_ctx_t*ctx);
 
 static const pipeline_func_t pipeline_bspatch = {
     .init = pipeline_bspatch_init,
     .process = pipeline_bspatch_process,
+    .clear = pipeline_bspatch_clear
 };
 
 #ifdef __cplusplus
