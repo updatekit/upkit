@@ -45,16 +45,16 @@ extern uint8_t verbosity_level;
 
 #if LOGGER_VERBOSITY > 0
 
-#define log_impl(verbosity, args...) \
+#define log_impl(verbosity, ...) \
     if (verbosity <= verbosity_level) { \
-        log_output(args);}
+        log_output(__VA_ARGS__);}
 
 #if LOGGER_VERBOSITY >= VERBOSITY_DEBUG
-    #define log_err(error, args...) \
+    #define log_err(error, ...) \
         log_output("%s:", err_as_str(error)); \
-        log_output(args);
+        log_output(__VA_ARGS__);
 #else
-    #define log_err(error, args...) \
+    #define log_err(error, ...) \
         log_output("%s\n", err_as_str(error));
 #endif
 
@@ -63,16 +63,16 @@ extern uint8_t verbosity_level;
 #define log_err(...)
 #endif /* LOGGER_VERBOSITY */
 
-#define log_debug(args...) log_impl(VERBOSITY_DEBUG, args)
-#define log_info(args...) log_impl(VERBOSITY_INFO, args)
+#define log_debug(...) log_impl(VERBOSITY_DEBUG, __VA_ARGS__)
+#define log_info(...) log_impl(VERBOSITY_INFO, __VA_ARGS__)
 /**
  * \brief This function takes as first parameter an error and
  * then an arbitrary number of arguments that will be printed.
  * The first arguemnt will be used to print the literal value
  * of the error.
  */
-#define log_error(err, args...) log_err(err, args)
-#define log_warn(args...) log_impl(VERBOSITY_WARN, args)
+#define log_error(err, ...) log_err(err, __VA_ARGS__)
+#define log_warn(...) log_impl(VERBOSITY_WARN, __VA_ARGS__)
 
 #ifdef __cplusplus
 }
