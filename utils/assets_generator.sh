@@ -24,8 +24,9 @@ fi
 echo "Generate Test Memory file..."
 test_memory_file=$ASSETSDIR/test_memory
 max=64
-for i in $(seq 1 $max); do
+while [ $max -gt 0 ]; do
     echo "memory_test" >> $test_memory_file
+    (( max-- ))
 done
 echo "Generate Test Memory file...done"
 
