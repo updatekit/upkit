@@ -798,6 +798,7 @@ int pipeline_patch_command(Context ctx) {
         input1.close();
         input2.close();
         outfile.close();
+        delete[] buffer;
         return -1;
     }
     // 6. Store the patched file
