@@ -11,6 +11,12 @@
 #define DEVICE_NAME	CONFIG_BT_DEVICE_NAME
 #define DEVICE_NAME_LEN	(sizeof(DEVICE_NAME) - 1)
 
+#if  WITH_TINYCRYPT
+int default_CSPRNG(uint8_t *dest, unsigned int size) {
+    return 0;
+}
+#endif
+
 static const struct bt_data ad[] = {
 	BT_DATA_BYTES(BT_DATA_FLAGS, BT_LE_AD_NO_BREDR),
 	BT_DATA_BYTES(BT_DATA_UUID16_ALL, 0x0a, 0x18),
@@ -45,8 +51,7 @@ static struct bt_conn_cb conn_callbacks = {
 	.disconnected = disconnected,
 };
 
-int main(void)
-{
+int main(void) {
 	int err;
 
 	err = bt_enable(NULL);
