@@ -2,6 +2,7 @@
 
 # The Portable Updates Lightweight Library
 
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/2d7c1102e03446a1abad33d768306677)](https://app.codacy.com/app/AntonioLangiu/libpull?utm_source=github.com&utm_medium=referral&utm_content=libpull/libpull&utm_campaign=Badge_Grade_Dashboard)
 [![GitHub license](https://img.shields.io/github/license/libpull/libpull.svg)](https://github.com/libpull/libpull/blob/update/readme/LICENSE)
 [![GitHub issues](https://img.shields.io/github/issues/libpull/libpull.svg)](https://github.com/libpull/libpull/issues)
 [![GitHub release](https://img.shields.io/github/release/libpull/libpull.svg)](https://github.com/libpull/libpull/releases)
