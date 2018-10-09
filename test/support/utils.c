@@ -6,12 +6,13 @@ int file_compare(char* fname1, char* fname2) {
     int ch1, ch2;
     fp1 = fopen(fname1, "r");
     if (fp1 == NULL) {
-        printf("Cannot open %s for reading\n", fname1);
+        fprintf(stderr, "Cannot open %s for reading\n", fname1);
         return 1;
     }
     fp2 = fopen(fname2, "r");
     if (fp2 == NULL) {
-        printf("Cannot open %s for reading\n", fname2);
+        fclose(fp1);
+        fprintf(stderr, "Cannot open %s for reading\n", fname2);
         return 1;
     }
     do {
