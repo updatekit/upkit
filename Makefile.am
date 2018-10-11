@@ -1,7 +1,7 @@
 AUTOMAKE_OPTIONS = subdir-objects
 SUBDIRS = test
 
-AM_CFLAGS = -Wall -I. -Iinclude -Iext/tinycrypt/lib/include -Iext/tinydtls -DHAVE_CONFIG_H -ffreestanding -pedantic-errors
+AM_CFLAGS = -Wall -I. -Iinclude -Iext/tinycrypt/lib/include -Iext/tinydtls -DHAVE_CONFIG_H -ffreestanding -pedantic-errors -std=c99
 
 noinst_LIBRARIES = libpull.a
 
