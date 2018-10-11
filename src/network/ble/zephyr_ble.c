@@ -9,10 +9,9 @@
 
 #include <libpull/common.h>
 #include <libpull/network/writer.h>
+#include <libpull/network/gatt.h>
 
 #include "platform_headers.h"
-
-#include "libpull_gatt.h"
 
 libpull_fsm_ctx_t ctx;
 
