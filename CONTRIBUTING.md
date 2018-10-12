@@ -112,4 +112,3 @@ increase readibility of the diff.
 
 We are using cppcheck to validate and find possible errors in the code. Check
 if there are new issues on [Codacy](https://app.codacy.com). 
-
