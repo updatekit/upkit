@@ -114,7 +114,7 @@ void output2(std::ofstream &outfile, int x, int y)
  * -f (output_file): the file where to store the compressed version
  */
 int pipeline_compress_command(Context ctx) {
-    int i, j, f1, x, y, r, s, bufferend;
+    int i, j, x, y, r, s, bufferend;
     static unsigned char buffer[N * 2];
     char c;
 
@@ -143,7 +143,7 @@ int pipeline_compress_command(Context ctx) {
     }
     bufferend = i;  r = N - F;  s = 0;
     while (r < bufferend) {
-        f1 = (F <= bufferend - r) ? F : bufferend - r;
+        int f1 = (F <= bufferend - r) ? F : bufferend - r;
         x = 0;  y = 1;  c = buffer[r];
         for (i = r - 1; i >= s; i--)
             if (buffer[i] == c) {
@@ -324,7 +324,7 @@ static void split(int64_t *I,int64_t *V,int64_t start,int64_t len,int64_t h)
 static void qsufsort(int64_t *I,int64_t *V,const uint8_t *old,int64_t oldsize)
 {
 	int64_t buckets[256];
-	int64_t i,h,len;
+	int64_t i, h;
 
 	for(i=0;i<256;i++) buckets[i]=0;
 	for(i=0;i<oldsize;i++) buckets[old[i]]++;
@@ -340,7 +340,7 @@ static void qsufsort(int64_t *I,int64_t *V,const uint8_t *old,int64_t oldsize)
 	I[0]=-1;
 
 	for(h=1;I[0]!=-(oldsize+1);h+=h) {
-		len=0;
+		int64_t len=0;
 		for(i=0;i<oldsize+1;) {
 			if(I[i]<0) {
 				len-=I[i];
@@ -372,13 +372,13 @@ static int64_t matchlen(const uint8_t *old,int64_t oldsize,const uint8_t *nnew,i
 static int64_t search(const int64_t *I,const uint8_t *old,int64_t oldsize,
 		const uint8_t *nnew,int64_t nnewsize,int64_t st,int64_t en,int64_t *pos)
 {
-	int64_t x,y;
+	int64_t x;
 
 	if(en-st<2) {
 		x=matchlen(old+I[st],oldsize-I[st],nnew,nnewsize);
-		y=matchlen(old+I[en],oldsize-I[en],nnew,nnewsize);
+		int64_t y=matchlen(old+I[en],oldsize-I[en],nnew,nnewsize);
 
-		if(x>y) {
+		if(x > y) {
 			*pos=I[st];
 			return x;
 		} else {
@@ -450,7 +450,7 @@ static int bsdiff_internal(const struct bsdiff_request req)
 	int64_t *I,*V;
 	int64_t scan,pos,len;
 	int64_t lastscan,lastpos,lastoffset;
-	int64_t oldscore,scsc;
+	int64_t scsc;
 	int64_t s,Sf,lenf,Sb,lenb;
 	int64_t overlap,Ss,lens;
 	int64_t i;
@@ -469,7 +469,7 @@ static int bsdiff_internal(const struct bsdiff_request req)
 	scan=0;len=0;pos=0;
 	lastscan=0;lastpos=0;lastoffset=0;
 	while(scan<req.nnewsize) {
-		oldscore=0;
+		int64_t oldscore=0;
 
 		for(scsc=scan+=len;scan<req.nnewsize;scan++) {
 			len=search(I,req.old,req.oldsize,req.nnew+scan,req.nnewsize-scan,
