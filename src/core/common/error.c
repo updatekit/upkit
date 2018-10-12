@@ -1,7 +1,7 @@
 #include <libpull/common.h>
 
 #if LOGGER_VERBOSITY >= 2
-static const char* error_str[] = {
+const char* error_str[] = {
     "PULL_SUCCESS",
     FOREACH_ERROR(GENERATE_STRING)
 }; 

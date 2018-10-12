@@ -31,7 +31,7 @@ typedef struct pipeline_func_t {
 /** 
  * \brief  This structure defines the context for each stage of the pipeline;
  */
-typedef struct pipeline_ctx_t {
+struct pipeline_ctx_t {
     int state;                  //< Internal state of the pipeline stage
                                 //< (since many stages uses Duff's device).
     void* more;
@@ -43,7 +43,7 @@ typedef struct pipeline_ctx_t {
                                 //< stage of the pipeline
     pipeline_ctx_t* next_ctx;   //< Pointer to the context to be passed to the
                                 //< next stage of the pipeline
-} pipeline_ctx_t;
+};
 
 #ifdef __cplusplus
 }
