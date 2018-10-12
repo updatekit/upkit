@@ -169,8 +169,8 @@ int pipeline_compress_command(Context ctx) {
         }
     }
     flush_bit_buffer(outfile);
-    printf("text:  %ld bytes\n", textcount);
-    printf("code:  %ld bytes (%ld%%)\n",
+    printf("text:  %lu bytes\n", textcount);
+    printf("code:  %lu bytes (%lu%%)\n",
             codecount, (codecount * 100) / textcount);
     return 0;
 }
@@ -798,6 +798,7 @@ int pipeline_patch_command(Context ctx) {
         input1.close();
         input2.close();
         outfile.close();
+        delete[] buffer;
         return -1;
     }
     // 6. Store the patched file

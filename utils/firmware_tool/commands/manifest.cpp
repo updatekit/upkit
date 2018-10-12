@@ -90,20 +90,24 @@ int manifest_generate_command(Context ctx) {
     uint8_t* signature = new uint8_t[64]; // XXX hardcoded value
     std::ifstream vend_priv_key(ctx.get_vendor_priv_key(), std::ios_base::binary);
     if (!vend_priv_key) {
+        delete[] vend_priv_key_buffer;
+        delete[] signature;
         std::cout << "Impossible to read the vendor private key" << std::endl;
         return EXIT_FAILURE;
     }
     vend_priv_key.read((char*)vend_priv_key_buffer, 32); // TODO check for errors && XXX hardcoded value
     vend_priv_key.close();
     err = sign_manifest_vendor(&mt, digest, vend_priv_key_buffer, signature, tinycrypt_secp256r1_ecc);
+    delete[] vend_priv_key_buffer;
     if (err) {
+        delete[] signature;
         std::cout << "Error signing the manifest" << std::endl;
         return EXIT_FAILURE;
     }
-    delete[] vend_priv_key_buffer;
     // (7) Store the signature in the metadata and a standalone file
     std::ofstream out_signature(ctx.get_signature_file(),  std::ios_base::binary);
     if (!out_signature) {
+        delete[] signature;
         std::cout << "Error writing on file: " << ctx.get_signature_file() << std::endl;
         return EXIT_FAILURE;
     }
@@ -116,18 +120,19 @@ int manifest_generate_command(Context ctx) {
     uint8_t* server_priv_key_buffer = new uint8_t[32];
     std::ifstream server_priv_key(ctx.get_server_priv_key(), std::ios_base::binary);
     if (!server_priv_key) {
+        delete[] server_priv_key_buffer;
         std::cout << "Impossible to read the server private key" << std::endl;
         return EXIT_FAILURE;
     }
     server_priv_key.read((char*)server_priv_key_buffer, 32); // TODO check for errors && XXX hardcoded value
     server_priv_key.close();
     err = sign_manifest_server(&mt, digest, server_priv_key_buffer, signature, tinycrypt_secp256r1_ecc);
+    delete[] server_priv_key_buffer;
+    delete[] signature;
     if (err) {
         std::cout << "Error signing the manifest" << std::endl;
         return EXIT_FAILURE;
     }
-    delete[] signature;
-    delete[] server_priv_key_buffer;
     // (9) write the metadata to the designed binary file
     std::ofstream out(ctx.get_out_file(), std::ios_base::out | std::ios_base::binary);
     if (!out) {

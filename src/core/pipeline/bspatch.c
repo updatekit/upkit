@@ -64,6 +64,10 @@ int pipeline_bspatch_process(pipeline_ctx_t* ctx, uint8_t* buf, int len) {
 	    oldpos=0;
         newpos=0;
 
+        // XXX This code can be refactored as a while loop with different cases.
+        // This will reduce the number of exit point from the Duff's device and
+        // make the code much smaller (around 1kB);
+        //
         // Get header and check size
         for (j=0; j<24; j++) {
             while ((buf+len-bufp) == 0) {
@@ -74,7 +78,7 @@ int pipeline_bspatch_process(pipeline_ctx_t* ctx, uint8_t* buf, int len) {
                     return -1;
                 }
             } else {
-                if (j != (16+8)) {
+                if (j != (16+7)) {
                     newsize.c[j-16] = *bufp;
                 } else {
                     newsize.c[j-16]= *bufp & 0x7F;
