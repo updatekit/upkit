@@ -14,7 +14,7 @@
 
 libpull is a C library to implement secure and portable software updates on IoT devices.
 
-It targets [Class 1](https://tools.ietf.org/html/rfc7228#section-3)
+It targets [Class 1 and Class 2](https://tools.ietf.org/html/rfc7228#section-3)
 constrained devices, characterized by ~10 kB of RAM and ~100 kB of ROM.
 However, its lightweight and modular approach can be beneficial also for bigger devices.
 
@@ -33,7 +33,6 @@ constrained applications.
 
 ## Online Presence
 
-- **Documentation**: [libpull.readthedocs.io](http://libpull.readthedocs.io)
-- **Twitter**: [@libpull](https://twitter.com/libpull)
-- **Join Slack**: [libpull.slack.com](https://join.slack.com/t/libpull/shared_invite/enQtNDEyOTkzMjE5MDkxLTEyZjUxZGE4MDYwNzE4ODdmYzFkZTA1NDAyN2ExOGVlYzQ3ODhkNTk1ZTZjMDExMmE1NjhiNmUyYjRmN2ZkYzc)
-
+- **Documentation**:  [libpull.readthedocs.io](http://libpull.readthedocs.io)
+- **Twitter**:  [@libpull](https://twitter.com/libpull)
+- **Join Slack**:  [libpull.slack.com](https://join.slack.com/t/libpull/shared_invite/enQtNDEyOTkzMjE5MDkxLTEyZjUxZGE4MDYwNzE4ODdmYzFkZTA1NDAyN2ExOGVlYzQ3ODhkNTk1ZTZjMDExMmE1NjhiNmUyYjRmN2ZkYzc)
