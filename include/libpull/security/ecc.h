@@ -34,7 +34,7 @@ typedef struct {
         .verify = impl##_ecc_verify, \
         .sign = impl##_ecc_sign, \
         .curve_size = size \
-    };
+    }
 
 #ifdef WITH_TINYDTLS
     ECC_VERIFY(tinydtls_secp256r1);
