@@ -18,6 +18,7 @@ pull_error verify_object(mem_object_t* obj, digest_func digest, const uint8_t* x
     PULL_ASSERT(obj != NULL || x != NULL || y != NULL || buffer != NULL || buffer_len != 0);
     pull_error err;
     enum verifier_states state;
+
     /************* GET_OBJECT_MANIFEST ***************/
     state = GET_OBJECT_MANIFEST;
     log_info("Start phase GET_OBJECT_MANIFEST\n");
@@ -27,6 +28,7 @@ pull_error verify_object(mem_object_t* obj, digest_func digest, const uint8_t* x
         err = MEMORY_READ_ERROR;
         goto error;
     }
+
     /************* CALCULATING DIGEST ****************/
     state = CALCULATING_DIGEST;
     log_info("Start phase CALCULATING_DIGEST\n");
@@ -35,7 +37,7 @@ pull_error verify_object(mem_object_t* obj, digest_func digest, const uint8_t* x
         goto error;
     }
     address_t offset = get_offset(&mt);
-    address_t final_offset = offset + get_size(&mt);
+    const address_t final_offset = offset + get_size(&mt);
     address_t step = buffer_len;
     log_debug("Digest: initial offset %uu final offset %u size %u\n", offset, final_offset, get_size(&mt));
     if (offset == final_offset) {
@@ -59,21 +61,27 @@ pull_error verify_object(mem_object_t* obj, digest_func digest, const uint8_t* x
         }
     }
     uint8_t* result = digest.finalize(&ctx);
+
     /***************** VERIFY DIGEST *************/
     log_info("Start phase VERIFY_DIGEST\n");
     state = VERIFY_DIGEST;
-    uint8_t* hash = get_digest(&mt);
+    const uint8_t* hash = get_digest(&mt);
     if (hash == NULL) {
         err = INVALID_MANIFEST_ERROR;
         goto error;
     }
-    if (memcmp(result, hash, digest.size) != 0) {
-        err = VERIFICATION_FAILED_ERROR;
-        log_debug("Invalid hash\n");
-        log_debug("Calculated: %02x %02x %02x %02x\n", result[0], result[1], result[2], result[3]);
-        log_debug("Expected: %02x %02x %02x %02x\n", hash[0], hash[1], hash[2], hash[3]);
-        goto error;
+    int i=digest.size;
+    while(i >= 0) {
+        if (hash[i] != result[i]) {
+            err = VERIFICATION_FAILED_ERROR;
+            log_debug("Invalid hash\n");
+            log_debug("Calculated: %02x %02x %02x %02x\n", result[0], result[1], result[2], result[3]);
+            log_debug("Expected: %02x %02x %02x %02x\n", hash[0], hash[1], hash[2], hash[3]);
+            goto error;
+        }
+        i--;
     }
+
     /********** VERIFY_VENDOR_SIGNATURE ***********/
     log_info("Start phase VERIFY_VENDOR_SIGNATURE\n");
     state = VERIFY_VENDOR_SIGNATURE;
@@ -86,14 +94,12 @@ pull_error verify_object(mem_object_t* obj, digest_func digest, const uint8_t* x
     log_info("Start phase VERIFY_SERVER_SIGNATURE\n");
     state = VERIFY_SERVER_SIGNATURE;
     err = verify_manifest_server(&mt, digest, x, y, ef);
-    if (err) {
+    if (!err) {
         goto error;
     }
     log_debug("Server Signature Valid\n");
     return PULL_SUCCESS;
 error:
-    if (state != VERIFY_SERVER_SIGNATURE) {
     log_error(err, "Error in the verification process in phase %d: %s\n", state, err_as_str(err));
-    }
     return err;
 }

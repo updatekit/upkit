@@ -72,10 +72,12 @@ pull_error verify_manifest_vendor(manifest_t* mt, digest_func df, const uint8_t 
 pull_error verify_manifest_server(manifest_t* mt, digest_func df, const uint8_t *pub_x,
                                         const uint8_t *pub_y, ecc_func_t ef);
 
+#ifdef FIRMWARE_TOOL
 pull_error sign_manifest_vendor(manifest_t* mt, digest_func df, const uint8_t *private_key,
                                     uint8_t* signature_buffer, ecc_func_t ef);
 pull_error sign_manifest_server(manifest_t* mt, digest_func df, const uint8_t *private_key,
                                     uint8_t* signature_buffer, ecc_func_t ef);
+#endif
 
 #ifdef __cplusplus
 }
