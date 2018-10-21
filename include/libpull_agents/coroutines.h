@@ -13,6 +13,8 @@ extern "C" {
 #ifndef AGENTS_COROUTINE_H_
 #define AGENTS_COROUTINE_H_
 
+#ifdef ENABLE_COROUTINES
+
 /** 
  * \brief PULL_BEGIN is a macro used to start the Duff's Device.
  * \param ev First event used to start the coroutine.
@@ -42,6 +44,9 @@ extern "C" {
         case ev:; \
     } while(0)
 
+#define PULL_RETURN(ev, ev_data) \
+        PULL_CONTINUE(ev, ev_data)
+
 /** 
 * \brief  PULL_FINISH is a macro that must be called at the end of each Duff's
 * device. It closes the switch case and definitely reuturns to the calling
@@ -58,5 +63,21 @@ extern "C" {
     return agent_msg;
 
 #define IGNORE_EVENT(event) case event:
+
+#else
+
+#define PULL_BEGIN(ev) \
+     static agent_msg_t agent_msg;
+#define PULL_FINISH(ev)
+#define IGNORE_EVENT(event)
+#define PULL_CONTINUE(ev, ev_data)
+#define PULL_RETURN(ev, ev_data) \
+    do { \
+        agent_msg.event = ev; \
+        agent_msg.event_data = ev_data; \
+        return agent_msg; \
+    } while(0)
+
+#endif /* ENABLE_COROUTINES */
 
 #endif /* AGENTS_COROUTINE_H_ */
