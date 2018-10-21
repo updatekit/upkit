@@ -13,7 +13,7 @@ int Context::parse_conf() {
     std::shared_ptr<cpptoml::table> config;
     try {
     config = cpptoml::parse_file(config_file_name);
-    } catch (cpptoml::parse_exception e) {
+    } catch (cpptoml::parse_exception &e) {
         std::cerr << e.what() << std::endl;
         return 1;
     }

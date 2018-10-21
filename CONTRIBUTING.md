@@ -20,7 +20,7 @@ goal.
 The libpull library aims to be a very portable library with a
 freestanding core and some platform specific modules.
 
-#### Support a new RTOS.
+#### Support a new RTOS
 
 If you want to integrate a new RTOS we ask you to check
 the following points:
@@ -32,7 +32,7 @@ the following points:
 If the following checks passes, you can open an issue and discuss
 together the integration of the new RTOS.
 
-#### Support a new MCU.
+#### Support a new MCU
 
 If you want to provide support for a new MCU you should check the
 following points:
@@ -47,7 +47,7 @@ the integation of the new MCU. If you already have an implementation
 that follows the logic of the library you can may want to open directly
 a pull request.
 
-### Reporting bugs.
+### Reporting bugs
 
 Please open an issue indicating all the steps
 to the reproduce the bug/vulnerability. If you
@@ -55,7 +55,7 @@ already have a solution please feel free to open
 a pull request, where it will be also easier to
 discuss the improvements.
 
-### Improve documentation.
+### Improve documentation
 
 If you found an error or want to improve some documentation
 pages plase open a pull request with the fix. To check that
@@ -105,5 +105,10 @@ When writing the description considering the following rules:
 
 ### C code
 
-All the C code must be formatted with [clang-format](https://clang.llvm.org/docs/ClangFormat.html). When submitting PR please avoid reformatting the code until the changes has been approved to increase readibility of the diff.
+All the C code must be formatted with
+[clang-format](https://clang.llvm.org/docs/ClangFormat.html). When submitting 
+PR please avoid reformatting the code until the changes has been approved to
+increase readibility of the diff.
 
+We are using cppcheck to validate and find possible errors in the code. Check
+if there are new issues on [Codacy](https://app.codacy.com). 
