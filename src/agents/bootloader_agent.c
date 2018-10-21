@@ -41,7 +41,7 @@ agent_msg_t bootloader_agent(bootloader_agent_config* cfg) {
 
     // (1) Get the newest bootable firmware (there must be at least one!!)
     PULL_CONTINUE(EVENT_GET_NEWEST_FIRMWARE, NULL);
-    err = get_newest_firmware(&id_newest_bootable, &version_bootable, &obj_t, false, true);
+    err = get_newest_firmware(&id_newest_bootable, &version_bootable, &obj_t, true);
     if (err) {
         PULL_CONTINUE(EVENT_GET_NEWEST_FIRMWARE_FAILURE, &err);
     }
@@ -99,7 +99,7 @@ agent_msg_t bootloader_agent(bootloader_agent_config* cfg) {
 
     // (3) Get the newest non bootable firmware
     PULL_CONTINUE(EVENT_GET_NEWEST_NON_BOOTABLE, NULL);
-    err = get_newest_firmware(&id_newest_non_bootable, &version_non_bootable, &obj_t, true, false);
+    err = get_newest_firmware(&id_newest_non_bootable, &version_non_bootable, &obj_t, false);
     if (err) {
         PULL_CONTINUE(EVENT_GET_NEWEST_NON_BOOTABLE_FAILURE, &err);
     }
@@ -128,7 +128,7 @@ agent_msg_t bootloader_agent(bootloader_agent_config* cfg) {
 
         // (4.2) If valid, move it to the oldest bootable slot
         PULL_CONTINUE(EVENT_UPGRADE, NULL);
-        err = get_oldest_firmware(&id_oldest_bootable, &version_bootable, &obj_t, false, true);
+        err = get_oldest_firmware(&id_oldest_bootable, &version_bootable, &obj_t, true);
         if (err) {
             PULL_CONTINUE(EVENT_UPGRADE_FAILURE, &err);
         }
