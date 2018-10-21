@@ -66,16 +66,14 @@ extern "C" {
 
 #else
 
-#define PULL_BEGIN(ev) \
-     static agent_msg_t agent_msg;
+#define PULL_BEGIN(ev)
 #define PULL_FINISH(ev)
 #define IGNORE_EVENT(event)
 #define PULL_CONTINUE(ev, ev_data)
 #define PULL_RETURN(ev, ev_data) \
     do { \
-        agent_msg.event = ev; \
-        agent_msg.event_data = ev_data; \
-        return agent_msg; \
+        event_data = ev_data; \
+        return ev; \
     } while(0)
 
 #endif /* ENABLE_COROUTINES */
