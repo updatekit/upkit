@@ -10,7 +10,6 @@ struct mem_object_t {
     int fp;
     int start_offset;
     int end_offset;
-    manifest_t mt;
 };
 
 enum memory_objects_enum {
