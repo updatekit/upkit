@@ -2,7 +2,7 @@ AUTOMAKE_OPTIONS = subdir-objects
 AM_CFLAGS = -Wall -I. -I../include -I../ext/tinycrypt/lib/include -I../ext/tinydtls -DHAVE_CONFIG_H
 AM_CFLAGS += -I../build/posix -Isupport -I../ext/libcoap/include -Imocks
 AM_CFLAGS += -DHAVE_CONFIG_H -DUSE_TESTING_KEYS=1 -DWITH_CONNECTION_LIBCOAP=1 -DWITH_UPDATE_AGENT=1
-AM_CFLAGS += -DWITH_PLATFORM_POSIX=1
+AM_CFLAGS += -DWITH_PLATFORM_POSIX=1 -DENABLE_SIGN=1
 
 if COND_GCOV
   MAYBE_COVERAGE= -fprofile-arcs -ftest-coverage

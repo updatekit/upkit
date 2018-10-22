@@ -27,8 +27,7 @@ void manifest_mock_restore() {
     FOREACH_ITEM(RESTORE_VALID_GETTER);
     manifest_mock.get_identity = get_identity_impl;
     manifest_mock.set_identity = set_identity_impl;
-    manifest_mock.verify_manifest_vendor = verify_manifest_vendor_impl; 
-    manifest_mock.verify_manifest_server = verify_manifest_server_impl;
+    manifest_mock.verify_signature = verify_signature_impl; 
     manifest_mock.sign_manifest_vendor = sign_manifest_vendor_impl;
     manifest_mock.sign_manifest_server = sign_manifest_server_impl;
 }
@@ -80,13 +79,9 @@ void set_identity(manifest_t* mt, identity_t identity) {
     set_identity_impl(mt, identity);
 }
 
-pull_error verify_manifest_vendor(manifest_t* mt, digest_func f, const uint8_t *pub_x,
+pull_error verify_signature(manifest_t* mt, digest_func f, const uint8_t *pub_x,
         const uint8_t *pub_y, ecc_func_t ef) {
-    return manifest_mock.verify_manifest_vendor(mt, f, pub_x, pub_y, ef);
-}
-pull_error verify_manifest_server(manifest_t* mt, digest_func f, const uint8_t *pub_x,
-        const uint8_t *pub_y, ecc_func_t ef) {
-    return manifest_mock.verify_manifest_server(mt, f, pub_x, pub_y, ef);
+    return manifest_mock.verify_signature(mt, f, pub_x, pub_y, ef);
 }
 pull_error sign_manifest_vendor(manifest_t* mt, digest_func f, const uint8_t *private_key,
                     uint8_t* signature_buffer, ecc_func_t ef) {
@@ -109,11 +104,7 @@ void set_identity_invalid(manifest_t* mt, identity_t identity) {
     mt->server.identity = invalid_identity_g;
 }
 
-pull_error verify_manifest_vendor_invalid(manifest_t* mt, digest_func f, const uint8_t *pub_x,
-		const uint8_t *pub_y, ecc_func_t ef) {
-	return GENERIC_ERROR;
-}
-pull_error verify_manifest_server_invalid(manifest_t* mt, digest_func f, const uint8_t *pub_x,
+pull_error verify_signature_invalid(manifest_t* mt, digest_func f, const uint8_t *pub_x,
 		const uint8_t *pub_y, ecc_func_t ef) {
 	return GENERIC_ERROR;
 }

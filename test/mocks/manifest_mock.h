@@ -22,8 +22,7 @@ typedef struct {
     FOREACH_ITEM(DEFINE_STRUCT_ELEM);
     identity_t (*get_identity) (const manifest_t* mt);
     void (*set_identity) (manifest_t* mt, identity_t identity);
-    pull_error (*verify_manifest_vendor) (manifest_t*, digest_func, const uint8_t*, const uint8_t*, ecc_func_t);
-    pull_error (*verify_manifest_server) (manifest_t*, digest_func, const uint8_t*, const uint8_t*, ecc_func_t);
+    pull_error (*verify_signature) (manifest_t*, digest_func, const uint8_t*, const uint8_t*, ecc_func_t);
     pull_error (*sign_manifest_vendor) (manifest_t*, digest_func, const uint8_t *, uint8_t*, ecc_func_t);
     pull_error (*sign_manifest_server) (manifest_t*, digest_func, const uint8_t*, uint8_t*, ecc_func_t);
 } manifest_mock_t;
@@ -40,9 +39,7 @@ void manifest_mock_restore();
 identity_t get_identity_impl(const manifest_t* mt);
 void set_identity_impl(manifest_t* mt, identity_t identity);
 
-pull_error verify_manifest_vendor_impl(manifest_t* mt, digest_func f, const uint8_t *pub_x,
-		const uint8_t *pub_y, ecc_func_t ef);
-pull_error verify_manifest_server_impl(manifest_t* mt, digest_func f, const uint8_t *pub_x,
+pull_error verify_signature_impl(manifest_t* mt, digest_func f, const uint8_t *pub_x,
 		const uint8_t *pub_y, ecc_func_t ef);
 pull_error sign_manifest_vendor_impl(manifest_t* mt, digest_func f, const uint8_t *private_key,
 		uint8_t* signature_buffer, ecc_func_t ef);
@@ -53,9 +50,7 @@ pull_error sign_manifest_server_impl(manifest_t* mt, digest_func f, const uint8_
 identity_t get_identity_invalid(const manifest_t* mt);
 void set_identity_invalid(manifest_t* mt, identity_t identity);
 
-pull_error verify_manifest_vendor_invalid(manifest_t* mt, digest_func f, const uint8_t *pub_x,
-		const uint8_t *pub_y, ecc_func_t ef);
-pull_error verify_manifest_server_invalid(manifest_t* mt, digest_func f, const uint8_t *pub_x,
+pull_error verify_signature(manifest_t* mt, digest_func f, const uint8_t *pub_x,
 		const uint8_t *pub_y, ecc_func_t ef);
 pull_error sign_manifest_vendor_invalid(manifest_t* mt, digest_func f, const uint8_t *private_key,
 		uint8_t* signature_buffer, ecc_func_t ef);

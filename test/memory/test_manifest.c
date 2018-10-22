@@ -81,27 +81,28 @@ void test_manifest_server_signature_s(void) {
     nTEST_COMPARE_UINT(size, new_size);
 }
 
-void test_sign_verify_manifest_vendor(void) {
+void test_sign_verify_manifest(void) {
     uint8_t buffer[BUFFER_LEN];
     pull_error err = sign_manifest_vendor(&mt, tinycrypt_digest_sha256, 
             vendor_priv_g, buffer, tinycrypt_secp256r1_ecc);
     nTEST_TRUE(err == PULL_SUCCESS);
-    err = verify_manifest_vendor(&mt, tinycrypt_digest_sha256, vendor_x_g, vendor_y_g, tinycrypt_secp256r1_ecc);
+    err = sign_manifest_server(&mt, tinycrypt_digest_sha256, 
+            server_priv_g, buffer, tinycrypt_secp256r1_ecc);
+    nTEST_TRUE(err == PULL_SUCCESS);
+    err = verify_signature(&mt, tinycrypt_digest_sha256, vendor_x_g, vendor_y_g, tinycrypt_secp256r1_ecc);
+    nTEST_TRUE(err == PULL_SUCCESS);
 }
-void test_sign_verify_manifest_vendor_invalid_digest(void) {
+
+void test_sign_verify_manifest_invalid_digest(void) {
     uint8_t buffer[BUFFER_LEN];
     digest_func f = tinycrypt_digest_sha256;
     f.init = invalid_init;
     pull_error err = sign_manifest_vendor(&mt, f, vendor_priv_g, buffer, tinycrypt_secp256r1_ecc);
     nTEST_TRUE(err);
-    err = verify_manifest_vendor(&mt, f, vendor_x_g, vendor_y_g, tinycrypt_secp256r1_ecc);
-    nTEST_TRUE(err);
-}
-void test_sign_verify_manifest_server(void) {
-    uint8_t buffer[BUFFER_LEN];
-    pull_error err = sign_manifest_server(&mt, tinycrypt_digest_sha256, vendor_priv_g, buffer, tinycrypt_secp256r1_ecc);
+    err = sign_manifest_server(&mt, f, server_priv_g, buffer, tinycrypt_secp256r1_ecc);
     nTEST_TRUE(err == PULL_SUCCESS);
-    err = verify_manifest_server(&mt, tinycrypt_digest_sha256, server_x_g, server_y_g, tinycrypt_secp256r1_ecc);
+    err = verify_signature(&mt, f, vendor_x_g, vendor_y_g, tinycrypt_secp256r1_ecc);
+    nTEST_TRUE(err);
 }
 
 int main() {
@@ -117,9 +118,8 @@ int main() {
     nTEST_RUN(test_manifest_vendor_signature_s);
     nTEST_RUN(test_manifest_server_signature_r);
     nTEST_RUN(test_manifest_server_signature_s);
-    nTEST_RUN(test_sign_verify_manifest_vendor);
-    nTEST_RUN(test_sign_verify_manifest_server);
-    nTEST_RUN(test_sign_verify_manifest_vendor_invalid_digest);
+    nTEST_RUN(test_sign_verify_manifest);
+    nTEST_RUN(test_sign_verify_manifest_invalid_digest);
     nTEST_END();
     nTEST_RETURN();
 }

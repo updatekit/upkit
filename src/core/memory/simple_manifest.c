@@ -117,12 +117,13 @@ pull_error verify_signature_impl(manifest_t* mt, digest_func f, const uint8_t *p
     f.update(&ctx, &mt->server, sizeof(server_manifest_t));
     hash = (uint8_t*) f.finalize(&ctx);
     if (ef.verify(mt->vendor.server_key_x, mt->vendor.server_key_y, mt->server_signature_r, mt->server_signature_s, hash, f.size) != PULL_SUCCESS) {
+        printf("hey\n");
         return GENERIC_ERROR;
     }
     return PULL_SUCCESS;
 }
 
-#ifdef FIRMWARE_TOOL
+#ifdef ENABLE_SIGN
 static pull_error sign_data_impl(uint8_t* data, size_t size, digest_func f, const uint8_t *private_key,
                                     uint8_t* signature_buffer, ecc_func_t ef) {
     digest_ctx ctx;
@@ -153,7 +154,7 @@ pull_error sign_manifest_server_impl(manifest_t* mt, digest_func f, const uint8_
     set_server_signature_s_impl(mt, signature_buffer+ef.curve_size, ef.curve_size);
     return err;
 }
-#endif /* FIRMWARE_TOOL */
+#endif /* ENABLE_SIGN  */
 
 void print_manifest_impl(const manifest_t* mt) {
     log_info("Platform: %04x\n", mt->vendor.platform);

@@ -242,23 +242,20 @@ int manifest_validate_command(Context ctx) {
     server_pub_key.close();
     log_item("server_key_x", memcmp(get_server_key_x(&mt), server_public_key_buffer, 32) == 0);
     log_item("server_key_y", memcmp(get_server_key_y(&mt), server_public_key_buffer+32, 32) == 0);
-    // (5) Validate Vendor Signature
+    // (5) Validate Signature
     std::ifstream vendor_pub_key(ctx.get_vendor_pub_key(), std::ios_base::binary);
-    if (!server_pub_key) {
+    if (!vendor_pub_key) {
         std::cout << "Error opening vendor_pub_key: " << ctx.get_server_pub_key() << std::endl;
         return EXIT_FAILURE;
     }
     uint8_t* vendor_public_key_buffer = new uint8_t[64];
     vendor_pub_key.read((char*)vendor_public_key_buffer, 64); // XXX hardcoded size
     vendor_pub_key.close();
-    err = verify_manifest_vendor(&mt, digest, vendor_public_key_buffer,
+
+    err = verify_signature(&mt, digest, vendor_public_key_buffer,
                                          vendor_public_key_buffer+32, tinycrypt_secp256r1_ecc);
-    log_item("vendor_signature", err == PULL_SUCCESS);
+    log_item("_signature", err == PULL_SUCCESS);
     delete[] vendor_public_key_buffer;
-    // (6) Validate Server Signature
-    err = verify_manifest_server(&mt, digest, server_public_key_buffer,
-                                         server_public_key_buffer+32, tinycrypt_secp256r1_ecc);
-    log_item("server_signature", err == PULL_SUCCESS);
     delete[] server_public_key_buffer;
     return EXIT_SUCCESS;
 }
