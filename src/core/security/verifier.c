@@ -8,8 +8,7 @@ enum verifier_states {
     GET_OBJECT_MANIFEST = 0,
     CALCULATING_DIGEST = 1,
     VERIFY_DIGEST = 2,
-    VERIFY_VENDOR_SIGNATURE = 3,
-    VERIFY_SERVER_SIGNATURE = 4
+    VERIFY_SIGNATURE = 3,
 };
 
 /* The memory object should be already opened */
@@ -82,22 +81,14 @@ pull_error verify_object(mem_object_t* obj, digest_func digest, const uint8_t* x
         i--;
     }
 
-    /********** VERIFY_VENDOR_SIGNATURE ***********/
-    log_info("Start phase VERIFY_VENDOR_SIGNATURE\n");
-    state = VERIFY_VENDOR_SIGNATURE;
-    err = verify_manifest_vendor(&mt, digest, x, y, ef);
+    /********** VERIFY_SIGNATURE ***********/
+    log_info("Start phase VERIFY_SIGNATURE\n");
+    state = VERIFY_SIGNATURE;
+    err = verify_signature(&mt, digest, x, y, ef);
     if (err) {
         goto error;
     }
-    log_debug("Vendor Signature Valid\n");
-    /********** VERIFY_SERVER_SIGNATURE ***********/
-    log_info("Start phase VERIFY_SERVER_SIGNATURE\n");
-    state = VERIFY_SERVER_SIGNATURE;
-    err = verify_manifest_server(&mt, digest, x, y, ef);
-    if (!err) {
-        goto error;
-    }
-    log_debug("Server Signature Valid\n");
+    log_debug("Valid Signature\n");
     return PULL_SUCCESS;
 error:
     log_error(err, "Error in the verification process in phase %d: %s\n", state, err_as_str(err));

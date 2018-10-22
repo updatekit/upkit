@@ -67,9 +67,7 @@ void print_manifest(const manifest_t* mt);
 identity_t get_identity(const manifest_t* mt);
 void set_identity(manifest_t* mt, identity_t identity);
 
-pull_error verify_manifest_vendor(manifest_t* mt, digest_func df, const uint8_t *pub_x,
-                                        const uint8_t *pub_y, ecc_func_t ef);
-pull_error verify_manifest_server(manifest_t* mt, digest_func df, const uint8_t *pub_x,
+pull_error verify_signature(manifest_t* mt, digest_func df, const uint8_t *pub_x,
                                         const uint8_t *pub_y, ecc_func_t ef);
 
 #ifdef FIRMWARE_TOOL

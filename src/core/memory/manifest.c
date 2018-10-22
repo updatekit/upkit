@@ -75,13 +75,9 @@ void print_manifest(const manifest_t *mt) {
     print_manifest_impl(mt);
 }
 
-pull_error verify_manifest_vendor(manifest_t* mt, digest_func f, const uint8_t *pub_x,
+pull_error verify_signature(manifest_t* mt, digest_func f, const uint8_t *pub_x,
         const uint8_t *pub_y, ecc_func_t ef) {
-    return verify_manifest_vendor_impl(mt, f, pub_x, pub_y, ef);
-}
-pull_error verify_manifest_server(manifest_t* mt, digest_func f, const uint8_t *pub_x,
-        const uint8_t *pub_y, ecc_func_t ef) {
-    return verify_manifest_server_impl(mt, f, pub_x, pub_y, ef);
+    return verify_signature_impl(mt, f, pub_x, pub_y, ef);
 }
 pull_error sign_manifest_vendor(manifest_t* mt, digest_func f, const uint8_t *private_key, 
         uint8_t* signature_buffer, ecc_func_t ef) {
