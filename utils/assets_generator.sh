@@ -63,3 +63,6 @@ $FIRMWAREDIR/firmware_tool pipeline compress -b $ASSETSDIR/slot_a.pristine \
 # The patch is generated between slot_a.pristine and slot_b.pristine
 $FIRMWAREDIR/firmware_tool pipeline diff -b $ASSETSDIR/slot_a.pristine \
     -z $ASSETSDIR/slot_b.pristine -f $ASSETSDIR/slot.patch
+
+# Generate an empty file to be used as swap partition
+yes | dd  bs=1024  count=4 > $ASSETSDIR/swap.bin

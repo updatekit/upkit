@@ -11,8 +11,6 @@ version_t version_g = 0xdead;
 platform_t platform_g = 0xabcd;
 address_t size_g = 0x1000;
 address_t offset_g = 0x100; 
-unsigned char server_key_x_g[] = "server_key_x";
-unsigned char server_key_y_g[] = "server_key_y";
 uint8_t* digest_g = (uint8_t*) hash_g;
 uint8_t* vendor_signature_r_g = (uint8_t*) vendor_r_g;
 uint8_t* vendor_signature_s_g = (uint8_t*) vendor_s_g;
@@ -29,8 +27,8 @@ void ntest_prepare(void) {
     set_digest(&mt, digest_g);
     set_platform(&mt, platform_g);
     set_version(&mt, version_g);
-    set_server_key_x(&mt, server_key_x_g);
-    set_server_key_y(&mt, server_key_y_g);
+    set_server_key_x(&mt, (uint8_t*) server_x_g);
+    set_server_key_y(&mt, (uint8_t*) server_y_g);
     set_vendor_signature_r(&mt, vendor_signature_r_g, size);
     set_vendor_signature_s(&mt, vendor_signature_s_g, size);
     set_server_signature_r(&mt, server_signature_r_g, size);
@@ -52,10 +50,10 @@ void test_manifest_offset(void) {
     nTEST_TRUE(offset_g == get_offset(&mt));
 }
 void test_manifest_server_key_x(void) {
-    nTEST_COMPARE_MEM(server_key_x_g, get_server_key_x(&mt), 32*sizeof(uint8_t));
+    nTEST_COMPARE_MEM(server_x_g, get_server_key_x(&mt), 32*sizeof(uint8_t));
 }
 void test_manifest_server_key_y(void) {
-    nTEST_COMPARE_MEM(server_key_y_g, get_server_key_y(&mt), 32*sizeof(uint8_t));
+    nTEST_COMPARE_MEM(server_y_g, get_server_key_y(&mt), 32*sizeof(uint8_t));
 }
 void test_manifest_digest(void) {
     nTEST_COMPARE_MEM(digest_g, get_digest(&mt), 32*sizeof(uint8_t));

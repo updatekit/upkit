@@ -117,7 +117,6 @@ pull_error verify_signature_impl(manifest_t* mt, digest_func f, const uint8_t *p
     f.update(&ctx, &mt->server, sizeof(server_manifest_t));
     hash = (uint8_t*) f.finalize(&ctx);
     if (ef.verify(mt->vendor.server_key_x, mt->vendor.server_key_y, mt->server_signature_r, mt->server_signature_s, hash, f.size) != PULL_SUCCESS) {
-        printf("hey\n");
         return GENERIC_ERROR;
     }
     return PULL_SUCCESS;

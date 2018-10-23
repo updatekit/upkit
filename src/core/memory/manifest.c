@@ -1,4 +1,5 @@
 #include <libpull/memory/manifest.h>
+#include <libpull/memory/simple_manifest.h>
 #include <string.h>
 
 #define DEFINE_GETTER_IMPL(type, name) \
