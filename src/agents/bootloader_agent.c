@@ -36,29 +36,29 @@ pull_error restore_factory_image() {
     return GENERIC_ERROR;
 }
 
-agent_msg_t bootloader_agent(bootloader_agent_config* cfg) {
+agent_event_t bootloader_agent(bootloader_agent_config* cfg, void** event_data) {
     PULL_BEGIN(EVENT_INIT);
 
     // (1) Get the newest bootable firmware (there must be at least one!!)
     PULL_CONTINUE(EVENT_GET_NEWEST_FIRMWARE, NULL);
     err = get_newest_firmware(&id_newest_bootable, &version_bootable, &obj_t, true);
     if (err) {
-        PULL_CONTINUE(EVENT_GET_NEWEST_FIRMWARE_FAILURE, &err);
+        PULL_RETURN(EVENT_GET_NEWEST_FIRMWARE_FAILURE, &err);
     }
     err = memory_open(&newest_bootable, id_newest_bootable, READ_ONLY);
     if (err) {
-        PULL_CONTINUE(EVENT_GET_NEWEST_FIRMWARE_FAILURE_2, &err);
+        PULL_RETURN(EVENT_GET_NEWEST_FIRMWARE_FAILURE_2, &err);
     }
 
     // (2) Bootstrap 
     PULL_CONTINUE(EVENT_BOOTSTRAP, NULL);
     err = memory_open(&bootloader_object, cfg->bootloader_ctx_id, WRITE_CHUNK);
     if (err) {
-        PULL_CONTINUE(EVENT_BOOTSTRAP_FAILURE, &err);
+        PULL_RETURN(EVENT_BOOTSTRAP_FAILURE, &err);
     }
     if (memory_read(&bootloader_object, &bctx, sizeof(bctx), 0x0) != sizeof(bctx)) {
         err = MEMORY_READ_ERROR;
-        PULL_CONTINUE(EVENT_BOOTSTRAP_FAILURE_2, &err);
+        PULL_RETURN(EVENT_BOOTSTRAP_FAILURE_2, &err);
     }
     if ((bctx.startup_flags & FIRST_BOOT) == FIRST_BOOT) {
         // (2.1) Erase slots
@@ -67,7 +67,7 @@ agent_msg_t bootloader_agent(bootloader_agent_config* cfg) {
             if (memory_slots[i].id != id_newest_bootable) {
                 err = invalidate_object(memory_slots[i].id, &obj_t);
                 if (err) {
-                    PULL_CONTINUE(EVENT_FIRST_BOOT_FAILURE, &err);
+                    PULL_RETURN(EVENT_FIRST_BOOT_FAILURE, &err);
                 }
             }
         }
@@ -77,13 +77,13 @@ agent_msg_t bootloader_agent(bootloader_agent_config* cfg) {
         log_debug("Storing Factory Image\n");
         err = memory_open(&destination_slot, cfg->factory_id, WRITE_ALL);
         if (err) {
-            PULL_CONTINUE(EVENT_STORE_RECOVER_FAILURE, &err);
+            PULL_RETURN(EVENT_STORE_RECOVER_FAILURE, &err);
         }
         PULL_CONTINUE(EVENT_STORE_FACTORY_COPY_START, NULL)
         err = copy_firmware(&newest_bootable, &destination_slot, buffer, BUFFER_SIZE);
         PULL_CONTINUE(EVENT_STORE_FACTORY_COPY_STOP, NULL)
         if (err) {
-            PULL_CONTINUE(EVENT_STORE_FACTORY_COPY_FAILURE, &err);
+            PULL_RETURN(EVENT_STORE_FACTORY_COPY_FAILURE, &err);
         }
 #endif /* FACTORY_IMAGE == 1 */
         // (2.3) Store bootloader context
@@ -91,7 +91,7 @@ agent_msg_t bootloader_agent(bootloader_agent_config* cfg) {
         bctx.startup_flags = 0x0;
         if (memory_write(&bootloader_object, &bctx, sizeof(bctx), 0x0) != sizeof(bctx)) {
             err = MEMORY_WRITE_ERROR;
-            PULL_CONTINUE(EVENT_STORE_BOOTLAODER_CTX_FAILURE, &err);
+            PULL_RETURN(EVENT_STORE_BOOTLAODER_CTX_FAILURE, &err);
         };
         log_debug("Bootstrap Success\n");
     }
@@ -101,7 +101,7 @@ agent_msg_t bootloader_agent(bootloader_agent_config* cfg) {
     PULL_CONTINUE(EVENT_GET_NEWEST_NON_BOOTABLE, NULL);
     err = get_newest_firmware(&id_newest_non_bootable, &version_non_bootable, &obj_t, false);
     if (err) {
-        PULL_CONTINUE(EVENT_GET_NEWEST_NON_BOOTABLE_FAILURE, &err);
+        PULL_RETURN(EVENT_GET_NEWEST_NON_BOOTABLE_FAILURE, &err);
     }
     log_debug("id: bootable %d - non bootable %d\n", id_newest_bootable, id_newest_non_bootable);
     log_debug("version: bootable %x - non bootable %x\n", version_bootable, version_non_bootable);
@@ -112,7 +112,7 @@ agent_msg_t bootloader_agent(bootloader_agent_config* cfg) {
         PULL_CONTINUE(EVENT_VALIDATE_NON_BOOTABLE, NULL);
         err = memory_open(&source_slot, id_newest_non_bootable, READ_ONLY);
         if (err) {
-           PULL_CONTINUE(EVENT_VALIDATE_NON_BOOTABLE_FAILURE, &err);
+           PULL_RETURN(EVENT_VALIDATE_NON_BOOTABLE_FAILURE, &err);
            // XXX This error can be recovered
         }
         PULL_CONTINUE(EVENT_VALIDATE_NON_BOOTABLE_START, NULL);
@@ -130,20 +130,20 @@ agent_msg_t bootloader_agent(bootloader_agent_config* cfg) {
         PULL_CONTINUE(EVENT_UPGRADE, NULL);
         err = get_oldest_firmware(&id_oldest_bootable, &version_bootable, &obj_t, true);
         if (err) {
-            PULL_CONTINUE(EVENT_UPGRADE_FAILURE, &err);
+            PULL_RETURN(EVENT_UPGRADE_FAILURE, &err);
         }
         err = memory_open(&destination_slot, id_oldest_bootable, SEQUENTIAL_REWRITE);
         if (err) {
-            PULL_CONTINUE(EVENT_UPGRADE_FAILURE_2, &err);
+            PULL_RETURN(EVENT_UPGRADE_FAILURE_2, &err);
         }
         err = memory_open(&source_slot, id_newest_non_bootable, SEQUENTIAL_REWRITE);
         if (err) {
-            PULL_CONTINUE(EVENT_UPGRADE_FAILURE_3, &err);
+            PULL_RETURN(EVENT_UPGRADE_FAILURE_3, &err);
 
         }
         err = memory_open(&swap_slot, cfg->swap_id, SEQUENTIAL_REWRITE);
         if (err) {
-            PULL_CONTINUE(EVENT_UPGRADE_FAILURE_4, &err);
+            PULL_RETURN(EVENT_UPGRADE_FAILURE_4, &err);
         }
 
         PULL_CONTINUE(EVENT_UPGRADE_COPY_START, NULL);
@@ -151,7 +151,7 @@ agent_msg_t bootloader_agent(bootloader_agent_config* cfg) {
         //err = copy_firmware(&source_slot, &destination_slot, buffer, BUFFER_SIZE);
         PULL_CONTINUE(EVENT_UPGRADE_COPY_STOP, NULL);
         if (err) {
-            PULL_CONTINUE(EVENT_UPGRADE_COPY_FAILURE, &err);
+            PULL_RETURN(EVENT_UPGRADE_COPY_FAILURE, &err);
         }
         memory_close(&destination_slot);
         PULL_CONTINUE(EVENT_UPGRADE_SUCCESS, NULL);
@@ -167,7 +167,7 @@ agent_msg_t bootloader_agent(bootloader_agent_config* cfg) {
         if (!err) {
             boot_id = id_newest_bootable;
         } else {
-            PULL_CONTINUE(EVENT_VALIDATE_BOOTABLE_FAILURE, &err);
+            PULL_RETURN(EVENT_VALIDATE_BOOTABLE_FAILURE, &err);
 #if FACTORY_IMAGE
             // (5.1.1) Restore the factory image if available
             PULL_CONTINUE(EVENT_FACTORY_RESET, NULL);
@@ -177,13 +177,13 @@ agent_msg_t bootloader_agent(bootloader_agent_config* cfg) {
             if (!err) {
                 boot_id = id_newest_bootable;
             } else {
-                PULL_CONTINUE(EVENT_FATAL_FAILURE, NULL);
+                PULL_RETURN(EVENT_FATAL_FAILURE, NULL);
             }
 #else 
-            PULL_CONTINUE(EVENT_FATAL_FAILURE, NULL);
+            PULL_RETURN(EVENT_FATAL_FAILURE, NULL);
 #endif
         }
     }
-    PULL_CONTINUE(EVENT_BOOT, &boot_id);
+    PULL_RETURN(EVENT_BOOT, &boot_id);
     PULL_FINISH(EVENT_FINISH);
 }

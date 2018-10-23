@@ -35,7 +35,6 @@ int main() {
     nTEST_RUN(test_sha256_invalid_final);
     nTEST_RUN(test_sign);
     nTEST_RUN(test_verify_object_valid);
-    nTEST_RUN(test_verify_object_invalid_object);
     nTEST_RUN(test_verify_object_invalid_read);
     nTEST_RUN(test_verify_object_invalid_digest_init);
     nTEST_RUN(test_verify_object_invalid_digest_update);

@@ -6,7 +6,7 @@
 
 #define BUFFER_SIZE 1024
 
-static agent_msg_t agent_msg;
+static agent_event_t agent_event;
 static bootloader_agent_config cfg;
 
 static int8_t retries = 3;
@@ -32,21 +32,16 @@ void test_bootloader_success(void) {
     bootloader_agent_set_buffer(&cfg, buffer, BUFFER_SIZE);
     cfg.bootloader_ctx_id = BOOTLOADER_CTX;
     cfg.recovery_id = OBJ_GOLD;
-    while(1) {
-        agent_msg = bootloader_agent(&cfg);
-        if (IS_FAILURE(agent_msg)) {
-            printf("error is:%s\n", (err_as_str(GET_ERROR(agent_msg))));
-            success = false;
-            break;
-        } else if (IS_CONTINUE(agent_msg)) {
-            if (agent_msg.event == EVENT_BOOT) {
-                nTEST_TRUE(agent_msg.event == EVENT_BOOT);
-                nTEST_COMPARE_INT(OBJ_B, GET_BOOT_ID(agent_msg));
-                success = true;
-                break;
-            }
-            continue;
-        }
+
+    void* event_data = NULL;
+    agent_event = bootloader_agent(&cfg, &event_data);
+    if (IS_FAILURE(agent_event)) {
+        printf("error is:%s\n", (err_as_str(GET_ERROR(event_data))));
+        success = false;
+    } else if (IS_CONTINUE(agent_event)) {
+        nTEST_TRUE(agent_event == EVENT_BOOT);
+        nTEST_COMPARE_INT(OBJ_B, GET_BOOT_ID(event_data));
+        success = true;
     }
     nTEST_TRUE(success, "Error during the booting process");
 }

@@ -40,15 +40,14 @@ void specialize_crypto_functions() {
 PROCESS(bootloader, "bootloader process");
 AUTOSTART_PROCESSES(&bootloader);
 
-static agent_msg_t agent_msg;
+static agent_event_t agent_event;
 
 PROCESS_THREAD(bootloader, ev, data) {
     PROCESS_BEGIN();
-    bootloader_agent_config cfg = {
-        .bootloader_ctx_id = BOOTLOADER_CTX,
-        .swap_id = SWAP,
-        .swap_size = SWAP_SIZE
-    };
+    bootloader_agent_config cfg;
+    cfg.bootloader_ctx_id = BOOTLOADER_CTX;
+    cfg.swap_id = SWAP;
+    cfg.swap_size = SWAP_SIZE;
     specialize_crypto_functions();
     bootloader_agent_vendor_keys(&cfg, vendor_x_g, vendor_y_g);
     bootloader_agent_digest_func(&cfg, df);
@@ -56,32 +55,33 @@ PROCESS_THREAD(bootloader, ev, data) {
     bootloader_agent_set_buffer(&cfg, buffer, BUFFER_SIZE);
 
     log_debug("Bootloader started\n");
+    void* event_data;
     while(1) {
-        agent_msg = bootloader_agent(&cfg);
-        if (IS_FAILURE(agent_msg)) {
-            log_debug("Bootloader error: %s\n", err_as_str(GET_ERROR(agent_msg)));
+        agent_event = bootloader_agent(&cfg, &event_data);
+        if (IS_FAILURE(agent_event)) {
+            log_debug("Bootloader error: %s\n", err_as_str(GET_ERROR(event_data)));
             break;
-        } else if (IS_CONTINUE(agent_msg)) {
-            if (agent_msg.event == EVENT_VALIDATE_NON_BOOTABLE_START) {
+        } else if (IS_CONTINUE(agent_event)) {
+            if (agent_event == EVENT_VALIDATE_NON_BOOTABLE_START) {
                 WATCHDOG_STOP();
-            } else if (agent_msg.event == EVENT_VALIDATE_NON_BOOTABLE_STOP) {
+            } else if (agent_event == EVENT_VALIDATE_NON_BOOTABLE_STOP) {
                 WATCHDOG_START();
-            } else if (agent_msg.event == EVENT_VALIDATE_BOOTABLE_START) {
+            } else if (agent_event == EVENT_VALIDATE_BOOTABLE_START) {
                 WATCHDOG_STOP();
-            } else if (agent_msg.event == EVENT_VALIDATE_BOOTABLE_STOP) {
+            } else if (agent_event == EVENT_VALIDATE_BOOTABLE_STOP) {
                 WATCHDOG_START();
-            } else if (agent_msg.event == EVENT_UPGRADE_COPY_START) {
+            } else if (agent_event == EVENT_UPGRADE_COPY_START) {
                 WATCHDOG_STOP();
-            } else if (agent_msg.event == EVENT_UPGRADE_COPY_STOP) {
+            } else if (agent_event == EVENT_UPGRADE_COPY_STOP) {
                 WATCHDOG_START();
 #if RECOVERY_IMAGE
-            } else if (agent_msg.event == EVENT_STORE_RECOVERY_COPY_START) {
+            } else if (agent_event == EVENT_STORE_RECOVERY_COPY_START) {
                 WATCHDOG_STOP();
-            } else if (agent_msg.event == EVENT_STORE_RECOVERY_COPY_STOP) {
+            } else if (agent_event == EVENT_STORE_RECOVERY_COPY_STOP) {
                 WATCHDOG_START();
 #endif
-            } else if (agent_msg.event == EVENT_BOOT) {
-                load_object(*((mem_id_t*) agent_msg.event_data));
+            } else if (agent_event == EVENT_BOOT) {
+                load_object(GET_BOOT_ID(event_data));
             break;
             }
             continue;

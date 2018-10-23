@@ -12,7 +12,7 @@
 #define TIMEOUT 1000
 #define BUFFER_SIZE 1024
 
-static agent_msg_t agent_msg;
+static agent_event_t agent_event;
 static update_agent_config cfg;
 static update_agent_ctx_t ctx;
 static int8_t retries = 3;
@@ -52,27 +52,16 @@ void* update_thread(void* args) {
     update_agent_ecc_func(&cfg, ef);
     update_agent_set_buffer(&cfg, buffer, BUFFER_SIZE);
 
-    while (1) {
-        agent_msg = update_agent(&cfg, &ctx);
-        if (IS_FAILURE(agent_msg)) {
-            break;
-        } else if (IS_CONTINUE(agent_msg)) {
-            if (agent_msg.event == EVENT_APPLY) {
-                success = 1;
-                break;
-            }
-        } else if (IS_RECOVER(agent_msg)) {
-            xtimer_sleep(5);
-            if (retries-- > 0) {
-                continue;
-            } else {
-                break;
-            }
-        } else if (IS_SEND(agent_msg)) {
-            loop(GET_CONNECTION(agent_msg), TIMEOUT);
-        }
+    void* event_data;
+    agent_event = update_agent(&cfg, &ctx, &event_data);
+    if (IS_FAILURE(agent_event)) {
+        log_error(GET_ERROR(event_data), "Error during the update process\n");
+    } else if (IS_CONTINUE(agent_event) && agent_event == EVENT_APPLY) {
+        success = 1;
     }
-    printf("There was an error during the update phase\n");
+    if (!success) {
+        printf("There was an error during the update phase\n");
+    }
     while(1);
 }
 

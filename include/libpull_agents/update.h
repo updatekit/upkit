@@ -29,13 +29,13 @@ extern "C" {
 
 #include "platform_headers.h"
 
-#define IS_CONTINUE(agent_msg) (agent_msg.event > EVENT_CONTINUE_START_ && agent_msg.event < EVENT_CONTINUE_END_ )
-#define IS_SEND(agent_msg) (agent_msg.event > EVENT_SEND_START_ && agent_msg.event < EVENT_SEND_END_ )
-#define IS_RECOVER(agent_msg) (agent_msg.event > EVENT_RECOVER_START_ && agent_msg.event < EVENT_RECOVER_END_ )
-#define IS_FAILURE(agent_msg) (agent_msg.event > EVENT_FAILURE_START_ && agent_msg.event < EVENT_FAILURE_END_ )
+#define IS_CONTINUE(agent_event) (agent_event > EVENT_CONTINUE_START_ && agent_event < EVENT_CONTINUE_END_ )
+#define IS_SEND(agent_event) (agent_event > EVENT_SEND_START_ && agent_event < EVENT_SEND_END_ )
+#define IS_RECOVER(agent_event) (agent_event > EVENT_RECOVER_START_ && agent_event < EVENT_RECOVER_END_ )
+#define IS_FAILURE(agent_event) (agent_event > EVENT_FAILURE_START_ && agent_event < EVENT_FAILURE_END_ )
 
-#define GET_CONNECTION(agent_msg) ((conn_ctx*) (agent_msg.event_data))
-#define GET_ERROR(agent_msg) ((pull_error) *(agent_msg.event_data))
+#define GET_CONNECTION(event_data) ((conn_ctx*) (event_data))
+#define GET_ERROR(event_data) *((pull_error*) (event_data))
 
 #define FOREACH_IGNORED_EVENT(ACTION) \
     ACTION(EVENT_CONTINUE_START_) \
@@ -87,14 +87,6 @@ typedef enum agent_event_t {
     EVENT_INVALIDATE_OBJECT_FAILURE,
     EVENT_FAILURE_END_
 } agent_event_t;
-
-/**
- * \brief  Message returned to the calling function.
- */
-typedef struct agent_msg_t {
-    agent_event_t event;
-    void * event_data;
-} agent_msg_t;
 
 /**
  * \brief  Configuration structure for the update agent.
@@ -207,6 +199,6 @@ typedef struct update_agent_ctx_t {
  *
  * \returns Messages containing the current event.
  */
-agent_msg_t update_agent(update_agent_config* cfg, update_agent_ctx_t* ctx);
+agent_event_t update_agent(update_agent_config* cfg, update_agent_ctx_t* ctx, void** agent_data);
 
 #endif /* AGENTS_UPDATE_H_ */

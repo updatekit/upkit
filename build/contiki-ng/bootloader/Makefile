@@ -33,7 +33,7 @@ LIBPULL_BOOTLOADER=1
 DISABLE_MAIN=0
 include ../makefiles/Makefile.libpull
 
-CFLAGS += -DDISABLE_ALL_OUTPUT=1
+CFLAGS += -DDISABLE_ALL_OUTPUT=1 -DENABLE_COROUTINES=1
 
 # Security Configurations
 ext= $(ROOTDIR)/ext
