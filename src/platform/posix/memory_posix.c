@@ -37,6 +37,7 @@ char* memory_objects_mapper[] = {
     [OBJ_A] = "../assets/slot_a.bin",
     [OBJ_B] = "../assets/slot_b.bin",
     [OBJ_C] = "../assets/slot_c.bin",
+    [OBJ_SWAP] = "../assets/swap.bin",
     [TEST_MEMORY_FILE] = "../assets/test_memory",
 };
 

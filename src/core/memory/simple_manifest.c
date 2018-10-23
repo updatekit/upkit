@@ -100,32 +100,29 @@ int set_server_signature_s_impl(manifest_t *mt, uint8_t* server_signature_s, uin
     return memcpy(mt->server_signature_s, server_signature_s, size) != mt->server_signature_s;
 }
 
-static pull_error verify_data_impl(uint8_t* data, size_t size, digest_func f, const uint8_t *pub_x,
-                     const uint8_t *pub_y, ecc_func_t ef, uint8_t* r, uint8_t* s) {
+pull_error verify_signature_impl(manifest_t* mt, digest_func f, const uint8_t *pub_x,
+                     const uint8_t *pub_y, ecc_func_t ef) {
     digest_ctx ctx;
     if (f.init(&ctx) != PULL_SUCCESS) {
         return GENERIC_ERROR; // TODO specialize error
     }
-    f.update(&ctx, data, size);
+    f.update(&ctx, &mt->vendor, sizeof(vendor_manifest_t));
     uint8_t* hash = (uint8_t*) f.finalize(&ctx);
-    if (ef.verify(pub_x, pub_y, r, s, hash, f.size) != PULL_SUCCESS) {
+    if (ef.verify(pub_x, pub_y, mt->vendor_signature_r, mt->vendor_signature_s, hash, f.size) != PULL_SUCCESS) {
+        return GENERIC_ERROR;
+    }
+    if (f.init(&ctx) != PULL_SUCCESS) {
+        return GENERIC_ERROR; // TODO specialize error
+    }
+    f.update(&ctx, &mt->server, sizeof(server_manifest_t));
+    hash = (uint8_t*) f.finalize(&ctx);
+    if (ef.verify(mt->vendor.server_key_x, mt->vendor.server_key_y, mt->server_signature_r, mt->server_signature_s, hash, f.size) != PULL_SUCCESS) {
         return GENERIC_ERROR;
     }
     return PULL_SUCCESS;
 }
 
-pull_error verify_manifest_vendor_impl(manifest_t* mt, digest_func f, const uint8_t *pub_x,
-                    const uint8_t *pub_y, ecc_func_t ef) {
-    return verify_data_impl((uint8_t*) &mt->vendor, sizeof(vendor_manifest_t), f, pub_x, pub_y, ef, mt->vendor_signature_r,
-            mt->vendor_signature_s); 
-}
-
-pull_error verify_manifest_server_impl(manifest_t* mt, digest_func f, const uint8_t *pub_x,
-        const uint8_t *pub_y, ecc_func_t ef) {
-    return verify_data_impl((uint8_t*) &mt->server, sizeof(server_manifest_t), f, mt->vendor.server_key_x, 
-            mt->vendor.server_key_y, ef, mt->server_signature_r, mt->server_signature_s);
-}
-
+#ifdef ENABLE_SIGN
 static pull_error sign_data_impl(uint8_t* data, size_t size, digest_func f, const uint8_t *private_key,
                                     uint8_t* signature_buffer, ecc_func_t ef) {
     digest_ctx ctx;
@@ -156,6 +153,7 @@ pull_error sign_manifest_server_impl(manifest_t* mt, digest_func f, const uint8_
     set_server_signature_s_impl(mt, signature_buffer+ef.curve_size, ef.curve_size);
     return err;
 }
+#endif /* ENABLE_SIGN  */
 
 void print_manifest_impl(const manifest_t* mt) {
     log_info("Platform: %04x\n", mt->vendor.platform);

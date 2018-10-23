@@ -1,6 +1,6 @@
 AUTOMAKE_OPTIONS = subdir-objects
 
-AM_CFLAGS = -Wall -I. -Iresources -I../../include -I../../ext/tinycrypt/lib/include -I../../ext/tinydtls -I../../ext/libcoap/include -DUSE_TESTING_KEYS=1
+AM_CFLAGS = -Wall -I. -Iresources -I../../include -I../../ext/tinycrypt/lib/include -I../../ext/tinydtls -I../../ext/libcoap/include -DUSE_TESTING_KEYS=1 -DENABLE_SIGN=1
 
 LIBS = ../../libpull.a ../../ext/libcoap/.libs/libcoap-1.a ../../ext/tinydtls/libtinydtls.a
 LIBS += ../../ext/tinycrypt/lib/libtinycrypt.a

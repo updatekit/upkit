@@ -171,17 +171,10 @@ pull_error write_firmware_manifest(mem_object_t* obj, const manifest_t* mt) {
 }
 
 pull_error invalidate_object(mem_id_t id, mem_object_t* obj) {
-    pull_error err = memory_open(obj, id, WRITE_CHUNK) != PULL_SUCCESS;
+    pull_error err = memory_open(obj, id, WRITE_ALL) != PULL_SUCCESS;
     if (err) {
         log_error(err, "Failure opening firmware\n");
         return WRITE_MANIFEST_ERROR;
-    }
-    manifest_t nullmt;
-    memset(&nullmt, 0, sizeof(manifest_t));
-    err = write_firmware_manifest(obj, &nullmt);
-    if (err) {
-        log_error(err, "Failure writing firmware manifest on object%d\n", id);
-        return INVALIDATE_OBJECT_ERROR;
     }
     memory_close(obj);
     return PULL_SUCCESS;

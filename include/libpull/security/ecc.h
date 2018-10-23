@@ -17,7 +17,9 @@ extern "C" {
 typedef struct {
     pull_error (*verify) (const uint8_t *, const uint8_t*, const uint8_t*,
             const uint8_t*, const void*, uint16_t);
+#ifdef ENABLE_SIGN
     pull_error (*sign) (const uint8_t*, uint8_t*, const void*, uint16_t);
+#endif
     uint8_t curve_size;
 } ecc_func_t;
 
@@ -25,16 +27,24 @@ typedef struct {
     pull_error impl##_ecc_verify(const uint8_t *pub_x, const uint8_t *pub_y, const uint8_t *r, \
         const uint8_t *s, const void *data, uint16_t data_len)
 
+#ifdef ENABLE_SIGN
 #define ECC_SIGN(impl) \
     pull_error impl##_ecc_sign(const uint8_t* private_key, uint8_t *signature, \
-        const void *data, uint16_t data_len)
-
+            const void *data, uint16_t data_len)
 #define ECC_FUNC(impl, size) \
     static const ecc_func_t impl##_ecc = { \
         .verify = impl##_ecc_verify, \
         .sign = impl##_ecc_sign, \
         .curve_size = size \
     }
+#else
+#define ECC_SIGN(impl)
+#define ECC_FUNC(impl, size) \
+    static const ecc_func_t impl##_ecc = { \
+        .verify = impl##_ecc_verify, \
+        .curve_size = size \
+    }
+#endif
 
 #ifdef WITH_TINYDTLS
     ECC_VERIFY(tinydtls_secp256r1);

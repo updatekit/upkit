@@ -26,21 +26,24 @@ void ntest_clean(void) {
 }
 
 void test_bootloader_success(void) {
+
     bootloader_agent_vendor_keys(&cfg, (uint8_t*) vendor_x_g, (uint8_t*) vendor_y_g);
     bootloader_agent_digest_func(&cfg, tinydtls_digest_sha256);
     bootloader_agent_ecc_func(&cfg, tinydtls_secp256r1_ecc);
     bootloader_agent_set_buffer(&cfg, buffer, BUFFER_SIZE);
     cfg.bootloader_ctx_id = BOOTLOADER_CTX;
     cfg.recovery_id = OBJ_GOLD;
+    cfg.swap_size = SWAP_SIZE;
+    cfg.swap_id = OBJ_SWAP;
 
     void* event_data = NULL;
     agent_event = bootloader_agent(&cfg, &event_data);
     if (IS_FAILURE(agent_event)) {
-        printf("error is:%s\n", (err_as_str(GET_ERROR(event_data))));
+        printf("error is: %s\n", (err_as_str(GET_ERROR(event_data))));
         success = false;
     } else if (IS_CONTINUE(agent_event)) {
         nTEST_TRUE(agent_event == EVENT_BOOT);
-        nTEST_COMPARE_INT(OBJ_B, GET_BOOT_ID(event_data));
+        nTEST_COMPARE_INT(OBJ_A, GET_BOOT_ID(event_data));
         success = true;
     }
     nTEST_TRUE(success, "Error during the booting process");
