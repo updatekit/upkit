@@ -36,7 +36,7 @@ pull_error restore_factory_image() {
     return GENERIC_ERROR;
 }
 
-agent_event_t bootloader_agent(bootloader_agent_config* cfg, void* event_data) {
+agent_event_t bootloader_agent(bootloader_agent_config* cfg, void** event_data) {
     PULL_BEGIN(EVENT_INIT);
 
     // (1) Get the newest bootable firmware (there must be at least one!!)
@@ -184,6 +184,6 @@ agent_event_t bootloader_agent(bootloader_agent_config* cfg, void* event_data) {
 #endif
         }
     }
-    PULL_CONTINUE(EVENT_BOOT, &boot_id);
+    PULL_RETURN(EVENT_BOOT, &boot_id);
     PULL_FINISH(EVENT_FINISH);
 }

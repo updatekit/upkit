@@ -24,8 +24,8 @@ extern "C" {
 #define IS_CONTINUE(event) (event > EVENT_CONTINUE_START_ && event < EVENT_CONTINUE_STOP_ )
 #define IS_FAILURE(event) (event > EVENT_FAILURE_START_ && event < EVENT_FAILURE_STOP_ )
 
-#define GET_BOOT_ID(agent_msg) *((mem_id_t*) (agent_msg.event_data))
-#define GET_ERROR(agent_msg) *((pull_error*) (agent_msg))
+#define GET_BOOT_ID(event_data) *((mem_id_t*) (event_data))
+#define GET_ERROR(event_data) *((pull_error*) (event_data))
 
  #define FOREACH_IGNORED_EVENT(ACTION) \
      ACTION(EVENT_CONTINUE_START_) \
@@ -165,7 +165,7 @@ static inline void bootloader_agent_set_buffer(bootloader_agent_config* cfg, uin
  * 
  * \returns   Structure indicating the current state and the data related to it.
  */
-agent_event_t bootloader_agent(bootloader_agent_config* cfg, void * event_data);
+agent_event_t bootloader_agent(bootloader_agent_config* cfg, void** event_data);
 
 #ifdef __cplusplus
 }

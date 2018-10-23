@@ -13,6 +13,10 @@ extern "C" {
 #ifndef AGENTS_COROUTINE_H_
 #define AGENTS_COROUTINE_H_
 
+#ifndef TIMEOUT
+#define TIMEOUT 100
+#endif
+
 #ifdef ENABLE_COROUTINES
 
 /** 
@@ -47,6 +51,9 @@ extern "C" {
 #define PULL_RETURN(ev, ev_data) \
         PULL_CONTINUE(ev, ev_data)
 
+#define PULL_SEND(ev, ev_data) \
+        PULL_CONTINUE(ev, ev_data)
+
 /** 
 * \brief  PULL_FINISH is a macro that must be called at the end of each Duff's
 * device. It closes the switch case and definitely reuturns to the calling
@@ -67,14 +74,19 @@ extern "C" {
 #else
 
 #define PULL_BEGIN(ev)
-#define PULL_FINISH(ev)
+#define PULL_FINISH(ev) \
+    return ev;
+
 #define IGNORE_EVENT(event)
 #define PULL_CONTINUE(ev, ev_data)
 #define PULL_RETURN(ev, ev_data) \
     do { \
-        event_data = ev_data; \
+        *event_data = ev_data; \
         return ev; \
     } while(0)
+
+#define PULL_SEND(ev, ev_data) \
+    loop(GET_CONNECTION(ev_data), TIMEOUT);
 
 #endif /* ENABLE_COROUTINES */
 

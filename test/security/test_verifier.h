@@ -81,12 +81,6 @@ void test_verify_object_valid(void) {
     nTEST_TRUE(err == PULL_SUCCESS, "%s\n", err_as_str(err));
 }
 
-void test_verify_object_invalid_object(void) {
-    pull_error err;
-    err = verify_object(NULL, df, vendor_x_g, vendor_y_g, ef, buffer, BUFFER_LEN);
-    nTEST_TRUE(err);
-}
-
 void test_verify_object_invalid_read(void) {
     memory_mock.memory_read_impl = memory_read_invalid;
 
