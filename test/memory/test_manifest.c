@@ -100,7 +100,7 @@ void test_sign_verify_manifest_invalid_digest(void) {
     pull_error err = sign_manifest_vendor(&mt, f, vendor_priv_g, buffer, tinycrypt_secp256r1_ecc);
     nTEST_TRUE(err);
     err = sign_manifest_server(&mt, f, server_priv_g, buffer, tinycrypt_secp256r1_ecc);
-    nTEST_TRUE(err == PULL_SUCCESS);
+    nTEST_TRUE(err);
     err = verify_signature(&mt, f, vendor_x_g, vendor_y_g, tinycrypt_secp256r1_ecc);
     nTEST_TRUE(err);
 }

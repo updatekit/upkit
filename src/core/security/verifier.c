@@ -69,7 +69,7 @@ pull_error verify_object(mem_object_t* obj, digest_func digest, const uint8_t* x
         err = INVALID_MANIFEST_ERROR;
         goto error;
     }
-    int i=digest.size;
+    int i=digest.size-1;
     while(i >= 0) {
         if (hash[i] != result[i]) {
             err = VERIFICATION_FAILED_ERROR;

@@ -36,14 +36,14 @@ typedef struct {
         .verify = impl##_ecc_verify, \
         .sign = impl##_ecc_sign, \
         .curve_size = size \
-    };
+    }
 #else
 #define ECC_SIGN(impl)
 #define ECC_FUNC(impl, size) \
     static const ecc_func_t impl##_ecc = { \
         .verify = impl##_ecc_verify, \
         .curve_size = size \
-    };
+    }
 #endif
 
 #ifdef WITH_TINYDTLS
