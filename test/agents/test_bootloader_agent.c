@@ -35,7 +35,6 @@ void test_bootloader_success(void) {
 
     void* event_data = NULL;
     agent_event = bootloader_agent(&cfg, &event_data);
-    printf("%x\n", event_data);
     if (IS_FAILURE(agent_event)) {
         printf("error is:%s\n", (err_as_str(GET_ERROR(event_data))));
         success = false;
