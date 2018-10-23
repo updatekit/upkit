@@ -29,16 +29,17 @@ int main(void) {
     bootloader_agent_set_buffer(&cfg, buffer, BUFFER_SIZE);
 
     log_debug("Bootloader started\n");
+
     void* event_data;
     agent_event_t agent_event = bootloader_agent(&cfg, &event_data);
-    if (IS_FAILURE(agent_event)) {
-        log_debug("Bootloader error: %s\n", err_as_str(GET_ERROR(event_data)));
-        // XXX handle this
-    } else if (IS_CONTINUE(agent_event)) {
+    if (IS_CONTINUE(agent_event)) {
         if (agent_event == EVENT_BOOT) {
             printf("loading object\n");
             load_object(GET_BOOT_ID(event_data));
+            PULL_ASSERT(false /* You should not be here */);
         }
     }
-    // XXX I still need to manage the fatal errors
+    pull_error err = GET_ERROR(event_data);
+    log_error(err, "Fatal bootloader state\n");
+    return 0;
 }

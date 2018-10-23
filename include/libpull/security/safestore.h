@@ -22,7 +22,10 @@ typedef union key_t {
 }
 
 typedef struct safestore_t {
-   key_t key;
+    uint16_t udid;
+    platform_t platform;
+    key_t vendor_pub_key;
+    uint8_t startup_flag;
 } safestore_t;
 
 #ifdef __cplusplus
