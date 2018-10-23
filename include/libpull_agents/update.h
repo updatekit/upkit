@@ -35,7 +35,7 @@ extern "C" {
 #define IS_FAILURE(agent_event) (agent_event > EVENT_FAILURE_START_ && agent_event < EVENT_FAILURE_END_ )
 
 #define GET_CONNECTION(event_data) ((conn_ctx*) (event_data))
-#define GET_ERROR(event_data) ((pull_error) *(event_data))
+#define GET_ERROR(event_data) *((pull_error*) (event_data))
 
 #define FOREACH_IGNORED_EVENT(ACTION) \
     ACTION(EVENT_CONTINUE_START_) \

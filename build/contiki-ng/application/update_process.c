@@ -20,7 +20,7 @@ static ecc_func_t ef;
 static void* conn_data;
 static conn_type type;
 
-static agent_msg_t agent_msg;
+static agent_event_t agent_event;
 static update_agent_config cfg;
 static update_agent_ctx_t ctx;
 static uint8_t buffer[BUFFER_SIZE];
@@ -64,30 +64,31 @@ PROCESS_THREAD(update_process, ev, data) {
     update_agent_ecc_func(&cfg, ef);
     update_agent_set_buffer(&cfg, buffer, BUFFER_SIZE);
 
+    void* event_data;
     while (1) {
-        agent_msg = update_agent(&cfg, &ctx);
-        if (IS_FAILURE(agent_msg)) {
+        agent_event = update_agent(&cfg, &ctx, &event_data);
+        if (IS_FAILURE(agent_event)) {
             break;
-        } else if (IS_CONTINUE(agent_msg)) {
-            if (agent_msg.event == EVENT_APPLY) {
+        } else if (IS_CONTINUE(agent_event)) {
+            if (agent_event == EVENT_APPLY) {
                 watchdog_reboot();
                 break;
-            } else if (agent_msg.event == EVENT_VERIFY_BEFORE) {
+            } else if (agent_event == EVENT_VERIFY_BEFORE) {
                 verify_before();
-            } else if (agent_msg.event == EVENT_VERIFY_AFTER) {
+            } else if (agent_event == EVENT_VERIFY_AFTER) {
                 verify_after();
-            } else if (agent_msg.event == EVENT_CHECKING_UPDATES_TIMEOUT) {
+            } else if (agent_event == EVENT_CHECKING_UPDATES_TIMEOUT) {
                 etimer_set(&et, (CLOCK_SECOND*5));
                 PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
             }
-        } else if (IS_RECOVER(agent_msg)) {
+        } else if (IS_RECOVER(agent_event)) {
             if (retries-- <= 0) {
                 continue;
             } else {
                 break;
             }
-        } else if (IS_SEND(agent_msg)) {
-            COAP_SEND(GET_CONNECTION(agent_msg));
+        } else if (IS_SEND(agent_event)) {
+            COAP_SEND(GET_CONNECTION(event_data));
         }
     } 
     if (retries <= 0) {

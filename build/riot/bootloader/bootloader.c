@@ -35,7 +35,8 @@ void specialize_crypto_functions() {
 }
 
 int main(void) {
-    agent_msg_t agent_msg;
+    agent_event_t agent_event;
+    void* event_data;
     bootloader_agent_config cfg = {
         .bootloader_ctx_id = BOOTLOADER_CTX,
         .swap_id = SWAP,
@@ -48,17 +49,12 @@ int main(void) {
     bootloader_agent_set_buffer(&cfg, buffer, BUFFER_SIZE);
 
     log_debug("Bootloader started\n");
-    while(1) {
-        agent_msg = bootloader_agent(&cfg);
-        if (IS_FAILURE(agent_msg)) {
-            log_debug("Bootloader error: %s\n", err_as_str(GET_ERROR(agent_msg)));
-            break;
-        } else if (IS_CONTINUE(agent_msg)) {
-            if (agent_msg.event == EVENT_BOOT) {
-                printf("loading object\n");
-                load_object(*((mem_id_t*) agent_msg.event_data));
-            }
-        }
-        // XXX I still need to manage the fatal errors
+    agent_event = bootloader_agent(&cfg, &event_data);
+    if (IS_CONTINUE(agent_event) && agent_event == EVENT_BOOT) {
+        printf("loading object\n");
+        load_object(GET_BOOT_ID(event_data));
+    } else if (IS_FAILURE(agent_event)) {
+        log_debug("Bootloader error: %s\n", err_as_str(GET_ERROR(agent_event)));
     }
+    while(1);
 }

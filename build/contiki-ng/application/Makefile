@@ -30,7 +30,7 @@ PROJECT_SOURCEFILES += update_process.c
 LIBPULL_APPLICATION=1
 MODULES += os/net/app-layer/coap
 
-CFLAGS += -DWITH_UPDATE_AGENT=1
+CFLAGS += -DWITH_UPDATE_AGENT=1 -DENABLE_COROUTINES=1
 
 include ../makefiles/Makefile.libpull
 
