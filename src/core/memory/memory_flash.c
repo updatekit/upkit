@@ -12,7 +12,7 @@ uint32_t get_end_offset(mem_id_t id) {
 }
 
 pull_error memory_open_impl(mem_object_t* ctx, mem_id_t id, mem_mode_t mode) {
-    PULL_ASSERT(ctx != NULL);
+    PULL_ASSERT(ctx != NULL && ctx->fdescr != NULL);
     memcpy(ctx, &flash_objects[id], sizeof(mem_object_t));
     ctx->mode = mode;
 

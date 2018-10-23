@@ -32,7 +32,7 @@ typedef struct mem_object_t mem_object_t;
 typedef struct mem_slot_t {
     mem_id_t id;
     bool bootable;
-    bool loaded;
+    bool reserved;
 } mem_slot_t;
 
 typedef enum {

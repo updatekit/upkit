@@ -16,17 +16,22 @@ const mem_slot_t memory_slots[] = {
     {
         .id = OBJ_A,
         .bootable = true,
-        .loaded = true
+        .reserved = false
     },
     {
         .id = OBJ_B,
         .bootable = true,
-        .loaded = false
+        .reserved = false
     },
     {
         .id = OBJ_C,
         .bootable = false,
-        .loaded = false
+        .reserved = false
+    },
+    {
+        .id = SWAP,
+        .bootable = false,
+        .reserved = true
     },
     {OBJ_END}
 };

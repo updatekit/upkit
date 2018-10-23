@@ -98,6 +98,7 @@ typedef struct bootloader_agent_config {
     mem_id_t bootloader_ctx_id;
     mem_id_t recovery_id;
     mem_id_t swap_id;
+    mem_id_t factory_id;
     size_t swap_size;
     uint8_t* vendor_x;
     uint8_t* vendor_y;

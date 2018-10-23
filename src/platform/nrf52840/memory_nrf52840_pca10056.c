@@ -10,12 +10,12 @@ const mem_slot_t memory_slots[] = {
     {
         .id = OBJ_1,
         .bootable = true,
-        .loaded = true
+        .reserved = false
     },
     {
         .id = OBJ_2,
         .bootable = false,
-        .loaded = false
+        .reserved = false
     },
     {OBJ_END}
 };

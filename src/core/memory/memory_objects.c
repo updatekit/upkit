@@ -9,9 +9,12 @@ pull_error get_ordered_firmware(mem_id_t* id, version_t* version, mem_object_t* 
     manifest_t mt;
     pull_error err;
     mem_id_t i;
-    bool first = true;
-    bool bootable;
+    *version = 0;
+    *id = 0;
     for (i=0; memory_slots[i].id > 0; i++) {
+        if (memory_slots[i].bootable != prefer_bootable) {
+            continue;
+        }
         err = memory_open(obj_t, memory_slots[i].id, READ_ONLY);
         if (err) {
             log_error(err, "Failure opening firmware id %d\n", memory_slots[i].id);
@@ -24,13 +27,10 @@ pull_error get_ordered_firmware(mem_id_t* id, version_t* version, mem_object_t* 
             return GET_NEWEST_ERROR;
         }
         // Avoid overriding the slot with the running image
-        if (first || ( !(prefer_bootable && (bootable && !memory_slots[i].bootable)) && (
-            (newest == true && mt.vendor.version > *version) || 
-            (newest == false && mt.vendor.version < *version)))) {
+        if ((newest == true && mt.vendor.version > *version) || 
+            (newest == false && mt.vendor.version < *version)) {
             *version = get_version(&mt);
             *id = memory_slots[i].id;
-            bootable = memory_slots[i].bootable;
-            first = false;
         }
     }
     return PULL_SUCCESS;

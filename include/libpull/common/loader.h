@@ -12,9 +12,9 @@ extern "C" {
 /** 
  * \brief Loader interface used to load the object once stored.
  * 
- * \param id Id of the memory object to be loaded.
+ * \param address address to be loaded
  */
-void load_object(mem_id_t id);
+void load_object(address_t address);
 
 #ifdef __cplusplus
  }
