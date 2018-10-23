@@ -16,7 +16,7 @@ MOSTLYCLEANFILES = idsgrep.aux idsgrep.log idsgrep.blg idsgrep.bbl idsgrep.toc \
 LIBS = ../ext/libcoap/.libs/libcoap-1.a ../ext/tinydtls/libtinydtls.a
 LIBS += ../ext/tinycrypt/lib/libtinycrypt.a
 
-COMMON_SRC = ../src/core/common/error.c ../src/core/common/identity.c ../src/core/common/crc16.c
+COMMON_SRC = ../src/core/common/error.c ../src/core/common/identity.c
 MEMORY_SRC = ../src/core/memory/memory_objects.c 
 SECURITY_SRC = ../src/core/security/verifier.c
 NETWORK_SRC = ../src/core/network/receiver.c ../src/core/network/subscriber.c ../src/core/network/connection_config.c ../src/core/network/writer.c
@@ -43,7 +43,6 @@ memory_tests = test_memory test_memory_objects test_manifest
 agents_tests = test_update test_bootloader_agent
 network_tests = test_receiver test_subscriber test_connection_dtls #test_receiver_memory_invalid
 security_tests = test_tinycrypt test_tinydtls
-common_tests = test_crc16
 pipeline_tests = test_pipeline test_lzss test_bspatch test_buffer
 
 check_PROGRAMS = $(memory_tests) $(agents_tests) $(network_tests) $(security_tests) $(common_tests) $(pipeline_tests)
@@ -67,9 +66,6 @@ test_tinydtls_SOURCES = security/test_tinydtls.c $(NO_MOCK_SRC) $(MOCK_MEMORY) $
 test_update_SOURCES = agents/test_update.c $(ALL_SRC) $(AGENTS_SRC) $(TINYDTLS_SRC)
 test_bootloader_agent_SOURCES = agents/test_bootloader_agent.c $(ALL_SRC) $(AGENTS_SRC) $(TINYDTLS_SRC)
 test_bootloader_agent_CFLAGS = $(AM_CFLAGS) -DRECOVERY_IMAGE=0
-
-# Common tests
-test_crc16_SOURCES = common/test_crc16.c $(ALL_SRC)
 
 # Pipeline tests
 test_pipeline_SOURCES = pipeline/test_pipeline.c $(ALL_SCR)

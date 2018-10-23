@@ -115,3 +115,4 @@ package-lock.json
 test/Makefile
 utils/server/Makefile
 utils/firmware_tool/Makefile
+stats_ci

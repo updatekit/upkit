@@ -30,7 +30,7 @@ void ntest_clean(void) {
 void test_get_newest_firmware(void) {
     mem_id_t newest = 0;
     version_t version = 0;
-    pull_error err = get_newest_firmware(&newest, &version, &obj_t, false, false);
+    pull_error err = get_newest_firmware(&newest, &version, &obj_t, false);
     nTEST_TRUE(!err);
     nTEST_COMPARE_HEX(0xc, version);
     nTEST_COMPARE_INT(OBJ_C, newest);
@@ -39,7 +39,7 @@ void test_get_newest_firmware(void) {
 void test_get_oldest_slot(void) {
     mem_id_t oldest;
     version_t version = 0;
-    pull_error err = get_oldest_firmware(&oldest, &version, &obj_t, false, false);
+    pull_error err = get_oldest_firmware(&oldest, &version, &obj_t, false);
     nTEST_TRUE(!err);
     nTEST_COMPARE_HEX(0xa, version);
     nTEST_COMPARE_INT(OBJ_A, oldest);
@@ -62,7 +62,7 @@ void test_write_slot_manifest(void) {
     set_version(&mt_new, 0xffff);
     err = write_firmware_manifest(&obj_a, &mt_new);
     nTEST_TRUE(!err);
-    get_newest_firmware(&newest, &version, &obj_t, false, false);
+    get_newest_firmware(&newest, &version, &obj_t, false);
     nTEST_COMPARE_INT(OBJ_A, newest);
     nTEST_COMPARE_HEX(0xffff, version);
     err = write_firmware_manifest(&obj_a, &mt_old);

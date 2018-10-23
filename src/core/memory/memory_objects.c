@@ -5,7 +5,7 @@
 #include <stdbool.h>
 
 pull_error get_ordered_firmware(mem_id_t* id, version_t* version, mem_object_t* obj_t, bool newest,
-        bool disable_running, bool prefer_bootable) {
+        bool prefer_bootable) {
     manifest_t mt;
     pull_error err;
     mem_id_t i;
@@ -18,48 +18,32 @@ pull_error get_ordered_firmware(mem_id_t* id, version_t* version, mem_object_t* 
             return GET_NEWEST_ERROR;
         }
         err = read_firmware_manifest(obj_t, &mt);
+        memory_close(obj_t);
         if (err) {
             log_error(err, "Failure reading firmware manifest for object %d\n", memory_slots[i].id);
             return GET_NEWEST_ERROR;
         }
-        memory_close(obj_t);
         // Avoid overriding the slot with the running image
-        if (disable_running && memory_slots[i].loaded == true) {
-            continue;
-        }
-        if (first) {
-            *version = mt.vendor.version;
+        if (first || ( !(prefer_bootable && (bootable && !memory_slots[i].bootable)) && (
+            (newest == true && mt.vendor.version > *version) || 
+            (newest == false && mt.vendor.version < *version)))) {
+            *version = get_version(&mt);
             *id = memory_slots[i].id;
             bootable = memory_slots[i].bootable;
             first = false;
-        } else {
-            if (prefer_bootable && (bootable && !memory_slots[i].bootable)) {
-                continue;
-            }
-            if (newest == true) {
-                if (mt.vendor.version > *version) {
-                    *version = mt.vendor.version;
-                    *id = memory_slots[i].id; // XXX This needs to be fixed
-                }
-            } else {
-                if (mt.vendor.version < *version) {
-                    *version= mt.vendor.version;
-                    *id = memory_slots[i].id; // This needs to be fixed XXX
-                }
-            }
         }
     }
     return PULL_SUCCESS;
 }
 
 pull_error get_newest_firmware(mem_id_t* id, version_t* version, 
-        mem_object_t* obj_t, bool disable_running, bool prefer_bootable) {
-    return get_ordered_firmware(id, version, obj_t, true, disable_running, prefer_bootable);
+        mem_object_t* obj_t, bool prefer_bootable) {
+    return get_ordered_firmware(id, version, obj_t, true, prefer_bootable);
 }
 
 pull_error get_oldest_firmware(mem_id_t* id, version_t* version, 
-        mem_object_t* obj_t, bool disable_running, bool prefer_bootable) {
-    return get_ordered_firmware(id, version, obj_t, false, disable_running, prefer_bootable);
+        mem_object_t* obj_t, bool prefer_bootable) {
+    return get_ordered_firmware(id, version, obj_t, false, prefer_bootable);
 }
 
 pull_error copy_firmware(mem_object_t* src, mem_object_t* dst, uint8_t* buffer, size_t buffer_size) {

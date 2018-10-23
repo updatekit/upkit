@@ -15,7 +15,7 @@ pull_error libpull_fsm_init(libpull_fsm_ctx_t* ctx, mem_object_t* obj) {
 
     // (0) Get the newest version available
     mem_id_t ignore;
-    pull_error err = get_newest_firmware(&ignore, &ctx->version, ctx->obj, false, false);
+    pull_error err = get_newest_firmware(&ignore, &ctx->version, ctx->obj, false);
     if (err) {
         log_error(err, "Error getting newest firmware\n");
         return err;
@@ -58,7 +58,7 @@ pull_error libpull_fsm_receive(libpull_fsm_ctx_t* ctx, libpull_cmd_t cmd, const 
                 break;
             }
             // (0) Get oldest memory object
-            err = get_oldest_firmware(&ctx->id, &ignore, ctx->obj, true, true);
+            err = get_oldest_firmware(&ctx->id, &ignore, ctx->obj, true);
             if (err) {
                 log_error(err, "Error getting the oldest slot");
                 return err;
