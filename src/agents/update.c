@@ -94,7 +94,7 @@ agent_event_t update_agent(update_agent_config* cfg, update_agent_ctx_t* ctx, vo
     // (6) Verify received firmware
     PULL_CONTINUE(EVENT_VERIFY, NULL);
     PULL_CONTINUE(EVENT_VERIFY_BEFORE, NULL);
-    ctx->err = verify_object(&ctx->new_obj, cfg->df, cfg->vendor_x, cfg->vendor_y, cfg->ef, 
+    ctx->err = verify_object(&ctx->new_obj, cfg->vendor_x, cfg->vendor_y, 
             cfg->buffer, cfg->buffer_size);
     PULL_CONTINUE(EVENT_VERIFY_AFTER, NULL);
     if (ctx->err) {

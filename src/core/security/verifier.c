@@ -12,8 +12,8 @@ enum verifier_states {
 };
 
 /* The memory object should be already opened */
-pull_error verify_object(mem_object_t* obj, digest_func digest, const uint8_t* x, const uint8_t* y,
-        ecc_func_t ef, uint8_t* buffer, size_t buffer_len) {
+pull_error verify_object(mem_object_t* obj, const uint8_t* x, const uint8_t* y, 
+            uint8_t* buffer, size_t buffer_len) {
     PULL_ASSERT(obj != NULL || x != NULL || y != NULL || buffer != NULL || buffer_len != 0);
     pull_error err;
     enum verifier_states state;
@@ -32,7 +32,7 @@ pull_error verify_object(mem_object_t* obj, digest_func digest, const uint8_t* x
     state = CALCULATING_DIGEST;
     log_info("Start phase CALCULATING_DIGEST\n");
     digest_ctx ctx;
-    if ((err = digest.init(&ctx)) != PULL_SUCCESS) {
+    if ((err = digest_init(&ctx)) != PULL_SUCCESS) {
         goto error;
     }
     address_t offset = get_offset(&mt);
@@ -50,7 +50,7 @@ pull_error verify_object(mem_object_t* obj, digest_func digest, const uint8_t* x
             err = MEMORY_READ_ERROR;
             goto error;
         }
-        err = digest.update(&ctx, buffer, readed);
+        err = digest_update(&ctx, buffer, readed);
         if (err) {
             goto error;
         }
@@ -59,7 +59,7 @@ pull_error verify_object(mem_object_t* obj, digest_func digest, const uint8_t* x
             step = final_offset - offset;
         }
     }
-    uint8_t* result = digest.finalize(&ctx);
+    uint8_t* result = digest_finalize(&ctx);
 
     /***************** VERIFY DIGEST *************/
     log_info("Start phase VERIFY_DIGEST\n");
@@ -69,7 +69,7 @@ pull_error verify_object(mem_object_t* obj, digest_func digest, const uint8_t* x
         err = INVALID_MANIFEST_ERROR;
         goto error;
     }
-    int i=digest.size-1;
+    int i=digest_size()-1;
     while(i >= 0) {
         if (hash[i] != result[i]) {
             err = VERIFICATION_FAILED_ERROR;
@@ -84,7 +84,7 @@ pull_error verify_object(mem_object_t* obj, digest_func digest, const uint8_t* x
     /********** VERIFY_SIGNATURE ***********/
     log_info("Start phase VERIFY_SIGNATURE\n");
     state = VERIFY_SIGNATURE;
-    err = verify_signature(&mt, digest, x, y, ef);
+    err = verify_signature(&mt, x, y);
     if (err) {
         goto error;
     }

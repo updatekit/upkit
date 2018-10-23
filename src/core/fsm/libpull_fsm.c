@@ -45,8 +45,8 @@ uint8_t buffer[BUFFER_SIZE];
 
 pull_error fsm_post_verification(mem_object_t* obj, void* user_data) {
     // XXX These informations should be derived from the specific user data
-    return verify_object(obj, tinycrypt_digest_sha256, vendor_x_g, vendor_y_g,
-            tinycrypt_secp256r1_ecc, buffer, BUFFER_SIZE);
+    return verify_object(obj, vendor_x_g, vendor_y_g,
+            buffer, BUFFER_SIZE);
 }
 
 pull_error libpull_fsm_receive(libpull_fsm_ctx_t* ctx, libpull_cmd_t cmd, const uint8_t* buf, size_t len) {

@@ -26,10 +26,6 @@ int main(void) {
     cfg.swap_id = SWAP;
     cfg.swap_size = SWAP_SIZE;
     bootloader_agent_vendor_keys(&cfg, vendor_x_g, vendor_y_g);
-#if WITH_TINYCRYPT
-    cfg.df = tinycrypt_digest_sha256;
-    cfg.ef = tinycrypt_secp256r1_ecc;
-#endif
     bootloader_agent_set_buffer(&cfg, buffer, BUFFER_SIZE);
 
     log_debug("Bootloader started\n");

@@ -54,16 +54,10 @@ typedef union digest_ctx {
 #endif
 } digest_ctx;
 
-/**
- * Abstraction to use different cryptographic libraries to calculate the hash
- */
-typedef struct {
-  uint16_t size;                    // Number of bytes of the digest
-  pull_error (*init)(digest_ctx *); // Pointer to digest init function
-  pull_error (*update)(digest_ctx *, void *,
-                       size_t);    // Pointer to digest update function
-  void *(*finalize)(digest_ctx *); // Pointer to digest finalize function
-} digest_func;
+pull_error digest_init(digest_ctx* ctx);
+pull_error digest_update(digest_ctx* ctx, void* data, size_t size);
+uint8_t* digest_finalize(digest_ctx* ctx);
+uint8_t digest_size();
 
 #ifdef __cplusplus
 }
