@@ -15,27 +15,11 @@
 
 uint8_t buffer[BUFFER_SIZE];
 
-static digest_func df;
-static ecc_func_t ef;
-
 #if  WITH_TINYCRYPT
 int default_CSPRNG(uint8_t *dest, unsigned int size) {
     return 0;
 }
 #endif
-
-void specialize_crypto_functions() {
-#if WITH_CRYPTOAUTHLIB
-    df = cryptoauthlib_digest_sha256;
-    ef = cryptoauthlib_ecc;
-#elif WITH_TINYDTLS
-    df = tinydtls_digest_sha256;
-    ef = tinydtls_secp256r1_ecc;
-#elif WITH_TINYCRYPT
-    df = tinycrypt_digest_sha256;
-    ef = tinycrypt_secp256r1_ecc;
-#endif
-}
 
 PROCESS(bootloader, "bootloader process");
 AUTOSTART_PROCESSES(&bootloader);
@@ -48,10 +32,7 @@ PROCESS_THREAD(bootloader, ev, data) {
     cfg.bootloader_ctx_id = BOOTLOADER_CTX;
     cfg.swap_id = SWAP;
     cfg.swap_size = SWAP_SIZE;
-    specialize_crypto_functions();
     bootloader_agent_vendor_keys(&cfg, vendor_x_g, vendor_y_g);
-    bootloader_agent_digest_func(&cfg, df);
-    bootloader_agent_ecc_func(&cfg, ef);
     bootloader_agent_set_buffer(&cfg, buffer, BUFFER_SIZE);
 
     log_debug("Bootloader started\n");
