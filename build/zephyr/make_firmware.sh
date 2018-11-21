@@ -18,7 +18,7 @@ FIRMWARE_DIR="$ROOTDIR/firmware"
 BOOTLOADER="$ROOTDIR/bootloader/build/zephyr/zephyr.bin"
 BOOTLOADER_CTX="$ROOTDIR/bootloader_ctx/bootloader_ctx.bin"
 MANIFEST="$FIRMWARE_DIR/manifest.bin"
-IMAGE="$ROOTDIR/application/build/zephyr/zephyr.bin"
+IMAGE="$ROOTDIR/application_ble/build/zephyr/zephyr.bin"
 FIRMWARE="$ROOTDIR/firmware/firmware.bin"
 
 check_args() {

@@ -16,7 +16,7 @@ extern "C" {
 #ifdef SIMPLE_MANIFEST
 
 /** Manifest that must be filled and signed by the vendor */
-typedef struct {
+typedef struct vendor_manifest_t {
     address_t size; /** Size of the object. */
     address_t offset; /** Offset of the blob starting from 0. */
     version_t version; /** Version of the object. */
@@ -27,13 +27,13 @@ typedef struct {
 } vendor_manifest_t;
 
 /** Manifest filled by the server */
-typedef struct {
+typedef struct server_manifest_t {
     identity_t identity; /* Structure containing the identity of the client */
     uint16_t self_checking_flags; /** Flags used to perform self checking after update */
 } server_manifest_t;
 
 /** General manifest structure */
-typedef struct {
+typedef struct manifest_t {
     uint8_t vendor_signature_r[32]; /** R component of vendor's signature */
     uint8_t vendor_signature_s[32]; /** S component of vendor's signature */
     vendor_manifest_t vendor; /** Vendor manifest */

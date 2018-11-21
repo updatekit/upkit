@@ -19,7 +19,7 @@ LIBS += ../ext/tinycrypt/lib/libtinycrypt.a
 COMMON_SRC = ../src/core/common/error.c ../src/core/common/identity.c
 MEMORY_SRC = ../src/core/memory/memory_objects.c 
 SECURITY_SRC = ../src/core/security/verifier.c
-NETWORK_SRC = ../src/core/network/receiver.c ../src/core/network/subscriber.c ../src/core/network/connection_config.c ../src/core/network/writer.c
+NETWORK_SRC = ../src/core/network/connection_config.c ../src/core/network/writer.c
 SUPPORT_SRC = support/external_variables.c support/utils.c
 PIPELINE_SRC = ../src/core/pipeline/lzss.c ../src/core/pipeline/bspatch.c ../src/core/pipeline/buffer.c
 

@@ -92,9 +92,7 @@ typedef enum agent_event_t {
  * \brief  Configuration structure for the update agent.
  */
 typedef struct {
-    conn_config_t subscriber;
-    conn_config_t receiver;
-    uint8_t reuse_connection;
+    conn_config_t connection;
     identity_t identity;
     uint8_t* vendor_x;
     uint8_t* vendor_y;
@@ -103,19 +101,6 @@ typedef struct {
     uint8_t* buffer;
     size_t buffer_size;
 } update_agent_config;
-
-/**
- * \brief  The update agents connects to the subscription server and the
- * provisioning server. If the connection to both server should be done with
- * the same connection than the connection must be reused.
- *
- * \param cfg Pointer to the configuration structure.
- * \param reuse Boolean indicating if the connection should be reused (1 to
- * reuse).
- */
-static inline void update_agent_reuse_connection(update_agent_config* cfg, uint8_t reuse) {
-    cfg->reuse_connection = reuse;
-}
 
 /**
  * \brief  Function to set the device identity used to identify the device with

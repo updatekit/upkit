@@ -7,7 +7,7 @@
 void ntest_prepare(void) {}
 void ntest_clean(void) {}
 
-/* The idea of the pipeline is to have, to keep it simple
+/* The idea of the pipeline is to have
  * a set of modules that takes N bytes in input and pass
  * to the next stage N times 1 byte. In this way we can
  * slightly simplify each stage and thus reduce the size.

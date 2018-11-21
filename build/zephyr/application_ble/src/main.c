@@ -52,9 +52,7 @@ static struct bt_conn_cb conn_callbacks = {
 };
 
 int main(void) {
-	int err;
-
-	err = bt_enable(NULL);
+	int err = bt_enable(NULL);
 	if (err) {
 		printf("Bluetooth init failed (err %d)\n", err);
 		return 1;
