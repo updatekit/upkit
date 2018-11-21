@@ -75,9 +75,9 @@ AC_ARG_ENABLE([simple-manifest], AC_HELP_STRING([--disable-simple-manifest],
 AS_IF([test "x$simple-manifest" != "xno"], [AC_DEFINE([SIMPLE_MANIFEST], [1],[Use the simple manifest.])])
 
 dnl With cryptographic libraries.
-AC_ARG_WITH([tinycrypt], AS_HELP_STRING([--without-tinycrypt],
-            [Do not use tinycrypt as a cryptographic library]))
-AS_IF([test "x$with-tinycrypt" != "xno"], [AC_DEFINE([WITH_TINYCRYPT], [1],
+AC_ARG_WITH([tinycrypt], AS_HELP_STRING([--with-tinycrypt],
+            [Use tinycrypt as a cryptographic library]))
+AS_IF([test "x$with-tinycrypt" != "xyes"], [AC_DEFINE([WITH_TINYCRYPT], [0],
       [Use tinycrypt as a cryptographic library.])])
 
 dnl check the presence of the library from the include path or from the ext path

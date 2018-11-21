@@ -9,7 +9,7 @@
 
 /* Use tinycrypt as a cryptographic library. */
 #ifndef WITH_TINYCRYPT
-#define WITH_TINYCRYPT 1
+#define WITH_TINYCRYPT 0
 #endif
 
 /* Use TinyDTLS as a cryptographic library. */

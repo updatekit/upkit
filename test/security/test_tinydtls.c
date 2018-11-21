@@ -9,16 +9,12 @@
 #include "manifest_mock.h" // Mock
 #include <libpull/memory/simple_manifest.h> // Real Implementation
 
-digest_func df;
-ecc_func_t ef;
 mem_object_t obj_a;
 
 #include "test_verifier.h"
 
 void ntest_prepare() {
     nTEST_TRUE(memory_open(&obj_a, OBJ_A, WRITE_ALL) == PULL_SUCCESS);
-    df = tinydtls_digest_sha256;
-    ef = tinydtls_secp256r1_ecc;
     memory_mock_restore();
     manifest_mock_restore();
 }

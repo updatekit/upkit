@@ -34,36 +34,6 @@ void test_sha256(void) {
     nTEST_COMPARE_MEM(hash_g, hash, 32);
 }
 
-void test_sha256_invalid_init(void) {
-    digest_func digest = df;
-    pull_error err = digest.init(NULL);
-    nTEST_TRUE(err == DIGEST_INIT_ERROR);
-}
-
-void test_sha256_invalid_update(void) {
-    digest_ctx ctx;
-    digest_func digest = df;
-    pull_error err = digest.init(&ctx);
-    nTEST_TRUE(!err);
-    err = digest.update(NULL, (void*) data_g, 128);
-    nTEST_TRUE(err = DIGEST_UPDATE_ERROR);
-    err = digest.update(&ctx, NULL, 128);
-    nTEST_TRUE(err = DIGEST_UPDATE_ERROR);
-    err = digest.update(&ctx, (void*) data_g, 0);
-    nTEST_TRUE(err = DIGEST_UPDATE_ERROR);
-}
-
-void test_sha256_invalid_final(void) {
-    digest_ctx ctx;
-    digest_func digest = df;
-    pull_error err = digest.init(&ctx);
-    nTEST_TRUE(!err);
-    err = digest.update(&ctx, (void*) data_g, 128);
-    nTEST_TRUE(!err);
-    uint8_t* hash = digest.finalize(NULL);
-    nTEST_TRUE(hash == NULL);
-}
-
 void test_sign(void) {
     uint8_t signature[64];
     pull_error err = ef.sign(server_priv_g, signature, hash_g, ef.curve_size);

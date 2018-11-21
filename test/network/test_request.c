@@ -1,6 +1,5 @@
 #include <libpull/common.h>
-#include <libpull/network/subscriber.h>
-#include <libpull/network/async_interface.h>
+#include <libpull/network.h>
 #include <libpull/memory/memory_objects.h>
 
 #include "support/support.h"
@@ -13,7 +12,7 @@ void ntest_clean(void) {
     restore_assets();
 }
 
-static void check_update_cb(pull_error err, const char* data, int len, void* more) {
+static void callback(pull_error err, const char* data, int len, void* more) {
     subscriber_ctx* ctx = (subscriber_ctx*) more;
     nTEST_TRUE(data != NULL);
     nTEST_TRUE(len == 2);

@@ -5,7 +5,7 @@
 IMPLEMENT(configs)
 
 
-bool validate_platform(std::string value) {
+bool validate_appid(std::string value) {
     return true; // TODO find a way to validate them
 }
 bool validate_version(std::string value) {

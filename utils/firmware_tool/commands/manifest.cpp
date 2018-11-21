@@ -17,11 +17,6 @@
 
 IMPLEMENT(manifest)
 
-identity_t default_identity = {
-    .udid = 0xabcd,
-    .random = 0x1234
-};
-
 int manifest_generate_command(Context ctx) {
     manifest_t mt;
     //manifest_init(&mt);
@@ -29,12 +24,12 @@ int manifest_generate_command(Context ctx) {
     struct stat buf;
     stat(ctx.get_binary_file().c_str(), &buf);
     set_size(&mt, buf.st_size);
-    // (2) Set Platform
+    // (2) Set Appid
     std::stringstream str;
-    str << ctx.get_platform();
-    platform_t platform;
-    str >> std::hex >> platform; // TODO check for errors
-    set_platform(&mt, platform);
+    str << ctx.get_appid();
+    appid_t appid;
+    str >> std::hex >> appid; // TODO check for errors
+    set_appid(&mt, appid);
     // (3) Set Offset
     str.clear();
     str << ctx.get_offset();
@@ -60,8 +55,7 @@ int manifest_generate_command(Context ctx) {
     delete[] key_buffer;
     // (6) Calculate Firmware Hash
     digest_ctx dctx;
-    digest_func digest = tinycrypt_digest_sha256;
-    pull_error err = digest.init(&dctx);
+    pull_error err = digest_init(&dctx);
     if (err) {
         std::cout << "Error initializing the hashing structure" << std::endl;
         return EXIT_FAILURE;
@@ -74,7 +68,7 @@ int manifest_generate_command(Context ctx) {
     char* buffer = new char[BUFFER_LEN];
     while (!file.eof()) {
         file.read(buffer, BUFFER_LEN);
-        err = digest.update(&dctx, buffer, file.gcount());
+        err = digest_update(&dctx, buffer, file.gcount());
         if (err) {
             std::cout << "Error updating digest" << std::endl;
             delete[] buffer;
@@ -83,7 +77,7 @@ int manifest_generate_command(Context ctx) {
     }
     file.close();
     delete[] buffer;
-    uint8_t* hash = (uint8_t*) digest.finalize(&dctx); // TODO check the size of the hash
+    uint8_t* hash = (uint8_t*) digest_finalize(&dctx); // TODO check the size of the hash
     set_digest(&mt, hash);
     // (6) Generate Vendor Signature
     uint8_t* vend_priv_key_buffer = new uint8_t[32];
@@ -97,7 +91,7 @@ int manifest_generate_command(Context ctx) {
     }
     vend_priv_key.read((char*)vend_priv_key_buffer, 32); // TODO check for errors && XXX hardcoded value
     vend_priv_key.close();
-    err = sign_manifest_vendor(&mt, digest, vend_priv_key_buffer, signature, tinycrypt_secp256r1_ecc);
+    err = sign_manifest_vendor(&mt, vend_priv_key_buffer, signature);
     delete[] vend_priv_key_buffer;
     if (err) {
         delete[] signature;
@@ -116,7 +110,6 @@ int manifest_generate_command(Context ctx) {
     // (8) Perform also the server signature // XXX this should be done only
     // during testing
 
-    set_identity(&mt, default_identity);
     uint8_t* server_priv_key_buffer = new uint8_t[32];
     std::ifstream server_priv_key(ctx.get_server_priv_key(), std::ios_base::binary);
     if (!server_priv_key) {
@@ -126,7 +119,7 @@ int manifest_generate_command(Context ctx) {
     }
     server_priv_key.read((char*)server_priv_key_buffer, 32); // TODO check for errors && XXX hardcoded value
     server_priv_key.close();
-    err = sign_manifest_server(&mt, digest, server_priv_key_buffer, signature, tinycrypt_secp256r1_ecc);
+    err = sign_manifest_server(&mt, server_priv_key_buffer, signature);
     delete[] server_priv_key_buffer;
     delete[] signature;
     if (err) {
@@ -161,7 +154,7 @@ int manifest_print_command(Context ctx) {
     input.read((char*) &mt, sizeof(mt));
     std::cout << ctx.get_out_file() << std::endl;
     std::cout << "   version:\t  " << "0x" << std::hex << get_version(&mt) << std::endl;
-    std::cout << "   platform:\t  " << "0x" << std::hex << get_platform(&mt) << std::endl;
+    std::cout << "   appid:\t  " << "0x" << std::hex << get_appid(&mt) << std::endl;
     std::cout << "   size:\t  " << std::to_string(get_size(&mt)) << " B" <<  std::endl;
     std::cout << "   offset:\t  " << "0x" << std::hex << get_offset(&mt) << " B" << std::endl;
     size_t offset = 18;
@@ -205,8 +198,7 @@ int manifest_validate_command(Context ctx) {
     log_item("size", get_size(&mt) == buf.st_size);
     // (3) Validate Digest
     digest_ctx dctx;
-    digest_func digest = tinycrypt_digest_sha256;
-    pull_error err = digest.init(&dctx);
+    pull_error err = digest_init(&dctx);
     if (err) {
         std::cout << "Error initializing the hashing structure" << std::endl;
         return EXIT_FAILURE;
@@ -218,7 +210,7 @@ int manifest_validate_command(Context ctx) {
         char* buffer = new char[BUFFER_LEN];
         while (!file.eof()) {
             file.read(buffer, BUFFER_LEN);
-            err = digest.update(&dctx, buffer, file.gcount());
+            err = digest_update(&dctx, buffer, file.gcount());
             if (err) {
                 std::cout << "Error updating digest" << std::endl;
                 delete[] buffer;
@@ -227,8 +219,8 @@ int manifest_validate_command(Context ctx) {
         }
         file.close();
         delete[] buffer;
-        uint8_t* hash = (uint8_t*) digest.finalize(&dctx); // TODO check the size of the hash
-        log_item("digest", memcmp(get_digest(&mt), hash, digest.size) == 0);
+        uint8_t* hash = (uint8_t*) digest_finalize(&dctx); // TODO check the size of the hash
+        log_item("digest", memcmp(get_digest(&mt), hash, get_digest_size()) == 0);
     }
 
     // (4) Validate Server Public Key
@@ -252,8 +244,10 @@ int manifest_validate_command(Context ctx) {
     vendor_pub_key.read((char*)vendor_public_key_buffer, 64); // XXX hardcoded size
     vendor_pub_key.close();
 
-    err = verify_signature(&mt, digest, vendor_public_key_buffer,
-                                         vendor_public_key_buffer+32, tinycrypt_secp256r1_ecc);
+    keystore_t keystore;
+    memcpy(keystore.x, vendor_public_key_buffer, 32);
+    memcpy(keystore.y, vendor_public_key_buffer+32, 32);
+    err = verify_signature(&mt, keystore);
     log_item("_signature", err == PULL_SUCCESS);
     delete[] vendor_public_key_buffer;
     delete[] server_public_key_buffer;

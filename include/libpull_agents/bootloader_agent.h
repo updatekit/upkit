@@ -101,8 +101,6 @@ typedef struct bootloader_agent_config {
     size_t swap_size;
     uint8_t* vendor_x;
     uint8_t* vendor_y;
-    digest_func df;
-    ecc_func_t ef;
     uint8_t* buffer;
     size_t buffer_size;
 } bootloader_agent_config;
@@ -118,28 +116,6 @@ typedef struct bootloader_agent_config {
 static inline void bootloader_agent_vendor_keys(bootloader_agent_config* cfg, uint8_t* x, uint8_t* y) {
     cfg->vendor_x = x;
     cfg->vendor_y = y;
-}
-
-/** 
- * \brief  Function to configure the bootloader digest function.
- * 
- * \param cfg Pointer to the configuration structure.
- * \param df Digest function to be used. (For a list of them check the
- * security/digest documentation).
- */
-static inline void bootloader_agent_digest_func(bootloader_agent_config* cfg, digest_func df) {
-    cfg->df = df;
-}
-
-/** 
- * \brief  Function to configure the bootloader ECC function.
- * 
- * \param cfg Pointer to the configuration structure.
- * \param ef ECC function to be used. (For a list of them check the
- * security/ecc documentation).
- */
-static inline void bootloader_agent_ecc_func(bootloader_agent_config* cfg, ecc_func_t ef) {
-    cfg->ef = ef;
 }
 
 /** 

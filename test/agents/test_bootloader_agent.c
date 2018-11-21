@@ -1,4 +1,4 @@
-#include <libpull/security/sha256.h>
+#include <libpull/security.h>
 #include "libpull_agents/bootloader_agent.h"
 
 #include "support/support.h"
@@ -28,8 +28,6 @@ void ntest_clean(void) {
 void test_bootloader_success(void) {
 
     bootloader_agent_vendor_keys(&cfg, (uint8_t*) vendor_x_g, (uint8_t*) vendor_y_g);
-    bootloader_agent_digest_func(&cfg, tinydtls_digest_sha256);
-    bootloader_agent_ecc_func(&cfg, tinydtls_secp256r1_ecc);
     bootloader_agent_set_buffer(&cfg, buffer, BUFFER_SIZE);
     cfg.bootloader_ctx_id = BOOTLOADER_CTX;
     cfg.recovery_id = OBJ_GOLD;

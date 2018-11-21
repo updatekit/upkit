@@ -5,7 +5,7 @@
 #define CONTEXT_HPP_
 
 #define FOREACH_ARG(ARG) \
-    ARG(std::string, platform, 'a', "Platform used")\
+    ARG(std::string, appid, 'a', "Application ID")\
     ARG(std::string, version, 'l', "Current firmware version")\
     ARG(std::string, offset, 'q', "Offset of the firmware respect the start of the file")\
     ARG(std::string, signature_file, 's', "File where the signature will be stored")\

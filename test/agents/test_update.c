@@ -27,13 +27,8 @@ void ntest_clean(void) {
 }
 
 void update_runner(conn_type type, void* data) {
-    conn_config(&cfg.subscriber, "localhost", 0, type, data, "version");
-    conn_config(&cfg.receiver, "localhost", 0, type, data, "firmware");
-    update_agent_reuse_connection(&cfg, 0);
-    update_agent_set_identity(&cfg, identity_g);
+    conn_config("localhost", 0, type, data);
     update_agent_vendor_keys(&cfg, (uint8_t*) vendor_x_g, (uint8_t*) vendor_y_g);
-    update_agent_digest_func(&cfg, tinydtls_digest_sha256);
-    update_agent_ecc_func(&cfg, tinydtls_secp256r1_ecc);
     update_agent_set_buffer(&cfg, buffer, BUFFER_SIZE);
 
     void* event_data;

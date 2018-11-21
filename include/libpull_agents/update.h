@@ -92,11 +92,9 @@ typedef enum agent_event_t {
  * \brief  Configuration structure for the update agent.
  */
 typedef struct {
-    conn_config_t connection;
+    conn_config_t conn;
     uint8_t* vendor_x;
     uint8_t* vendor_y;
-    digest_func df;
-    ecc_func_t ef;
     uint8_t* buffer;
     size_t buffer_size;
 } update_agent_config;
@@ -111,28 +109,6 @@ typedef struct {
 static inline void update_agent_vendor_keys(update_agent_config* cfg, uint8_t* x, uint8_t* y) {
     cfg->vendor_x = x;
     cfg->vendor_y = y;
-}
-
-/**
- * \brief  Function to set the digest function.
- *
- * \param cfg Pointer to the configuration structure.
- * \param df Digest function to be used. (To see all the available digest
- * functions check the documentation at security/digest).
- */
-static inline void update_agent_digest_func(update_agent_config* cfg, digest_func df) {
-    cfg->df = df;
-}
-
-/**
- * \brief  Function to set the ECC function.
- *
- * \param cfg Pointer to the configuration structure.
- * \param ef ECC function to be used. (To see all the available ECC
- * functions check the documentation at security/ECC).
- */
-static inline void update_agent_ecc_func(update_agent_config* cfg, ecc_func_t ef) {
-    cfg->ef = ef;
 }
 
 /**
@@ -151,14 +127,11 @@ static inline void update_agent_set_buffer(update_agent_config* cfg, uint8_t* bu
  * \brief Context of the update agent.
  */
 typedef struct update_agent_ctx_t {
-    conn_ctx sconn;
-    subscriber_ctx sctx;
-    receiver_ctx rctx;
-    conn_ctx rconn;
     mem_id_t id;
     mem_object_t new_obj;
     mem_object_t obj_t;
     pull_error err;
+    fsm_ctx_t fsmc;
 } update_agent_ctx_t;
 
 /**
