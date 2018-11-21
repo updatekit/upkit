@@ -1,5 +1,4 @@
 #include <libpull/memory.h>
-#include <libpull/security/sha256.h>
 #include <string.h>
 
 #include "support/support.h"
@@ -25,7 +24,6 @@ void ntest_prepare(void) {
     set_size(&mt, size_g);
     set_offset(&mt, offset_g);
     set_digest(&mt, digest_g);
-    set_platform(&mt, platform_g);
     set_version(&mt, version_g);
     set_server_key_x(&mt, (uint8_t*) server_x_g);
     set_server_key_y(&mt, (uint8_t*) server_y_g);
@@ -39,9 +37,6 @@ void ntest_clean() {};
 
 void test_manifest_version(void) {
     nTEST_TRUE(version_g == get_version(&mt));
-}
-void test_manifest_platform(void) {
-    nTEST_TRUE(platform_g == get_platform(&mt));
 }
 void test_manifest_size(void) {
     nTEST_TRUE(size_g == get_size(&mt));
@@ -81,32 +76,17 @@ void test_manifest_server_signature_s(void) {
 
 void test_sign_verify_manifest(void) {
     uint8_t buffer[BUFFER_LEN];
-    pull_error err = sign_manifest_vendor(&mt, tinycrypt_digest_sha256, 
-            vendor_priv_g, buffer, tinycrypt_secp256r1_ecc);
+    pull_error err = sign_manifest_vendor(&mt, vendor_priv_g, buffer);
     nTEST_TRUE(err == PULL_SUCCESS);
-    err = sign_manifest_server(&mt, tinycrypt_digest_sha256, 
-            server_priv_g, buffer, tinycrypt_secp256r1_ecc);
+    err = sign_manifest_server(&mt, server_priv_g, buffer);
     nTEST_TRUE(err == PULL_SUCCESS);
-    err = verify_signature(&mt, tinycrypt_digest_sha256, vendor_x_g, vendor_y_g, tinycrypt_secp256r1_ecc);
+    err = verify_signature(&mt, keystore_g);
     nTEST_TRUE(err == PULL_SUCCESS);
-}
-
-void test_sign_verify_manifest_invalid_digest(void) {
-    uint8_t buffer[BUFFER_LEN];
-    digest_func f = tinycrypt_digest_sha256;
-    f.init = invalid_init;
-    pull_error err = sign_manifest_vendor(&mt, f, vendor_priv_g, buffer, tinycrypt_secp256r1_ecc);
-    nTEST_TRUE(err);
-    err = sign_manifest_server(&mt, f, server_priv_g, buffer, tinycrypt_secp256r1_ecc);
-    nTEST_TRUE(err);
-    err = verify_signature(&mt, f, vendor_x_g, vendor_y_g, tinycrypt_secp256r1_ecc);
-    nTEST_TRUE(err);
 }
 
 int main() {
     nTEST_INIT();
     nTEST_RUN(test_manifest_version);
-    nTEST_RUN(test_manifest_platform);
     nTEST_RUN(test_manifest_size);
     nTEST_RUN(test_manifest_offset);
     nTEST_RUN(test_manifest_server_key_x);
@@ -117,7 +97,6 @@ int main() {
     nTEST_RUN(test_manifest_server_signature_r);
     nTEST_RUN(test_manifest_server_signature_s);
     nTEST_RUN(test_sign_verify_manifest);
-    nTEST_RUN(test_sign_verify_manifest_invalid_digest);
     nTEST_END();
     nTEST_RETURN();
 }

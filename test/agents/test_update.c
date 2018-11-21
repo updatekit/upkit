@@ -1,4 +1,4 @@
-#include <libpull/security/sha256.h>
+#include <libpull/security.h>
 #include "libpull_agents/update.h"
 
 #include "support/support.h"

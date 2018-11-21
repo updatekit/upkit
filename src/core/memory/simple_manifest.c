@@ -24,6 +24,30 @@ uint8_t* get_server_key_y_impl(const manifest_t* mt) {
     return (uint8_t*) mt->vendor.server_key_y;
 }
 
+appid_t get_appid_impl(const manifest_t* mt) {
+    return mt->vendor.appid;
+}
+version_t get_diff_version_impl(const manifest_t* mt) {
+    return mt->server.diff_version;
+}
+nonce_t get_nonce_impl(const manifest_t* mt) {
+    return mt->server.nonce;
+}
+udid_t get_udid_impl(const manifest_t* mt) {
+    return mt->server.udid;
+}
+void set_diff_version_impl(manifest_t* mt, version_t diff_version) {
+    mt->server.diff_version = diff_version;
+}
+void set_nonce_impl(manifest_t* mt, nonce_t nonce) {
+    mt->server.nonce = nonce;
+}
+void set_udid_impl(manifest_t* mt, udid_t udid) {
+    mt->server.udid = udid;
+}
+void set_appid_impl(manifest_t* mt, appid_t appid) {
+    mt->vendor.appid = appid;
+}
 void set_version_impl(manifest_t* mt, version_t version) {
     mt->vendor.version = version;
 }

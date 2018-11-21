@@ -14,7 +14,7 @@
 
 /* Use TinyDTLS as a cryptographic library. */
 #ifndef WITH_TINYDTLS
-#define WITH_TINYDTLS 1
+#define WITH_TINYDTLS 0
 #endif
 
 /* Define logger verbosity */

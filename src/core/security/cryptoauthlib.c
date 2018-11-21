@@ -3,12 +3,12 @@
 #include <string.h>
 #include <stdio.h>
 
-#ifdef WITH_CRYPTOAUTHLIB
+#if WITH_CRYPTOAUTHLIB
 
 #include <cryptoauthlib.h>
 #include <crypto/atca_crypto_sw_sha2.h>
 
-#ifdef WITH_CRYPTOAUTHLIB_HW
+#if WITH_CRYPTOAUTHLIB_HW
 
 pull_error digest_init(digest_ctx* ctx) {
     if (atcab_hw_sha2_256_init(&ctx->sha256_cryptoauthlib_hw.ctx) != ATCA_SUCCESS) {
@@ -24,7 +24,7 @@ pull_error digest_update(digest_ctx* ctx, void* data, size_t data_size) {
     return PULL_SUCCESS;
 }
 
-void* digest_final(digest_ctx* ctx) {
+void* digest_finalize(digest_ctx* ctx) {
     if (atcab_hw_sha2_256_finish(&ctx->sha256_cryptoauthlib_hw.ctx, (uint8_t*) &ctx->sha256_cryptoauthlib_hw.result) != ATCA_SUCCESS) {
         return NULL;
     }
@@ -51,12 +51,17 @@ pull_error digest_update(digest_ctx* ctx, void* data, size_t data_size) {
     return PULL_SUCCESS;
 }
 
-void* digest_final(digest_ctx* ctx) {
+void* digest_finalize(digest_ctx* ctx) {
     if (atcac_sw_sha2_256_finish(&ctx->sha256_cryptoauthlib.ctx, (uint8_t*) &ctx->sha256_cryptoauthlib.result) != ATCA_SUCCESS) {
         return NULL;
     }
     return &ctx->sha256_cryptoauthlib.result;
 }
+
+uint16_t digest_get_size() {
+    return 32;
+}
+
 #endif /* WITH_CRYPTOAUTHLIB_** */
 
 /* ECC */
@@ -85,9 +90,6 @@ pull_error ecc_sign(const uint8_t* private_key, uint8_t *signature,
     return NOT_IMPLEMENTED_ERROR;
 }
 
-uint16_t digest_get_size() {
-    return 32;
-}
 
 #endif /* WITH_CRYPTOAUTHLIB */
 

@@ -82,9 +82,9 @@ AS_IF([test "x$with-tinycrypt" != "xno"], [AC_DEFINE([WITH_TINYCRYPT], [1],
 
 dnl check the presence of the library from the include path or from the ext path
 
-AC_ARG_WITH([tinydtls], AS_HELP_STRING([--without-tinydtls],
-            [Do not use TinyDTLS as a cryptographic library]))
-AS_IF([test "x$with-tinydtls" != "xno"], [AC_DEFINE([WITH_TINYDTLS], [1],
+AC_ARG_WITH([tinydtls], AS_HELP_STRING([--with-tinydtls],
+            [Use TinyDTLS as a cryptographic library]))
+AS_IF([test "x$with-tinydtls" != "xyes"], [AC_DEFINE([WITH_TINYDTLS], [0],
       [Use TinyDTLS as a cryptographic library.])])
 
 dnl check the presence of the library from the include path or from the ext path

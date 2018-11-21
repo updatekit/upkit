@@ -16,33 +16,33 @@
 extern "C" {
 #endif /* __cplusplus */
 
-#ifdef WITH_TINYDTLS
+#if WITH_TINYDTLS
 #include <crypto.h>
 #include <tinydtls.h>
 #endif
 
-#ifdef WITH_TINYCRYPT
+#if WITH_TINYCRYPT
 #include <tinycrypt/sha256.h>
 #endif
 
-#ifdef WITH_CRYPTOAUTHLIB
+#if WITH_CRYPTOAUTHLIB
 #include <cryptoauthlib.h>
 #endif
 
 typedef union digest_ctx {
-#ifdef WITH_TINYDTLS
+#if WITH_TINYDTLS
   struct sha256_tinydtls_t {
     dtls_sha256_ctx ctx;
     uint8_t result[32];
   } sha256_tinydtls;
 #endif
-#ifdef WITH_TINYCRYPT
+#if WITH_TINYCRYPT
   struct sha256_tinycrypt_t {
     struct tc_sha256_state_struct ctx;
     uint8_t result[32];
   } sha256_tinycrypt;
 #endif
-#ifdef WITH_CRYPTOAUTHLIB
+#if WITH_CRYPTOAUTHLIB
   struct sha256_cryptoauthlib_hw_t {
     atca_sha256_ctx_t ctx;
     uint8_t result[32];

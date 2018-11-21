@@ -3,7 +3,7 @@
 #include <libpull/common/error.h>
 #include <string.h>
 
-#ifdef WITH_TINYCRYPT
+#if WITH_TINYCRYPT
 
 #include <tinycrypt/sha256.h>
 #include <tinycrypt/ecc_dsa.h>
@@ -24,7 +24,7 @@ pull_error digest_update(digest_ctx* ctx, void* data, size_t data_size) {
     return PULL_SUCCESS;
 }
 
-void* digest_final(digest_ctx* ctx) {
+void* digest_finalize(digest_ctx* ctx) {
     if (ctx == NULL || tc_sha256_final((uint8_t*) &ctx->sha256_tinycrypt.result, 
                 &ctx->sha256_tinycrypt.ctx) != 1) {
         return NULL;
@@ -58,6 +58,10 @@ pull_error ecc_sign(const uint8_t* private_key, uint8_t *signature,
         return SIGN_FAILED_ERROR;
      }
      return PULL_SUCCESS;
+}
+
+uint8_t get_curve_size() {
+    return 32; 
 }
 
 #endif /* WITH_TINYCRYPT */

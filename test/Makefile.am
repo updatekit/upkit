@@ -2,7 +2,7 @@ AUTOMAKE_OPTIONS = subdir-objects
 AM_CFLAGS = -Wall -I. -I../include -I../ext/tinycrypt/lib/include -I../ext/tinydtls -DHAVE_CONFIG_H
 AM_CFLAGS += -I../build/posix -Isupport -I../ext/libcoap/include -Imocks
 AM_CFLAGS += -DHAVE_CONFIG_H -DUSE_TESTING_KEYS=1 -DWITH_CONNECTION_LIBCOAP=1 -DWITH_UPDATE_AGENT=1
-AM_CFLAGS += -DWITH_PLATFORM_POSIX=1 -DENABLE_SIGN=1
+AM_CFLAGS += -DWITH_PLATFORM_POSIX=1 -DENABLE_SIGN=1 -DWITH_TINYCRYPT=1
 
 if COND_GCOV
   MAYBE_COVERAGE= -fprofile-arcs -ftest-coverage
@@ -13,20 +13,21 @@ AM_CFLAGS += $(MAYBE_COVERAGE)
 MOSTLYCLEANFILES = idsgrep.aux idsgrep.log idsgrep.blg idsgrep.bbl idsgrep.toc \
 				   *.gcda *.gcno *.gcov
 
-LIBS = ../ext/libcoap/.libs/libcoap-1.a ../ext/tinydtls/libtinydtls.a
+LIBS =  ../ext/libcoap/.libs/libcoap-1.a 
+LIBS += ../ext/tinydtls/libtinydtls.a
 LIBS += ../ext/tinycrypt/lib/libtinycrypt.a
 
-COMMON_SRC = ../src/core/common/error.c ../src/core/common/identity.c
+COMMON_SRC = ../src/core/common/error.c
 MEMORY_SRC = ../src/core/memory/memory_objects.c 
-SECURITY_SRC = ../src/core/security/verifier.c
-NETWORK_SRC = ../src/core/network/connection_config.c ../src/core/network/writer.c
+SECURITY_SRC = ../src/core/security/verifier.c ../src/core/security/safestore.c
+NETWORK_SRC = ../src/core/network/connection_config.c ../src/core/network/fsm.c
 SUPPORT_SRC = support/external_variables.c support/utils.c
 PIPELINE_SRC = ../src/core/pipeline/lzss.c ../src/core/pipeline/bspatch.c ../src/core/pipeline/buffer.c
 
 AGENTS_SRC = ../src/agents/update.c ../src/agents/bootloader_agent.c
 
 NETWORK_IMPL = ../src/network/coap/libcoap/connection_libcoap.c ../src/network/coap/libcoap/async_libcoap.c
-MEMORY_IMPL = ../src/core/memory/memory_impl.c ../src/platform/posix/memory_posix.c
+MEMORY_IMPL = ../src/core/memory/memory_impl.c ../src/platform/posix/memory_posix.c ../src/platform/posix/rng.c
 MANIFEST_IMPL = ../src/core/memory/manifest.c ../src/core/memory/simple_manifest.c
 
 ALL_SRC = $(COMMON_SRC) $(MEMORY_SRC) $(SECURITY_SRC) $(MANIFEST_IMPL) $(NETWORK_SRC)

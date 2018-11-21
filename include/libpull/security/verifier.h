@@ -12,7 +12,7 @@
 #define LIBPULL_SECURITY_VERIFIER_H_
 
 #include <libpull/common.h>
-#include <libpull/memory/memory_interface.h>
+#include <libpull/memory.h>
 #include <libpull/security/digest.h>
 #include <libpull/security/ecc.h>
 

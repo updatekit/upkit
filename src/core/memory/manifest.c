@@ -50,7 +50,6 @@ FOREACH_ITEM(IMPLEMENT_SETTER)
 #undef IMPLEMENT_GETTER_MEMORY
 #undef IMPLEMENT_SETTER_MEMORY
 
-
 pull_error verify_signature_impl(manifest_t* mt, keystore_t keystore);
 pull_error sign_manifest_vendor_impl(manifest_t* mt,  const uint8_t *private_key,
         uint8_t* signature_buffer);

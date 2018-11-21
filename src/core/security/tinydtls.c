@@ -2,7 +2,7 @@
 #include <libpull/security/ecc.h>
 #include <string.h>
 
-#ifdef WITH_TINYDTLS
+#if WITH_TINYDTLS
 
 #include <sha2/sha2.h>
 #include "crypto.h"
@@ -25,7 +25,7 @@ pull_error digest_update(digest_ctx* ctx, void* data, size_t data_size) {
     return PULL_SUCCESS;
 }
 
-void* digest_final(digest_ctx* ctx) {
+void* digest_finalize(digest_ctx* ctx) {
     if (ctx == NULL) {
         return NULL;
     }
