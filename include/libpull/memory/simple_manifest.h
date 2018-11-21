@@ -20,16 +20,17 @@ typedef struct vendor_manifest_t {
     address_t size; /** Size of the object. */
     address_t offset; /** Offset of the blob starting from 0. */
     version_t version; /** Version of the object. */
-    platform_t platform; /** Platform number */
-    uint8_t digest[32]; /** Digest of the blob */
+    appid_t appid; /** App Identifer: it must represent the platform and the application */
+    uint8_t digest[32]; /** Digest of the firmware */
     uint8_t server_key_x[32]; /** Public key X component of the server */
     uint8_t server_key_y[32]; /** Public key Y component of the server */
 } vendor_manifest_t;
 
 /** Manifest filled by the server */
 typedef struct server_manifest_t {
-    identity_t identity; /* Structure containing the identity of the client */
-    uint16_t self_checking_flags; /** Flags used to perform self checking after update */
+    udid_t udid;
+    nonce_t nonce;
+    version_t diff_version;
 } server_manifest_t;
 
 /** General manifest structure */

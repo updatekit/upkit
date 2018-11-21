@@ -16,14 +16,18 @@
 extern "C" {
 #endif /* __cplusplus */
 
-typedef union key_t {
+typedef union keystore_t {
     uint8_t x[32];
     uint8_t y[32];
-}
+} keystore_t;
 
 typedef struct safestore_t {
-   key_t key;
+   keystore_t keystore; // contains the vendor public key
+   udid_t udid;
+   appid_t appid;
 } safestore_t;
+
+pull_error get_safestore(safestore_t* sf);
 
 #ifdef __cplusplus
 }

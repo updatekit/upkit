@@ -20,30 +20,12 @@
 extern "C" {
 #endif /* __cplusplus */
 
-/**
- * \brief This function verifies the signature on the object id.
- *
- * The digest function and the curve must match the one used to generate
- * the signature stored into the memory object metadata. The ECC signature
- * does not accept any format to reduce space used to store keys.
- *
- * \param[in] obj_t The memory object to validate
- * \param[in] f The digest function.
- * \param[in] x The X parameter of the signer's public key.
- * \param[in] y The Y parameter of the signer's public key.
- * \param[in] curve The curve parameters.
- * \param[in] buffer The buffer used to read data from the object
- * \param[in] buffer_len The size of the buffer
- *
- * \note The size of the buffer must be greather or equal to the
- * chunk of manifest to be hashed
- *
- * \returns PULL_SUCCESS if verification succeded or the specific error
- * otherwise.
- */
-pull_error verify_object(mem_object_t* obj, digest_func f, const uint8_t *x,
-                         const uint8_t *y, ecc_func_t ef,
-                         uint8_t* buffer, size_t buffer_len);
+pull_error verify_object(mem_object_t* obj, safestore_t sf, uint8_t* buffer, 
+        size_t buffer_len);
+        
+pull_error verify_manifest(manifest_t* mt, safestore_t sf);
+
+pull_error verify_digest(mem_object_t* obj, manifest_t* mt, uint8_t* buffer, size_t buffer_len);
 
 #ifdef __cplusplus
 }

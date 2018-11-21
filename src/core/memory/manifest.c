@@ -51,38 +51,25 @@ FOREACH_ITEM(IMPLEMENT_SETTER)
 #undef IMPLEMENT_SETTER_MEMORY
 
 
-pull_error verify_signature_impl(manifest_t* mt, digest_func f, const uint8_t *pub_x,
-            const uint8_t *pub_y, ecc_func_t ef);
-pull_error sign_manifest_vendor_impl(manifest_t* mt, digest_func f, const uint8_t *private_key,
-        uint8_t* signature_buffer, ecc_func_t ef);
-pull_error sign_manifest_server_impl(manifest_t* mt, digest_func f, const uint8_t *private_key,
-        uint8_t* signature_buffer, ecc_func_t ef);
-
-identity_t get_identity_impl(const manifest_t* mt);
-void set_identity_impl(manifest_t* mt, identity_t identity);
-
-identity_t get_identity(const manifest_t* mt) {
-    return get_identity_impl(mt);
-}
-void set_identity(manifest_t* mt, identity_t identity) {
-    set_identity_impl(mt, identity);
-}
+pull_error verify_signature_impl(manifest_t* mt, keystore_t keystore);
+pull_error sign_manifest_vendor_impl(manifest_t* mt,  const uint8_t *private_key,
+        uint8_t* signature_buffer);
+pull_error sign_manifest_server_impl(manifest_t* mt,  const uint8_t *private_key,
+        uint8_t* signature_buffer);
 
 void print_manifest_impl(const manifest_t* mt);
 
 void print_manifest(const manifest_t *mt) {
     print_manifest_impl(mt);
 }
-
-pull_error verify_signature(manifest_t* mt, digest_func f, const uint8_t *pub_x,
-        const uint8_t *pub_y, ecc_func_t ef) {
-    return verify_signature_impl(mt, f, pub_x, pub_y, ef);
+pull_error verify_signature(manifest_t* mt, keystore_t keystore) {
+    return verify_signature_impl(mt, keystore);
 }
-pull_error sign_manifest_vendor(manifest_t* mt, digest_func f, const uint8_t *private_key, 
-        uint8_t* signature_buffer, ecc_func_t ef) {
-    return sign_manifest_vendor_impl(mt, f, private_key, signature_buffer, ef);
+pull_error sign_manifest_vendor(manifest_t* mt,  const uint8_t *private_key, 
+        uint8_t* signature_buffer) {
+    return sign_manifest_vendor_impl(mt, private_key, signature_buffer);
 }
-pull_error sign_manifest_server(manifest_t* mt, digest_func f, const uint8_t *private_key,
-        uint8_t* signature_buffer, ecc_func_t ef) {
-    return sign_manifest_server_impl(mt, f, private_key, signature_buffer, ef);
+pull_error sign_manifest_server(manifest_t* mt,  const uint8_t *private_key,
+        uint8_t* signature_buffer) {
+    return sign_manifest_server_impl(mt, private_key, signature_buffer);
 }

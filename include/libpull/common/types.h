@@ -23,6 +23,12 @@ typedef uint32_t address_t;
 /** This must be a signed integer since negative values are used to define
  * an invalid object */
 typedef int8_t mem_id_t;
+/** Unique device ID */
+typedef uint16_t udid_t;
+/** Nonce */
+typedef uint32_t nonce_t;
+/** App ID */
+typedef uint16_t appid_t;
 
 #ifdef __cplusplus
 }

@@ -84,14 +84,12 @@ extern "C" {
     /* Verification Errors */ \
     ERROR(NOT_SUPPORTED_CURVE) \
     ERROR(VERIFICATION_FAILED) \
+    /* Pipeline Errors */ \
+    ERROR(PIPELINE) \
     /* FSM errors */ \
     ERROR(INVALID_VERSION) \
-    ERROR() \
-    ERROR() \
-    ERROR() \
-    ERROR() \
-    ERROR() \
-    ERROR() \
+    ERROR(INVALID_SIGNATURE) \
+    ERROR(INVALID_STATE) \
     ERROR(SIGN_FAILED) \
 
 /** 

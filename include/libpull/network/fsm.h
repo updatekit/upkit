@@ -5,6 +5,7 @@
 #include <libpull/network.h>
 #include <libpull/memory.h>
 #include <libpull/pipeline.h>
+#include <libpull/security.h>
 
 typedef enum fsm_state_t {
     STATE_CLEAN = 0,
@@ -21,14 +22,18 @@ typedef struct fsm_ctx_t {
     fsm_state_t state;
 
     version_t version;
-    platform_t platform;
-    identity_t identity;
 
+    safestore_t sf;
+
+    receiver_msg_t msg;
     manifest_t mt;
     size_t processed;
-
+    size_t expected;
     mem_id_t id;
     mem_object_t* obj;
+
+    rng_ctx_t rctx;
+    nonce_t nonce;
 
     pipeline_ctx_t bsdiff_ctx;
     pipeline_ctx_t lzss_ctx;
@@ -40,6 +45,6 @@ typedef struct fsm_ctx_t {
 
 pull_error fsm_init(fsm_ctx_t* ctx, mem_object_t* obj);
 
-pull_error fsm(fsm_ctx_t* ctx, const uint8_t* buf, size_t len);
+pull_error fsm(fsm_ctx_t* ctx, uint8_t* buf, size_t len);
 
 #endif /* LIBPULL_FSM_H_ */

@@ -8,9 +8,6 @@
 version_t get_version_impl(const manifest_t* mt) {
     return mt->vendor.version;
 }
-platform_t get_platform_impl(const manifest_t* mt) {
-    return mt->vendor.platform;
-}
 address_t get_size_impl(const manifest_t* mt) {
     return mt->vendor.size;
 }
@@ -26,15 +23,9 @@ uint8_t* get_server_key_x_impl(const manifest_t* mt) {
 uint8_t* get_server_key_y_impl(const manifest_t* mt) {
     return (uint8_t*) mt->vendor.server_key_y;
 }
-identity_t get_identity_impl(const manifest_t* mt) {
-    return mt->server.identity;
-}
 
 void set_version_impl(manifest_t* mt, version_t version) {
     mt->vendor.version = version;
-}
-void set_platform_impl(manifest_t* mt, platform_t platform) {
-    mt->vendor.platform = platform;
 }
 void set_size_impl(manifest_t* mt, address_t size) {
     mt->vendor.size = size;
@@ -51,11 +42,6 @@ void set_server_key_x_impl(manifest_t* mt, uint8_t* server_key_x) {
 void set_server_key_y_impl(manifest_t* mt, uint8_t* server_key_y) {
     memcpy(mt->vendor.server_key_y, server_key_y, 32); // XXX hardcoded value
 }
-void set_identity_impl(manifest_t* mt, identity_t identity) {
-    mt->server.identity = identity;
-}
-
-
 /* Memory getter and setters */
 uint8_t* get_vendor_signature_r_impl(const manifest_t *mt, uint8_t* size) {
     *size = 32;
@@ -100,63 +86,61 @@ int set_server_signature_s_impl(manifest_t *mt, uint8_t* server_signature_s, uin
     return memcpy(mt->server_signature_s, server_signature_s, size) != mt->server_signature_s;
 }
 
-pull_error verify_signature_impl(manifest_t* mt, digest_func f, const uint8_t *pub_x,
-                     const uint8_t *pub_y, ecc_func_t ef) {
+pull_error verify_signature_impl(manifest_t* mt, keystore_t keystore) {
     digest_ctx ctx;
-    if (f.init(&ctx) != PULL_SUCCESS) {
+    if (digest_init(&ctx) != PULL_SUCCESS) {
         return GENERIC_ERROR; // TODO specialize error
     }
-    f.update(&ctx, &mt->vendor, sizeof(vendor_manifest_t));
-    uint8_t* hash = (uint8_t*) f.finalize(&ctx);
-    if (ef.verify(pub_x, pub_y, mt->vendor_signature_r, mt->vendor_signature_s, hash, f.size) != PULL_SUCCESS) {
+    digest_update(&ctx, &mt->vendor, sizeof(vendor_manifest_t));
+    uint8_t* hash = (uint8_t*) digest_finalize(&ctx);
+    if (ecc_verify(keystore.x, keystore.y, mt->vendor_signature_r, mt->vendor_signature_s, hash, get_digest_size()) != PULL_SUCCESS) {
         return GENERIC_ERROR;
     }
-    if (f.init(&ctx) != PULL_SUCCESS) {
+    if (digest_init(&ctx) != PULL_SUCCESS) {
         return GENERIC_ERROR; // TODO specialize error
     }
-    f.update(&ctx, &mt->server, sizeof(server_manifest_t));
-    hash = (uint8_t*) f.finalize(&ctx);
-    if (ef.verify(mt->vendor.server_key_x, mt->vendor.server_key_y, mt->server_signature_r, mt->server_signature_s, hash, f.size) != PULL_SUCCESS) {
+    digest_update(&ctx, &mt->server, sizeof(server_manifest_t));
+    hash = (uint8_t*) digest_finalize(&ctx);
+    if (ecc_verify(mt->vendor.server_key_x, mt->vendor.server_key_y, mt->server_signature_r, mt->server_signature_s, hash, get_digest_size()) != PULL_SUCCESS) {
         return GENERIC_ERROR;
     }
     return PULL_SUCCESS;
 }
 
 #ifdef ENABLE_SIGN
-static pull_error sign_data_impl(uint8_t* data, size_t size, digest_func f, const uint8_t *private_key,
-                                    uint8_t* signature_buffer, ecc_func_t ef) {
+static pull_error sign_data_impl(uint8_t* data, size_t size, const uint8_t *private_key,
+                                    uint8_t* signature_buffer) {
     digest_ctx ctx;
-    pull_error err = f.init(&ctx);
+    pull_error err = digest_init(&ctx);
     if (err) {
         return GENERIC_ERROR; // TODO specialize error
     }
-    f.update(&ctx, data, size);
-    uint8_t* hash = (uint8_t*) f.finalize(&ctx);
-    if (ef.sign(private_key, signature_buffer, hash, f.size) != PULL_SUCCESS) {
+    digest_update(&ctx, data, size);
+    uint8_t* hash = (uint8_t*) digest_finalize(&ctx);
+    if (ecc_sign(private_key, signature_buffer, hash, get_digest_size()) != PULL_SUCCESS) {
         return GENERIC_ERROR;
     }
     return PULL_SUCCESS;
 }
 
-pull_error sign_manifest_vendor_impl(manifest_t* mt, digest_func f, const uint8_t *private_key,
-                                   uint8_t* signature_buffer, ecc_func_t ef) {
-    pull_error err = sign_data_impl((uint8_t*) &mt->vendor, sizeof(vendor_manifest_t), f, private_key, signature_buffer, ef);
-    set_vendor_signature_r_impl(mt, signature_buffer, ef.curve_size);
-    set_vendor_signature_s_impl(mt, signature_buffer+ef.curve_size, ef.curve_size);
+pull_error sign_manifest_vendor_impl(manifest_t* mt, const uint8_t *private_key,
+                                   uint8_t* signature_buffer) {
+    pull_error err = sign_data_impl((uint8_t*) &mt->vendor, sizeof(vendor_manifest_t), private_key, signature_buffer);
+    set_vendor_signature_r_impl(mt, signature_buffer, get_curve_size());
+    set_vendor_signature_s_impl(mt, signature_buffer+get_curve_size(), get_curve_size());
     return err;
 }
 
-pull_error sign_manifest_server_impl(manifest_t* mt, digest_func f, const uint8_t *private_key,
-                                   uint8_t* signature_buffer, ecc_func_t ef) {
-    pull_error err = sign_data_impl((uint8_t*) &mt->server, sizeof(server_manifest_t), f, private_key, signature_buffer, ef);
-    set_server_signature_r_impl(mt, signature_buffer, ef.curve_size);
-    set_server_signature_s_impl(mt, signature_buffer+ef.curve_size, ef.curve_size);
+pull_error sign_manifest_server_impl(manifest_t* mt, const uint8_t *private_key,
+                                   uint8_t* signature_buffer) {
+    pull_error err = sign_data_impl((uint8_t*) &mt->server, sizeof(server_manifest_t), private_key, signature_buffer);
+    set_server_signature_r_impl(mt, signature_buffer, get_curve_size());
+    set_server_signature_s_impl(mt, signature_buffer+get_curve_size(), get_curve_size());
     return err;
 }
 #endif /* ENABLE_SIGN  */
 
 void print_manifest_impl(const manifest_t* mt) {
-    log_info("Platform: %04x\n", mt->vendor.platform);
     log_info("Version: %04x\n", mt->vendor.version);
     log_info("Size: %d\n", (int) mt->vendor.size);
 }

@@ -93,7 +93,6 @@ typedef enum agent_event_t {
  */
 typedef struct {
     conn_config_t connection;
-    identity_t identity;
     uint8_t* vendor_x;
     uint8_t* vendor_y;
     digest_func df;
@@ -101,17 +100,6 @@ typedef struct {
     uint8_t* buffer;
     size_t buffer_size;
 } update_agent_config;
-
-/**
- * \brief  Function to set the device identity used to identify the device with
- * the server.
- *
- * \param cfg Pointer to the configuration structure.
- * \param identity Identity structure.
- */
-static inline void update_agent_set_identity(update_agent_config* cfg, identity_t identity) {
-    cfg->identity = identity;
-}
 
 /**
  * \brief  Function to set the vendor keys.

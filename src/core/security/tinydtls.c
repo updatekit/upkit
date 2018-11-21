@@ -4,12 +4,12 @@
 
 #ifdef WITH_TINYDTLS
 
-#include "tinydtls.h"
+#include <sha2/sha2.h>
 #include "crypto.h"
 
 /* SHA 256 */
 
-pull_error tinydtls_sha256_init(digest_ctx* ctx) {
+pull_error digest_init(digest_ctx* ctx) {
     if (ctx == NULL) {
         return DIGEST_INIT_ERROR;
     }
@@ -17,7 +17,7 @@ pull_error tinydtls_sha256_init(digest_ctx* ctx) {
     return PULL_SUCCESS;
 }
 
-pull_error tinydtls_sha256_update(digest_ctx* ctx, void* data, size_t data_size) {
+pull_error digest_update(digest_ctx* ctx, void* data, size_t data_size) {
     if (ctx == NULL || data == NULL) {
         return DIGEST_UPDATE_ERROR;
     }
@@ -25,7 +25,7 @@ pull_error tinydtls_sha256_update(digest_ctx* ctx, void* data, size_t data_size)
     return PULL_SUCCESS;
 }
 
-void* tinydtls_sha256_final(digest_ctx* ctx) {
+void* digest_final(digest_ctx* ctx) {
     if (ctx == NULL) {
         return NULL;
     }
@@ -33,15 +33,19 @@ void* tinydtls_sha256_final(digest_ctx* ctx) {
     return &ctx->sha256_tinydtls.result;
 }
 
+uint16_t get_digest_size() {
+    return 32;
+}
+
 /* ECC */
 
-pull_error tinydtls_secp256r1_ecc_verify(const uint8_t* x, const uint8_t* y, 
+pull_error ecc_verify(const uint8_t* x, const uint8_t* y, 
         const uint8_t* r, const uint8_t* s, const void* data, uint16_t data_len) {
     int ret = dtls_ecdsa_verify_sig_hash(x, y, 32, data, data_len, (unsigned char*) r, (unsigned char*) s);
     return ret == 0 ? PULL_SUCCESS : VERIFICATION_FAILED_ERROR;
 }
 
-pull_error tinydtls_secp256r1_ecc_sign(const uint8_t* private_key, uint8_t *signature,
+pull_error ecc_sign(const uint8_t* private_key, uint8_t *signature,
         const void *data, uint16_t data_len) {
     uint32_t signature_DER[18];
     dtls_ecdsa_create_sig_hash(private_key, 32, data, data_len,
@@ -51,6 +55,10 @@ pull_error tinydtls_secp256r1_ecc_sign(const uint8_t* private_key, uint8_t *sign
     // signature to enable different encodings! Use TinyCrypt until this
     // is not solved.
     return SIGN_FAILED_ERROR;
+}
+
+uint8_t get_curve_size() {
+    return 32;
 }
 
 #endif /* WITH_TINYDTLS */

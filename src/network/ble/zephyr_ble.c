@@ -22,8 +22,8 @@ BT_UUID_INIT_128(LIBPULL_SERVICE_UUID);
 static const struct bt_uuid_128 libpull_version =
 BT_UUID_INIT_128(LIBPULL_VERSION_UUID);
 
-static const struct bt_uuid_128 libpull_identity =
-BT_UUID_INIT_128(LIBPULL_IDENTITY_UUID);
+static const struct bt_uuid_128 libpull_receiver_msg =
+BT_UUID_INIT_128(LIBPULL_RECEIVER_MSG_UUID);
 
 static const struct bt_uuid_128 libpull_state =
 BT_UUID_INIT_128(LIBPULL_STATE_UUID);
@@ -40,12 +40,12 @@ static ssize_t gatt_read_version(struct bt_conn *conn,
     return bt_gatt_attr_read(conn, attr, buf, len, offset, &fsmc->version,
             sizeof(version_t));
 }
-static ssize_t gatt_read_identity(struct bt_conn *conn,
+static ssize_t gatt_read_receiver_msg(struct bt_conn *conn,
         const struct bt_gatt_attr *attr, void *buf,
         uint16_t len, uint16_t offset) {
     void *value = attr->user_data;
     return bt_gatt_attr_read(conn, attr, buf, len, offset, value,
-            sizeof(identity_t));
+            sizeof(receiver_msg));
 }
 
 static ssize_t gatt_write_image(struct bt_conn *conn,
@@ -81,11 +81,11 @@ static struct bt_gatt_attr libpull_attrs[] = {
             gatt_read_version, NULL, NULL),
     /* 2 WRITE_ONLY version */
 
-    /* 3 READ_ONLY identity */
-    BT_GATT_CHARACTERISTIC(&libpull_identity.uuid,
+    /* 3 READ_ONLY receiver_msg */
+    BT_GATT_CHARACTERISTIC(&libpull_receiver_msg.uuid,
             BT_GATT_CHRC_READ,
             BT_GATT_PERM_READ,
-            gatt_read_identity, NULL, &ctx.identity),
+            gatt_read_receiver_msg, NULL, &ctx.receiver_msg),
     /* 4 WRITE_ONLY data */
     BT_GATT_CHARACTERISTIC(&libpull_image.uuid,
             BT_GATT_CHRC_WRITE | BT_GATT_CHRC_WRITE_WITHOUT_RESP,

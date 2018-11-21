@@ -16,7 +16,6 @@
 #include <libpull/common/error.h>
 #include <libpull/common/callback.h>
 #include <libpull/common/logger.h>
-#include <libpull/common/identity.h>
 #include <libpull/common/pull_assert.h>
 #include <libpull/common/external.h>
 
