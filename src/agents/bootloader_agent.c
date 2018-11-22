@@ -116,8 +116,7 @@ agent_event_t bootloader_agent(bootloader_agent_config* cfg, void** event_data) 
            // XXX This error can be recovered
         }
         PULL_CONTINUE(EVENT_VALIDATE_NON_BOOTABLE_START, NULL);
-        err = verify_object(&source_slot, cfg->df, cfg->vendor_x, cfg->vendor_y, cfg->ef, 
-                        cfg->buffer, cfg->buffer_size);
+        err = verify_object(&source_slot, cfg->safestore, cfg->buffer, cfg->buffer_size);
         PULL_CONTINUE(EVENT_VALIDATE_NON_BOOTABLE_STOP, NULL);
         if (err) {
            // XXX  invalidate_object(id, &obj_t);
@@ -162,7 +161,7 @@ agent_event_t bootloader_agent(bootloader_agent_config* cfg, void** event_data) 
     if (!already_validated_flag) {
         // (5.1) Validate the newest_bootable
         PULL_CONTINUE(EVENT_VALIDATE_BOOTABLE_START, NULL);
-        err = verify_object(&newest_bootable, cfg->df, cfg->vendor_x, cfg->vendor_y, cfg->ef, cfg->buffer, cfg->buffer_size);
+        err = verify_object(&newest_bootable, cfg->safestore, cfg->buffer, cfg->buffer_size);
         PULL_CONTINUE(EVENT_VALIDATE_BOOTABLE_STOP, NULL);
         if (!err) {
             boot_id = id_newest_bootable;

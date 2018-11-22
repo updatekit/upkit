@@ -8,7 +8,7 @@
 manifest_t invalid_manifest = {
     .vendor.size = 0xffffffff,
     .vendor.version = 0xffff,
-    .vendor.platform = 0xffff,
+    .vendor.appid = 0xffff,
 };
 
 #define VERSION_MAX_AGE 3600

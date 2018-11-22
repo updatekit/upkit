@@ -38,7 +38,7 @@ int pipeline_buffer_process(pipeline_ctx_t* c, uint8_t* buf, int l) {
             // This is a fatal error since the bufferp must never be higher than
             // buffer+sizeof(buffer). This means we are writing over the buffer
             // boundaries.
-            PULL_ASSERT(0);
+            PULL_ASSERT(false);
         } }
     return l;
 }

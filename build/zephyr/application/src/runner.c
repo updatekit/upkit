@@ -23,26 +23,12 @@ static update_agent_ctx_t ctx;
 static int8_t retries = 3;
 static uint8_t success = 0;
 static uint8_t buffer[BUFFER_SIZE];
-static digest_func df;
-static ecc_func_t ef;
-
-void specialize_crypto_functions() {
-#if WITH_TINYCRYPT
-    df = tinycrypt_digest_sha256;
-    ef = tinycrypt_secp256r1_ecc;
-#endif
-}
 
 int main(void) {
-    specialize_crypto_functions();
-    conn_config(&cfg.subscriber, SERVER_ADDR, 5683, PULL_UDP, NULL, "/version");
-    conn_config(&cfg.receiver, SERVER_ADDR, 5683, PULL_UDP, NULL, "/firmware");
-    update_agent_reuse_connection(&cfg, 0);
-    update_agent_set_identity(&cfg, identity_g);
-    update_agent_vendor_keys(&cfg, (uint8_t*) vendor_x_g, (uint8_t*) vendor_y_g);
-    update_agent_digest_func(&cfg, df);
-    update_agent_ecc_func(&cfg, ef);
-    update_agent_set_buffer(&cfg, buffer, BUFFER_SIZE);
+    conn_config_t conn;
+    conn_config(&conn, SERVER_ADDR, 5683, PULL_UDP, NULL);
+
+    update_agent_config(&cfg, &conn, safestore_g, buffer, BUFFER_SIZE);
 
     while (1) {
         agent_msg = update_agent(&cfg, &ctx);

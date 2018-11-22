@@ -91,34 +91,16 @@ typedef enum agent_event_t {
 /**
  * \brief  Configuration structure for the update agent.
  */
-typedef struct {
-    conn_config_t conn;
-    uint8_t* vendor_x;
-    uint8_t* vendor_y;
+typedef struct update_agent_config_t {
+    conn_config_t* conn;
+    safestore_t safestore;
     uint8_t* buffer;
     size_t buffer_size;
-} update_agent_config;
+} update_agent_config_t;
 
-/**
- * \brief  Function to set the vendor keys.
- *
- * \param cfg Pointer to the configuration structure.
- * \param x The X component of the vendor key.
- * \param y The Y component of the vendor key.
- */
-static inline void update_agent_vendor_keys(update_agent_config* cfg, uint8_t* x, uint8_t* y) {
-    cfg->vendor_x = x;
-    cfg->vendor_y = y;
-}
-
-/**
- * \brief  Function to set the buffer for the update agent.
- *
- * \param cfg Pointer to the configuration structure.
- * \param buffer Pointer to the buffer.
- * \param buffer_size Size of the buffer.
- */
-static inline void update_agent_set_buffer(update_agent_config* cfg, uint8_t* buffer, size_t buffer_size) {
+static inline void update_agent_config(update_agent_config_t* cfg, conn_config_t* conn, safestore_t safestore, uint8_t* buffer, size_t buffer_size) {
+    cfg->conn = conn;
+    cfg->safestore = safestore;
     cfg->buffer = buffer;
     cfg->buffer_size = buffer_size;
 }
@@ -132,6 +114,8 @@ typedef struct update_agent_ctx_t {
     mem_object_t obj_t;
     pull_error err;
     fsm_ctx_t fsmc;
+    conn_ctx* conn;
+    request_ctx_t reqc;
 } update_agent_ctx_t;
 
 /**
@@ -145,6 +129,6 @@ typedef struct update_agent_ctx_t {
  *
  * \returns Messages containing the current event.
  */
-agent_event_t update_agent(update_agent_config* cfg, update_agent_ctx_t* ctx, void** agent_data);
+agent_event_t update_agent(update_agent_config_t* cfg, update_agent_ctx_t* ctx, agent_data_t* agent_data);
 
 #endif /* AGENTS_UPDATE_H_ */

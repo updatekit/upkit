@@ -25,12 +25,6 @@ extern "C" {
 #include <stdint.h>
 #include <libpull/pipeline/pipeline.h>
 
-#define EI 10  /* typically 10..13 */
-#define EJ  4  /* typically 4..5 */
-#define P   1  /* If match length <= P then output one character */
-#define N (1 << EI)  /* buffer size */
-#define F ((1 << EJ) + 1)  /* lookahead buffer size */
-
 int pipeline_lzss_init(pipeline_ctx_t* ctx, void* more);
 int pipeline_lzss_process(pipeline_ctx_t* ctx, uint8_t* buf, int l);
 int pipeline_lzss_clear(pipeline_ctx_t*ctx);

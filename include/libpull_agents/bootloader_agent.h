@@ -99,24 +99,11 @@ typedef struct bootloader_agent_config {
     mem_id_t recovery_id;
     mem_id_t swap_id;
     size_t swap_size;
-    uint8_t* vendor_x;
-    uint8_t* vendor_y;
     uint8_t* buffer;
     size_t buffer_size;
+    safestore_t safestore;
 } bootloader_agent_config;
 
-
-/** 
- * \brief  Function to configure the vendor keys.
- * 
- * \param cfg Pointer to configuration structure.
- * \param x X component of the vendor key.
- * \param y Y component of the vendor key.
- */
-static inline void bootloader_agent_vendor_keys(bootloader_agent_config* cfg, uint8_t* x, uint8_t* y) {
-    cfg->vendor_x = x;
-    cfg->vendor_y = y;
-}
 
 /** 
  * \brief  Function to set the buffer used by the bootloader.

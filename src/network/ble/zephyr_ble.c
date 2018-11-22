@@ -8,8 +8,7 @@
 #include <bluetooth/uuid.h>
 
 #include <libpull/common.h>
-#include <libpull/network/writer.h>
-#include <libpull/network/gatt.h>
+#include <libpull/network.h>
 
 #include "platform_headers.h"
 
@@ -17,16 +16,19 @@ fsm_ctx_t fsmc;
 
 /* Libpull GATT service UUIDs */
 static struct bt_uuid_128 libpull_service_udid =
-BT_UUID_INIT_128(LIBPULL_SERVICE_UUID);
+    BT_UUID_INIT_128(LIBPULL_SERVICE_UUID);
 
-static const struct bt_uuid_128 libpull_version =
-BT_UUID_INIT_128(LIBPULL_VERSION_UUID);
+static const struct bt_uuid_128 libpull_version_read =
+    BT_UUID_INIT_128(LIBPULL_VERSION_READ_UUID);
+
+static const struct bt_uuid_128 libpull_version_write =
+    BT_UUID_INIT_128(LIBPULL_VERSION_WRITE_UUID);
 
 static const struct bt_uuid_128 libpull_receiver_msg =
-BT_UUID_INIT_128(LIBPULL_RECEIVER_MSG_UUID);
+    BT_UUID_INIT_128(LIBPULL_RECEIVER_MSG_UUID);
 
 static const struct bt_uuid_128 libpull_state =
-BT_UUID_INIT_128(LIBPULL_STATE_UUID);
+    BT_UUID_INIT_128(LIBPULL_STATE_UUID);
 
 static ssize_t gatt_read_state(struct bt_conn *conn,
         const struct bt_gatt_attr *attr, void *buf,
@@ -40,6 +42,13 @@ static ssize_t gatt_read_version(struct bt_conn *conn,
     return bt_gatt_attr_read(conn, attr, buf, len, offset, &fsmc->version,
             sizeof(version_t));
 }
+
+static ssize_t gatt_write_version(struct bt_conn *conn,
+        const struct bt_gatt_attr *attr, void *buf,
+        uint16_t len, uint16_t offset) {
+    return 0; // TODO
+}
+
 static ssize_t gatt_read_receiver_msg(struct bt_conn *conn,
         const struct bt_gatt_attr *attr, void *buf,
         uint16_t len, uint16_t offset) {
@@ -75,12 +84,15 @@ static struct bt_gatt_attr libpull_attrs[] = {
     /* 0 Vendor Primary Service Declaration */
     BT_GATT_PRIMARY_SERVICE(&libpull_service_udid),
     /* 1 READ_ONLY version */
-    BT_GATT_CHARACTERISTIC(&libpull_version.uuid,
+    BT_GATT_CHARACTERISTIC(&libpull_version_read.uuid,
             BT_GATT_CHRC_READ,
             BT_GATT_PERM_READ,
             gatt_read_version, NULL, NULL),
     /* 2 WRITE_ONLY version */
-
+    BT_GATT_CHARACTERISTIC(&libpull_version_write.uuid,
+            BT_GATT_CHRC_WRITE | BT_GATT_CHRC_WRITE_WITHOUT_RESP,
+            BT_GATT_PERM_WRITE,
+            NULL, gatt_write_version, NULL),
     /* 3 READ_ONLY receiver_msg */
     BT_GATT_CHARACTERISTIC(&libpull_receiver_msg.uuid,
             BT_GATT_CHRC_READ,

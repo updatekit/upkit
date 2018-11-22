@@ -10,7 +10,7 @@ static agent_event_t agent_event;
 static bootloader_agent_config cfg;
 
 static int8_t retries = 3;
-static uint8_t success = 0;
+static bool success = false;
 static uint8_t buffer[BUFFER_SIZE];
 
 // The test logic should update the OBJ_2 with the firmware with version 0xdead
@@ -22,13 +22,12 @@ void ntest_prepare(void) {
 void ntest_clean(void) { 
     restore_assets();
     retries = 3;
-    success = 0;
+    success = false;
 }
 
 void test_bootloader_success(void) {
-
-    bootloader_agent_vendor_keys(&cfg, (uint8_t*) vendor_x_g, (uint8_t*) vendor_y_g);
     bootloader_agent_set_buffer(&cfg, buffer, BUFFER_SIZE);
+    cfg.safestore = safestore_g;
     cfg.bootloader_ctx_id = BOOTLOADER_CTX;
     cfg.recovery_id = OBJ_GOLD;
     cfg.swap_size = SWAP_SIZE;

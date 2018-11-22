@@ -2,9 +2,6 @@
 #include <libpull/security.h>
 #include <libpull/memory.h>
 
-#include "memory_mock.h"
-#include "manifest_mock.h"
-
 #include "invalid_digest.h" // Test Support
 #include "support/support.h"
 
@@ -13,67 +10,48 @@ static uint8_t buffer[BUFFER_LEN];
 
 void test_ecc_verify(void) {
     pull_error err;
-    err = ef.verify(vendor_x_g, vendor_y_g, vendor_r_g, vendor_s_g, hash_g, ef.curve_size);
+    err = ecc_verify(vendor_x_g, vendor_y_g, vendor_r_g, vendor_s_g, hash_g, get_curve_size());
     nTEST_TRUE(err == PULL_SUCCESS);
 }
 
 void test_ecc_verify_invalid_signature(void) {
     pull_error err;
-    err = ef.verify(server_x_g, server_y_g, vendor_r_g, vendor_s_g, server_priv_g, ef.curve_size);
+    err = ecc_verify(server_x_g, server_y_g, vendor_r_g, vendor_s_g, server_priv_g, get_curve_size());
     nTEST_TRUE(err == VERIFICATION_FAILED_ERROR);
 }
 
 void test_sha256(void) {
     digest_ctx ctx;
-    pull_error err = df.init(&ctx);
+    pull_error err = digest_init(&ctx);
     nTEST_TRUE(!err);
-    err = df.update(&ctx, (void*) data_g, 128);
+    err = digest_update(&ctx, (void*) data_g, 128);
     nTEST_TRUE(!err);
-    uint8_t* hash = df.finalize(&ctx);
+    uint8_t* hash = digest_finalize(&ctx);
     nTEST_TRUE(hash != NULL);
     nTEST_COMPARE_MEM(hash_g, hash, 32);
 }
 
 void test_sign(void) {
     uint8_t signature[64];
-    pull_error err = ef.sign(server_priv_g, signature, hash_g, ef.curve_size);
+    pull_error err = ecc_sign(server_priv_g, signature, hash_g, get_curve_size());
     nTEST_TRUE(!err);
-    nTEST_TRUE(ef.verify(server_x_g, server_y_g, signature, signature+32, hash_g, ef.curve_size) == PULL_SUCCESS);
+    nTEST_TRUE(ecc_verify(server_x_g, server_y_g, signature, signature+32, hash_g, get_curve_size()) == PULL_SUCCESS);
 }
 void test_sign_invalid_hash_size(void) {
     uint8_t signature[64];
-    pull_error err = ef.sign(server_priv_g, signature, hash_g, 10);
+    pull_error err = ecc_sign(server_priv_g, signature, hash_g, 10);
     nTEST_TRUE(!err);
 }
 
 void test_verify_object_valid(void) {
-    pull_error err = verify_object(&obj_a, df, vendor_x_g, vendor_y_g, ef, buffer, BUFFER_LEN);
+    pull_error err = verify_object(&obj_a, safestore_g, buffer, BUFFER_LEN);
     nTEST_TRUE(err == PULL_SUCCESS, "%s\n", err_as_str(err));
 }
 
-void test_verify_object_invalid_read(void) {
-    memory_mock.memory_read_impl = memory_read_invalid;
-
-    pull_error err;
-    err = verify_object(&obj_a, df, vendor_x_g, vendor_y_g, ef, buffer, BUFFER_LEN);
-    nTEST_TRUE(MEMORY_READ_ERROR == err, "%s\n", err_as_str(err));
-}
-
-void test_verify_object_invalid_digest_init(void) {
-    pull_error err;
-    df.init = invalid_init;
-    err = verify_object(&obj_a, df, vendor_x_g, vendor_y_g, ef, buffer, BUFFER_LEN);
-    nTEST_TRUE(err == DIGEST_INIT_ERROR, "%s\n", err_as_str(err));
-}
-
-void test_verify_object_invalid_digest_update(void) {
-    pull_error err;
-    df.update = invalid_update;
-    err = verify_object(&obj_a, df, vendor_x_g, vendor_y_g, ef, buffer, BUFFER_LEN);
-    nTEST_TRUE(err, "%s\n", err_as_str(err));
-}
-
 void test_verify_object_invalid_key(void) {
-    pull_error err = verify_object(&obj_a, df, vendor_y_g, vendor_y_g, ef, buffer, BUFFER_LEN);
+    safestore_t safestore_invalid;
+    memcpy(&safestore_invalid, &safestore_g, sizeof(safestore_t));
+    safestore_invalid.keystore.x[0] = 0xab;
+    pull_error err = verify_object(&obj_a, safestore_invalid, buffer, BUFFER_LEN);
     nTEST_TRUE(err, "%s\n", err_as_str(err));
 }

@@ -4,7 +4,7 @@
 
 #include <libpull/network/receiver.h>
 #include <libpull/memory/manifest.h>
-#include <libpull/security/sha256.h>
+#include <libpull/security/digest.h>
 #include "../server.h"
 
 extern void resource_next_version(coap_context_t *ctx,
@@ -21,16 +21,13 @@ extern void resource_next_version(coap_context_t *ctx,
 
     /**************** Generate Vendor Signature ****************/
     pull_error err = sign_manifest_vendor(server_ctx->mapped_file_manifest,
-            tinycrypt_digest_sha256, vendor_priv_g, (uint8_t*)&signature_buffer,
-            tinycrypt_secp256r1_ecc);
+            vendor_priv_g, (uint8_t*)&signature_buffer);
     if (err) {
         printf("Error signing Vendor data\n");
         response->code = COAP_RESPONSE_CODE(400);
         return;
     }
-    /**************** Invalidate Identity ****************/
-    identity_t identity = { .udid = 0x0000, .random=0x0000 };
-    set_identity(server_ctx->mapped_file_manifest, identity);
+
     printf("Version increased to %04x\n", current_version);
     coap_add_data(response, sizeof(version_t), (const uint8_t*) &current_version);
     return;

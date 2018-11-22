@@ -29,6 +29,8 @@ typedef uint16_t udid_t;
 typedef uint32_t nonce_t;
 /** App ID */
 typedef uint16_t appid_t;
+/** Agent data */
+typedef void* agent_data_t;
 
 #ifdef __cplusplus
 }

@@ -16,7 +16,7 @@
 extern "C" {
 #endif /* __cplusplus */
 
-typedef union keystore_t {
+typedef struct keystore_t {
     uint8_t x[32];
     uint8_t y[32];
 } keystore_t;

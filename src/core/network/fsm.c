@@ -9,10 +9,10 @@
 #define BUFFER_SIZE 1024
 uint8_t buffer[BUFFER_SIZE];
 
-pull_error fsm_init(fsm_ctx_t* ctx, mem_object_t* obj) {
+pull_error fsm_init(fsm_ctx_t* ctx, safestore_t sf, mem_object_t* obj) {
     ctx->obj = obj;
 
-    // Get the current runnin version
+    // Get the current running version
     mem_id_t ignore;
     pull_error err = get_newest_firmware(&ignore, &ctx->version, ctx->obj, true);
     if (err) {
@@ -29,11 +29,13 @@ pull_error fsm_init(fsm_ctx_t* ctx, mem_object_t* obj) {
     }
 
     // Load safestore
-    err = get_safestore(&ctx->sf);
-    if (err) {
-        log_err(err, "Error initializing RNG\n");
-        return err;
-    }
+    ctx->sf = sf;
+
+    // Configure the pipeline
+    buffer_pipeline.init(&ctx->buffer_ctx, NULL);
+    ctx->buffer_ctx.next_func = &writer_pipeline;
+    ctx->buffer_ctx.next_ctx = &ctx->writer_ctx;
+    
     return PULL_SUCCESS;
 }
 
@@ -64,12 +66,6 @@ pull_error fsm(fsm_ctx_t* ctx, uint8_t* buf, size_t len) {
                 return PULL_SUCCESS;
             }
             log_debug("A new version is available\n");
-
-            // If all the previous checks are valid, fallthough
-            // and generate the nonce and the m
-            // /Users/alangiu/Projects/libpull/libpull/src/core/network/fsm.c
-            // +14
-            // identity for the request
             ctx->state = STATE_START_UPDATE;
             return PULL_SUCCESS;
         case STATE_START_UPDATE:
@@ -93,6 +89,7 @@ pull_error fsm(fsm_ctx_t* ctx, uint8_t* buf, size_t len) {
 
             ctx->state = STATE_RECEIVE_MANIFEST;
             return PULL_SUCCESS;
+
         case STATE_RECEIVE_MANIFEST:
             // We expect to receive bytes until the manifest structure is full
             if (ctx->processed > sizeof(manifest_t)) {
@@ -103,7 +100,7 @@ pull_error fsm(fsm_ctx_t* ctx, uint8_t* buf, size_t len) {
             uint8_t* mtbuf = ((uint8_t*)&ctx->mt) + ctx->processed;
             uint8_t* bufp = buf;
             while (ctx->processed < sizeof(manifest_t) && (bufp-buf) < len) {
-                mtbuf = bufp;
+                *mtbuf = *bufp;
                 ctx->processed++;
                 mtbuf++;
                 bufp++;
@@ -124,6 +121,7 @@ pull_error fsm(fsm_ctx_t* ctx, uint8_t* buf, size_t len) {
                 ctx->state = STATE_CLEAN;
                 return INVALID_SIGNATURE_ERROR;
             }
+
             // compare nonce
             if (get_nonce(&ctx->mt) != ctx->nonce) {
                 log_err(INVALID_SIGNATURE_ERROR, "Received nonce is invalid\n");                
@@ -133,7 +131,7 @@ pull_error fsm(fsm_ctx_t* ctx, uint8_t* buf, size_t len) {
             err = verify_manifest(&ctx->mt, ctx->sf);
             if (err) {
                 log_err(INVALID_SIGNATURE_ERROR,
-                        "Received firmware has invalid appid\n");
+                        "Manifest has invalid signature\n");
                 ctx->state = STATE_CLEAN;
                 return INVALID_SIGNATURE_ERROR;
             }
@@ -169,7 +167,11 @@ pull_error fsm(fsm_ctx_t* ctx, uint8_t* buf, size_t len) {
                 ctx->state = STATE_CLEAN;
                 return err;
             }
+
+            // Set the new memory object in the writer pipeline
+            writer_pipeline.init(&ctx->writer_ctx, ctx->obj);
             
+            // Store the manifest directly without passing through the pipeline
             int ret = buffer_pipeline.process(&ctx->buffer_ctx, (uint8_t*) &ctx->mt, sizeof(manifest_t));
             if (ret != sizeof(manifest_t)) {
                 log_err(err, "Error writing manifest");
@@ -187,12 +189,12 @@ pull_error fsm(fsm_ctx_t* ctx, uint8_t* buf, size_t len) {
                 }
             }
 
-            ctx->expected = get_size(&ctx->mt)+sizeof(manifest_t);
+            ctx->expected = get_offset(&ctx->mt)+get_size(&ctx->mt);
 
             ctx->state = STATE_RECEIVE_FIRMWARE;
             return PULL_SUCCESS;
         case STATE_RECEIVE_FIRMWARE:
-            if (ctx->processed+len > get_size(&ctx->mt)) {
+            if (ctx->processed+len > get_offset(&ctx->mt)+get_size(&ctx->mt)) {
                 log_err(INVALID_SIZE_ERROR, "Received more data than expected\n");
                 ctx->state = STATE_CLEAN;
                 return INVALID_SIZE_ERROR;
@@ -207,13 +209,14 @@ pull_error fsm(fsm_ctx_t* ctx, uint8_t* buf, size_t len) {
             if (ctx->processed != ctx->expected) {
                 return PULL_SUCCESS;
             }
-            // if all the data has been received fall through to state firmware
-            // verify
-            ctx->state = STATE_VERIFY_FIRMWARE;
-        case STATE_VERIFY_FIRMWARE:
-            memory_close(ctx->obj);
 
+            ctx->pipeline->clear(ctx->pipeline_ctx);
+            memory_close(ctx->obj);
+            ctx->state = STATE_VERIFY_FIRMWARE;
+            // Fallthrough
+        case STATE_VERIFY_FIRMWARE:
             memory_open(ctx->obj, ctx->id, READ_ONLY);
+            printf("id is %d\n", ctx->id);
             err = verify_object(ctx->obj, ctx->sf, buffer, BUFFER_SIZE);
             memory_close(ctx->obj);
             

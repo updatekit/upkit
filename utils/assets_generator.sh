@@ -32,7 +32,7 @@ echo "Generate Test Memory file...done"
 
 # Generate slots
 echo "Generate slots..."
-APPLICATION=0x1001
+APPID=0x0202
 slot_prefix="$ASSETSDIR/slot_"
 versions="a b c d"
 for v in $versions; do
@@ -42,7 +42,7 @@ for v in $versions; do
     $FIRMWAREDIR/firmware_tool manifest generate -y $FIRMWAREDIR/config.toml -vv \
         -p $FIRMWAREDIR/keys/vendor.priv -c $FIRMWAREDIR/keys/vendor.pub \
         -k $FIRMWAREDIR/keys/server.priv -m $FIRMWAREDIR/keys/server.pub \
-        -l $v -a $APPLICATION -b $slot.tmp \
+        -l $v -a $APPID -b $slot.tmp \
         -f $ASSETSDIR/metadata metadata
     srec_cat $ASSETSDIR/metadata -binary $slot.tmp -binary -offset 0x100 -o $slot.bin -binary
     cp $slot.bin $slot.pristine

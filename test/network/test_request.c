@@ -6,38 +6,43 @@
 
 #define PROV_SERVER "localhost"
 
-void ntest_prepare(void) {}
+bool success = false;
+
+void ntest_prepare(void) {
+    success = false;
+}
 
 void ntest_clean(void) {
     restore_assets();
 }
 
-static void callback(pull_error err, const char* data, int len, void* more) {
-    subscriber_ctx* ctx = (subscriber_ctx*) more;
+static void test_callback(pull_error err, const char* data, int len, void* more) {
+    request_ctx_t* ctx = (request_ctx_t*) more;
     nTEST_TRUE(data != NULL);
-    nTEST_TRUE(len == 2);
+    nTEST_TRUE(len == sizeof(version_t));
     version_t version;
     memcpy(&version, data, sizeof(version_t));
     nTEST_COMPARE_HEX(0xD, version);
+    success=true;
     break_loop(ctx->conn);
 }
 
 void test_update_polling(void) {
-    subscriber_ctx ctx;
     conn_ctx conn;
-    conn_init(&conn, PROV_SERVER, 0, PULL_UDP, NULL);
-    mem_object_t obj_t;
-    pull_error err = subscribe(&ctx, &conn, "version", &obj_t);
+    pull_error err;
+    request_ctx_t ctx;
+
+    err = conn_init(&conn, PROV_SERVER, 0, PULL_UDP, NULL);
     nTEST_TRUE(!err);
-    err = check_updates(&ctx, check_update_cb);
+
+    err = conn_on_data(&conn, test_callback, &ctx);
+    nTEST_TRUE(!err);
+
+    err = conn_request(&conn, GET, "version", NULL, 0);
     nTEST_TRUE(!err);
     loop(&conn, 1000);
-    // XXX This is not valid.. The loop function should return the reason why
-    // it returned
-    unsubscribe(&ctx);
+    nTEST_TRUE(success);
 }
-
-// TODO: add more tests making requests to invalid endpoints
 
 int main() {
     nTEST_INIT();

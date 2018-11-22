@@ -15,3 +15,5 @@ test_pipeline
 test_lzss
 test_bspatch
 test_buffer
+test_request
+test_update_push

@@ -1,7 +1,7 @@
 AUTOMAKE_OPTIONS = subdir-objects
 SUBDIRS = test
 
-AM_CFLAGS = -Wall -I. -Iinclude -Iext/tinycrypt/lib/include -Iext/tinydtls -DHAVE_CONFIG_H -ffreestanding -pedantic-errors -std=c99 -DENABLE_SIGN=1 -DSIMPLE_MANIFEST=1 -DWITH_TINYDTLS=1
+AM_CFLAGS = -Wall -I. -Iinclude -Iext/tinycrypt/lib/include -Iext/tinydtls -DHAVE_CONFIG_H -ffreestanding -pedantic-errors -std=c99 -DENABLE_SIGN=1 -DSIMPLE_MANIFEST=1 -DWITH_TINYDTLS=1 -DWITH_TINYCRYPT=1
 
 noinst_LIBRARIES = libpull.a
 
@@ -10,7 +10,7 @@ libpull_a_SOURCES += src/core/memory/manifest.c src/core/memory/memory_objects.c
 libpull_a_SOURCES += src/core/memory/memory_impl.c src/core/memory/memory_flash.c
 libpull_a_SOURCES += src/core/network/connection_config.c src/core/network/fsm.c src/core/network/request.c
 libpull_a_SOURCES += src/core/security/verifier.c src/core/security/tinycrypt.c src/core/security/tinydtls.c src/core/security/cryptoauthlib.c src/core/security/safestore.c
-libpull_a_SOURCES += src/core/pipeline/lzss.c src/core/pipeline/bspatch.c src/core/pipeline/buffer.c
+libpull_a_SOURCES += src/core/pipeline/lzss.c src/core/pipeline/bspatch.c src/core/pipeline/buffer.c src/core/pipeline/writer.c
 
 pkginclude_HEADERS = include/
 # TODO Finish including all the headers

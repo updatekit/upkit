@@ -4,7 +4,7 @@ title = "Configuration Example"
 
 # Firmware Configurations
 version = "0xdead"
-platform = "0xbeef"
+appid = "0x0202"
 offset = "0x100"
 
 # Paths

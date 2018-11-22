@@ -19,6 +19,7 @@ typedef struct {
     udid_t udid;
     nonce_t nonce;
     version_t version;
+    address_t offset;
 } receiver_msg_t;
 
 #ifdef __cplusplus

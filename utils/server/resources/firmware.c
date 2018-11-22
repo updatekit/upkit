@@ -41,7 +41,9 @@ extern void resource_firmware(coap_context_t *ctx,
     // the specific manifest for a N number of requuests
     // XXX now the signature is calculated at each request
     // TODO This part must be completely rewritten to make it more robust
-    identity_t current_identity = get_identity(server_ctx->mapped_file_manifest);
+    //
+    // TODO AAA this part must be fixed 
+    /*identity_t current_identity = get_identity(server_ctx->mapped_file_manifest);
     identity_t identity = {
         .udid = msg->udid,
         .random = msg->random
@@ -56,8 +58,8 @@ extern void resource_firmware(coap_context_t *ctx,
             response->code = COAP_RESPONSE_CODE(400);
             return;
         }
-    }
-            
+    }*/
+
     // Start the blockwise transfer
     unsigned char buf[3];
     response->code = COAP_RESPONSE_CODE(205);

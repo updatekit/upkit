@@ -1,3 +1,6 @@
+
+#ifdef WITH_PLATFORM_POSIX
+
 #include <libpull/security.h>
 #include <time.h>
 #include <stdlib.h>
@@ -13,3 +16,5 @@ pull_error rng_generate(rng_ctx_t* ctx, nonce_t* nonce) {
     *nonce = (uint32_t) rand();
     return PULL_SUCCESS;
 }
+
+#endif /* WITH_PLATFORM_POSIX */

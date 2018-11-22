@@ -10,7 +10,6 @@ pull_error verify_object(mem_object_t* obj, safestore_t sf, uint8_t* buffer, siz
     pull_error err;
 
     /************* GET_OBJECT_MANIFEST ***************/
-    log_info("Start phase GET_OBJECT_MANIFEST\n");
     manifest_t mt;
     err = read_firmware_manifest(obj, &mt);
     if (err) {
@@ -31,12 +30,12 @@ pull_error verify_object(mem_object_t* obj, safestore_t sf, uint8_t* buffer, siz
 
 pull_error verify_manifest(manifest_t* mt, safestore_t sf) {
     // Verify App ID
+    printf("%x %x\n", get_appid(mt), sf.appid);
     if (get_appid(mt) != sf.appid) {
         log_err(INVALID_SIGNATURE_ERROR, "Received firmware has invalid appid\n");
         return INVALID_SIGNATURE_ERROR;
     }
     // Verify signature
-    log_info("Start phase VERIFY_SIGNATURE\n");
     pull_error err = verify_signature(mt, sf.keystore);
     if (err) {
         return err;
@@ -49,7 +48,6 @@ pull_error verify_digest(mem_object_t* obj, manifest_t* mt, uint8_t* buffer,
         size_t buffer_len) {
     pull_error err;
     /************* CALCULATING DIGEST ****************/
-    log_info("Start phase CALCULATING_DIGEST\n");
     digest_ctx ctx;
     if ((err = digest_init(&ctx)) != PULL_SUCCESS) {
         return err;
@@ -78,7 +76,6 @@ pull_error verify_digest(mem_object_t* obj, manifest_t* mt, uint8_t* buffer,
     }
     uint8_t* result = digest_finalize(&ctx);
     /***************** VERIFY DIGEST *************/
-    log_info("Start phase VERIFY_DIGEST\n");
     const uint8_t* hash = get_digest(mt);
     if (hash == NULL) {
         return INVALID_MANIFEST_ERROR;

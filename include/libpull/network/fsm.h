@@ -22,13 +22,14 @@ typedef struct fsm_ctx_t {
     fsm_state_t state;
 
     version_t version;
-
     safestore_t sf;
 
     receiver_msg_t msg;
     manifest_t mt;
+
     size_t processed;
     size_t expected;
+
     mem_id_t id;
     mem_object_t* obj;
 
@@ -38,12 +39,13 @@ typedef struct fsm_ctx_t {
     pipeline_ctx_t bsdiff_ctx;
     pipeline_ctx_t lzss_ctx;
     pipeline_ctx_t buffer_ctx;
+    pipeline_ctx_t writer_ctx;
 
     pipeline_func_t* pipeline;
     pipeline_ctx_t* pipeline_ctx;
 } fsm_ctx_t;
 
-pull_error fsm_init(fsm_ctx_t* ctx, mem_object_t* obj);
+pull_error fsm_init(fsm_ctx_t* ctx, safestore_t sf, mem_object_t* obj);
 
 pull_error fsm(fsm_ctx_t* ctx, uint8_t* buf, size_t len);
 
