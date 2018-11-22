@@ -2,7 +2,7 @@ AUTOMAKE_OPTIONS = subdir-objects
 AM_CFLAGS = -Wall -I. -I../include -I../ext/tinycrypt/lib/include -I../ext/tinydtls -DHAVE_CONFIG_H
 AM_CFLAGS += -I../build/posix -Isupport -I../ext/libcoap/include -Imocks
 AM_CFLAGS += -DHAVE_CONFIG_H -DUSE_TESTING_KEYS=1 -DWITH_CONNECTION_LIBCOAP=1 -DWITH_UPDATE_AGENT=1
-AM_CFLAGS += -DWITH_PLATFORM_POSIX=1 -DENABLE_SIGN=1 -DWITH_TINYCRYPT=1
+AM_CFLAGS += -DWITH_PLATFORM_POSIX=1 -DENABLE_SIGN=1 -DWITH_TINYCRYPT=1 -DWITH_TINYDTLS=1
 
 if COND_GCOV
   MAYBE_COVERAGE= -fprofile-arcs -ftest-coverage
@@ -54,7 +54,7 @@ test_memory_objects_SOURCES = memory/test_memory_objects.c $(ALL_SRC) $(TINYCRYP
 test_manifest_SOURCES = memory/test_manifest.c $(ALL_SRC) $(TINYCRYPT_SRC)
 
 # Network tests
-test_request_SOURCES = network/test_request.c $(ALL_SRC) $(TINYDTLS_SRC)
+test_request_SOURCES = network/test_request.c $(ALL_SRC) $(TINYCRYPT_SRC)
 test_connection_dtls_SOURCES = network/test_connection_dtls.c $(ALL_SRC) $(TINYDTLS_SRC)
 
 # Security tests
@@ -62,7 +62,7 @@ test_tinycrypt_SOURCES = security/test_tinycrypt.c $(ALL_SRC) $(TINYCRYPT_SRC)
 test_tinydtls_SOURCES = security/test_tinydtls.c $(ALL_SRC) $(TINYDTLS_SRC)
 
 # Agents tests
-test_update_pull_SOURCES = agents/test_update_pull.c ../src/agents/update.c $(ALL_SRC) $(TINYDTLS_SRC)
+test_update_pull_SOURCES = agents/test_update_pull.c ../src/agents/update.c $(ALL_SRC) $(TINYCRYPT_SRC)
 test_update_push_SOURCES = agents/test_update_push.c $(ALL_SRC) $(TINYCRYPT_SRC)
 test_bootloader_agent_SOURCES = agents/test_bootloader_agent.c ../src/agents/bootloader_agent.c $(ALL_SRC) $(TINYCRYPT_SRC)
 #test_bootloader_agent_CFLAGS = $(AM_CFLAGS) -DRECOVERY_IMAGE=0
