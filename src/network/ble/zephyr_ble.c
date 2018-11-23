@@ -27,34 +27,52 @@ static const struct bt_uuid_128 libpull_version_write =
 static const struct bt_uuid_128 libpull_receiver_msg =
     BT_UUID_INIT_128(LIBPULL_RECEIVER_MSG_UUID);
 
+static const struct bt_uuid_128 libpull_image =
+    BT_UUID_INIT_128(LIBPULL_IMAGE_UUID);
+
 static const struct bt_uuid_128 libpull_state =
     BT_UUID_INIT_128(LIBPULL_STATE_UUID);
 
 static ssize_t gatt_read_state(struct bt_conn *conn,
         const struct bt_gatt_attr *attr, void *buf,
         uint16_t len, uint16_t offset) {
-    return bt_gatt_attr_read(conn, attr, buf, len, offset, &fsmc->state, sizeof(fsm_state_t));
+    return bt_gatt_attr_read(conn, attr, buf, len, offset, &fsmc.state, sizeof(fsm_state_t));
 }
 
 static ssize_t gatt_read_version(struct bt_conn *conn,
         const struct bt_gatt_attr *attr, void *buf,
         uint16_t len, uint16_t offset) {
-    return bt_gatt_attr_read(conn, attr, buf, len, offset, &fsmc->version,
-            sizeof(version_t));
+    return bt_gatt_attr_read(conn, attr, buf, len, offset, &fsmc.version, sizeof(version_t));
 }
 
 static ssize_t gatt_write_version(struct bt_conn *conn,
-        const struct bt_gatt_attr *attr, void *buf,
-        uint16_t len, uint16_t offset) {
-    return 0; // TODO
+        const struct bt_gatt_attr *attr,
+        const void *buf, uint16_t len,
+        uint16_t offset, uint8_t flags) {
+    pull_error err;
+    if (fsmc.state != STATE_IDLE) {
+        return 0;
+    }
+    err = fsm(&fsmc, (uint8_t*)buf, len);
+    if (err) {
+        return 0;
+    }
+    return len;
 }
 
 static ssize_t gatt_read_receiver_msg(struct bt_conn *conn,
         const struct bt_gatt_attr *attr, void *buf,
         uint16_t len, uint16_t offset) {
-    void *value = attr->user_data;
-    return bt_gatt_attr_read(conn, attr, buf, len, offset, value,
-            sizeof(receiver_msg));
+    pull_error err;
+    receiver_msg_t msg;
+    if (fsmc.state != STATE_START_UPDATE) {
+        return 0;
+    }
+    err = fsm(&fsmc, (uint8_t*)&msg, sizeof(receiver_msg_t));
+    if (err) {
+        return 0;
+    }
+    return bt_gatt_attr_read(conn, attr, buf, len, offset, &msg, sizeof(receiver_msg_t));
 }
 
 static ssize_t gatt_write_image(struct bt_conn *conn,
@@ -97,7 +115,7 @@ static struct bt_gatt_attr libpull_attrs[] = {
     BT_GATT_CHARACTERISTIC(&libpull_receiver_msg.uuid,
             BT_GATT_CHRC_READ,
             BT_GATT_PERM_READ,
-            gatt_read_receiver_msg, NULL, &ctx.receiver_msg),
+            gatt_read_receiver_msg, NULL, NULL),
     /* 4 WRITE_ONLY data */
     BT_GATT_CHARACTERISTIC(&libpull_image.uuid,
             BT_GATT_CHRC_WRITE | BT_GATT_CHRC_WRITE_WITHOUT_RESP,
@@ -111,29 +129,27 @@ static struct bt_gatt_attr libpull_attrs[] = {
     BT_GATT_CCC(notify_state, notify_state_cb),
 };
 
-static const uint8_t update_cmd = UPDATE_CMD_VAL;
-
 static ssize_t gatt_write_image(struct bt_conn *conn,
         const struct bt_gatt_attr *attr,
         const void *buf, uint16_t len,
         uint16_t offset, uint8_t flags) {
     uint8_t* characteristic = attr->user_data;
-    uint8_t old_state = ctx.state;
-    err = libpull_fsm_receive(&ctx, buf, len);
+    uint8_t old_state = fsmc.state;
+    pull_error err = fsm(&fsmc, buf, len);
     if (err) {
         log_error(err, "Error in the fsm\n");
         return 0;
     }
-    if (notify_state_flag && (old_state != ctx.state)) {
-        bt_gatt_notify(NULL, &libpull_attrs[10], &ctx.state, sizeof(uint8_t));
+    if (notify_state_flag && (old_state != fsmc.state)) {
+        bt_gatt_notify(NULL, &libpull_attrs[10], &fsmc.state, sizeof(uint8_t));
     }
     return len;
 }
 
 static struct bt_gatt_service libpull_service = BT_GATT_SERVICE(libpull_attrs);
 
-pull_error libpull_gatt_init(mem_object_t *obj) {
-    pull_error err = fsm_init(&ctx, obj);
+pull_error libpull_gatt_init(safestore_t sf, mem_object_t *obj) {
+    pull_error err = fsm_init(&fsmc, sf, obj);
     if (err) {
         log_error(err, "Error initializing push receiver\n");
         return err;

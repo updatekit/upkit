@@ -5,7 +5,7 @@
 #if WITH_TINYDTLS
 
 #include <sha2/sha2.h>
-#include "crypto.h"
+#include <ecc/ecc.h>
 
 /* SHA 256 */
 
@@ -41,7 +41,10 @@ uint16_t get_digest_size() {
 
 pull_error ecc_verify(const uint8_t* x, const uint8_t* y, 
         const uint8_t* r, const uint8_t* s, const void* data, uint16_t data_len) {
-    int ret = dtls_ecdsa_verify_sig_hash(x, y, 32, data, data_len, (unsigned char*) r, (unsigned char*) s);
+    if (data_len != 32) {
+        return VERIFICATION_FAILED_ERROR;
+    }
+    int ret = ecc_ecdsa_validate(x, y, data, r, s);
     return ret == 0 ? PULL_SUCCESS : VERIFICATION_FAILED_ERROR;
 }
 

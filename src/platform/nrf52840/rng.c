@@ -1,7 +1,6 @@
 #ifdef WITH_PLATFORM_NRF52840
 
 #include <libpull/security.h>
-#include <openthread/platform/random.h>
 
 pull_error rng_init(rng_ctx_t* ctx) {
     return PULL_SUCCESS;

@@ -7,6 +7,8 @@
 #include <bluetooth/gatt.h>
 
 #include <libpull/network/gatt.h>
+#include "platform_headers.h"
+#include "default_keys.h"
 
 #define DEVICE_NAME	CONFIG_BT_DEVICE_NAME
 #define DEVICE_NAME_LEN	(sizeof(DEVICE_NAME) - 1)
@@ -61,7 +63,7 @@ int main(void) {
 	printf("Bluetooth initialized\n");
 
     mem_object_t obj;
-    libpull_gatt_init(&obj);
+    libpull_gatt_init(safestore_g, &obj);
 
 	bt_conn_cb_register(&conn_callbacks);
 	err = bt_le_adv_start(BT_LE_ADV_CONN, ad, ARRAY_SIZE(ad), sd, ARRAY_SIZE(sd));

@@ -6,6 +6,7 @@
 #include <libpull/network/connection_config.h>
 #include <libpull/network/receiver.h>
 #include <libpull/network/fsm.h>
+#include <libpull/network/gatt.h>
 #include <libpull/network/request.h>
 
 #endif /* LIBPULL_NETWORK_H_ */
