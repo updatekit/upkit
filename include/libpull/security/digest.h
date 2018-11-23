@@ -29,6 +29,10 @@ extern "C" {
 #include <cryptoauthlib.h>
 #endif
 
+#if WITH_MBEDTLS
+#include <mbedtls/sha256.h>
+#endif
+
 typedef union digest_ctx {
 #if WITH_TINYDTLS
   struct sha256_tinydtls_t {
@@ -51,6 +55,12 @@ typedef union digest_ctx {
     atcac_sha2_256_ctx ctx;
     uint8_t result[32];
   } sha256_cryptoauthlib;
+#endif
+#if WITH_MBEDTLS
+  struct sha256_mbedtls {
+    mbedtls_sha256_context ctx;
+    uint8_t result[32];
+  } sha256_mbedtls;
 #endif
 } digest_ctx;
 

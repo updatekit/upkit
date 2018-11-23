@@ -57,6 +57,13 @@ if [ ! -d "ext/tinycrypt" ]; then
     (cd ext/tinycrypt && make ENABLE_TESTS=false)
     echo "Build tinycrypt...done"
 fi
+if [ ! -d "ext/mbedtls" ]; then
+    clone mbedtls https://github.com/ARMmbed/mbedtls.git
+    # Build mbedtls
+    echo "Build mbedtls..."
+    (cd ext/mbedtls && make)
+    echo "Build mbedtls...done"
+fi
 #clone cryptoauthlib https://github.com/MicrochipTech/cryptoauthlib.git
 
 autoreconf -i

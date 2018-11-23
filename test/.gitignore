@@ -17,3 +17,4 @@ test_buffer
 test_request
 test_update_pull
 test_update_push
+test_mbedtls

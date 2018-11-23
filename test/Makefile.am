@@ -1,8 +1,8 @@
 AUTOMAKE_OPTIONS = subdir-objects
-AM_CFLAGS = -Wall -I. -I../include -I../ext/tinycrypt/lib/include -I../ext/tinydtls -DHAVE_CONFIG_H
-AM_CFLAGS += -I../build/posix -Isupport -I../ext/libcoap/include -Imocks
+AM_CFLAGS = -Wall -I. -I../include -I../ext/tinycrypt/lib/include -I../ext/tinydtls -DHAVE_CONFIG_H -I../ext/mbedtls/include
+AM_CFLAGS += -I../build/posix -Isupport -I../ext/libcoap/include -Imocks -Iext/mbedtls/include
 AM_CFLAGS += -DHAVE_CONFIG_H -DUSE_TESTING_KEYS=1 -DWITH_CONNECTION_LIBCOAP=1 -DWITH_UPDATE_AGENT=1
-AM_CFLAGS += -DWITH_PLATFORM_POSIX=1 -DENABLE_SIGN=1 -DWITH_TINYCRYPT=1 -DWITH_TINYDTLS=1
+AM_CFLAGS += -DWITH_PLATFORM_POSIX=1 -DENABLE_SIGN=1 -DWITH_TINYCRYPT=1 -DWITH_TINYDTLS=1 -DWITH_MBEDTLS=1
 
 if COND_GCOV
   MAYBE_COVERAGE= -fprofile-arcs -ftest-coverage
@@ -16,6 +16,7 @@ MOSTLYCLEANFILES = idsgrep.aux idsgrep.log idsgrep.blg idsgrep.bbl idsgrep.toc \
 LIBS =  ../ext/libcoap/.libs/libcoap-1.a 
 LIBS += ../ext/tinydtls/libtinydtls.a
 LIBS += ../ext/tinycrypt/lib/libtinycrypt.a
+LIBS += ../ext/mbedtls/library/libmbedtls.a ../ext/mbedtls/library/libmbedcrypto.a
 
 COMMON_SRC = ../src/core/common/error.c
 MEMORY_SRC = ../src/core/memory/memory_objects.c 
@@ -38,11 +39,12 @@ NO_MOCK_SRC = $(COMMON_SRC) $(SECURITY_SRC) $(NETWORK_SRC) $(NETWORK_IMPL) $(MEM
 
 TINYCRYPT_SRC = ../src/core/security/tinycrypt.c ../ext/tinycrypt/lib/source/ecc_platform_specific.c
 TINYDTLS_SRC = ../src/core/security/tinydtls.c
+MBEDTLS_SRC = ../src/core/security/mbedtls.c
 
 memory_tests = test_memory test_memory_objects test_manifest
 agents_tests = test_update_push test_update_pull test_bootloader_agent
 network_tests = test_request test_connection_dtls
-security_tests = test_tinycrypt test_tinydtls
+security_tests = test_tinycrypt test_tinydtls test_mbedtls
 pipeline_tests = test_pipeline test_lzss test_bspatch test_buffer
 
 check_PROGRAMS = $(memory_tests) $(agents_tests) $(network_tests) $(security_tests) $(common_tests) $(pipeline_tests)
@@ -60,6 +62,7 @@ test_connection_dtls_SOURCES = network/test_connection_dtls.c $(ALL_SRC) $(TINYD
 # Security tests
 test_tinycrypt_SOURCES = security/test_tinycrypt.c $(ALL_SRC) $(TINYCRYPT_SRC)
 test_tinydtls_SOURCES = security/test_tinydtls.c $(ALL_SRC) $(TINYDTLS_SRC)
+test_mbedtls_SOURCES = security/test_mbedtls.c $(ALL_SRC) $(MBEDTLS_SRC)
 
 # Agents tests
 test_update_pull_SOURCES = agents/test_update_pull.c ../src/agents/update.c $(ALL_SRC) $(TINYCRYPT_SRC)
