@@ -12,6 +12,10 @@ uint8_t buffer[BUFFER_SIZE];
 pull_error fsm_init(fsm_ctx_t* ctx, safestore_t sf, mem_object_t* obj) {
     ctx->obj = obj;
 
+    // Set the initial state
+    ctx->state = STATE_IDLE;
+    ctx->processed = 0;
+
     // Get the current running version
     mem_id_t ignore;
     pull_error err = get_newest_firmware(&ignore, &ctx->version, ctx->obj, true);
@@ -51,6 +55,7 @@ pull_error fsm(fsm_ctx_t* ctx, uint8_t* buf, size_t len) {
             // TODO if the process already started I should invalidate that object
             ctx->state = STATE_IDLE;
         case STATE_IDLE:
+            printf("mamma\n");
             // When the FSM is in state idle the input data must be the new
             // version available. Only if the new version is higher than the
             // current one then the device will move to the next state.
@@ -59,7 +64,8 @@ pull_error fsm(fsm_ctx_t* ctx, uint8_t* buf, size_t len) {
                 ctx->state = STATE_CLEAN;
                 return INVALID_VERSION_ERROR;
             }
-            if ( *((version_t*)buf) < ctx->version) {
+            log_debug("received %x, local %x\n", *((version_t*)buf), ctx->version);
+            if ( *((version_t*)buf) <= ctx->version) {
                 // If the version is not higher is not a failure. Just there 
                 // is no update available
                 log_debug("Version is not strictly higher\n");
@@ -216,7 +222,6 @@ pull_error fsm(fsm_ctx_t* ctx, uint8_t* buf, size_t len) {
             // Fallthrough
         case STATE_VERIFY_FIRMWARE:
             memory_open(ctx->obj, ctx->id, READ_ONLY);
-            printf("id is %d\n", ctx->id);
             err = verify_object(ctx->obj, ctx->sf, buffer, BUFFER_SIZE);
             memory_close(ctx->obj);
             

@@ -14,7 +14,7 @@ extern "C" {
 #define AGENTS_COROUTINE_H_
 
 #ifndef TIMEOUT
-#define TIMEOUT 100
+#define TIMEOUT 1000
 #endif
 
 #ifdef ENABLE_COROUTINES

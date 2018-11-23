@@ -40,7 +40,7 @@ static int libcoap_verify_key(const coap_session_t *session, const uint8_t *othe
 pull_error conn_init(conn_ctx* ctx, const char* addr, uint16_t port, conn_type type, void* conn_data) {
     ctx->coap_ctx = coap_new_context(NULL);
     if (ctx->coap_ctx == NULL) {
-        log_error(CONNECTION_INIT_ERROR, "Failure creating the CoAP context\n");
+        log_err(CONNECTION_INIT_ERROR, "Failure creating the CoAP context\n");
         return CONNECTION_INIT_ERROR;
     }
     ctx->conn_data = conn_data;
@@ -76,7 +76,7 @@ pull_error conn_init(conn_ctx* ctx, const char* addr, uint16_t port, conn_type t
             break;
 #endif
         default:
-            log_error(INVALID_CONN_DATA_ERROR, "Protocol not supported\n");
+            log_err(INVALID_CONN_DATA_ERROR, "Protocol not supported\n");
             return INVALID_CONN_DATA_ERROR;
     }
 #ifdef DEBUG_LIBCOAP
@@ -93,7 +93,7 @@ pull_error conn_init(conn_ctx* ctx, const char* addr, uint16_t port, conn_type t
     hints.ai_flags = AI_PASSIVE | AI_ALL;
     int error = getaddrinfo(addr, NULL, &hints, &result);
     if (error) {
-        log_error(RESOLVER_ERROR, "getaddrinfo: %s\n", gai_strerror(error));
+        log_err(RESOLVER_ERROR, "getaddrinfo: %s\n", gai_strerror(error));
         return RESOLVER_ERROR;
     }
     // Create a libcoap session
@@ -134,7 +134,7 @@ void handler_libcoap(struct coap_context_t * ctx,
         coap_pdu_t *received, const coap_tid_t id) {
     unsigned char buf[4];
     if (received->type == COAP_MESSAGE_RST) {
-        log_error(REQUEST_RST_ERROR, "Received a reset message\n");
+        log_err(REQUEST_RST_ERROR, "Received a reset message\n");
         CALLBACK(REQUEST_RST_ERROR, NULL, 0);
         return;
     }
@@ -142,7 +142,7 @@ void handler_libcoap(struct coap_context_t * ctx,
     if (COAP_RESPONSE_CLASS(received->code) >= 4) {
         // TODO Here I should parse the errors and return the
         // correct one to the callback
-        log_error(REQUEST_ERROR, "Received an error %d.%02d\n",
+        log_err(REQUEST_ERROR, "Received an error %d.%02d\n",
                 (received->code >> 5), received->code & 0x1F);
         CALLBACK(REQUEST_ERROR, NULL, 0);
         return;
@@ -158,12 +158,12 @@ void handler_libcoap(struct coap_context_t * ctx,
             coap_pdu_t* pdu = coap_pdu_init(COAP_MESSAGE_CON, BCTX.method,
                     coap_new_message_id(session), coap_session_max_pdu_size(session));
             if (!pdu) {
-                log_error(REQUEST_ERROR, "Error creating the request\n");
+                log_err(REQUEST_ERROR, "Error creating the request\n");
                 CALLBACK(REQUEST_ERROR, NULL, 0);
                 return;
             }
             if (split_resource(BCTX.resource, pdu) != PULL_SUCCESS) {
-                log_error(REQUEST_ERROR, "Error splitting resource\n");
+                log_err(REQUEST_ERROR, "Error splitting resource\n");
                 coap_delete_pdu(pdu);
                 CALLBACK(REQUEST_ERROR, NULL, 0);
                 return;
@@ -173,14 +173,14 @@ void handler_libcoap(struct coap_context_t * ctx,
                         BLOCK_SIZE), buf);
             if (BCTX.length > 0 && BCTX.data != NULL) {
                 if (coap_add_data(pdu, BCTX.length, (const uint8_t*) BCTX.data) == 0) {
-                    log_error(REQUEST_ERROR, "Error adding data\n");
+                    log_err(REQUEST_ERROR, "Error adding data\n");
                     coap_delete_pdu(pdu);
                     CALLBACK(REQUEST_ERROR, NULL, 0);
                     return;
                 }
             }
             if (coap_send(session, pdu) == COAP_INVALID_TID) {
-                log_error(REQUEST_ERROR, "Error sending the PDU\n");
+                log_err(REQUEST_ERROR, "Error sending the PDU\n");
                 CALLBACK(REQUEST_ERROR, NULL, 0);
                 return;
             }
@@ -188,6 +188,7 @@ void handler_libcoap(struct coap_context_t * ctx,
     } else if (block_opt && !BCTX.enabled) {
         // The response contained a blockwise transmission but it was
         // not expected by the client. Aborting
+        log_err(REQUEST_ERROR, "Not expected blockwise transmission\n");
         CALLBACK(REQUEST_ERROR, NULL, 0);
         return;
     }
@@ -237,11 +238,11 @@ pull_error conn_request(conn_ctx* ctx, rest_method method, const char* resource,
             coap_new_message_id(ctx->coap_session), 
             coap_session_max_pdu_size(ctx->coap_session));
     if (!request) {
-        log_error(REQUEST_ERROR, "Error creating the request\n");
+        log_err(REQUEST_ERROR, "Error creating the request\n");
         return REQUEST_ERROR;
     }
     if (split_resource(resource, request) != PULL_SUCCESS) {
-        log_error(INVALID_RESOURCE_ERROR, "Error splitting resource\n");
+        log_err(INVALID_RESOURCE_ERROR, "Error splitting resource\n");
         coap_delete_pdu(request);
         return INVALID_RESOURCE_ERROR;
     }
@@ -262,13 +263,13 @@ pull_error conn_request(conn_ctx* ctx, rest_method method, const char* resource,
         ctx->cb_ctx.bctx.data = data;
         ctx->cb_ctx.bctx.length = length;
         if (coap_add_data(request, length, (const uint8_t*) data) == 0) {
-            log_error(INVALID_DATA_ERROR, "Error adding data\n");
+            log_err(INVALID_DATA_ERROR, "Error adding data\n");
             coap_delete_pdu(request);
             return INVALID_DATA_ERROR;
         }
     }
     if (coap_send(ctx->coap_session, request) == COAP_INVALID_TID) {
-        log_error(SEND_ERROR, "Error sending the PDU\n");
+        log_err(SEND_ERROR, "Error sending the PDU\n");
         coap_delete_pdu(request);
         return SEND_ERROR;
     }

@@ -17,38 +17,36 @@ int default_CSPRNG(uint8_t *dest, unsigned int size) {
 }
 #endif
 
-static agent_msg_t agent_msg;
-static update_agent_config cfg;
+static agent_event_t agent_event;
+static update_agent_config_t cfg;
 static update_agent_ctx_t ctx;
-static int8_t retries = 3;
-static uint8_t success = 0;
 static uint8_t buffer[BUFFER_SIZE];
+static bool exit = false;
 
 int main(void) {
     conn_config_t conn;
+    agent_data_t event_data;
     conn_config(&conn, SERVER_ADDR, 5683, PULL_UDP, NULL);
 
     update_agent_config(&cfg, &conn, safestore_g, buffer, BUFFER_SIZE);
 
-    while (1) {
-        agent_msg = update_agent(&cfg, &ctx);
-        if (IS_FAILURE(agent_msg)) {
+    do {
+        agent_event = update_agent(&cfg, &ctx, &event_data);
+        if (IS_FAILURE(agent_event)) {
+            log_debug("Failure\n");
+            exit = true;
             break;
-        } else if (IS_CONTINUE(agent_msg)) {
-            if (agent_msg.event == EVENT_APPLY) {
-                success = 1;
+        } else if (IS_SEND(agent_event)) {
+            loop(GET_CONNECTION(agent_event), TIMEOUT);
+        } else if (IS_CONTINUE(agent_event)) {
+            if (agent_event == EVENT_APPLY) {
+                exit = true;
                 break;
-            }
-        } else if (IS_RECOVER(agent_msg)) {
-            if (retries-- > 0) {
-                continue;
             } else {
-                break;
+                log_debug("Continue..\n");
             }
-        } else if (IS_SEND(agent_msg)) {
-            loop(GET_CONNECTION(agent_msg), TIMEOUT);
         }
-    }
+    } while (!exit);
     printf("There was an error during the update phase\n");
     while(1) { /* BUSY WAIT */};
 }

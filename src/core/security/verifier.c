@@ -30,7 +30,6 @@ pull_error verify_object(mem_object_t* obj, safestore_t sf, uint8_t* buffer, siz
 
 pull_error verify_manifest(manifest_t* mt, safestore_t sf) {
     // Verify App ID
-    printf("%x %x\n", get_appid(mt), sf.appid);
     if (get_appid(mt) != sf.appid) {
         log_err(INVALID_SIGNATURE_ERROR, "Received firmware has invalid appid\n");
         return INVALID_SIGNATURE_ERROR;

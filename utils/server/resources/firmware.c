@@ -36,29 +36,20 @@ extern void resource_firmware(coap_context_t *ctx,
     }
     msg = (receiver_msg_t*) raw_message;
 
-    // Make the manifest specific for the request
-    // TODO When moving the server to c++ store temporarely
-    // the specific manifest for a N number of requuests
-    // XXX now the signature is calculated at each request
-    // TODO This part must be completely rewritten to make it more robust
-    //
-    // TODO AAA this part must be fixed 
-    /*identity_t current_identity = get_identity(server_ctx->mapped_file_manifest);
-    identity_t identity = {
-        .udid = msg->udid,
-        .random = msg->random
-    };
-    if (current_identity.udid != identity.udid || current_identity.random != identity.random) {
-        set_identity(server_ctx->mapped_file_manifest, identity);
+    manifest_t* mt = (manifest_t*)server_ctx->mapped_file_manifest;
+    server_manifest_t* smt = &mt->server;
+    if (smt->udid != msg->udid || smt->nonce != msg->nonce) {
+        smt->udid = msg->udid;
+        smt->nonce = msg->nonce;
+        smt->diff_version = 0;
         uint8_t signature_buffer[64];
-        pull_error perr = sign_manifest_server(server_ctx->mapped_file_manifest, 
-                tinycrypt_digest_sha256, priv_g, (uint8_t*)&signature_buffer, tinycrypt_secp256r1_ecc);
+        pull_error perr = sign_manifest_server(mt, server_priv_g, &signature_buffer);
         if (perr) {
             printf("Error signing data\n");
             response->code = COAP_RESPONSE_CODE(400);
             return;
         }
-    }*/
+    }
 
     // Start the blockwise transfer
     unsigned char buf[3];
@@ -95,4 +86,5 @@ extern void resource_firmware(coap_context_t *ctx,
         response->code = COAP_RESPONSE_CODE(400);
         return;
     }
+    printf("successfully sent data with block %x\n", block.num);
 }

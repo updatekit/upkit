@@ -116,8 +116,9 @@ typedef struct update_agent_ctx_t {
     mem_object_t obj_t;
     pull_error err;
     fsm_ctx_t fsmc;
-    conn_ctx* conn;
+    conn_ctx conn;
     request_ctx_t reqc;
+    receiver_msg_t msg;
 } update_agent_ctx_t;
 
 /**

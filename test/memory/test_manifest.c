@@ -33,7 +33,9 @@ void ntest_prepare(void) {
     set_server_signature_s(&mt, server_signature_s_g, size);
 }
 
-void ntest_clean() {};
+void ntest_clean() {
+    restore_assets();
+};
 
 void test_manifest_version(void) {
     nTEST_TRUE(version_g == get_version(&mt));

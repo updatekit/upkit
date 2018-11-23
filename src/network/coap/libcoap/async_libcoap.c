@@ -14,19 +14,22 @@
 /* This is a blocking function, it will return when the
  * message has been received or the timeout is exceeded */
 void loop_once(conn_ctx* ctx, uint32_t timeout) {
-    coap_run_once(ctx->coap_ctx, timeout);
+    int ret = coap_run_once(ctx->coap_ctx, timeout);
+    if (ret > timeout) {
+        log_debug("Timeout received %d %d\n", ret, timeout);
+        return;
+    }
 }
 
 void loop(conn_ctx* ctx, uint32_t timeout) {
     ctx->loop = 1;
-    while(ctx->loop) {
-        log_debug("Starting loop\n");
+    do {
         int ret = coap_run_once(ctx->coap_ctx, timeout);
         if (ret > timeout) {
-            log_debug("Timeout received\n");
+            log_debug("Timeout received %d %d\n", ret, timeout);
             return;
         }
-    }
+    } while(ctx->loop);
     log_debug("Loop end\n");
 }
 

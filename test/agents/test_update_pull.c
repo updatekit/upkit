@@ -63,7 +63,7 @@ void test_update_success_dtls(void) {
 int main() {
     nTEST_INIT();
     nTEST_RUN(test_update_success);
-    nTEST_RUN(test_update_success_dtls);
+    //nTEST_RUN(test_update_success_dtls);
     nTEST_END();
     nTEST_RETURN();
 }

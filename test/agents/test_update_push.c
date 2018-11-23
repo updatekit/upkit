@@ -69,6 +69,7 @@ void test_update_success(void) {
     sign_manifest_server(&mt, server_priv_g, buffer);
 
     // 7) CB: Starts sending the udpate
+    printf("%d\n", get_version(&mt));
     nTEST_TRUE(fsmc.state == STATE_RECEIVE_MANIFEST);
     err = fsm(&fsmc, &mt, sizeof(manifest_t));
     nTEST_TRUE(!err);
