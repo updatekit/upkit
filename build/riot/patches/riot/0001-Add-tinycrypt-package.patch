@@ -28,7 +28,7 @@ index 000000000..ff862ffce
 @@ -0,0 +1,12 @@
 +PKG_NAME=tinycrypt
 +PKG_URL=https://github.com/01org/tinycrypt
-+PKG_VERSION=3ea1a609e7aff9f2d8d13803e1076b7a8e551804
++PKG_VERSION=b7e31959c56c29054827831efc9a5a551eac3a46
 +PKG_LICENSE=BSD-3-Clause
 +
 +.PHONY: all

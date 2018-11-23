@@ -2,8 +2,8 @@
 #               Configurable Parameters             #
 #####################################################
 # Accepted values: 0 1 2 3 4
-LOGGER_VERBOSITY ?= 4
-# Accepted values: NULL, TINYDTLS, CRYPTOAUTHLIB, TINYCRYPT
+LOGGER_VERBOSITY ?= 1
+# Accepted values: NULL, TINYDTLS, TINYCRYPT
 SEC_LIB ?= TINYDTLS
 #####################################################
 #              End Configurable Parameters          #
@@ -31,20 +31,27 @@ CFLAGS += $(BOARD_CFLAGS)
 EXTERNAL_MODULE_DIRS = $(ROOTDIR)/src
 USEMODULE += libpull
 
-#ifeq ($(BOARD),"remote-reva")
+ifeq ($(BOARD),remote-reva)
 	CFLAGS += -I$(ROOTDIR)/src/platform/cc2538
 	CFLAGS += -DWITH_PLATFORM_CC2538=1
 	CFLAGS += -DWITH_ARM_CORTEX_LOADER=1
-#endif
+endif
 
 CFLAGS += -I$(ROOTDIR)/include -I$(ROOTDIR)
 CFLAGS += -DSIMPLE_MANIFEST -DLOGGER_VERBOSITY=$(LOGGER_VERBOSITY)
 # Enable the flash interface
 CFLAGS += -DMEMORY_FLASH_IMPL=1 -DDISABLE_LIBPULL_NETWORK=1
-CFLAGS += -DWITH_TINYCRYPT=1
 
-# Add tinycrypt to the build
-USEPKG += tinycrypt
+ifeq ($(SEC_LIB),TINYCRYPT) 
+	# Add tinycrypt to the build
+	CFLAGS += -DWITH_TINYCRYPT=1
+	USEPKG += tinycrypt
+else ifeq ($(SEC_LIB),TINYDTLS)
+	# Add tinydtls to the build
+	CFLAGS += -DWITH_TINYDTLS=1
+	USEPKG += tinydtls
+	CFLAGS += -DDTLS_ECC -DWITH_SHA256 -DWITH_RIOT_GNRC
+endif
 
 bootloader_ctx:
 	gcc -Wall bootloader_ctx.c -I$(ROOTDIR)/include -o bootloader_ctx

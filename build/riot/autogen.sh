@@ -8,7 +8,7 @@ mkdir ext
 
 # Clone the RIOT repository and its submodules
 echo "Cloning the RIOT repository..."
-git clone --quiet --progress \
+git clone --quiet --progress --recursive \
     https://github.com/RIOT-OS/RIOT ext/riot
 (cd ext/riot
 git checkout "2018.04"
