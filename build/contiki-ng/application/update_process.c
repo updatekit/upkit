@@ -30,23 +30,6 @@ int default_CSPRNG(uint8_t *dest, unsigned int size) {
 }
 #endif
 
-void verify_before() {
-#ifdef WITH_CRYPTOAUTHLIB
-    ATCA_STATUS status = atcab_init(&cfg_ateccx08a_i2c_default);
-    if (status != ATCA_SUCCESS) {
-        log_error(GENERIC_ERROR, "Failure initializing ATECC508A\n");
-    }
-#endif
-    WATCHDOG_STOP();
-}
-
-void verify_after() {
-#ifdef WITH_CRYPTOAUTHLIB
-    atcab_release();
-#endif
-    WATCHDOG_START();
-}
-
 PROCESS_THREAD(update_process, ev, data) {
     PROCESS_BEGIN();
     agent_data_t event_data;
@@ -67,10 +50,19 @@ PROCESS_THREAD(update_process, ev, data) {
                  watchdog_reboot();
                  break;
              } else if (agent_event == EVENT_VERIFY_BEFORE) {
-                 verify_before();
+                #ifdef WITH_CRYPTOAUTHLIB
+                 ATCA_STATUS status = atcab_init(&cfg_ateccx08a_i2c_default);
+                 if (status != ATCA_SUCCESS) {
+                     log_error(GENERIC_ERROR, "Failure initializing ATECC508A\n");
+                 }
+                #endif
+                 WATCHDOG_STOP();
              } else if (agent_event == EVENT_VERIFY_AFTER) {
-                 verify_after();
-             } else if (agent_event == EVENT_CHECKING_UPDATES_TIMEOUT) {
+                #ifdef WITH_CRYPTOAUTHLIB
+                atcab_release();
+                #endif
+                WATCHDOG_START();
+             } else if (agent_event == EVENT_SUBSCRIBE_TIMEOUT) {
                  etimer_set(&et, (CLOCK_SECOND*5));
                  PROCESS_WAIT_EVENT_UNTIL(etimer_expired(&et));
              }

@@ -33,39 +33,42 @@ agent_event_t update_agent(update_agent_config_t* cfg, update_agent_ctx_t* ctx, 
 
 
     // (4) Subscribe to the server
-    PULL_CONTINUE(EVENT_CHECK_UPDATES, NULL);
+    PULL_CONTINUE(EVENT_SUBSCRIBE, NULL);
     do {
         ctx->err = conn_request(&ctx->conn, GET, "/version", NULL, 0);
         if (ctx->err) {
             log_debug("Error sending the request\n");
             PULL_RETURN(EVENT_SUBSCRIBE_FAILURE, &ctx->err);
         }
-        PULL_SEND(EVENT_CHECKING_UPDATES_SEND, &(ctx->conn));
+        PULL_SEND(EVENT_SUBSCRIBE_SEND, &(ctx->conn));
         if (ctx->reqc.err) {
             log_err(ctx->reqc.err, "Error in the callback\n");
-            return ctx->reqc.err;
+            PULL_RETURN(EVENT_SUBSCRIBE_FAILURE_2, &ctx->reqc.err);
         }
     } while (ctx->fsmc.state != STATE_START_UPDATE);
 
     // (5) The fsm returns the data to be passed to the update server
+    PULL_CONTINUE(EVENT_GET_MSG, NULL);
     ctx->err = fsm(&ctx->fsmc, (uint8_t*) &ctx->msg, sizeof(receiver_msg_t));
     if (ctx->err) {
         log_err(ctx->err, "Invalid identity");
-        PULL_RETURN(EVENT_VERIFY_FAILURE, &ctx->err);
+        PULL_RETURN(EVENT_GET_MSG_FAILURE, &ctx->err);
     }
 
     // (6) Perform the request passing the data
-    PULL_CONTINUE(EVENT_RECEIVER, NULL);
+    PULL_CONTINUE(EVENT_RECEIVE, NULL);
     do {
         ctx->err = conn_request(&ctx->conn, GET_BLOCKWISE2, "/firmware", (const char*)&ctx->msg, sizeof(receiver_msg_t));
         if (ctx->err) {
             log_debug("Error sending the request\n");
-            PULL_RETURN(EVENT_CONN_RECEIVER_FAILURE, &ctx->err);
+            PULL_RETURN(EVENT_RECEIVER_FAILURE, &ctx->err);
         }
-        PULL_SEND(EVENT_CHECKING_UPDATES_SEND, &(ctx->conn));
+        PULL_SEND(EVENT_RECEIVE_SEND, &(ctx->conn));
         if (ctx->reqc.err) {
             log_err(ctx->reqc.err, "Error in the callback\n");
-            return ctx->reqc.err;
+            PULL_RETURN(EVENT_RECEIVER_FAILURE_2, &ctx->reqc.err);
+        } else {
+            PULL_CONTINUE(EVENT_SUBSCRIBE_TIMEOUT, NULL);
         }
     } while (ctx->fsmc.state == STATE_RECEIVE_FIRMWARE);
     conn_end(&ctx->conn);
