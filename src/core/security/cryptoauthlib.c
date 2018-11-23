@@ -31,7 +31,7 @@ void* digest_finalize(digest_ctx* ctx) {
     return &ctx->sha256_cryptoauthlib_hw.result;
 }
 
-uint16_t digest_get_size() {
+uint16_t get_digest_size() {
     return 32;
 }
 
@@ -58,7 +58,7 @@ void* digest_finalize(digest_ctx* ctx) {
     return &ctx->sha256_cryptoauthlib.result;
 }
 
-uint16_t digest_get_size() {
+uint16_t get_digest_size() {
     return 32;
 }
 

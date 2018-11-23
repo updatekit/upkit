@@ -16,6 +16,12 @@ git submodule update --init --recursive
 )
 echo "Cloning the Contiki-NG repository...done"
 
+# Clone cryptoauhlib
+echo "Cloning the cryptoauthlib repository..."
+git clone --quiet --progress \
+    https://github.com/MicrochipTech/cryptoauthlib.git cryptoauthlib
+echo "Cloning the cryptoauthlib repository...done"
+
 PATCHDIR=patches
 for dir in $(cd $PATCHDIR && find . -type d -print); do
     for f in $(find "$PATCHDIR/$dir" -maxdepth 1 -name "*.patch"| sort); do

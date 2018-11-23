@@ -64,6 +64,8 @@ if [ ! -d "ext/mbedtls" ]; then
     (cd ext/mbedtls && make)
     echo "Build mbedtls...done"
 fi
-#clone cryptoauthlib https://github.com/MicrochipTech/cryptoauthlib.git
+if [ ! -d "ext/cryptoauthlib" ]; then
+    clone cryptoauthlib https://github.com/libpull/cryptoauthlib-hal.git
+fi
 
 autoreconf -i

@@ -1,6 +1,7 @@
 bootloader/linker_script.ld
 runner
 bootloader/bootloader_ctx
+bootloader/bootloader
 firmware
 linker_script.ld
 
