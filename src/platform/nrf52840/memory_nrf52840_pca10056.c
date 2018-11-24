@@ -49,7 +49,7 @@ static int internal_flash_read(uint8_t* buffer, address_t offset, size_t size) {
 }
 
 #define PAGE_SIZE 0x1000
-static flash_descr_t internal_flash_descr = {
+static const flash_descr_t internal_flash_descr = {
     .page_size = PAGE_SIZE,
     .open = internal_flash_open,
     .erase = internal_flash_erase,

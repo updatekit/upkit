@@ -90,11 +90,11 @@ uint8_t notify_state_flag = 0;
 uint8_t notify_result_flag = 0;
 
 static void notify_state_cb(const struct bt_gatt_attr *attr, u16_t value) {
-    printf("received request for notify state\n");
+    log_debug("received request for notify state\n");
     notify_state_flag = (value == BT_GATT_CCC_NOTIFY)? 1 : 0;
 }
 static void notify_result_cb(const struct bt_gatt_attr *attr, u16_t value) {
-    printf("received request for notify result\n");
+    log_debug("received request for notify result\n");
     notify_result_flag = (value == BT_GATT_CCC_NOTIFY)? 1 : 0;
 }
 
@@ -148,7 +148,7 @@ static ssize_t gatt_write_image(struct bt_conn *conn,
 
 static struct bt_gatt_service libpull_service = BT_GATT_SERVICE(libpull_attrs);
 
-pull_error libpull_gatt_init(safestore_t sf, mem_object_t *obj) {
+pull_error libpull_gatt_init(safestore_t* sf, mem_object_t *obj) {
     pull_error err = fsm_init(&fsmc, sf, obj);
     if (err) {
         log_error(err, "Error initializing push receiver\n");

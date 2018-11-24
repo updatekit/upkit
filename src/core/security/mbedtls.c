@@ -48,9 +48,10 @@ pull_error ecc_verify(const uint8_t* x, const uint8_t* y, const uint8_t* r, cons
     memcpy(pub_key_buff, x, 32);
     memcpy(pub_key_buff+32, y, 32);
 
-    const mbedtls_ecp_curve_info *curve_info = mbedtls_ecp_curve_info_from_grp_id(MBEDTLS_ECP_DP_SECP256R1);
-
-    mbedtls_ecp_group_load(&ctx_verify.grp, curve_info->grp_id);
+    if (mbedtls_ecp_group_load(&ctx_verify.grp, MBEDTLS_ECP_DP_SECP256R1)) {
+        log_debug("Error loading group\n");
+        return VERIFICATION_FAILED_ERROR;
+    }
 
     ret = mbedtls_ecp_point_read_binary( &ctx_verify.grp, &ctx_verify.Q,
                            pub_key_buff, 64);

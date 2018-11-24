@@ -26,8 +26,12 @@ AUTOSTART_PROCESSES(&bootloader);
 
 static agent_event_t agent_event;
 
+#ifdef CONTIKI_PROCESS
 PROCESS_THREAD(bootloader, ev, data) {
     PROCESS_BEGIN();
+#else
+int pull_bootloader() {
+#endif
     bootloader_agent_config cfg;
     cfg.bootloader_ctx_id = BOOTLOADER_CTX;
     cfg.swap_id = SWAP;
@@ -69,5 +73,7 @@ PROCESS_THREAD(bootloader, ev, data) {
         }
         // XXX I still need to manage the fatal errors
     }
+#ifdef CONTIKI_PROCESS
     PROCESS_END();
+#endif
 }

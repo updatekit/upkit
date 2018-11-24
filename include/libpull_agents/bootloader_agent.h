@@ -101,7 +101,7 @@ typedef struct bootloader_agent_config {
     size_t swap_size;
     uint8_t* buffer;
     size_t buffer_size;
-    safestore_t safestore;
+    safestore_t* safestore;
 } bootloader_agent_config;
 
 

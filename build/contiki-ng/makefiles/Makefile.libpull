@@ -6,7 +6,8 @@ ifeq ($(LIBPULL_APPLICATION), 1)
 	CFLAGS += -DWITH_CONNECTION_ERCOAP=1
 endif
 ifeq ($(DISABLE_MAIN),1) 
-	LIBPULLDIRS += $(BOARDDIR)/bootloader
+	PROJECTDIRS += $(BOARDDIR)/bootloader
+	PROJECT_SOURCEFILES += $(notdir $(shell find $(BOARDDIR)/bootloader -name '*.c'))
 endif
 
 PROJECTDIRS += $(shell find $(ROOTDIR)/src -type d ! -name ".deps")

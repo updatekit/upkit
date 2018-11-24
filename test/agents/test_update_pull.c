@@ -35,7 +35,7 @@ void update_runner(conn_type type, void* data) {
     conn_config(&conn, "localhost", 0, type, data);
 
     /* Configure update agent */
-    update_agent_config(&cfg, &conn, safestore_g, buffer, BUFFER_SIZE);
+    update_agent_config(&cfg, &conn, &safestore_g, buffer, BUFFER_SIZE);
 
     /* Start the update agent */
     agent_event = update_agent(&cfg, &ctx, &event_data);

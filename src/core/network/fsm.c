@@ -9,7 +9,7 @@
 #define BUFFER_SIZE 1024
 uint8_t buffer[BUFFER_SIZE];
 
-pull_error fsm_init(fsm_ctx_t* ctx, safestore_t sf, mem_object_t* obj) {
+pull_error fsm_init(fsm_ctx_t* ctx, safestore_t* sf, mem_object_t* obj) {
     ctx->obj = obj;
 
     // Set the initial state
@@ -40,6 +40,10 @@ pull_error fsm_init(fsm_ctx_t* ctx, safestore_t sf, mem_object_t* obj) {
     ctx->buffer_ctx.next_func = &writer_pipeline;
     ctx->buffer_ctx.next_ctx = &ctx->writer_ctx;
     
+    // Setup pipeline bspatch
+    ctx->bspatch_ctx.next_func = &lzss_pipeline;
+    ctx->bspatch_ctx.next_ctx = &ctx->lzss_ctx;
+    
     return PULL_SUCCESS;
 }
 
@@ -55,7 +59,6 @@ pull_error fsm(fsm_ctx_t* ctx, uint8_t* buf, size_t len) {
             // TODO if the process already started I should invalidate that object
             ctx->state = STATE_IDLE;
         case STATE_IDLE:
-            printf("mamma\n");
             // When the FSM is in state idle the input data must be the new
             // version available. Only if the new version is higher than the
             // current one then the device will move to the next state.
@@ -89,7 +92,7 @@ pull_error fsm(fsm_ctx_t* ctx, uint8_t* buf, size_t len) {
                 ctx->state = STATE_CLEAN;
                 return err;
             }
-            msg->udid = ctx->sf.udid; // set UDID
+            msg->udid = ctx->sf->udid; // set UDID
             msg->version = ctx->version; // set version
             msg->nonce = ctx->nonce;
 
@@ -120,16 +123,16 @@ pull_error fsm(fsm_ctx_t* ctx, uint8_t* buf, size_t len) {
             // Fallthrough to verify. If it is invalid we do not need to open
             // the memory and store the data
         case STATE_VERIFY_MANIFEST:
-            if (get_version(&ctx->mt) <= ctx->version) {
+            if (ctx->mt.vendor.version <= ctx->version) {
                 log_debug("Received version: %u - Local version: %u\n", 
-                        get_version(&ctx->mt), ctx->version);
+                        ctx->mt.vendor.version, ctx->version);
                 log_err(INVALID_SIGNATURE_ERROR, "Received firmware has invalid version\n");
                 ctx->state = STATE_CLEAN;
                 return INVALID_SIGNATURE_ERROR;
             }
 
             // compare nonce
-            if (get_nonce(&ctx->mt) != ctx->nonce) {
+            if (ctx->mt.server.nonce != ctx->nonce) {
                 log_err(INVALID_SIGNATURE_ERROR, "Received nonce is invalid\n");                
                 ctx->state = STATE_CLEAN;
                 return INVALID_SIGNATURE_ERROR;
@@ -145,12 +148,12 @@ pull_error fsm(fsm_ctx_t* ctx, uint8_t* buf, size_t len) {
              * through to the state receive firmware. We still need to store
              * the manifest and the remaining of the buffer */
 
-            if (get_diff_version(&ctx->mt) == 0) {
+            if (ctx->mt.server.diff_version == 0) {
                 ctx->pipeline = &buffer_pipeline;
                 ctx->pipeline_ctx = &ctx->buffer_ctx;
-            } else if (get_diff_version(&ctx->mt) == ctx->version) {
+            } else if (ctx->mt.server.diff_version == ctx->version) {
                 ctx->pipeline = &pipeline_bspatch;
-                ctx->pipeline_ctx = &ctx->bsdiff_ctx;
+                ctx->pipeline_ctx = &ctx->bspatch_ctx;
             } else {
                 log_err(INVALID_SIGNATURE_ERROR,
                         "Received firmware has invalid diff version\n");
@@ -195,12 +198,12 @@ pull_error fsm(fsm_ctx_t* ctx, uint8_t* buf, size_t len) {
                 }
             }
 
-            ctx->expected = get_offset(&ctx->mt)+get_size(&ctx->mt);
+            ctx->expected = ctx->mt.vendor.offset + ctx->mt.vendor.size;
 
             ctx->state = STATE_RECEIVE_FIRMWARE;
             return PULL_SUCCESS;
         case STATE_RECEIVE_FIRMWARE:
-            if (ctx->processed+len > get_offset(&ctx->mt)+get_size(&ctx->mt)) {
+            if (ctx->processed+len > ctx->expected) {
                 log_err(INVALID_SIZE_ERROR, "Received more data than expected\n");
                 ctx->state = STATE_CLEAN;
                 return INVALID_SIZE_ERROR;
@@ -218,6 +221,7 @@ pull_error fsm(fsm_ctx_t* ctx, uint8_t* buf, size_t len) {
 
             ctx->pipeline->clear(ctx->pipeline_ctx);
             memory_close(ctx->obj);
+
             ctx->state = STATE_VERIFY_FIRMWARE;
             // Fallthrough
         case STATE_VERIFY_FIRMWARE:

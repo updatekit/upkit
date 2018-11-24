@@ -163,7 +163,6 @@ pull_error read_firmware_manifest(mem_object_t* obj, manifest_t* mt) {
 
 pull_error write_firmware_manifest(mem_object_t* obj, const manifest_t* mt) {
     if (memory_write(obj, (uint8_t*) mt, sizeof(manifest_t), 0) != sizeof(manifest_t)) {
-        memory_close(obj);
         log_error(MEMORY_WRITE_ERROR, "Failure writing manifest into object\n");
         return WRITE_MANIFEST_ERROR;
     }

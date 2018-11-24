@@ -27,7 +27,7 @@ void ntest_clean(void) {
 
 void test_bootloader_success(void) {
     bootloader_agent_set_buffer(&cfg, buffer, BUFFER_SIZE);
-    cfg.safestore = safestore_g;
+    cfg.safestore = &safestore_g;
     cfg.bootloader_ctx_id = BOOTLOADER_CTX;
     cfg.recovery_id = OBJ_GOLD;
     cfg.swap_size = SWAP_SIZE;

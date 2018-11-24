@@ -44,7 +44,7 @@ void test_sign_invalid_hash_size(void) {
 }
 
 void test_verify_object_valid(void) {
-    pull_error err = verify_object(&obj_a, safestore_g, buffer, BUFFER_LEN);
+    pull_error err = verify_object(&obj_a, &safestore_g, buffer, BUFFER_LEN);
     nTEST_TRUE(err == PULL_SUCCESS, "%s\n", err_as_str(err));
 }
 
@@ -52,6 +52,6 @@ void test_verify_object_invalid_key(void) {
     safestore_t safestore_invalid;
     memcpy(&safestore_invalid, &safestore_g, sizeof(safestore_t));
     safestore_invalid.keystore.x[0] = 0xab;
-    pull_error err = verify_object(&obj_a, safestore_invalid, buffer, BUFFER_LEN);
+    pull_error err = verify_object(&obj_a, &safestore_invalid, buffer, BUFFER_LEN);
     nTEST_TRUE(err, "%s\n", err_as_str(err));
 }

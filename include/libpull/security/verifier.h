@@ -20,10 +20,10 @@
 extern "C" {
 #endif /* __cplusplus */
 
-pull_error verify_object(mem_object_t* obj, safestore_t sf, uint8_t* buffer, 
+pull_error verify_object(mem_object_t* obj, safestore_t* sf, uint8_t* buffer, 
         size_t buffer_len);
         
-pull_error verify_manifest(manifest_t* mt, safestore_t sf);
+pull_error verify_manifest(manifest_t* mt, safestore_t* sf);
 
 pull_error verify_digest(mem_object_t* obj, manifest_t* mt, uint8_t* buffer, size_t buffer_len);
 

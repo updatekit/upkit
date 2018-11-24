@@ -6,7 +6,7 @@
 
 
 /* The memory object should be already opened */
-pull_error verify_object(mem_object_t* obj, safestore_t sf, uint8_t* buffer, size_t buffer_len) {
+pull_error verify_object(mem_object_t* obj, safestore_t* sf, uint8_t* buffer, size_t buffer_len) {
     pull_error err;
 
     /************* GET_OBJECT_MANIFEST ***************/
@@ -28,14 +28,14 @@ pull_error verify_object(mem_object_t* obj, safestore_t sf, uint8_t* buffer, siz
     return PULL_SUCCESS;
 }
 
-pull_error verify_manifest(manifest_t* mt, safestore_t sf) {
+pull_error verify_manifest(manifest_t* mt, safestore_t* sf) {
     // Verify App ID
-    if (get_appid(mt) != sf.appid) {
+    if (get_appid(mt) != sf->appid) {
         log_err(INVALID_SIGNATURE_ERROR, "Received firmware has invalid appid\n");
         return INVALID_SIGNATURE_ERROR;
     }
     // Verify signature
-    pull_error err = verify_signature(mt, sf.keystore);
+    pull_error err = verify_signature(mt, sf->keystore);
     if (err) {
         return err;
     }

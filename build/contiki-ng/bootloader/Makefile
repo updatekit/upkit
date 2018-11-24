@@ -2,7 +2,7 @@
 # 				Configurable Parameters             #
 #####################################################
 # Accepted values: 0 1 2 3 4
-LOGGER_VERBOSITY ?= 1
+LOGGER_VERBOSITY ?= 0
 # Accepted values: NULL, TINYDTLS, CRYPTOAUTHLIB, TINYCRYPT
 SEC_LIB ?= CRYPTOAUTHLIB
 #####################################################
@@ -30,7 +30,7 @@ BOARDDIR = ../target/$(TARGET)/$(BOARD)
 
 # Bootloader Configurations
 LIBPULL_BOOTLOADER=1
-DISABLE_MAIN=0
+DISABLE_MAIN=1
 include ../makefiles/Makefile.libpull
 
 CFLAGS += -DDISABLE_ALL_OUTPUT=1 -DENABLE_COROUTINES=1
