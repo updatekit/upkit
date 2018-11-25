@@ -12,7 +12,7 @@
 
 #include "platform_headers.h"
 
-fsm_ctx_t fsmc;
+static fsm_ctx_t fsmc;
 
 /* Libpull GATT service UUIDs */
 static struct bt_uuid_128 libpull_service_udid =
@@ -63,13 +63,11 @@ static ssize_t gatt_write_version(struct bt_conn *conn,
 static ssize_t gatt_read_receiver_msg(struct bt_conn *conn,
         const struct bt_gatt_attr *attr, void *buf,
         uint16_t len, uint16_t offset) {
-    pull_error err;
     receiver_msg_t msg;
     if (fsmc.state != STATE_START_UPDATE) {
         return 0;
     }
-    err = fsm(&fsmc, (uint8_t*)&msg, sizeof(receiver_msg_t));
-    if (err) {
+    if (fsm(&fsmc, (uint8_t*)&msg, sizeof(receiver_msg_t))) {
         return 0;
     }
     return bt_gatt_attr_read(conn, attr, buf, len, offset, &msg, sizeof(receiver_msg_t));
@@ -80,22 +78,12 @@ static ssize_t gatt_write_image(struct bt_conn *conn,
         const void *buf, uint16_t len,
         uint16_t offset, uint8_t flags);
 
-static uint8_t update_characteristic = 0x0;
-static uint8_t image_characteristic = 0x1;
-
 static struct bt_gatt_ccc_cfg notify_state[BT_GATT_CCC_MAX] = {};
-static struct bt_gatt_ccc_cfg notify_result[BT_GATT_CCC_MAX] = {};
-
 uint8_t notify_state_flag = 0;
-uint8_t notify_result_flag = 0;
 
 static void notify_state_cb(const struct bt_gatt_attr *attr, u16_t value) {
     log_debug("received request for notify state\n");
     notify_state_flag = (value == BT_GATT_CCC_NOTIFY)? 1 : 0;
-}
-static void notify_result_cb(const struct bt_gatt_attr *attr, u16_t value) {
-    log_debug("received request for notify result\n");
-    notify_result_flag = (value == BT_GATT_CCC_NOTIFY)? 1 : 0;
 }
 
 static struct bt_gatt_attr libpull_attrs[] = {
@@ -120,7 +108,7 @@ static struct bt_gatt_attr libpull_attrs[] = {
     BT_GATT_CHARACTERISTIC(&libpull_image.uuid,
             BT_GATT_CHRC_WRITE | BT_GATT_CHRC_WRITE_WITHOUT_RESP,
             BT_GATT_PERM_WRITE,
-            NULL, gatt_write_image, &image_characteristic),
+            NULL, gatt_write_image, NULL),
     /* 5 READ_ONLY & NOTIFY state */
     BT_GATT_CHARACTERISTIC(&libpull_state.uuid,
             BT_GATT_CHRC_READ | BT_GATT_CHRC_NOTIFY,
@@ -133,7 +121,6 @@ static ssize_t gatt_write_image(struct bt_conn *conn,
         const struct bt_gatt_attr *attr,
         const void *buf, uint16_t len,
         uint16_t offset, uint8_t flags) {
-    uint8_t* characteristic = attr->user_data;
     uint8_t old_state = fsmc.state;
     pull_error err = fsm(&fsmc, buf, len);
     if (err) {

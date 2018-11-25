@@ -21,12 +21,7 @@ extern "C" {
 #endif /* DOXYGEN_SHOULD_SKIP_THIS */
 
 typedef struct pipeline_ctx_t pipeline_ctx_t;
-
-typedef struct pipeline_func_t {
-    int (*init)(pipeline_ctx_t* ctx, void* more);
-    int (*process)(pipeline_ctx_t* ctx, uint8_t* buf, int l);
-    int (*clear)(pipeline_ctx_t*ctx);
-} pipeline_func_t;
+typedef int (*pipeline_stage_t)(pipeline_ctx_t* ctx, uint8_t* buf, int l);
 
 /** 
  * \brief  This structure defines the context for each stage of the pipeline;
@@ -39,7 +34,7 @@ struct pipeline_ctx_t {
     void* stage_data;           //< This value is used internally by the init
                                 //< function to store informations for the
                                 //< process function.
-    pipeline_func_t* next_func; //< Pointer to functions structure of the next
+    pipeline_stage_t next_stage; //< Pointer to functions structure of the next
                                 //< stage of the pipeline
     pipeline_ctx_t* next_ctx;   //< Pointer to the context to be passed to the
                                 //< next stage of the pipeline

@@ -27,23 +27,13 @@ pull_error get_ordered_firmware(mem_id_t* id, version_t* version, mem_object_t* 
         if (first || ( !(prefer_bootable && (bootable && !memory_slots[i].bootable)) && (
             (newest == true && mt.vendor.version > *version) || 
             (newest == false && mt.vendor.version < *version)))) {
-            *version = get_version(&mt);
+            *version = mt.vendor.version;
             *id = memory_slots[i].id;
             bootable = memory_slots[i].bootable;
             first = false;
         }
     }
     return PULL_SUCCESS;
-}
-
-pull_error get_newest_firmware(mem_id_t* id, version_t* version, 
-        mem_object_t* obj_t, bool prefer_bootable) {
-    return get_ordered_firmware(id, version, obj_t, true, prefer_bootable);
-}
-
-pull_error get_oldest_firmware(mem_id_t* id, version_t* version, 
-        mem_object_t* obj_t, bool prefer_bootable) {
-    return get_ordered_firmware(id, version, obj_t, false, prefer_bootable);
 }
 
 pull_error copy_firmware(mem_object_t* src, mem_object_t* dst, uint8_t* buffer, size_t buffer_size) {
@@ -150,31 +140,5 @@ pull_error swap_slots(mem_object_t* obj1, mem_object_t* obj2, mem_object_t* obj_
         // Incremente the offset
         offset += swap_size;
     }
-    return PULL_SUCCESS;
-}
-
-pull_error read_firmware_manifest(mem_object_t* obj, manifest_t* mt) {
-    if (memory_read(obj, (uint8_t*) mt, sizeof(manifest_t), 0) != sizeof(manifest_t)) {
-        log_error(MEMORY_READ_ERROR, "Failure reading object\n");
-        return READ_MANIFEST_ERROR;
-    }
-    return PULL_SUCCESS;
-}
-
-pull_error write_firmware_manifest(mem_object_t* obj, const manifest_t* mt) {
-    if (memory_write(obj, (uint8_t*) mt, sizeof(manifest_t), 0) != sizeof(manifest_t)) {
-        log_error(MEMORY_WRITE_ERROR, "Failure writing manifest into object\n");
-        return WRITE_MANIFEST_ERROR;
-    }
-    return PULL_SUCCESS;
-}
-
-pull_error invalidate_object(mem_id_t id, mem_object_t* obj) {
-    pull_error err = memory_open(obj, id, WRITE_ALL) != PULL_SUCCESS;
-    if (err) {
-        log_error(err, "Failure opening firmware\n");
-        return WRITE_MANIFEST_ERROR;
-    }
-    memory_close(obj);
     return PULL_SUCCESS;
 }

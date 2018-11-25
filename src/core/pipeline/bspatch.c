@@ -32,15 +32,8 @@
 #include <string.h>
 #include <libpull/pipeline/bspatch.h>
 
-int pipeline_bspatch_init(pipeline_ctx_t* ctx, void* more) {
-    ctx->finish = false;
-    ctx->more = more;
-    ctx->state = 0;
-    return 0;
-}
-
 // Returns < 0 on error; >=0 number of bytes processed
-int pipeline_bspatch_process(pipeline_ctx_t* ctx, uint8_t* buf, int len) {
+int bspatch_pipeline(pipeline_ctx_t* ctx, uint8_t* buf, int len) {
     // TODO implement a check for the bundaries
     // A corrupted patch could let this program access random memory
     // The oldsize shuold be passed during the configuration, since if
@@ -119,7 +112,7 @@ int pipeline_bspatch_process(pipeline_ctx_t* ctx, uint8_t* buf, int len) {
                 pipelineReturn(bufp-buf);
             }
             uint8_t buffer = *bufp + old[oldpos+i];
-            ctx->next_func->process(ctx->next_ctx, &buffer, 1);
+            ctx->next_stage(ctx->next_ctx, &buffer, 1);
             bufp++;
         }
 
@@ -137,7 +130,7 @@ int pipeline_bspatch_process(pipeline_ctx_t* ctx, uint8_t* buf, int len) {
             while ((buf+len-bufp) == 0) {
                 pipelineReturn(bufp-buf);
             }
-            ctx->next_func->process(ctx->next_ctx, bufp, 1);
+            ctx->next_stage(ctx->next_ctx, bufp, 1);
             bufp++;
         }
 
@@ -148,11 +141,5 @@ int pipeline_bspatch_process(pipeline_ctx_t* ctx, uint8_t* buf, int len) {
     ctx->finish = true;
     pipelineFinish
 	return bufp-buf;
-}
-
-int pipeline_bspatch_clear(pipeline_ctx_t*ctx) {
-    ctx->next_func->clear(ctx->next_ctx);
-    // Do nothing
-    return 0;
 }
 

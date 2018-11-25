@@ -25,15 +25,13 @@ extern "C" {
 #include <stdint.h>
 #include <libpull/pipeline/pipeline.h>
 
-int pipeline_lzss_init(pipeline_ctx_t* ctx, void* more);
-int pipeline_lzss_process(pipeline_ctx_t* ctx, uint8_t* buf, int l);
-int pipeline_lzss_clear(pipeline_ctx_t*ctx);
+inline void pipeline_lzss_init(pipeline_ctx_t* ctx, void* more) {
+    ctx->state = 0;
+    ctx->finish = false;
+    ctx->more = more;
+}
 
-static pipeline_func_t lzss_pipeline = {
-    .init = pipeline_lzss_init,
-    .process = pipeline_lzss_process,
-    .clear = pipeline_lzss_clear
-};
+int lzss_pipeline(pipeline_ctx_t* ctx, uint8_t* buf, int l);
 
 #ifdef __cplusplus
 }

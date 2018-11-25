@@ -7,7 +7,18 @@
 #include <string.h>
 
 #define BUFFER_SIZE 1024
-uint8_t buffer[BUFFER_SIZE];
+static uint8_t buffer[BUFFER_SIZE];
+
+typedef struct fsm_internal_state_t {
+    manifest_t mt;
+    nonce_t nonce;
+    pipeline_ctx_t bspatch_ctx;
+    pipeline_ctx_t lzss_ctx;
+    pipeline_ctx_t buffer_ctx;
+    pipeline_ctx_t writer_ctx;
+    pipeline_stage_t pipeline;
+    pipeline_ctx_t* pipeline_ctx;
+} fsm_internal_state_t;
 
 pull_error fsm_init(fsm_ctx_t* ctx, safestore_t* sf, mem_object_t* obj) {
     ctx->obj = obj;
@@ -15,6 +26,9 @@ pull_error fsm_init(fsm_ctx_t* ctx, safestore_t* sf, mem_object_t* obj) {
     // Set the initial state
     ctx->state = STATE_IDLE;
     ctx->processed = 0;
+
+    // Load safestore
+    ctx->sf = sf;
 
     // Get the current running version
     mem_id_t ignore;
@@ -32,28 +46,19 @@ pull_error fsm_init(fsm_ctx_t* ctx, safestore_t* sf, mem_object_t* obj) {
         return err;
     }
 
-    // Load safestore
-    ctx->sf = sf;
-
-    // Configure the pipeline
-    buffer_pipeline.init(&ctx->buffer_ctx, NULL);
-    ctx->buffer_ctx.next_func = &writer_pipeline;
-    ctx->buffer_ctx.next_ctx = &ctx->writer_ctx;
-    
-    // Setup pipeline bspatch
-    ctx->bspatch_ctx.next_func = &lzss_pipeline;
-    ctx->bspatch_ctx.next_ctx = &ctx->lzss_ctx;
-    
     return PULL_SUCCESS;
 }
 
 pull_error fsm(fsm_ctx_t* ctx, uint8_t* buf, size_t len) {
     PULL_ASSERT(buf != NULL && len > 0);
     pull_error err;
+    // Using this buffer to store the manifest allows to avoids to have
+    // a shared variable
+    fsm_internal_state_t* is = (fsm_internal_state_t*)buffer;
     switch (ctx->state) {
         case STATE_CLEAN:
             /* Clean the stored data */
-            memset(&ctx->mt, 0, sizeof(manifest_t));
+            memset(&is->mt, 0, sizeof(manifest_t));
             ctx->processed = 0;
             ctx->id = 0;
             // TODO if the process already started I should invalidate that object
@@ -86,7 +91,7 @@ pull_error fsm(fsm_ctx_t* ctx, uint8_t* buf, size_t len) {
             receiver_msg_t* msg = (receiver_msg_t*)buf;
             // get nonce
 
-            err = rng_generate(&ctx->rctx, &ctx->nonce);
+            err = rng_generate(&ctx->rctx, &is->nonce);
             if (err) {
                 log_err(err, "Error getting RNG\n");
                 ctx->state = STATE_CLEAN;
@@ -94,7 +99,7 @@ pull_error fsm(fsm_ctx_t* ctx, uint8_t* buf, size_t len) {
             }
             msg->udid = ctx->sf->udid; // set UDID
             msg->version = ctx->version; // set version
-            msg->nonce = ctx->nonce;
+            msg->nonce = is->nonce;
 
             ctx->state = STATE_RECEIVE_MANIFEST;
             return PULL_SUCCESS;
@@ -106,7 +111,7 @@ pull_error fsm(fsm_ctx_t* ctx, uint8_t* buf, size_t len) {
                 ctx->state = STATE_CLEAN;
                 return INVALID_STATE_ERROR;
             }
-            uint8_t* mtbuf = ((uint8_t*)&ctx->mt) + ctx->processed;
+            uint8_t* mtbuf = ((uint8_t*)&is->mt) + ctx->processed;
             uint8_t* bufp = buf;
             while (ctx->processed < sizeof(manifest_t) && (bufp-buf) < len) {
                 *mtbuf = *bufp;
@@ -123,21 +128,21 @@ pull_error fsm(fsm_ctx_t* ctx, uint8_t* buf, size_t len) {
             // Fallthrough to verify. If it is invalid we do not need to open
             // the memory and store the data
         case STATE_VERIFY_MANIFEST:
-            if (ctx->mt.vendor.version <= ctx->version) {
+            if (is->mt.vendor.version <= ctx->version) {
                 log_debug("Received version: %u - Local version: %u\n", 
-                        ctx->mt.vendor.version, ctx->version);
+                        is->mt.vendor.version, ctx->version);
                 log_err(INVALID_SIGNATURE_ERROR, "Received firmware has invalid version\n");
                 ctx->state = STATE_CLEAN;
                 return INVALID_SIGNATURE_ERROR;
             }
 
             // compare nonce
-            if (ctx->mt.server.nonce != ctx->nonce) {
+            if (is->mt.server.nonce != is->nonce) {
                 log_err(INVALID_SIGNATURE_ERROR, "Received nonce is invalid\n");                
                 ctx->state = STATE_CLEAN;
                 return INVALID_SIGNATURE_ERROR;
             }
-            err = verify_manifest(&ctx->mt, ctx->sf);
+            err = verify_manifest(&is->mt, ctx->sf);
             if (err) {
                 log_err(INVALID_SIGNATURE_ERROR,
                         "Manifest has invalid signature\n");
@@ -148,12 +153,20 @@ pull_error fsm(fsm_ctx_t* ctx, uint8_t* buf, size_t len) {
              * through to the state receive firmware. We still need to store
              * the manifest and the remaining of the buffer */
 
-            if (ctx->mt.server.diff_version == 0) {
-                ctx->pipeline = &buffer_pipeline;
-                ctx->pipeline_ctx = &ctx->buffer_ctx;
-            } else if (ctx->mt.server.diff_version == ctx->version) {
-                ctx->pipeline = &pipeline_bspatch;
-                ctx->pipeline_ctx = &ctx->bspatch_ctx;
+            // Configure the pipeline
+            pipeline_buffer_init(&is->buffer_ctx, NULL);
+            is->buffer_ctx.next_stage = (pipeline_stage_t) writer_pipeline;
+            is->buffer_ctx.next_ctx = &is->writer_ctx;
+
+            is->bspatch_ctx.next_stage = (pipeline_stage_t) lzss_pipeline;
+            is->bspatch_ctx.next_ctx = &is->lzss_ctx;
+
+            if (is->mt.server.diff_version == 0) {
+                is->pipeline = (pipeline_stage_t) buffer_pipeline;
+                is->pipeline_ctx = &is->buffer_ctx;
+            } else if (is->mt.server.diff_version == ctx->version) {
+                is->pipeline = (pipeline_stage_t) bspatch_pipeline;
+                is->pipeline_ctx = &is->bspatch_ctx;
             } else {
                 log_err(INVALID_SIGNATURE_ERROR,
                         "Received firmware has invalid diff version\n");
@@ -178,17 +191,17 @@ pull_error fsm(fsm_ctx_t* ctx, uint8_t* buf, size_t len) {
             }
 
             // Set the new memory object in the writer pipeline
-            writer_pipeline.init(&ctx->writer_ctx, ctx->obj);
+            pipeline_writer_init(&is->writer_ctx, ctx->obj);
             
             // Store the manifest directly without passing through the pipeline
-            int ret = buffer_pipeline.process(&ctx->buffer_ctx, (uint8_t*) &ctx->mt, sizeof(manifest_t));
+            int ret = buffer_pipeline(&is->buffer_ctx, (uint8_t*)&is->mt, sizeof(manifest_t));
             if (ret != sizeof(manifest_t)) {
                 log_err(err, "Error writing manifest");
                 ctx->state = STATE_CLEAN;
                 return err;
             }
             if ((bufp-buf) < len) {
-                ret = ctx->pipeline->process(ctx->pipeline_ctx, bufp, len-(bufp-buf));
+                ret = is->pipeline(is->pipeline_ctx, bufp, len-(bufp-buf));
                 if (ret != len-(bufp-buf)) {
                     log_err(err, "Error writing manifest");
                     ctx->state = STATE_CLEAN;
@@ -198,7 +211,7 @@ pull_error fsm(fsm_ctx_t* ctx, uint8_t* buf, size_t len) {
                 }
             }
 
-            ctx->expected = ctx->mt.vendor.offset + ctx->mt.vendor.size;
+            ctx->expected = is->mt.vendor.offset + is->mt.vendor.size;
 
             ctx->state = STATE_RECEIVE_FIRMWARE;
             return PULL_SUCCESS;
@@ -208,7 +221,7 @@ pull_error fsm(fsm_ctx_t* ctx, uint8_t* buf, size_t len) {
                 ctx->state = STATE_CLEAN;
                 return INVALID_SIZE_ERROR;
             }
-            ret = ctx->pipeline->process(ctx->pipeline_ctx, buf, len);
+            ret = is->pipeline(is->pipeline_ctx, buf, len);
             if (ret != len) {
                 log_err(PIPELINE_ERROR, "Error writing manifest");
                 ctx->state = STATE_CLEAN;
@@ -219,7 +232,7 @@ pull_error fsm(fsm_ctx_t* ctx, uint8_t* buf, size_t len) {
                 return PULL_SUCCESS;
             }
 
-            ctx->pipeline->clear(ctx->pipeline_ctx);
+            pipeline_buffer_clear(&is->buffer_ctx);
             memory_close(ctx->obj);
 
             ctx->state = STATE_VERIFY_FIRMWARE;

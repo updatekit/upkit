@@ -30,7 +30,7 @@ pull_error verify_object(mem_object_t* obj, safestore_t* sf, uint8_t* buffer, si
 
 pull_error verify_manifest(manifest_t* mt, safestore_t* sf) {
     // Verify App ID
-    if (get_appid(mt) != sf->appid) {
+    if (mt->vendor.appid != sf->appid) {
         log_err(INVALID_SIGNATURE_ERROR, "Received firmware has invalid appid\n");
         return INVALID_SIGNATURE_ERROR;
     }
@@ -51,10 +51,10 @@ pull_error verify_digest(mem_object_t* obj, manifest_t* mt, uint8_t* buffer,
     if ((err = digest_init(&ctx)) != PULL_SUCCESS) {
         return err;
     }
-    address_t offset = get_offset(mt);
-    const address_t final_offset = offset + get_size(mt);
+    address_t offset = mt->vendor.offset;
+    const address_t final_offset = offset + mt->vendor.size;
     address_t step = buffer_len;
-    log_debug("Digest: initial offset %uu final offset %u size %u\n", offset, final_offset, get_size(mt));
+    log_debug("Digest: initial offset %uu final offset %u size %u\n", offset, final_offset, mt->vendor.size);
     if (offset == final_offset) {
         return MEMORY_READ_ERROR;
     }
@@ -75,7 +75,7 @@ pull_error verify_digest(mem_object_t* obj, manifest_t* mt, uint8_t* buffer,
     }
     uint8_t* result = digest_finalize(&ctx);
     /***************** VERIFY DIGEST *************/
-    const uint8_t* hash = get_digest(mt);
+    const uint8_t* hash = &mt->vendor.digest;
     if (hash == NULL) {
         return INVALID_MANIFEST_ERROR;
     }

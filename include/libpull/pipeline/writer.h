@@ -11,15 +11,18 @@ extern "C" {
 
 #include <libpull/pipeline/pipeline.h>
 
-int pipeline_writer_init(pipeline_ctx_t* ctx, void* more);
-int pipeline_writer_process(pipeline_ctx_t* ctx, uint8_t* buf, int l);
-int pipeline_writer_clear(pipeline_ctx_t*ctx);
-
-static pipeline_func_t writer_pipeline = {
-    .init = pipeline_writer_init,
-    .process = pipeline_writer_process,
-    .clear = pipeline_writer_clear
+struct writer_ctx {
+    mem_object_t* obj;
+    address_t written;
 };
+
+static inline void pipeline_writer_init(pipeline_ctx_t* c, void* more) {
+    static struct writer_ctx ctx;
+    ctx.obj = (mem_object_t*)more;
+    ctx.written = 0;
+    c->stage_data = &ctx;    
+}
+int writer_pipeline(pipeline_ctx_t* ctx, uint8_t* buf, int l);
 
 #ifdef __cplusplus
 }

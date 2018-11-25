@@ -21,6 +21,8 @@
 extern "C" {
 #endif /* __cplusplus */
 
+pull_error get_ordered_firmware(mem_id_t* id, version_t* version, mem_object_t* obj_t, bool   newest, bool prefer_bootable);
+
 /**
  * \brief Get the id of the memory object containing the newest firmware.
  *
@@ -29,8 +31,10 @@ extern "C" {
  * \param[in] obj_t A temporary mem_object_t used by the function.
  * \returns PULL_SUCCESS on success or a specific error otherwise.
  */
-pull_error get_newest_firmware(mem_id_t *id, version_t *version, mem_object_t *obj_t,
-        bool prefer_bootable);
+inline pull_error get_newest_firmware(mem_id_t* id, version_t* version,
+        mem_object_t* obj_t, bool prefer_bootable) {
+    return get_ordered_firmware(id, version, obj_t, true, prefer_bootable);
+}
 
 /**
  * \brief Get the id of the memory object containing the oldest firmware.
@@ -40,8 +44,10 @@ pull_error get_newest_firmware(mem_id_t *id, version_t *version, mem_object_t *o
  * \param[in] obj_t A temporary mem_object_t used by the function.
  * \returns PULL_SUCCESS on success or a specific error otherwise.
  */
-pull_error get_oldest_firmware(mem_id_t *obj, version_t *version, mem_object_t *obj_t,
-        bool prefer_bootable);
+inline pull_error get_oldest_firmware(mem_id_t* id, version_t* version,
+        mem_object_t* obj_t, bool prefer_bootable) {
+    return get_ordered_firmware(id, version, obj_t, false, prefer_bootable);
+}
 
 /**
  * \brief Copy the firmware s into the firmware d.
@@ -98,7 +104,13 @@ pull_error swap_slots(mem_object_t* obj1, mem_object_t* obj2, mem_object_t* obj_
  * \param[out] mt manifest of the memory object.
  * \returns PULL_SUCCESS on success or a specific error otherwise.
  */
-pull_error read_firmware_manifest(mem_object_t *obj, manifest_t *mt);
+inline pull_error read_firmware_manifest(mem_object_t* obj, manifest_t* mt) {
+    if (memory_read(obj, (uint8_t*) mt, sizeof(manifest_t), 0) != sizeof(manifest_t)) {
+        log_error(MEMORY_READ_ERROR, "Failure reading object\n");
+        return READ_MANIFEST_ERROR;
+    }
+    return PULL_SUCCESS;
+}
 
 /**
  * \brief Write the manifest into the memory object.
@@ -107,7 +119,13 @@ pull_error read_firmware_manifest(mem_object_t *obj, manifest_t *mt);
  * \param[in] mt The manifest to be written.
  * \returns PULL_SUCCESS on success or a specific error otherwise.
  */
-pull_error write_firmware_manifest(mem_object_t *obj_t, const manifest_t *mt);
+inline pull_error write_firmware_manifest(mem_object_t* obj, const manifest_t* mt) {
+    if (memory_write(obj, (uint8_t*) mt, sizeof(manifest_t), 0) != sizeof(manifest_t)) {
+        log_error(MEMORY_WRITE_ERROR, "Failure writing manifest into object\n");
+        return WRITE_MANIFEST_ERROR;
+    }
+    return PULL_SUCCESS;
+}
 
 /** 
  * \brief  Invalidate a memory object
@@ -117,8 +135,15 @@ pull_error write_firmware_manifest(mem_object_t *obj_t, const manifest_t *mt);
  * 
  * \returns   
  */
-pull_error invalidate_object(mem_id_t id, mem_object_t* obj_t);
-
+inline pull_error invalidate_object(mem_id_t id, mem_object_t* obj) {
+    pull_error err = memory_open(obj, id, WRITE_ALL) != PULL_SUCCESS;
+    if (err) {
+        log_error(err, "Failure opening firmware\n");
+        return WRITE_MANIFEST_ERROR;
+    }
+    memory_close(obj);
+    return PULL_SUCCESS;
+}
 
 #ifdef __cplusplus
 }
