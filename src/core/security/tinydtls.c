@@ -44,7 +44,7 @@ pull_error ecc_verify(const uint8_t* x, const uint8_t* y,
     if (data_len != 32) {
         return VERIFICATION_FAILED_ERROR;
     }
-    int ret = ecc_ecdsa_validate(x, y, data, r, s);
+    int ret = ecc_ecdsa_validate((const uint32_t *)x, (const uint32_t *)y, data, (const uint32_t *)r, (const uint32_t *)s);
     return ret == 0 ? PULL_SUCCESS : VERIFICATION_FAILED_ERROR;
 }
 

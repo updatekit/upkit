@@ -5,16 +5,11 @@
 
 #include <unistd.h>
 
-#ifndef BUFFER_SIZE
-#define BUFFER_SIZE 1024
-#endif
-
 static agent_event_t agent_event;
 static update_agent_config_t cfg;
 static update_agent_ctx_t ctx;
 static int8_t retries = 3;
 static uint8_t success = 0;
-static uint8_t buffer[BUFFER_SIZE];
 
 void ntest_prepare(void) {
     bzero(&cfg, sizeof(cfg));
@@ -35,7 +30,7 @@ void update_runner(conn_type type, void* data) {
     conn_config(&conn, "localhost", 0, type, data);
 
     /* Configure update agent */
-    update_agent_config(&cfg, &conn, &safestore_g, buffer, BUFFER_SIZE);
+    update_agent_config(&cfg, &conn, &safestore_g);
 
     /* Start the update agent */
     agent_event = update_agent(&cfg, &ctx, &event_data);

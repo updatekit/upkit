@@ -33,7 +33,7 @@ void* update_thread(void* args) {
     agent_data_t event_data;
     conn_config(&conn, SERVER_ADDR, 5683, PULL_UDP, NULL);
 
-    update_agent_config(&cfg, &conn, safestore_g, buffer, BUFFER_SIZE);
+    update_agent_config(&cfg, &conn, &safestore_g, buffer, BUFFER_SIZE);
 
     do {
         agent_event = update_agent(&cfg, &ctx, &event_data);

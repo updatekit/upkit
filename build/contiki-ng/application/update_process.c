@@ -10,8 +10,6 @@
 
 PROCESS(update_process, "OTA Update process");
 
-#define BUFFER_SIZE 512
-
 void specialize_conn_functions(void);
 static void* conn_data;
 static conn_type type;
@@ -19,7 +17,6 @@ static conn_type type;
 static agent_event_t agent_event;
 static update_agent_config_t cfg;
 static update_agent_ctx_t ctx;
-static uint8_t buffer[BUFFER_SIZE];
 static struct etimer et;
 
 static int8_t retries = 3;
@@ -34,12 +31,14 @@ PROCESS_THREAD(update_process, ev, data) {
     PROCESS_BEGIN();
     agent_data_t event_data;
 
+    specialize_conn_functions();
+
      /* Configure connection */
      conn_config_t conn;
      conn_config(&conn, "coap://[fd00::1]", 0, type, conn_data);
 
      /* Configure update agent */
-     update_agent_config(&cfg, &conn, safestore_g, buffer, BUFFER_SIZE);
+     update_agent_config(&cfg, &conn, &safestore_g);
 
      while (1) {
          agent_event = update_agent(&cfg, &ctx, &event_data);

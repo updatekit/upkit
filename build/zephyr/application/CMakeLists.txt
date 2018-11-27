@@ -1,3 +1,4 @@
+cmake_minimum_required(VERSION 3.11)
 include($ENV{ZEPHYR_BASE}/cmake/app/boilerplate.cmake NO_POLICY_SCOPE)
 project(application)
 
@@ -11,12 +12,12 @@ file(GLOB libpull_headers ${ROOTDIR}/include)
 target_sources(app PRIVATE ${libpull_src})
 include_directories(${libpull_headers} ${ROOTDIR})
 
-add_definitions(-DLOGGER_VERBOSITY=1)
+add_definitions(-DLOGGER_VERBOSITY=0)
 add_definitions(-DMEMORY_FLASH_IMPL=1 -DSIMPLE_MANIFEST=1)
 add_definitions(-DWITH_UPDATE_AGENT=1 -DWITH_CONNECTION_ZOAP=1)
 add_definitions(-DWITH_PLATFORM_NRF52840=1)
 
-set(TINYCRYPT 1) # TINYCRYPT or TINYDTLS or MBEDTLS
+set(TINYDTLS 1) # TINYCRYPT or TINYDTLS or MBEDTLS
 if (TINYCRYPT)
     add_definitions(-DWITH_TINYCRYPT=1)
 elseif(TINYDTLS)

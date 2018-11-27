@@ -54,7 +54,9 @@ pull_error fsm(fsm_ctx_t* ctx, uint8_t* buf, size_t len) {
     pull_error err;
     // Using this buffer to store the manifest allows to avoids to have
     // a shared variable
+    //static fsm_internal_state_t internal_state;
     fsm_internal_state_t* is = (fsm_internal_state_t*)buffer;
+    //fsm_internal_state_t* is = &internal_state;
     switch (ctx->state) {
         case STATE_CLEAN:
             /* Clean the stored data */

@@ -75,7 +75,7 @@ pull_error verify_digest(mem_object_t* obj, manifest_t* mt, uint8_t* buffer,
     }
     uint8_t* result = digest_finalize(&ctx);
     /***************** VERIFY DIGEST *************/
-    const uint8_t* hash = &mt->vendor.digest;
+    const uint8_t* hash = (uint8_t*)&mt->vendor.digest;
     if (hash == NULL) {
         return INVALID_MANIFEST_ERROR;
     }

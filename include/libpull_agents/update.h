@@ -94,15 +94,11 @@ typedef enum agent_event_t {
 typedef struct update_agent_config_t {
     conn_config_t* conn;
     safestore_t* safestore;
-    uint8_t* buffer;
-    size_t buffer_size;
 } update_agent_config_t;
 
-static inline void update_agent_config(update_agent_config_t* cfg, conn_config_t* conn, safestore_t* safestore, uint8_t* buffer, size_t buffer_size) {
+static inline void update_agent_config(update_agent_config_t* cfg, conn_config_t* conn, safestore_t* safestore) {
     cfg->conn = conn;
     cfg->safestore = safestore;
-    cfg->buffer = buffer;
-    cfg->buffer_size = buffer_size;
 }
 
 /**

@@ -24,7 +24,7 @@ int main(void) {
     agent_event_t agent_event;
     void* event_data = NULL;
     bootloader_agent_set_buffer(&cfg, buffer, BUFFER_SIZE);
-    cfg.safestore = safestore_g;
+    cfg.safestore = &safestore_g;
     cfg.bootloader_ctx_id = BOOTLOADER_CTX;
     cfg.swap_size = SWAP_SIZE;
     cfg.swap_id = SWAP;

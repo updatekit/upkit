@@ -36,7 +36,7 @@ int pull_bootloader() {
     cfg.bootloader_ctx_id = BOOTLOADER_CTX;
     cfg.swap_id = SWAP;
     cfg.swap_size = SWAP_SIZE;
-    cfg.safestore = safestore_g;
+    cfg.safestore = &safestore_g;
     bootloader_agent_set_buffer(&cfg, buffer, BUFFER_SIZE);
 
     log_debug("Bootloader started\n");

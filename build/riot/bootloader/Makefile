@@ -2,9 +2,9 @@
 #               Configurable Parameters             #
 #####################################################
 # Accepted values: 0 1 2 3 4
-LOGGER_VERBOSITY ?= 1
+LOGGER_VERBOSITY ?= 0
 # Accepted values: NULL, TINYDTLS, TINYCRYPT
-SEC_LIB ?= TINYDTLS
+SEC_LIB ?= TINYCRYPT
 #####################################################
 #              End Configurable Parameters          #
 #####################################################

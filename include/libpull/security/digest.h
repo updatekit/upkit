@@ -19,6 +19,7 @@ extern "C" {
 #if WITH_TINYDTLS
 #include <crypto.h>
 #include <tinydtls.h>
+#include <sha2/sha2.h>
 #endif
 
 #if WITH_TINYCRYPT
