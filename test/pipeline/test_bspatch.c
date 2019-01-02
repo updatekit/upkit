@@ -41,11 +41,6 @@ void ntest_clean(void) {}
      return l;
  }
 
- pipeline_func_t test_save = {
-     .init = test_save_init,
-     .process = test_save_process
- };
-
 /* This function tests the bspatch stage of the pipeline. */
 void test_patch(void) {
     char buffer[100];
@@ -64,10 +59,10 @@ void test_patch(void) {
     pipeline_ctx_t bspatch_ctx;
     pipeline_ctx_t save_ctx;
     
-    pipeline_bspatch.init(&bspatch_ctx, NULL);
-    test_save.init(&save_ctx, NULL);
+    pipeline_bspatch_init(&bspatch_ctx, NULL);
+    test_save_init(&save_ctx, NULL);
 
-    bspatch_ctx.next_func = &test_save;
+    bspatch_ctx.next_stage = &test_save_process;
     bspatch_ctx.next_ctx = &save_ctx;
     bspatch_ctx.stage_data = buffer1;
     // 4. Start the algorithm.
@@ -77,7 +72,7 @@ void test_patch(void) {
         // 4.1. Read N bytes from the original file.
         readed = read(patch, &buffer, r);
         // 4.2. Pass the readed bytes to the bspatch stage of the pipeline.
-        nTEST_TRUE(pipeline_bspatch.process(&bspatch_ctx, (uint8_t*)buffer, readed) >= 0);
+        nTEST_TRUE(bspatch_pipeline(&bspatch_ctx, (uint8_t*)buffer, readed) >= 0);
     } while (readed == r);
     // 5. Compare the decompressed file with the original file.
     nTEST_TRUE(file_compare(BSDIFF_INPUT2, BSDIFF_PATCHED) == 0);

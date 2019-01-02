@@ -46,7 +46,7 @@ if [ ! -d "ext/tinydtls" ]; then
     POSIX_OPTIMIZATIONS="-Os -ffunction-sections -fdata-sections -Wl,--gc-sections"
     autoreconf -i --force
     ./configure --without-debug
-    make libtinydtls.a CFLAGS="$POSIX_OPTIMIZATIONS"
+    make libtinydtls.a CFLAGS="$POSIX_OPTIMIZATIONS -DWITH_AES_DECRYPT=1"
     echo "Build tinydtls...done")
 fi
 if [ ! -d "ext/tinycrypt" ]; then

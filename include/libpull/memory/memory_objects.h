@@ -136,7 +136,7 @@ inline pull_error write_firmware_manifest(mem_object_t* obj, const manifest_t* m
  * \returns   
  */
 inline pull_error invalidate_object(mem_id_t id, mem_object_t* obj) {
-    pull_error err = memory_open(obj, id, WRITE_ALL) != PULL_SUCCESS;
+    pull_error err = memory_open(obj, id, WRITE_ALL);
     if (err) {
         log_error(err, "Failure opening firmware\n");
         return WRITE_MANIFEST_ERROR;

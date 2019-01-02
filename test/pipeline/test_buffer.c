@@ -46,13 +46,6 @@ int test_save_clear(pipeline_ctx_t* ctx) {
     return 0; 
 }
 
-pipeline_func_t test_save = {
-    .init = test_save_init,
-    .process = test_save_process,
-    .clear = test_save_clear
-};
-
-
 /* The goals of the buffer tests are two:
  * - check that the output file is equal to the input file;
  * - check if the stage behaves as expected: this means
@@ -69,12 +62,12 @@ void test_single_buffer(void) {
     nTEST_TRUE(input >= 0);
 
     // 1. Prepare the pipeline
-    test_save.init(&ctx_save, NULL);
+    test_save_init(&ctx_save, NULL);
 
-    ctx_buffer.next_func = &test_save;
+    ctx_buffer.next_stage = &test_save_process;
     ctx_buffer.next_ctx = &ctx_save;
 
-    buffer_pipeline.init(&ctx_buffer, NULL);
+    pipeline_buffer_init(&ctx_buffer, NULL);
 
     int r = 0;
     do {
@@ -82,9 +75,9 @@ void test_single_buffer(void) {
         r = (rand() % 50) + 50;
         readed = read(input, buffer, r);
         // 3. Pass the readed bytes to the stage until the file is finished
-        buffer_pipeline.process(&ctx_buffer, buffer, readed);
+        buffer_pipeline(&ctx_buffer, buffer, readed);
     } while (readed == r);
-    buffer_pipeline.clear(&ctx_buffer);
+    pipeline_buffer_clear(&ctx_buffer);
     close(input);
     // 4. Compare the decompressed file with the original file
     nTEST_TRUE(file_compare(BUFFER_OUTPUT, BUFFER_EXPECTED) == 0);

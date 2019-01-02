@@ -40,11 +40,6 @@ void ntest_clean(void) {}
      return l;
  }
 
- pipeline_func_t test_save = {
-     .init = test_save_init,
-     .process = test_save_process
- };
-
 /* This function must test the lzss decoding stage of the pipeline. */
 void test_decode(void) {
     int readed;
@@ -56,12 +51,12 @@ void test_decode(void) {
     int input = open(LZSS_INPUT, O_RDONLY);
     nTEST_TRUE(input >= 0);
     // 1. Prepare the pipeline
-    test_save.init(&ctx_save, NULL);
+    test_save_init(&ctx_save, NULL);
 
-    ctx_lzss.next_func = &test_save;
+    ctx_lzss.next_stage = &test_save_process;
     ctx_lzss.next_ctx = &ctx_save;
 
-    lzss_pipeline.init(&ctx_lzss, NULL);
+    pipeline_lzss_init(&ctx_lzss, NULL);
     
     int r = 0;
     do {
@@ -69,7 +64,7 @@ void test_decode(void) {
         r = (rand() % 50) + 50;
         readed = read(input, buffer, r);
         // 3. Pass the readed bytes to the stage until the file is finished
-        lzss_pipeline.process(&ctx_lzss, buffer, readed);
+        lzss_pipeline(&ctx_lzss, buffer, readed);
     } while (readed == r);
     close(input);
     // 4. Compare the decompressed file with the original file

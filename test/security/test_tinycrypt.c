@@ -6,6 +6,7 @@
 #include "platform_headers.h"
 
 mem_object_t obj_a;
+#define TEST_AES 1
 
 #include "test_verifier.h"
 

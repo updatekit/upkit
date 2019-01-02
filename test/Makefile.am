@@ -44,7 +44,7 @@ MBEDTLS_SRC = ../src/core/security/mbedtls.c
 memory_tests = test_memory test_memory_objects test_manifest
 agents_tests = test_update_push test_update_pull test_bootloader_agent
 network_tests = test_request test_connection_dtls
-security_tests = test_tinycrypt test_tinydtls test_mbedtls
+security_tests = test_tinycrypt test_tinydtls #test_mbedtls
 pipeline_tests = test_pipeline test_lzss test_bspatch test_buffer
 
 check_PROGRAMS = $(memory_tests) $(agents_tests) $(network_tests) $(security_tests) $(common_tests) $(pipeline_tests)
@@ -62,7 +62,7 @@ test_connection_dtls_SOURCES = network/test_connection_dtls.c $(ALL_SRC) $(TINYD
 # Security tests
 test_tinycrypt_SOURCES = security/test_tinycrypt.c $(ALL_SRC) $(TINYCRYPT_SRC)
 test_tinydtls_SOURCES = security/test_tinydtls.c $(ALL_SRC) $(TINYDTLS_SRC)
-test_mbedtls_SOURCES = security/test_mbedtls.c $(ALL_SRC) $(MBEDTLS_SRC)
+#test_mbedtls_SOURCES = security/test_mbedtls.c $(ALL_SRC) $(MBEDTLS_SRC)
 
 # Agents tests
 test_update_pull_SOURCES = agents/test_update_pull.c ../src/agents/update.c $(ALL_SRC) $(TINYCRYPT_SRC)

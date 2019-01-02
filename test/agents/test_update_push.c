@@ -80,7 +80,7 @@ void test_update_success(void) {
     // 9) Continues sending the firmware
     uint8_t buf[100];
     int ret, len = (rand()%50)+50;
-    while (ret = read(fd, &buf, len)) {
+    while ((ret = read(fd, &buf, len))) {
         err = fsm(&fsmc, buf, ret);
         nTEST_TRUE(!err);
         if (ret != len) {

@@ -34,11 +34,6 @@ int test_val_process(pipeline_ctx_t* ctx, uint8_t* buf, int l) {
     return l;
 }
 
-pipeline_func_t test_val = {
-    .init = test_val_init,
-    .process = test_val_process
-};
-
 int test_sum_init(pipeline_ctx_t* ctx, void* more) {
     /* This funtion does nothing */
     return 0;
@@ -51,15 +46,10 @@ int test_sum_process(pipeline_ctx_t* ctx, uint8_t* buf, int l) {
     int i;
     for (i=0; i<l; i++) {
         buf[i] += 1;
-        ctx->next_func->process(ctx->next_ctx, &buf[i], 1);
+        ctx->next_stage(ctx->next_ctx, &buf[i], 1);
     }
     return l;
 }
-
-pipeline_func_t test_sum = {
-    .init = test_sum_init,
-    .process = test_sum_process
-};
 
 /** 
  * \brief This test must pass a buffer to a stage 
@@ -75,13 +65,13 @@ void test_one_stage(void) {
     pipeline_ctx_t ctx_sum;
     pipeline_ctx_t ctx_val;
 
-    test_val.init(&ctx_val, &expected);
-    test_sum.init(&ctx_sum, NULL);
+    test_val_init(&ctx_val, &expected);
+    test_sum_init(&ctx_sum, NULL);
 
-    ctx_sum.next_func = &test_val;
+    ctx_sum.next_stage = &test_val_process;
     ctx_sum.next_ctx = &ctx_val;
 
-    test_sum.process(&ctx_sum, buffer, 100);
+    test_sum_process(&ctx_sum, buffer, 100);
     nTEST_TRUE(success);
 }
 
@@ -97,19 +87,19 @@ void test_ten_stages(void) {
 
     }
     for (i=0; i<10; i++) {
-        test_sum.init(&ctx_sum[i], NULL);
+        test_sum_init(&ctx_sum[i], NULL);
     }
     for (i=0; i<9; i++) {
-        ctx_sum[i].next_func = &test_sum;
+        ctx_sum[i].next_stage = &test_sum_process;
         ctx_sum[i].next_ctx = &ctx_sum[i+1];
     }
 
-    test_val.init(&ctx_val, &expected);
+    test_val_init(&ctx_val, &expected);
 
-    ctx_sum[9].next_func = &test_val;
+    ctx_sum[9].next_stage = &test_val_process;
     ctx_sum[9].next_ctx = &ctx_val;
 
-    test_sum.process((pipeline_ctx_t*) &ctx_sum, buffer, 100);
+    test_sum_process((pipeline_ctx_t*) &ctx_sum, buffer, 100);
     nTEST_TRUE(success);
 }
 

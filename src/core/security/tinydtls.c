@@ -1,5 +1,6 @@
 #include <libpull/security/digest.h>
 #include <libpull/security/ecc.h>
+#include <libpull/security/aes.h>
 #include <string.h>
 
 #if WITH_TINYDTLS
@@ -44,7 +45,9 @@ pull_error ecc_verify(const uint8_t* x, const uint8_t* y,
     if (data_len != 32) {
         return VERIFICATION_FAILED_ERROR;
     }
-    int ret = ecc_ecdsa_validate((const uint32_t *)x, (const uint32_t *)y, data, (const uint32_t *)r, (const uint32_t *)s);
+    int ret = dtls_ecdsa_verify_sig_hash((const uint32_t *)x, (const uint32_t *)y,
+            32, data, data_len, (const uint32_t *)r, (const uint32_t *)s);
+
     return ret == 0 ? PULL_SUCCESS : VERIFICATION_FAILED_ERROR;
 }
 
@@ -67,16 +70,14 @@ uint8_t get_curve_size() {
 /* AES */
 
 pull_error aes128_init(aes128_ctx_t* ctx, safestore_t* sf) {
-    if (rijndael_set_key(&ctx->aes128_tinydtls.ctx, sf->aes_key), 128) {
+    if (rijndael_set_key(&ctx->aes128_tinydtls.ctx, sf->aes_key, 128)) {
         return GENERIC_ERROR;
     }
     return PULL_SUCCESS;
 }
 
 pull_error aes128_decypt(aes128_ctx_t* ctx, uint8_t* out, const uint8_t* in) {
-    if (rijndael_decrypt(&ctx->aes128_tinydtls.ctx, in, out)) {
-        return GENERIC_ERROR;
-    }
+    rijndael_decrypt(&ctx->aes128_tinydtls.ctx, in, out);
     return PULL_SUCCESS;
 }
 

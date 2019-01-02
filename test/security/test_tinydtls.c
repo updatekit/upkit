@@ -20,7 +20,6 @@ int main() {
     nTEST_RUN(test_ecc_verify);
     nTEST_RUN(test_ecc_verify_invalid_signature);
     nTEST_RUN(test_sha256);
-    nTEST_RUN(test_aes128);
     nTEST_RUN(test_verify_object_valid);
     nTEST_RUN(test_verify_object_invalid_key);
     nTEST_END();

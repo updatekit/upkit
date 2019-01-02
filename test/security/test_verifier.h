@@ -31,6 +31,7 @@ void test_sha256(void) {
     nTEST_COMPARE_MEM(hash_g, hash, 32);
 }
 
+#ifdef TEST_AES
 void test_aes128(void) {
     aes128_ctx_t ctx;
     pull_error err =  aes128_init(&ctx, &safestore_g);
@@ -40,6 +41,7 @@ void test_aes128(void) {
     nTEST_TRUE(!err);
     nTEST_COMPARE_MEM(plaintext_g, result, 16);
 }
+#endif
 
 void test_sign(void) {
     uint8_t signature[64];
