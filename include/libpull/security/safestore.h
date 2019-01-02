@@ -25,6 +25,7 @@ typedef struct safestore_t {
    keystore_t keystore; // contains the vendor public key
    udid_t udid;
    appid_t appid;
+   uint8_t aes_key[128];
 } safestore_t;
 
 pull_error get_safestore(safestore_t* sf);

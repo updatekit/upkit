@@ -1,6 +1,4 @@
-#include <libpull/security/digest.h>
-#include <libpull/security/ecc.h>
-#include <libpull/common/error.h>
+#include <libpull/security.h>
 #include <string.h>
 
 #if WITH_TINYCRYPT
@@ -62,6 +60,25 @@ pull_error ecc_sign(const uint8_t* private_key, uint8_t *signature,
 
 uint8_t get_curve_size() {
     return 32; 
+}
+
+/* AES */
+
+pull_error aes128_init(aes128_ctx_t* ctx, safestore_t* sf) {
+    // This is safe up to AES 128
+    // https://github.com/01org/tinycrypt/blob/master/lib/include/tinycrypt/aes.h#L104
+
+    if (!tc_aes128_set_decrypt_key(&ctx->aes128_tinycrypt.s, sf->aes_key)) {
+        return GENERIC_ERROR; 
+    }
+    return PULL_SUCCESS;
+}
+
+pull_error aes128_decypt(aes128_ctx_t* ctx, uint8_t* out, const uint8_t* in) {
+    if (!tc_aes_decrypt(out, in, &ctx->aes128_tinycrypt.s)) {
+        return GENERIC_ERROR;
+    }
+    return PULL_SUCCESS;
 }
 
 #endif /* WITH_TINYCRYPT */

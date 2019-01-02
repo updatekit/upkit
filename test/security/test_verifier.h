@@ -31,6 +31,16 @@ void test_sha256(void) {
     nTEST_COMPARE_MEM(hash_g, hash, 32);
 }
 
+void test_aes128(void) {
+    aes128_ctx_t ctx;
+    pull_error err =  aes128_init(&ctx, &safestore_g);
+    nTEST_TRUE(!err);
+    uint8_t result[16];
+    err = aes128_decypt(&ctx, result, ciphertext_g);
+    nTEST_TRUE(!err);
+    nTEST_COMPARE_MEM(plaintext_g, result, 16);
+}
+
 void test_sign(void) {
     uint8_t signature[64];
     pull_error err = ecc_sign(server_priv_g, signature, hash_g, get_curve_size());

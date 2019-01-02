@@ -64,4 +64,20 @@ uint8_t get_curve_size() {
     return 32;
 }
 
+/* AES */
+
+pull_error aes128_init(aes128_ctx_t* ctx, safestore_t* sf) {
+    if (rijndael_set_key(&ctx->aes128_tinydtls.ctx, sf->aes_key), 128) {
+        return GENERIC_ERROR;
+    }
+    return PULL_SUCCESS;
+}
+
+pull_error aes128_decypt(aes128_ctx_t* ctx, uint8_t* out, const uint8_t* in) {
+    if (rijndael_decrypt(&ctx->aes128_tinydtls.ctx, in, out)) {
+        return GENERIC_ERROR;
+    }
+    return PULL_SUCCESS;
+}
+
 #endif /* WITH_TINYDTLS */
