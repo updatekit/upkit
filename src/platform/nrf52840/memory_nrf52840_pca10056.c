@@ -27,7 +27,7 @@ static struct device *flash_device;
 
 static int internal_flash_open(void) {
     if (flash_device == NULL) {
-        flash_device = device_get_binding(FLASH_DEV_NAME);
+        flash_device = device_get_binding(DT_FLASH_DEV_NAME);
     }
     return flash_device == NULL? 1: 0;
 }

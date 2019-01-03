@@ -1,6 +1,5 @@
 #ifdef WITH_CONNECTION_ZOAP
 
-#include <net/coap_link_format.h>
 #include "platform_headers.h"
 
 static uint8_t method_mapper[] = {
@@ -34,18 +33,17 @@ pull_error conn_init(conn_ctx* ctx, const char* addr, uint16_t port, conn_type t
     }
 
     struct sockaddr_in6 my_addr;
-    if (net_addr_pton(AF_INET6, CONFIG_NET_APP_MY_IPV6_ADDR,
+    if (net_addr_pton(AF_INET6, addr,
                 &my_addr.sin6_addr)) {
-        NET_ERR("Invalid my IPv6 address: %s",
-                CONFIG_NET_APP_MY_IPV6_ADDR);
-        return -1;
+        log_error(CONNECTION_INIT_ERROR, "Invalid my IPv6 address: %s", addr);
+        return CONNECTION_INIT_ERROR;
     }
     my_addr.sin6_family = AF_INET6;
 
     res = net_context_bind(ctx->net_ctx, (struct sockaddr *) &my_addr,
             sizeof(my_addr));
     if (res) {
-        NET_ERR("Could not bind the context");
+        log_error(CONNECTION_INIT_ERROR, "Could not bind the context");
         return CONNECTION_INIT_ERROR;
     }
 

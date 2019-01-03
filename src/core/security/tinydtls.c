@@ -45,8 +45,8 @@ pull_error ecc_verify(const uint8_t* x, const uint8_t* y,
     if (data_len != 32) {
         return VERIFICATION_FAILED_ERROR;
     }
-    int ret = dtls_ecdsa_verify_sig_hash((const uint32_t *)x, (const uint32_t *)y,
-            32, data, data_len, (const uint32_t *)r, (const uint32_t *)s);
+    int ret = dtls_ecdsa_verify_sig_hash((unsigned char *)x, (unsigned char *)y,
+            32, data, data_len, (unsigned char *)r, (unsigned char *)s);
 
     return ret == 0 ? PULL_SUCCESS : VERIFICATION_FAILED_ERROR;
 }

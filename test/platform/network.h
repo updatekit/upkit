@@ -24,7 +24,6 @@
 #define EXPECTED_VERSION 0xD
 #endif /* EXPECTED_VERSION */
 
-static mem_object_t obj;
 int cb_called = 0;
 
 static conn_ctx conn;
@@ -54,7 +53,7 @@ static void handler_cmp_memory(pull_error err, const char* data, const int len, 
     }
     cb_called++;
     if (cb_called >= 10) {
-        conn.loop = 0;
+        break_loop(&conn);
     }
 }
 
@@ -68,22 +67,6 @@ void test_conn(void) {
         loop_once(&conn, TIMEOUT_MS);
     }
     nTEST_COMPARE_INT(cb_called, 10);
-}
-
-void test_receiver(void) {
-    mem_object_t obj;
-    pull_error err = memory_open(&obj, OBJ_2, WRITE_ALL);
-    nTEST_TRUE(!err, "Error opening memory: %s", err_as_str(err));
-    receiver_ctx rcv;
-    err = receiver_open(&rcv, &conn, identity_g, "/firmware", &obj);
-    nTEST_TRUE(!err, "Error opening receiver: %s", err_as_str(err));
-    while (!rcv.firmware_received) {
-        err = receiver_chunk(&rcv);
-        nTEST_TRUE(!err, "Error in receiver_chunk: %s", err_as_str(err));
-        loop(&conn, TIMEOUT_MS);
-    }
-    err = receiver_close(&rcv);
-    nTEST_TRUE(!err, "Error closing receiver: %s", err_as_str(err));
 }
 
 #endif /* TEST_PLATFORM_NETWORK_H_ */
