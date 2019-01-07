@@ -1,3 +1,4 @@
+cmake_minimum_required(VERSION 3.11)
 include($ENV{ZEPHYR_BASE}/cmake/app/boilerplate.cmake NO_POLICY_SCOPE)
 project(bootloader)
 
@@ -11,7 +12,7 @@ file(GLOB libpull_headers ${ROOTDIR}/include)
 target_sources(app PRIVATE ${libpull_src})
 include_directories(${libpull_headers} ${ROOTDIR})
 
-add_definitions(-DSIMPLE_MANIFEST=1 -DLOGGER_VERBOSITY=1)
+add_definitions(-DSIMPLE_MANIFEST=1 -DLOGGER_VERBOSITY=0)
 add_definitions(-DMEMORY_FLASH_IMPL=1 -DDISABLE_LIBPULL_NETWORK=1)
 add_definitions(-DWITH_BOOTLOADER=1)
 add_definitions(-DWITH_PLATFORM_NRF52840=1 -DWITH_ARM_CORTEX_LOADER=1)
@@ -28,7 +29,7 @@ elseif(TINYDTLS)
     target_sources(app PRIVATE ${ecc_src} ${sha2_src})
 elseif(MBEDTLS)
     add_definitions(-DWITH_MBEDTLS=1)
-endif(MBEDTLS)
+endif(TINYCRYPT)
 
 # Add the board headers
 include_directories(${ROOTDIR}/src/platform/nrf52840)

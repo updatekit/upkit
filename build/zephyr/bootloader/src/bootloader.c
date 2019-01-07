@@ -36,7 +36,7 @@ int main(void) {
         // XXX handle this
     } else if (IS_CONTINUE(agent_event)) {
         if (agent_event == EVENT_BOOT) {
-            printf("loading object\n");
+            log_debug("loading object\n");
             load_object(GET_BOOT_ID(event_data));
         }
     }
