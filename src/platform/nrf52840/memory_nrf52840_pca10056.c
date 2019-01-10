@@ -27,7 +27,7 @@ static struct device *flash_device;
 
 static int internal_flash_open(void) {
     if (flash_device == NULL) {
-        flash_device = device_get_binding(DT_FLASH_DEV_NAME);
+        flash_device = device_get_binding(FLASH_DEV_NAME);
     }
     return flash_device == NULL? 1: 0;
 }
@@ -49,7 +49,7 @@ static int internal_flash_read(uint8_t* buffer, address_t offset, size_t size) {
 }
 
 #define PAGE_SIZE 0x1000
-static const flash_descr_t internal_flash_descr = {
+static flash_descr_t internal_flash_descr = {
     .page_size = PAGE_SIZE,
     .open = internal_flash_open,
     .erase = internal_flash_erase,

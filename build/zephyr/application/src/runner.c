@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <misc/reboot.h>
 #include <libpull/common.h>
 #include <libpull/security.h>
 
@@ -8,9 +9,9 @@
 
 #define TIMEOUT 1000
 
-#define SERVER_ADDR "fd11:22::c86e:7efd:33a9:a69e"
+#define SERVER_ADDR  "fd11:22::e43a:7c35:238a:c6cf"
 
-#if  WITH_TINYCRYPT
+#if WITH_TINYCRYPT
 int default_CSPRNG(uint8_t *dest, unsigned int size) {
     return 0;
 }
@@ -24,7 +25,8 @@ static bool exitb = false;
 int main(void) {
     conn_config_t conn;
     agent_data_t event_data;
-    conn_config(&conn, SERVER_ADDR, 5683, PULL_UDP, NULL);
+    static char endpoint[] = SERVER_ADDR;
+    conn_config(&conn, endpoint, 5683, PULL_UDP, NULL);
 
     update_agent_config(&cfg, &conn, &safestore_g);
 
@@ -38,13 +40,14 @@ int main(void) {
             loop(GET_CONNECTION(agent_event), TIMEOUT);
         } else if (IS_CONTINUE(agent_event)) {
             if (agent_event == EVENT_APPLY) {
-                exitb = true;
+                log_debug("Success.. rebooting\n");
+                sys_reboot(SYS_REBOOT_COLD);
                 break;
             } else {
                 log_debug("Continue..\n");
             }
         }
     } while (!exitb);
-    printf("There was an error during the update phase\n");
-    while(1) { /* BUSY WAIT */};
+    log_debug("There was an error during the update phase\n");
+    return 1;
 }

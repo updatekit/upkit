@@ -31,6 +31,7 @@
 #include <stdbool.h>
 #include <string.h>
 #include <libpull/pipeline/bspatch.h>
+#include <libpull/memory.h>
 
 // Returns < 0 on error; >=0 number of bytes processed
 int bspatch_pipeline(pipeline_ctx_t* ctx, uint8_t* buf, int len) {
@@ -47,7 +48,7 @@ int bspatch_pipeline(pipeline_ctx_t* ctx, uint8_t* buf, int len) {
 
     // bufp points to the number of bytes processed of the received buffer
     uint8_t* bufp = buf;
-    uint8_t* old = (uint8_t*) ctx->stage_data;
+    mem_object_t* old = (mem_object_t*) ctx->stage_data;
     if (ctx->finish) {
         return 0;
     }
@@ -60,7 +61,7 @@ int bspatch_pipeline(pipeline_ctx_t* ctx, uint8_t* buf, int len) {
         // XXX This code can be refactored as a while loop with different cases.
         // This will reduce the number of exit point from the Duff's device and
         // make the code much smaller (around 1kB);
-        //
+        
         // Get header and check size
         for (j=0; j<24; j++) {
             while ((buf+len-bufp) == 0) {
@@ -68,6 +69,7 @@ int bspatch_pipeline(pipeline_ctx_t* ctx, uint8_t* buf, int len) {
             }
             if (j < 16) {
                 if (*bufp != 0x2a) {
+                    log_err(INVALID_PATCH_ERROR,"Invalid patch magic number\n");
                     return -1;
                 }
             } else {
@@ -84,6 +86,7 @@ int bspatch_pipeline(pipeline_ctx_t* ctx, uint8_t* buf, int len) {
             return -2;
         }
     }
+    printf("moving forward\n");
 	while(newpos < newsize.y) {
 		/* Read control data */
 		for(i=0;i<=2;i++) {
@@ -111,7 +114,13 @@ int bspatch_pipeline(pipeline_ctx_t* ctx, uint8_t* buf, int len) {
             while ((buf+len-bufp) == 0) {
                 pipelineReturn(bufp-buf);
             }
-            uint8_t buffer = *bufp + old[oldpos+i];
+            //uint8_t buffer = *bufp + old[oldpos+i];
+            uint8_t oldbuf;
+            if (memory_read(old, &oldbuf, 1, oldpos+i)) {
+                log_error(MEMORY_READ_ERROR, "Error reading old slot during bspatch\n");
+                return -1;
+            }
+            uint8_t buffer = *bufp + oldbuf;
             ctx->next_stage(ctx->next_ctx, &buffer, 1);
             bufp++;
         }

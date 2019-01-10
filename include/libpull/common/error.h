@@ -86,6 +86,7 @@ extern "C" {
     ERROR(VERIFICATION_FAILED) \
     /* Pipeline Errors */ \
     ERROR(PIPELINE) \
+    ERROR(INVALID_PATCH) \
     /* FSM errors */ \
     ERROR(INVALID_VERSION) \
     ERROR(INVALID_SIGNATURE) \

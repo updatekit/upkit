@@ -108,6 +108,7 @@ typedef struct update_agent_ctx_t {
     mem_id_t id;
     mem_object_t new_obj;
     mem_object_t obj_t;
+    mem_object_t old_obj;
     pull_error err;
     fsm_ctx_t fsmc;
     conn_ctx conn;

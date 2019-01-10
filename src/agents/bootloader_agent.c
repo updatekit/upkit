@@ -36,8 +36,20 @@ pull_error restore_factory_image() {
     return GENERIC_ERROR;
 }
 
+// (X) Timer
+#ifdef ZEPHYR
+s64_t time_stamp;
+s32_t milliseconds_spent;
+#endif
+
 agent_event_t bootloader_agent(bootloader_agent_config* cfg, void** event_data) {
     PULL_BEGIN(EVENT_INIT);
+
+    // (X) Init timer
+     #ifdef ZEPHYR
+    k_enable_sys_clock_always_on();
+    time_stamp = k_uptime_get();
+#endif
 
     // (1) Get the newest bootable firmware (there must be at least one!!)
     PULL_CONTINUE(EVENT_GET_NEWEST_FIRMWARE, NULL);
@@ -146,7 +158,9 @@ agent_event_t bootloader_agent(bootloader_agent_config* cfg, void** event_data) 
         }
 
         PULL_CONTINUE(EVENT_UPGRADE_COPY_START, NULL);
+        log_debug("Starting swap\n");
         err = swap_slots(&source_slot, &destination_slot, &swap_slot, cfg->swap_size, buffer, BUFFER_SIZE);
+        log_debug("End swap\n");
         //err = copy_firmware(&source_slot, &destination_slot, buffer, BUFFER_SIZE);
         PULL_CONTINUE(EVENT_UPGRADE_COPY_STOP, NULL);
         if (err) {
@@ -183,6 +197,14 @@ agent_event_t bootloader_agent(bootloader_agent_config* cfg, void** event_data) 
 #endif
         }
     }
+
+// (X) evaluation
+ #ifdef ZEPHYR
+    milliseconds_spent = k_uptime_delta_32(&time_stamp);
+    printf("TIME: BOOTING %d\n", milliseconds_spent);
+#endif
+
+
     PULL_RETURN(EVENT_BOOT, &boot_id);
     PULL_FINISH(EVENT_FINISH);
 }

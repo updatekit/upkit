@@ -20,8 +20,15 @@ typedef struct fsm_internal_state_t {
     pipeline_ctx_t* pipeline_ctx;
 } fsm_internal_state_t;
 
-pull_error fsm_init(fsm_ctx_t* ctx, safestore_t* sf, mem_object_t* obj) {
+// (X) Evaluation
+#ifdef ZEPHYR
+#include "platform_headers.h"
+extern s64_t time_stamp;
+#endif
+
+pull_error fsm_init(fsm_ctx_t* ctx, safestore_t* sf, mem_object_t* obj, mem_object_t* old_obj) {
     ctx->obj = obj;
+    ctx->old_obj = old_obj;
 
     // Set the initial state
     ctx->state = STATE_IDLE;
@@ -31,8 +38,7 @@ pull_error fsm_init(fsm_ctx_t* ctx, safestore_t* sf, mem_object_t* obj) {
     ctx->sf = sf;
 
     // Get the current running version
-    mem_id_t ignore;
-    pull_error err = get_newest_firmware(&ignore, &ctx->version, ctx->obj, true);
+    pull_error err = get_newest_firmware(&ctx->old_id, &ctx->version, ctx->obj, true);
     if (err) {
         log_err(err, "Error getting newest firmware\n");
         return err;
@@ -46,6 +52,11 @@ pull_error fsm_init(fsm_ctx_t* ctx, safestore_t* sf, mem_object_t* obj) {
         return err;
     }
 
+    return PULL_SUCCESS;
+}
+
+pull_error update_receiver_msg(fsm_ctx_t* ctx, receiver_msg_t* msg) { 
+    msg->offset = ctx->processed;
     return PULL_SUCCESS;
 }
 
@@ -160,15 +171,30 @@ pull_error fsm(fsm_ctx_t* ctx, uint8_t* buf, size_t len) {
             is->buffer_ctx.next_stage = (pipeline_stage_t) writer_pipeline;
             is->buffer_ctx.next_ctx = &is->writer_ctx;
 
-            is->bspatch_ctx.next_stage = (pipeline_stage_t) lzss_pipeline;
-            is->bspatch_ctx.next_ctx = &is->lzss_ctx;
-
             if (is->mt.server.diff_version == 0) {
+                log_debug("Using full-image update\n");
                 is->pipeline = (pipeline_stage_t) buffer_pipeline;
                 is->pipeline_ctx = &is->buffer_ctx;
             } else if (is->mt.server.diff_version == ctx->version) {
-                is->pipeline = (pipeline_stage_t) bspatch_pipeline;
-                is->pipeline_ctx = &is->bspatch_ctx;
+                log_debug("Configuring the pipeline for differential updates\n");
+
+                pipeline_bspatch_init(&is->bspatch_ctx, NULL);
+                is->bspatch_ctx.next_stage = (pipeline_stage_t) buffer_pipeline;
+                is->bspatch_ctx.next_ctx = &is->buffer_ctx;
+
+                // Setting old file for the bspatch stage
+                // You can use the new id
+                if (memory_open(ctx->old_obj, ctx->old_id, READ_ONLY)) {
+                    log_error(MEMORY_READ_ERROR, "Error opening old object for bspatch");
+                    return MEMORY_READ_ERROR;
+                }
+                is->bspatch_ctx.stage_data = &ctx->old_obj;
+
+                is->lzss_ctx.next_stage = (pipeline_stage_t) bspatch_pipeline;
+                is->lzss_ctx.next_ctx = &is->bspatch_ctx;
+
+                is->pipeline = (pipeline_stage_t) lzss_pipeline;
+                is->pipeline_ctx = &is->lzss_ctx;
             } else {
                 log_err(INVALID_SIGNATURE_ERROR,
                         "Received firmware has invalid diff version\n");
@@ -178,7 +204,7 @@ pull_error fsm(fsm_ctx_t* ctx, uint8_t* buf, size_t len) {
 
             // Get oldest memory object
             version_t ignore;
-            err = get_oldest_firmware(&ctx->id, &ignore, ctx->obj, true);
+            err = get_oldest_firmware(&ctx->id, &ignore, ctx->obj, false);
             if (err) {
                 log_err(err, "Error getting the oldest slot");
                 ctx->state = STATE_CLEAN;
@@ -198,22 +224,28 @@ pull_error fsm(fsm_ctx_t* ctx, uint8_t* buf, size_t len) {
             // Store the manifest directly without passing through the pipeline
             int ret = buffer_pipeline(&is->buffer_ctx, (uint8_t*)&is->mt, sizeof(manifest_t));
             if (ret != sizeof(manifest_t)) {
-                log_err(err, "Error writing manifest");
+                log_err(err, "Error writing manifest 1");
                 ctx->state = STATE_CLEAN;
                 return err;
             }
+
+            // Check if we received more data than the manifest
             if ((bufp-buf) < len) {
                 ret = is->pipeline(is->pipeline_ctx, bufp, len-(bufp-buf));
-                if (ret != len-(bufp-buf)) {
-                    log_err(err, "Error writing manifest");
+                if (ret < 0) {
+                    log_err(PIPELINE_ERROR, "Invalid return value");
+                    return PIPELINE_ERROR;
+                } else if (ret != len-(bufp-buf)) {
+                    log_err(PIPELINE_ERROR, "Error writing manifest 3");
                     ctx->state = STATE_CLEAN;
-                    return err;
+                    return PIPELINE_ERROR;
                 } else {
                     ctx->processed += ret; 
                 }
             }
 
-            ctx->expected = is->mt.vendor.offset + is->mt.vendor.size;
+            //ctx->expected = is->mt.vendor.offset + is->mt.vendor.size;
+            ctx->expected = is->mt.vendor.offset + is->mt.server.prop_size;
 
             ctx->state = STATE_RECEIVE_FIRMWARE;
             return PULL_SUCCESS;
@@ -237,10 +269,16 @@ pull_error fsm(fsm_ctx_t* ctx, uint8_t* buf, size_t len) {
             pipeline_buffer_clear(&is->buffer_ctx);
             memory_close(ctx->obj);
 
+            // (X) evaluation
+            #ifdef ZEPHYR
+            printf("TIME: download %d\n", k_uptime_delta_32(&time_stamp));
+            #endif
+
             ctx->state = STATE_VERIFY_FIRMWARE;
             // Fallthrough
         case STATE_VERIFY_FIRMWARE:
             memory_open(ctx->obj, ctx->id, READ_ONLY);
+            log_debug("Using id %d\n", ctx->id);
             err = verify_object(ctx->obj, ctx->sf, buffer, BUFFER_SIZE);
             memory_close(ctx->obj);
             
@@ -250,6 +288,12 @@ pull_error fsm(fsm_ctx_t* ctx, uint8_t* buf, size_t len) {
                 ctx->state = STATE_IDLE;
                 return err;
             }
+
+            // (X) evaluation
+            #ifdef ZEPHYR
+            printf("TIME: verify %d\n", k_uptime_delta_32(&time_stamp));
+            #endif
+
             ctx->state = STATE_REBOOT;
         case STATE_REBOOT:
             return PULL_SUCCESS;

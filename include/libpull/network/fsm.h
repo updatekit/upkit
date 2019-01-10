@@ -27,9 +27,12 @@ typedef struct fsm_ctx_t {
     mem_id_t id;
     mem_object_t* obj;
     rng_ctx_t rctx;
+
+    mem_id_t old_id;
+    mem_object_t* old_obj;
 } fsm_ctx_t;
 
-pull_error fsm_init(fsm_ctx_t* ctx, safestore_t* sf, mem_object_t* obj);
+pull_error fsm_init(fsm_ctx_t* ctx, safestore_t* sf, mem_object_t* obj, mem_object_t* old_obj);
 
 pull_error fsm(fsm_ctx_t* ctx, uint8_t* buf, size_t len);
 

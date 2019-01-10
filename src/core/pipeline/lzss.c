@@ -31,6 +31,11 @@ int lzss_pipeline(pipeline_ctx_t* ctx, uint8_t* buf, int l) {
     static unsigned char buffer[N * 2];
     static int b, mask;
 
+    int debugk;
+    for (debugk =0; debugk <l; debugk++) {
+        log_debug("LZSS received: %x\n", *(buf+debugk));
+    }
+
     uint8_t* bufp = buf;
 
     pipelineBegin
@@ -42,7 +47,9 @@ int lzss_pipeline(pipeline_ctx_t* ctx, uint8_t* buf, int l) {
 
         if (c) {
             getbit(8, c);
-            ctx->next_stage(ctx->next_ctx, (uint8_t*) &c, 1);
+            if (ctx->next_stage(ctx->next_ctx, (uint8_t*) &c, 1) < 0) {
+                return -1;
+            }
             buffer[r++] = c;
             r &= (N - 1);
         } else {

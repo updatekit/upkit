@@ -31,6 +31,8 @@ typedef struct server_manifest_t {
     udid_t udid;
     nonce_t nonce;
     version_t diff_version;
+    address_t prop_size; // Size to be sent over the network. It may be smaller than the fw size if only the delta is sent
+    int flags;
 } server_manifest_t;
 
 /** General manifest structure */

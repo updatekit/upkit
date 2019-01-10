@@ -142,3 +142,19 @@ pull_error swap_slots(mem_object_t* obj1, mem_object_t* obj2, mem_object_t* obj_
     }
     return PULL_SUCCESS;
 }
+
+pull_error invalidate_object(mem_id_t id, mem_object_t* obj) {
+     pull_error err = memory_open(obj, id, WRITE_CHUNK);
+     if (err) {
+         log_error(err, "Failure opening firmware\n");
+         return WRITE_MANIFEST_ERROR;
+     }
+     manifest_t mt;
+     memset(&mt, 0, sizeof(mt));
+     if (write_firmware_manifest(obj, &mt) != PULL_SUCCESS) {
+         memory_close(obj);
+         return WRITE_MANIFEST_ERROR;
+     }
+     memory_close(obj);
+     return PULL_SUCCESS;
+ }

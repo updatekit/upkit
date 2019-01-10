@@ -1,7 +1,8 @@
+cmake_minimum_required(VERSION 3.11)
 include($ENV{ZEPHYR_BASE}/cmake/app/boilerplate.cmake NO_POLICY_SCOPE)
 project(application_ble)
 
- target_sources(app PRIVATE src/main.c)
+target_sources(app PRIVATE src/main.c)
 
 set(ROOTDIR "../../..")
 
@@ -17,7 +18,7 @@ add_definitions(-DDISABLE_LIBPULL_NETWORK=1)
 add_definitions(-DWITH_ZEPHYR_BLE=1)
 add_definitions(-DWITH_PLATFORM_NRF52840=1)
 
-set(TINYDTLS 1) # TINYCRYPT or TINYDTLS or MBEDTLS
+set(TINYCRYPT 1) # TINYCRYPT or TINYDTLS or MBEDTLS
 if (TINYCRYPT)
     add_definitions(-DWITH_TINYCRYPT=1)
 elseif(TINYDTLS)
@@ -29,6 +30,6 @@ elseif(TINYDTLS)
     target_sources(app PRIVATE ${ecc_src} ${sha2_src})
 elseif(MBEDTLS)
     add_definitions(-DWITH_MBEDTLS=1)
-endif(MBEDTLS)
+endif(TINYCRYPT)
 
 include_directories(${ROOTDIR}/src/platform/nrf52840)

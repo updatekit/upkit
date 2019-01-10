@@ -8,6 +8,7 @@
 #include <fcntl.h>
 
 #include <libpull/common.h>
+#include <libpull/memory.h>
 #include <libpull/pipeline/bspatch.h>
 #include "support/support.h"
 
@@ -18,6 +19,7 @@
 
 void ntest_prepare(void) {
     srand(time(NULL));
+    restore_assets();
 }
 
 void ntest_clean(void) {}
@@ -45,13 +47,9 @@ void ntest_clean(void) {}
 void test_patch(void) {
     char buffer[100];
     // 0. Open the original file;
-    int input1 = open(BSDIFF_INPUT1, O_RDONLY);
-    nTEST_TRUE(input1 >= 0);
-    nTEST_TRUE(lseek(input1, 0L, SEEK_END) > 0);
-    long bufsize = lseek(input1, 0, SEEK_CUR);
-    nTEST_TRUE(lseek(input1, 0L, SEEK_SET) == 0);
-    char* buffer1 = malloc(sizeof(char)*bufsize);
-    nTEST_TRUE(read(input1, buffer1, bufsize) == bufsize);
+    mem_object_t obj_a;
+    nTEST_TRUE(memory_open(&obj_a, OBJ_A, READ_ONLY) == PULL_SUCCESS);
+
     // 1. Open the patch file.
     int patch = open(BSDIFF_PATCH, O_RDONLY);
     nTEST_TRUE(patch >= 0);
@@ -64,7 +62,8 @@ void test_patch(void) {
 
     bspatch_ctx.next_stage = &test_save_process;
     bspatch_ctx.next_ctx = &save_ctx;
-    bspatch_ctx.stage_data = buffer1;
+
+    bspatch_ctx.stage_data = &obj_a;
     // 4. Start the algorithm.
     int readed = 0, r = 0;
     do {

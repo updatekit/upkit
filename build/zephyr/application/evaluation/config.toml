@@ -12,7 +12,7 @@ binary_file = "firmware/firmware.bin.tmp"
 out_file = "firmware/manifest.bin"
 
 # Keys
-server_priv_key = "../../utils/firmware_tool/keys/server.priv"
-server_pub_key = "../../utils/firmware_tool/keys/server.pub"
-vendor_priv_key = "../../utils/firmware_tool/keys/vendor.priv"
-vendor_pub_key = "../../utils/firmware_tool/keys/vendor.pub"
+server_priv_key = "../../../../utils/firmware_tool/keys/server.priv"
+server_pub_key = "../../../../utils/firmware_tool/keys/server.pub"
+vendor_priv_key = "../../../../utils/firmware_tool/keys/vendor.priv"
+vendor_pub_key = "../../../../utils/firmware_tool/keys/vendor.pub"

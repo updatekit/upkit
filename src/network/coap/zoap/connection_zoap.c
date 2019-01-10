@@ -1,6 +1,7 @@
 #ifdef WITH_CONNECTION_ZOAP
 
 #include "platform_headers.h"
+#include <net/coap_link_format.h>
 
 static uint8_t method_mapper[] = {
     [GET] = COAP_METHOD_GET,
@@ -33,16 +34,15 @@ pull_error conn_init(conn_ctx* ctx, const char* addr, uint16_t port, conn_type t
     }
 
     struct sockaddr_in6 my_addr;
-    if (net_addr_pton(AF_INET6, addr,
+    if (net_addr_pton(AF_INET6, CONFIG_NET_APP_MY_IPV6_ADDR,
                 &my_addr.sin6_addr)) {
-        log_error(CONNECTION_INIT_ERROR, "Invalid my IPv6 address: %s", addr);
+        log_error(CONNECTION_INIT_ERROR, "Invalid IPv6 address: %s", addr);
         return CONNECTION_INIT_ERROR;
     }
     my_addr.sin6_family = AF_INET6;
 
-    res = net_context_bind(ctx->net_ctx, (struct sockaddr *) &my_addr,
-            sizeof(my_addr));
-    if (res) {
+    if (net_context_bind(ctx->net_ctx, (struct sockaddr *) &my_addr,
+            sizeof(my_addr))) {
         log_error(CONNECTION_INIT_ERROR, "Could not bind the context");
         return CONNECTION_INIT_ERROR;
     }
@@ -250,7 +250,6 @@ pull_error conn_request(conn_ctx* ctx, rest_method method, const char* resource,
         net_pkt_unref(pkt);
         return REQUEST_ERROR;
     }
-
     net_pkt_frag_add(pkt, frag);
 
     r = coap_packet_init(&request, pkt, 1, COAP_TYPE_CON,
@@ -258,7 +257,7 @@ pull_error conn_request(conn_ctx* ctx, rest_method method, const char* resource,
             method_mapper[method], coap_next_id());
 
     if (r < 0) {
-        log_error(REQUEST_ERROR, "Error sending the request\n");
+        log_error(REQUEST_ERROR, "Error creating packet\n");
         net_pkt_unref(pkt);
         return REQUEST_ERROR;
     }
@@ -270,8 +269,6 @@ pull_error conn_request(conn_ctx* ctx, rest_method method, const char* resource,
     }
 
     // Split resource
-    // Resource will be somethings like "/one[/two[/three]]"
-    // Thus we can split it simply finding the slash char
     const char *a, *p = resource;
     for (a = p+1; a <= (resource+strlen(resource)); a++) {
         if (*p != '/') {

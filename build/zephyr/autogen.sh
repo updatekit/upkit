@@ -8,7 +8,7 @@ mkdir ext
 
 # Clone the RIOT repository and its submodules
 echo "Cloning the Zephyr repository..."
-git clone --quiet --progress --depth 1 -b master \
+git clone --quiet --progress \
     https://github.com/zephyrproject-rtos/zephyr ext/zephyr
 (cd ext/zephyr
 git checkout "v1.12.0"

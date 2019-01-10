@@ -18,7 +18,7 @@ void ntest_prepare(void) {
     success = 0;
 }
 
-void ntest_clean(void) { 
+void ntest_clean(void) {
     restore_assets();
 }
 

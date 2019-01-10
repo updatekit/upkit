@@ -27,6 +27,7 @@ extern "C" {
     ITEM(udid_t, udid) \
     ITEM(nonce_t, nonce) \
     ITEM(version_t, diff_version) \
+    ITEM(address_t, prop_size) \
     ITEM(uint8_t*, server_key_x) \
     ITEM(uint8_t*, server_key_y) \
     ITEM(uint8_t*, digest) \

@@ -10,5 +10,5 @@ bin_PROGRAMS = server
 server_SOURCES = server.c network.c
 server_SOURCES += resources/echo.c resources/firmware.c resources/firmware_invalid_signature.c
 server_SOURCES += resources/firmware_invalid_size.c resources/resources.h resources/version.c
-server_SOURCES += resources/version_invalid.c resources/next_version.c
+server_SOURCES += resources/version_invalid.c resources/next_version.c resources/firmware_diff.c
 server_SOURCES += ../../ext/tinycrypt/lib/source/ecc_platform_specific.c

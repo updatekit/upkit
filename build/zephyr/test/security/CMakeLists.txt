@@ -1,3 +1,4 @@
+cmake_minimum_required(VERSION 3.11)
 include($ENV{ZEPHYR_BASE}/cmake/app/boilerplate.cmake NO_POLICY_SCOPE)
 project(test_memory)
 
@@ -6,7 +7,7 @@ target_sources(app PRIVATE src/main.c)
 set(ROOTDIR "../../../..")
 
 # Add libpull to the build
-file(GLOB libpull_src ${ROOTDIR}/src/**/*.c)
+file(GLOB libpull_src ${ROOTDIR}/src/**/**/*.c)
 file(GLOB libpull_headers ${ROOTDIR}/include)
 target_sources(app PRIVATE ${libpull_src})
 include_directories(${libpull_headers} ${ROOTDIR})
@@ -16,7 +17,7 @@ add_definitions(-DMEMORY_FLASH_IMPL=1 -DDISABLE_LIBPULL_NETWORK=1)
 add_definitions(-DWITH_TINYCRYPT=1)
 
 # Add the board files
-set(BOARDDIR "../../board/${BOARD}")
+set(BOARDDIR ${ROOTDIR}/src/platform/nrf52840)
 include_directories(${BOARDDIR})
 include_directories(${ROOTDIR}/test/platform)
 file(GLOB board_src ${BOARDDIR}/*.c)

@@ -24,6 +24,7 @@ int manifest_generate_command(Context ctx) {
     struct stat buf;
     stat(ctx.get_binary_file().c_str(), &buf);
     set_size(&mt, buf.st_size);
+    set_prop_size(&mt, buf.st_size);
     // (2) Set Appid
     std::stringstream str;
     str << ctx.get_appid();
@@ -157,6 +158,7 @@ int manifest_print_command(Context ctx) {
     std::cout << "   appid:\t  " << "0x" << std::hex << get_appid(&mt) << std::endl;
     std::cout << "   size:\t  " << std::to_string(get_size(&mt)) << " B" <<  std::endl;
     std::cout << "   offset:\t  " << "0x" << std::hex << get_offset(&mt) << " B" << std::endl;
+    std::cout << "   prop_size:\t  " << std::to_string(get_prop_size(&mt)) << " B" << std::endl;
     size_t offset = 18;
     show_buffer("server_key_x", get_server_key_x(&mt), 32, offset);
     show_buffer("server_key_y", get_server_key_y(&mt), 32, offset);

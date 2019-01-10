@@ -30,6 +30,9 @@ appid_t get_appid_impl(const manifest_t* mt) {
 version_t get_diff_version_impl(const manifest_t* mt) {
     return mt->server.diff_version;
 }
+address_t get_prop_size_impl(const manifest_t* mt) {
+    return mt->server.prop_size;
+}
 nonce_t get_nonce_impl(const manifest_t* mt) {
     return mt->server.nonce;
 }
@@ -53,6 +56,9 @@ void set_version_impl(manifest_t* mt, version_t version) {
 }
 void set_size_impl(manifest_t* mt, address_t size) {
     mt->vendor.size = size;
+}
+void set_prop_size_impl(manifest_t* mt, address_t size) {
+    mt->server.prop_size = size;
 }
 void set_offset_impl(manifest_t* mt, address_t offset) {
     mt->vendor.offset = offset;

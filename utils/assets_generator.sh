@@ -46,7 +46,7 @@ for v in $versions; do
         -f $ASSETSDIR/metadata metadata
     srec_cat $ASSETSDIR/metadata -binary $slot.tmp -binary -offset 0x100 -o $slot.bin -binary
     cp $slot.bin $slot.pristine
-    rm $slot.tmp
+    #rm $slot.tmp
 done
 echo "Generate slots...done"
 
@@ -66,3 +66,23 @@ $FIRMWAREDIR/firmware_tool pipeline diff -b $ASSETSDIR/slot_a.pristine \
 
 # Generate an empty file to be used as swap partition
 yes | dd  bs=1024  count=4 > $ASSETSDIR/swap.bin
+
+# Generate patch firmware from b to d
+$FIRMWAREDIR/firmware_tool manifest generate -y $FIRMWAREDIR/config.toml -vv \
+    -p $FIRMWAREDIR/keys/vendor.priv -c $FIRMWAREDIR/keys/vendor.pub \
+    -k $FIRMWAREDIR/keys/server.priv -m $FIRMWAREDIR/keys/server.pub \
+    -l "d" -a $APPID -b $ASSETSDIR/slot_d.tmp \
+    -f $ASSETSDIR/slot_d.manifest
+# Generate diff
+$FIRMWAREDIR/firmware_tool pipeline diff -b $ASSETSDIR/slot_b.tmp \
+    -z $ASSETSDIR/slot_d.tmp -f $ASSETSDIR/slot_d.patch.tmp
+# Compress diff
+$FIRMWAREDIR/firmware_tool pipeline compress -b $ASSETSDIR/slot_d.patch.tmp \
+    -f $ASSETSDIR/slot_d.patch.diff.tmp
+# Add manifest to patch to generate slot_d.patch which contains the patch and
+# the manifest and is ready to be sent to a device
+srec_cat $ASSETSDIR/slot_d.manifest -binary $ASSETSDIR/slot_d.patch.diff.tmp -binary\
+    -offset 0x100 -o $ASSETSDIR/slot_d.patch -binary
+
+echo "done"
+

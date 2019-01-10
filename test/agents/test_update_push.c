@@ -34,7 +34,8 @@ void test_update_success(void) {
     pull_error err;
     fsm_ctx_t fsmc;
     mem_object_t obj;
-    err = fsm_init(&fsmc, &safestore_g, &obj);
+    mem_object_t objold;
+    err = fsm_init(&fsmc, &safestore_g, &obj, &objold);
     nTEST_TRUE(!err);
 
     // 1) CB: Server reads version

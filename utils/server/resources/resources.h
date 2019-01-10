@@ -38,6 +38,10 @@ int init_resources(server_ctx_t* server_ctx, coap_context_t* context) {
     DEFINE_RESOURCE(resource, "firmware", "Get the latest firmware");
     REGISTER_HANDLER(resource, COAP_REQUEST_GET, resource_firmware, 0);
     REGISTER_RESOURCE(context, resource);
+    /* RESOURCE Firmware Diff */
+    DEFINE_RESOURCE(resource, "firmware_diff", "Get the diff between two firmwares");
+    REGISTER_HANDLER(resource, COAP_REQUEST_GET, resource_firmware_diff, 0);
+    REGISTER_RESOURCE(context, resource);
 #if WITH_TESTING_RESOURCES
     /* RESOURCE Version Invalid */
     DEFINE_RESOURCE(resource, "version/invalid", "Get an invalid version");

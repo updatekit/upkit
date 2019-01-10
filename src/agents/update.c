@@ -4,7 +4,20 @@
 
 #include "platform_headers.h"
 
+
+// (X) Timer
+#ifdef ZEPHYR
+s64_t time_stamp;
+s32_t milliseconds_spent;
+#endif
+
 agent_event_t update_agent(update_agent_config_t* cfg, update_agent_ctx_t* ctx, void** event_data) {
+
+    // (X) Init timer
+    #ifdef ZEPHYR
+    k_enable_sys_clock_always_on();
+    time_stamp = k_uptime_get();
+    #endif
 
     // (1) Init the connection interface
     PULL_BEGIN(EVENT_INIT);
@@ -15,7 +28,7 @@ agent_event_t update_agent(update_agent_config_t* cfg, update_agent_ctx_t* ctx, 
     }
 
     // (2) Init the finite state machine
-    ctx->err = fsm_init(&ctx->fsmc, cfg->safestore, &ctx->obj_t);
+    ctx->err = fsm_init(&ctx->fsmc, cfg->safestore, &ctx->obj_t, &ctx->old_obj);
     if (ctx->err) {
         log_err(ctx->err, "Error initializing the finite state machine\n");
         PULL_RETURN(EVENT_INIT_FAILURE_2, &ctx->err);
@@ -30,7 +43,6 @@ agent_event_t update_agent(update_agent_config_t* cfg, update_agent_ctx_t* ctx, 
         log_error(ctx->err, "Error setting the callback");
         PULL_RETURN(EVENT_INIT_FAILURE_3, &ctx->err);
     }
-
 
     // (4) Subscribe to the server
     PULL_CONTINUE(EVENT_SUBSCRIBE, NULL);
@@ -58,6 +70,7 @@ agent_event_t update_agent(update_agent_config_t* cfg, update_agent_ctx_t* ctx, 
     // (6) Perform the request passing the data
     PULL_CONTINUE(EVENT_RECEIVE, NULL);
     do {
+        update_receiver_msg(&ctx->fsmc, &ctx->msg);
         ctx->err = conn_request(&ctx->conn, GET_BLOCKWISE2, "/firmware", (const char*)&ctx->msg, sizeof(receiver_msg_t));
         if (ctx->err) {
             log_debug("Error sending the request\n");
@@ -74,6 +87,7 @@ agent_event_t update_agent(update_agent_config_t* cfg, update_agent_ctx_t* ctx, 
     conn_end(&ctx->conn);
 
     if (ctx->fsmc.state != STATE_REBOOT) {
+        log_err(ctx->reqc.err, "Validation Error");
         // Validation error
     }
     PULL_FINISH(EVENT_APPLY);

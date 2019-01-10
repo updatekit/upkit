@@ -15,7 +15,7 @@ static const uint8_t priv_g[32] = {
     0xea,0x51,0x16,0x35,0xe9,0x2e,0x7c,0x8d,0xaf,0x0e,0x10,0xee,0x12,0xc0,0x10,0xfb
 };
 
-extern void resource_firmware(coap_context_t *ctx,
+extern void resource_firmware_diff(coap_context_t *ctx,
         struct coap_resource_t *resource, coap_session_t *session,
         coap_pdu_t *request, str *token, str *query, coap_pdu_t *response) {
     server_ctx_t* server_ctx = (server_ctx_t*) coap_get_app_data(ctx);
@@ -38,12 +38,11 @@ extern void resource_firmware(coap_context_t *ctx,
 
     manifest_t* mt = (manifest_t*)server_ctx->mapped_file_manifest;
     server_manifest_t* smt = &mt->server;
+
     if (smt->udid != msg->udid || smt->nonce != msg->nonce) {
         smt->udid = msg->udid;
         smt->nonce = msg->nonce;
-        //smt->diff_version = 0;
         smt->diff_version = msg->version;
-        smt->prop_size = server_ctx->mapped_file_len-sizeof(manifest_t);
         uint8_t signature_buffer[64];
         pull_error perr = sign_manifest_server(mt, server_priv_g, &signature_buffer);
         if (perr) {
@@ -70,7 +69,7 @@ extern void resource_firmware(coap_context_t *ctx,
     }
     if (msg->offset >= server_ctx->mapped_file_len) {
         response->code = COAP_RESPONSE_CODE(404);
-        printf("Requested invalid size: requested %d total %d\n", msg->offset, server_ctx->mapped_file_len);
+        printf("Requested invalid size\n");
         return;
     }
 

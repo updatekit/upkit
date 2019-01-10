@@ -4,6 +4,7 @@
 #include <libpull/common.h>
 
 int writer_pipeline(pipeline_ctx_t* c, uint8_t* buf, int l) {
+    log_debug("PIP: Writing %d bytes\n", l);
     struct writer_ctx* ctx = (struct writer_ctx*) c->stage_data;
     int ret = memory_write(ctx->obj, buf, l, ctx->written);
     ctx->written+=ret;

@@ -9,6 +9,7 @@
 #define MIN(A,B) ((A<B)? A: B)
 
 int buffer_pipeline(pipeline_ctx_t* c, uint8_t* buf, int l) {
+    log_debug("PIP: Buffering %d bytes\n", l);
     struct buffer_ctx* ctx = (struct buffer_ctx*) c->stage_data;
     uint8_t* bufp = buf;
 
