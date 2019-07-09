@@ -1,3 +1,4 @@
+#ifdef WITH_BOOTLOADER
 #include <libpull/common.h>
 #include <libpull/memory.h>
 #include <libpull/security.h>
@@ -208,3 +209,4 @@ agent_event_t bootloader_agent(bootloader_agent_config* cfg, void** event_data) 
     PULL_RETURN(EVENT_BOOT, &boot_id);
     PULL_FINISH(EVENT_FINISH);
 }
+#endif /* WITH_BOOTLOADER */

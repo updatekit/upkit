@@ -116,7 +116,7 @@ int bspatch_pipeline(pipeline_ctx_t* ctx, uint8_t* buf, int len) {
             }
             //uint8_t buffer = *bufp + old[oldpos+i];
             uint8_t oldbuf;
-            if (memory_read(old, &oldbuf, 1, oldpos+i)) {
+            if (memory_read(old, &oldbuf, 1, oldpos+i) != 1) {
                 log_error(MEMORY_READ_ERROR, "Error reading old slot during bspatch\n");
                 return -1;
             }

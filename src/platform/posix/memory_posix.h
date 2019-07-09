@@ -15,10 +15,10 @@ struct mem_object_t {
 
 enum memory_objects_enum {
     OBJ_FIRST = 0,
-    BOOTLOADER_CTX,
-    OBJ_GOLD,
-    OBJ_A,
-    OBJ_B,
+    BOOTLOADER_CTX, //1
+    OBJ_GOLD, //2
+    OBJ_A, //3 
+    OBJ_B, //4
     OBJ_C,
     OBJ_SWAP,
     /// Other files used for testing

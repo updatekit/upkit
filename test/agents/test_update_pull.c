@@ -19,7 +19,7 @@ void ntest_prepare(void) {
 }
 
 void ntest_clean(void) {
-    restore_assets();
+    //restore_assets();
 }
 
 void update_runner(conn_type type, void* data) {

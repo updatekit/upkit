@@ -31,11 +31,6 @@ int lzss_pipeline(pipeline_ctx_t* ctx, uint8_t* buf, int l) {
     static unsigned char buffer[N * 2];
     static int b, mask;
 
-    int debugk;
-    for (debugk =0; debugk <l; debugk++) {
-        log_debug("LZSS received: %x\n", *(buf+debugk));
-    }
-
     uint8_t* bufp = buf;
 
     pipelineBegin

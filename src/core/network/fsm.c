@@ -23,7 +23,8 @@ typedef struct fsm_internal_state_t {
 // (X) Evaluation
 #ifdef ZEPHYR
 #include "platform_headers.h"
-extern s64_t time_stamp;
+s64_t time_stamp;
+s32_t milliseconds_spent;
 #endif
 
 pull_error fsm_init(fsm_ctx_t* ctx, safestore_t* sf, mem_object_t* obj, mem_object_t* old_obj) {
@@ -77,6 +78,13 @@ pull_error fsm(fsm_ctx_t* ctx, uint8_t* buf, size_t len) {
             // TODO if the process already started I should invalidate that object
             ctx->state = STATE_IDLE;
         case STATE_IDLE:
+
+
+         // (X) Init timer
+         #ifdef ZEPHYR
+         k_enable_sys_clock_always_on();
+         time_stamp = k_uptime_get();
+         #endif
             // When the FSM is in state idle the input data must be the new
             // version available. Only if the new version is higher than the
             // current one then the device will move to the next state.
@@ -150,11 +158,11 @@ pull_error fsm(fsm_ctx_t* ctx, uint8_t* buf, size_t len) {
             }
 
             // compare nonce
-            if (is->mt.server.nonce != is->nonce) {
+            /*if (is->mt.server.nonce != is->nonce) {
                 log_err(INVALID_SIGNATURE_ERROR, "Received nonce is invalid\n");                
                 ctx->state = STATE_CLEAN;
                 return INVALID_SIGNATURE_ERROR;
-            }
+            }*/
             err = verify_manifest(&is->mt, ctx->sf);
             if (err) {
                 log_err(INVALID_SIGNATURE_ERROR,
@@ -171,6 +179,8 @@ pull_error fsm(fsm_ctx_t* ctx, uint8_t* buf, size_t len) {
             is->buffer_ctx.next_stage = (pipeline_stage_t) writer_pipeline;
             is->buffer_ctx.next_ctx = &is->writer_ctx;
 
+            // XXX DEBUG
+            is->mt.server.diff_version = 0;
             if (is->mt.server.diff_version == 0) {
                 log_debug("Using full-image update\n");
                 is->pipeline = (pipeline_stage_t) buffer_pipeline;
@@ -183,12 +193,12 @@ pull_error fsm(fsm_ctx_t* ctx, uint8_t* buf, size_t len) {
                 is->bspatch_ctx.next_ctx = &is->buffer_ctx;
 
                 // Setting old file for the bspatch stage
-                // You can use the new id
+                log_debug("Using object as old image %d\n", ctx->old_id);
                 if (memory_open(ctx->old_obj, ctx->old_id, READ_ONLY)) {
                     log_error(MEMORY_READ_ERROR, "Error opening old object for bspatch");
                     return MEMORY_READ_ERROR;
                 }
-                is->bspatch_ctx.stage_data = &ctx->old_obj;
+                is->bspatch_ctx.stage_data = ctx->old_obj;
 
                 is->lzss_ctx.next_stage = (pipeline_stage_t) bspatch_pipeline;
                 is->lzss_ctx.next_ctx = &is->bspatch_ctx;
@@ -211,6 +221,7 @@ pull_error fsm(fsm_ctx_t* ctx, uint8_t* buf, size_t len) {
                 return err;
             }
             // Open the memory object
+            log_debug("Writing into object: %d\n", ctx->id);
             err = memory_open(ctx->obj, ctx->id, WRITE_ALL);
             if (err) {
                 log_err(err, "Error opening the memory_object\n");
@@ -232,10 +243,7 @@ pull_error fsm(fsm_ctx_t* ctx, uint8_t* buf, size_t len) {
             // Check if we received more data than the manifest
             if ((bufp-buf) < len) {
                 ret = is->pipeline(is->pipeline_ctx, bufp, len-(bufp-buf));
-                if (ret < 0) {
-                    log_err(PIPELINE_ERROR, "Invalid return value");
-                    return PIPELINE_ERROR;
-                } else if (ret != len-(bufp-buf)) {
+                if (ret != len-(bufp-buf)) {
                     log_err(PIPELINE_ERROR, "Error writing manifest 3");
                     ctx->state = STATE_CLEAN;
                     return PIPELINE_ERROR;
@@ -254,10 +262,12 @@ pull_error fsm(fsm_ctx_t* ctx, uint8_t* buf, size_t len) {
                 log_err(INVALID_SIZE_ERROR, "Received more data than expected\n");
                 ctx->state = STATE_CLEAN;
                 return INVALID_SIZE_ERROR;
+                len = ctx->expected - ctx->processed;
             }
             ret = is->pipeline(is->pipeline_ctx, buf, len);
             if (ret != len) {
-                log_err(PIPELINE_ERROR, "Error writing manifest");
+                printf("%d %d\n", ret, len);
+                log_err(PIPELINE_ERROR, "Error writing firmware");
                 ctx->state = STATE_CLEAN;
                 return PIPELINE_ERROR;
             }
@@ -278,13 +288,13 @@ pull_error fsm(fsm_ctx_t* ctx, uint8_t* buf, size_t len) {
             // Fallthrough
         case STATE_VERIFY_FIRMWARE:
             memory_open(ctx->obj, ctx->id, READ_ONLY);
-            log_debug("Using id %d\n", ctx->id);
+            log_debug("Veryfing ID %d\n", ctx->id);
             err = verify_object(ctx->obj, ctx->sf, buffer, BUFFER_SIZE);
             memory_close(ctx->obj);
             
             if (err) {
                 log_err(err, "Verification failed\n");
-                invalidate_object(ctx->id, ctx->obj);
+                //invalidate_object(ctx->id, ctx->obj);
                 ctx->state = STATE_IDLE;
                 return err;
             }

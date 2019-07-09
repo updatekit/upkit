@@ -59,10 +59,28 @@ pull_error verify_digest(mem_object_t* obj, manifest_t* mt, uint8_t* buffer,
         return MEMORY_READ_ERROR;
     }
     int readed = 0;
+
+    log_debug("Initial bytes:\n");
+
     while (offset < final_offset) {
         if ((readed = memory_read(obj, buffer, step, offset)) != step) {
             log_error(MEMORY_READ_ERROR, "Error reading memory to calculate digest\n");
             return MEMORY_READ_ERROR;
+        }
+        if (offset < (256+8)) {
+            int k = 0; 
+            for (k = 0; k < 8; k++) {
+                log_debug("%x, ", buffer[k]);
+            }
+            log_debug("\n");
+        }
+        if (final_offset-offset == step) {
+            log_debug("Final bytes\n");
+            int k = 0; 
+            for (k = 8; k > 0; k--) {
+                log_debug("%x, ", buffer[step-k]);
+            }
+            log_debug("\n");
         }
         err = digest_update(&ctx, buffer, readed);
         if (err) {

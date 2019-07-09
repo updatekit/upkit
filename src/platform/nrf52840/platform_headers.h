@@ -5,9 +5,9 @@
 
 #include "utils.h"
 
+#include <drivers/system_timer.h>
 #ifdef WITH_BOOTLOADER
 #include <arch/arm/cortex_m/cmsis.h>
-#include <drivers/system_timer.h>
 #endif
 
 #ifndef DISABLE_LIBPULL_NETWORK
