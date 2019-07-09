@@ -7,7 +7,6 @@
 [![GitHub issues](https://img.shields.io/github/issues/updatekit/upkit.svg)](https://github.com/updatekit/upkit/issues)
 [![GitHub release](https://img.shields.io/github/release/updatekit/upkit.svg)](https://github.com/updatekit/upkit/releases)
 [![Documentation Status](https://readthedocs.org/projects/libpull/badge/?version=latest)](https://libpull.readthedocs.io/en/latest/?badge=latest)
-[![Build Status](https://travis-ci.org/libpull/libpull.svg?branch=master)](https://travis-ci.org/libpull/libpull)
 [![Coverage Status](https://coveralls.io/repos/github/libpull/libpull/badge.svg)](https://coveralls.io/github/libpull/libpull)
 [![GitHub pull-requests](https://img.shields.io/github/issues-pr/updatekit/upkit.svg)](https://github.com/updatekit/upkit/pulls)
 
